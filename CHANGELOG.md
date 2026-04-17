@@ -43,6 +43,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Security
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
+### Changed
+- **Storage backend**: replaced direct `azure-storage-blob` and `azure-storage-file` SDK usage with [apache-libcloud](https://libcloud.apache.org/) Object Storage API (`apache-libcloud==3.9.0`). The `AzureStorageProvider` in `lmdb_manager` is now backed by `LibcloudStorageProvider` (a thin libcloud wrapper), making it straightforward to swap in alternative backends (GCS, S3, local) by supplying a different libcloud driver. The user-manual storage blueprint (`blueprints/storage.py`) likewise uses the libcloud API. Removed the now-unused `AZURE_BLOB_STORAGE_URL` config entry.
 
 ### Fixed
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
