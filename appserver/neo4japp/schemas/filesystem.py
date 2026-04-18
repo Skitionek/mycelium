@@ -336,6 +336,16 @@ class FileVersionSchema(CamelCaseSchema):
     message = fields.String()
     user = fields.Nested(UserSchema)
     creation_date = fields.DateTime()
+    revision = fields.Method('get_revision')
+
+    def get_revision(self, obj):
+        """Return the hex-encoded SHA-256 of this version's content.
+
+        Maps to :attr:`FileContent.revision` and is the key used by
+        :class:`~neo4japp.services.file_storage.FileStorageService` to
+        address this specific version's bytes in the storage backend.
+        """
+        return obj.content.revision if obj.content else None
 
 
 class FileVersionHistorySchema(ResultListSchema):

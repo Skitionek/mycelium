@@ -17,6 +17,11 @@ class FileStorageService:
     interface so that the concrete storage backend can be swapped by changing
     the driver (e.g. ``Provider.AZURE_BLOBS``, ``Provider.S3``,
     ``Provider.LOCAL_STORAGE``).
+
+    File objects are addressed by their *revision*, which is the hex-encoded
+    SHA-256 checksum of the content (``FileContent.revision``).  This
+    maps directly onto the libcloud ``object_name`` so the same bytes are
+    always stored under the same key — enabling content-addressed deduplication.
     """
 
     def __init__(self, driver, container_name: str) -> None:
@@ -38,47 +43,48 @@ class FileStorageService:
     # Public API — mirrors the libcloud StorageDriver interface
     # ------------------------------------------------------------------
 
-    def store(self, object_key: str, data: bytes) -> None:
-        """Upload *data* to the container under *object_key*.
+    def store(self, revision: str, data: bytes) -> None:
+        """Upload *data* to the container under *revision*.
 
         Corresponds to :meth:`~libcloud.storage.base.StorageDriver.upload_object_via_stream`.
 
-        :param object_key: identifier of the object (e.g. ``checksum_sha256.hex()``).
+        :param revision: content revision key — the hex-encoded SHA-256 of *data*
+            (i.e. ``FileContent.revision``).
         :param data: raw bytes to store.
         """
         container = self._get_or_create_container()
         self.driver.upload_object_via_stream(
             iterator=iter([data]),
             container=container,
-            object_name=object_key,
+            object_name=revision,
         )
 
-    def retrieve(self, object_key: str) -> Optional[bytes]:
-        """Download and return the bytes stored under *object_key*.
+    def retrieve(self, revision: str) -> Optional[bytes]:
+        """Download and return the bytes stored under *revision*.
 
         Corresponds to :meth:`~libcloud.storage.base.StorageDriver.download_object_as_stream`.
         Returns ``None`` if the object does not exist.
 
-        :param object_key: identifier of the object.
+        :param revision: content revision key (``FileContent.revision``).
         :return: file bytes, or ``None`` if the object was not found.
         """
         try:
-            obj = self.driver.get_object(self.container_name, object_key)
+            obj = self.driver.get_object(self.container_name, revision)
             return b''.join(self.driver.download_object_as_stream(obj))
         except ObjectDoesNotExistError:
             return None
 
-    def delete(self, object_key: str) -> bool:
-        """Delete the object identified by *object_key*.
+    def delete(self, revision: str) -> bool:
+        """Delete the object identified by *revision*.
 
         Corresponds to :meth:`~libcloud.storage.base.StorageDriver.delete_object`.
         Returns ``False`` when the object does not exist rather than raising.
 
-        :param object_key: identifier of the object.
+        :param revision: content revision key (``FileContent.revision``).
         :return: ``True`` if deleted, ``False`` if it did not exist.
         """
         try:
-            obj = self.driver.get_object(self.container_name, object_key)
+            obj = self.driver.get_object(self.container_name, revision)
             return self.driver.delete_object(obj)
         except ObjectDoesNotExistError:
             return False

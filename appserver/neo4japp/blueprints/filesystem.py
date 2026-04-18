@@ -1338,7 +1338,8 @@ class FileVersionListView(FilesystemBaseView):
 
         query = db.session.query(FileVersion) \
             .options(raiseload('*'),
-                     joinedload(FileVersion.user)) \
+                     joinedload(FileVersion.user),
+                     joinedload(FileVersion.content)) \
             .filter(FileVersion.file_id == file.id) \
             .order_by(desc(FileVersion.creation_date))
 
