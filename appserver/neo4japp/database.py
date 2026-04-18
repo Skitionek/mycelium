@@ -225,50 +225,31 @@ def get_excel_export_service():
 @scope_flask_app_ctx('file_storage_service')
 def get_file_storage_service():
     """Return a :class:`~neo4japp.services.file_storage.FileStorageService`
-    backed by the configured libcloud storage driver.
+    backed by the configured storage driver.
 
-    The driver is controlled by the ``FILE_STORAGE_PROVIDER`` app-config key:
-
-    * ``"POSTGRESQL"`` (default) — uses
-      :class:`~neo4japp.services.storage_drivers.postgresql.PostgreSQLStorageDriver`,
-      which stores file bytes in the ``files_content.raw_file`` PostgreSQL
-      column via SQLAlchemy.  No external storage service is required.
-    * Any other value is treated as a libcloud ``Provider`` attribute name
-      (e.g. ``"AZURE_BLOBS"``, ``"S3"``, ``"GOOGLE_STORAGE"``), and the
-      matching libcloud driver is instantiated using ``FILE_STORAGE_KEY`` /
-      ``FILE_STORAGE_SECRET``.
+    The driver is controlled by the ``FILE_STORAGE_PROVIDER`` app-config key.
+    At present, only ``"POSTGRESQL"`` is supported because the persistence
+    layer still requires a ``files_content`` row and some code paths read
+    ``files_content.raw_file`` directly via SQLAlchemy.
 
     The service is memoised to the current Flask app/request context so
     the driver is not re-initialised on every call.
     """
     from neo4japp.services.file_storage import FileStorageService
+    from neo4japp.services.storage_drivers.postgresql import PostgreSQLStorageDriver
 
     config = current_app.config
-    provider_name = config.get('FILE_STORAGE_PROVIDER', 'POSTGRESQL')
+    provider_name = str(config.get('FILE_STORAGE_PROVIDER', 'POSTGRESQL')).upper()
     container_name = config.get('FILE_STORAGE_CONTAINER', 'files_content')
 
-    if provider_name == 'POSTGRESQL':
-        from neo4japp.services.storage_drivers.postgresql import PostgreSQLStorageDriver
-        driver = PostgreSQLStorageDriver()
-    else:
-        import os
-        from libcloud.storage.providers import get_driver
-        from libcloud.storage.types import Provider
+    if provider_name != 'POSTGRESQL':
+        raise ValueError(
+            'Unsupported FILE_STORAGE_PROVIDER {!r}. Only "POSTGRESQL" is '
+            'currently supported because the persistence layer still depends '
+            'on files_content.raw_file.'.format(provider_name)
+        )
 
-        try:
-            provider = getattr(Provider, provider_name)
-        except AttributeError:
-            raise ValueError(f"Unknown libcloud storage provider: {provider_name!r}")
-
-        driver_cls = get_driver(provider)
-        key = config.get('FILE_STORAGE_KEY', '')
-        secret = config.get('FILE_STORAGE_SECRET', '')
-
-        if provider_name == 'LOCAL':
-            os.makedirs(key, exist_ok=True)
-            driver = driver_cls(key)
-        else:
-            driver = driver_cls(key=key, secret=secret)
+    driver = PostgreSQLStorageDriver()
 
     return FileStorageService(driver, container_name)
 
