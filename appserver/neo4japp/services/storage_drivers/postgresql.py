@@ -12,10 +12,7 @@ Object names are the hex-encoded SHA-256 checksums of the file contents
 present on the table.
 """
 from libcloud.storage.base import Container, Object, StorageDriver
-from libcloud.storage.types import (
-    ContainerDoesNotExistError,
-    ObjectDoesNotExistError,
-)
+from libcloud.storage.types import ObjectDoesNotExistError
 
 # The table/container "name" used when code does not explicitly specify one.
 DEFAULT_CONTAINER = 'files_content'
