@@ -34,14 +34,16 @@ class Config():
     AZURE_ACCOUNT_STORAGE_KEY = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')
 
     # Object storage for user file content (via apache-libcloud).
-    # FILE_STORAGE_PROVIDER must be a valid libcloud Provider attribute name,
-    # e.g. "LOCAL", "AZURE_BLOBS", "S3", "GOOGLE_STORAGE".
-    # Defaults to LOCAL (local filesystem) for development / test.
-    FILE_STORAGE_PROVIDER = os.environ.get('FILE_STORAGE_PROVIDER', 'LOCAL')
-    FILE_STORAGE_CONTAINER = os.environ.get('FILE_STORAGE_CONTAINER', 'lifelike-files')
-    # For LOCAL this is the root directory; for cloud providers it is
-    # the account name / access key ID.
-    FILE_STORAGE_KEY = os.environ.get('FILE_STORAGE_KEY', '/tmp/lifelike-file-storage')
+    # FILE_STORAGE_PROVIDER controls the libcloud driver used to store/retrieve
+    # user file bytes.  The default "POSTGRESQL" uses the built-in
+    # PostgreSQLStorageDriver which stores bytes in the files_content.raw_file
+    # column — no external storage service is required.
+    # To switch to a cloud backend set this to a libcloud Provider name,
+    # e.g. "AZURE_BLOBS", "S3", or "GOOGLE_STORAGE".
+    FILE_STORAGE_PROVIDER = os.environ.get('FILE_STORAGE_PROVIDER', 'POSTGRESQL')
+    FILE_STORAGE_CONTAINER = os.environ.get('FILE_STORAGE_CONTAINER', 'files_content')
+    # For cloud providers: account name / access key ID and secret.
+    FILE_STORAGE_KEY = os.environ.get('FILE_STORAGE_KEY', '')
     FILE_STORAGE_SECRET = os.environ.get('FILE_STORAGE_SECRET', '')
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
