@@ -54,6 +54,7 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
     googleDriveFileId: new FormControl(null),
     googleDriveAccessToken: new FormControl(null),
     googleDriveFileName: new FormControl(null),
+    googleDriveIsFolder: new FormControl(false),
     parent: new FormControl(null),
     filename: new FormControl('', [Validators.required, filenameValidator]),
     description: new FormControl('', [Validators.maxLength(MAX_DESCRIPTION_LENGTH)]),
@@ -254,11 +255,12 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
       this.form.get('googleDriveFileId').setValue(result.fileId);
       this.form.get('googleDriveAccessToken').setValue(result.accessToken);
       this.form.get('googleDriveFileName').setValue(result.fileName);
-      // Pre-fill filename if it is still the placeholder value
+      this.form.get('googleDriveIsFolder').setValue(result.isFolder);
+      // Pre-fill filename if it is still pristine
       if (!this.form.get('filename').dirty) {
         this.form.get('filename').setValue(this.extractFilename(result.fileName));
       }
-      this.filePossiblyAnnotatable = true;
+      this.filePossiblyAnnotatable = !result.isFolder;
     }).catch(() => {
       // User cancelled or an error occurred — leave the form unchanged
     }).finally(() => {
