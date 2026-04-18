@@ -1,6 +1,5 @@
 """Unit tests for FileStorageService and PostgreSQLStorageDriver."""
 import hashlib
-from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
