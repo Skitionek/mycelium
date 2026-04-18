@@ -228,9 +228,9 @@ def get_file_storage_service():
     backed by the configured storage driver.
 
     The driver is controlled by the ``FILE_STORAGE_PROVIDER`` app-config key.
-    At present, only ``"POSTGRESQL"`` is supported because the persistence
-    layer still requires a ``files_content`` row and some code paths read
-    ``files_content.raw_file`` directly via SQLAlchemy.
+    Currently only ``"POSTGRESQL"`` is supported; all user-file byte reads and
+    writes go through this service via the
+    :class:`~neo4japp.services.storage_drivers.postgresql.PostgreSQLStorageDriver`.
 
     The service is memoised to the current Flask app/request context so
     the driver is not re-initialised on every call.
@@ -245,8 +245,7 @@ def get_file_storage_service():
     if provider_name != 'POSTGRESQL':
         raise ValueError(
             'Unsupported FILE_STORAGE_PROVIDER {!r}. Only "POSTGRESQL" is '
-            'currently supported because the persistence layer still depends '
-            'on files_content.raw_file.'.format(provider_name)
+            'currently supported.'.format(provider_name)
         )
 
     driver = PostgreSQLStorageDriver()
