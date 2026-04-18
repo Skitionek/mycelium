@@ -91,6 +91,10 @@ class FileContent(RDBMSBase):
         object is not found in storage (e.g. for rows created before the
         migration) the value of the legacy ``raw_file`` DB column is returned
         instead.
+
+        Storage-layer errors are logged and the DB column is used as a
+        fallback so that a temporarily unavailable backend does not take
+        down the whole application.
         """
         if self.checksum_sha256:
             from flask import has_app_context
@@ -101,7 +105,12 @@ class FileContent(RDBMSBase):
                     if data is not None:
                         return data
                 except Exception:
-                    pass
+                    current_app.logger.warning(
+                        f'Failed to retrieve file from object storage '
+                        f'(object_key={self.object_key!r}); '
+                        f'falling back to database column.',
+                        exc_info=True,
+                    )
         return self._raw_file
 
     @raw_file.setter
