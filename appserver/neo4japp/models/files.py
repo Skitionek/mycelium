@@ -81,12 +81,18 @@ class FileContent(RDBMSBase):
         When called inside a Flask request context the bytes are retrieved
         through :func:`~neo4japp.database.get_file_storage_service` so that
         swapping the storage backend (e.g. to S3) requires no changes here.
-        Falls back to reading the ORM column directly when no app context is
-        present (e.g. tests or migration scripts).
+        For the default PostgreSQL-backed storage provider, return the ORM
+        column directly to avoid redundant storage-service lookups when the
+        content has already been loaded with the model. Falls back to reading
+        the ORM column directly when no app context is present (e.g. tests or
+        migration scripts).
         """
         try:
             from flask import has_app_context
             if has_app_context():
+                if current_app.config.get('FILE_STORAGE_PROVIDER') == 'POSTGRESQL':
+                    return self.raw_file
+
                 from neo4japp.database import get_file_storage_service
                 result = get_file_storage_service().retrieve(self.revision)
                 if result is not None:
