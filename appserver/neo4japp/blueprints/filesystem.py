@@ -1061,7 +1061,7 @@ class FileContentView(FilesystemBaseView):
 
         # Lazy loaded
         if file.content:
-            content = file.content.raw_file
+            content = file.content.get_bytes()
             etag = file.content.checksum_sha256.hex()
         else:
             content = b''
@@ -1087,7 +1087,7 @@ class FileContentPdfView(FilesystemBaseView):
         file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id, lazy_load_content=True)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=True)
 
-        raw: bytes = file.content.raw_file if file.content else b''
+        raw: bytes = file.content.get_bytes() if file.content else b''
 
         if file.mime_type == FILE_MIME_TYPE_PDF:
             # Already a PDF — serve as-is
@@ -1144,7 +1144,7 @@ class MapContentView(FilesystemBaseView):
                                   f'{file.mime_type}')
 
         try:
-            zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+            zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes()))
             json_graph = zip_file.read('graph.json')
         except (KeyError, zipfile.BadZipFile):
             raise ValidationError(
@@ -1198,7 +1198,7 @@ class FileExportView(FilesystemBaseView):
 
     def get_all_linked_maps(self, file: Files, map_hash_set: set, files: list, links: list):
         current_user = g.current_user
-        zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+        zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes()))
         try:
             json_graph = json.loads(zip_file.read('graph.json'))
         except KeyError:
@@ -1374,7 +1374,7 @@ class FileVersionContentView(FilesystemBaseView):
         file = self.get_nondeleted_recycled_file(Files.id == file_version.file_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=False)
 
-        return file_version.content.raw_file
+        return file_version.content.get_bytes()
 
 
 class FileLockBaseView(FilesystemBaseView):

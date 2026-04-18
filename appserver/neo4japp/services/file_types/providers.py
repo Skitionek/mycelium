@@ -956,7 +956,7 @@ class MapTypeProvider(BaseFileTypeProvider):
         folder = tempfile.TemporaryDirectory()
 
         try:
-            zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+            zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes()))
             json_graph = json.loads(zip_file.read('graph.json'))
         except KeyError:
             current_app.logger.info(
@@ -1397,7 +1397,7 @@ def get_content_offsets(file):
         calculated) in pixels.
     """
     x_values, y_values = [], []
-    zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+    zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes()))
     try:
         json_graph = json.loads(zip_file.read('graph.json'))
     except KeyError:
