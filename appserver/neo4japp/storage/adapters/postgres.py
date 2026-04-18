@@ -3,10 +3,34 @@ PostgresAdapter — wraps the existing Lifelike Postgres/SQLAlchemy file storage
 
 Capabilities
 ------------
-* ``supports_acl``       = ``False``  (permissions are managed by the Lifelike
-  role/collaborator system, not raw POSIX bits)
-* ``supports_versioning``= ``True``   (revisions are stored in the
-  ``file_version`` table via :class:`~neo4japp.models.files.FileVersion`)
+* ``supports_acl``        = ``True``  — the Lifelike Postgres store carries
+  sufficient ACL information to satisfy the interface:
+
+  - ``file.public`` (boolean) maps to the POSIX *other-read* bit (``o+r``).
+  - ``file.user_id`` represents the file owner.
+  - ``chmod`` reads/writes ``file.public`` from/to the ``o+r`` bit.
+  - ``chown`` transfers ownership by changing ``file.user_id``; *uid* must be
+    the ``hash_id`` of an :class:`~neo4japp.models.auth.AppUser` row.  *gid*
+    is accepted for API compatibility but is a no-op (Lifelike has no group
+    concept at the file level).
+
+* ``supports_versioning`` = ``True``  — revisions are stored in the
+  ``file_version`` table via :class:`~neo4japp.models.files.FileVersion`.
+
+POSIX mode convention
+---------------------
+The Lifelike ACL model is simpler than a full POSIX grid, so the mapping is:
+
+==========  =======  ================================================
+POSIX bits  Value    Lifelike meaning
+==========  =======  ================================================
+``u+rw``    0o600    Owner always has read/write (implicit via user_id)
+``o+r``     0o004    ``file.public == True``
+==========  =======  ================================================
+
+``stat`` returns ``0o604`` for public files and ``0o600`` for private ones.
+``chmod`` enables *public* when the *other-read* bit (``0o004``) is set in
+*mode*, and disables it otherwise.  All other bits are ignored.
 """
 
 from __future__ import annotations
@@ -17,14 +41,17 @@ from typing import BinaryIO, List, Optional
 from sqlalchemy.orm import joinedload
 
 from neo4japp.database import db
+from neo4japp.models.auth import AppUser
 from neo4japp.models.files import FileContent, FileVersion, Files
 from neo4japp.storage.interface import (
     FileStat,
     IStorageProvider,
-    NotSupportedError,
     Revision,
     StorageCapabilities,
 )
+
+# Owner always has read/write; no execute bits are stored
+_OWNER_BITS = 0o600
 
 
 class PostgresAdapter(IStorageProvider):
@@ -34,7 +61,7 @@ class PostgresAdapter(IStorageProvider):
     row throughout all methods.
     """
 
-    _CAPABILITIES = StorageCapabilities(supports_acl=False, supports_versioning=True)
+    _CAPABILITIES = StorageCapabilities(supports_acl=True, supports_versioning=True)
 
     # ------------------------------------------------------------------
     # Capabilities
@@ -85,6 +112,14 @@ class PostgresAdapter(IStorageProvider):
             )
         return fv
 
+    @staticmethod
+    def _mode_from_file(file: Files) -> int:
+        """Derive a POSIX mode integer from *file*'s public flag."""
+        mode = _OWNER_BITS
+        if file.public:
+            mode |= 0o004  # other-read
+        return mode
+
     # ------------------------------------------------------------------
     # Metadata
     # ------------------------------------------------------------------
@@ -98,20 +133,48 @@ class PostgresAdapter(IStorageProvider):
             content_type=file.mime_type,
             created_at=file.creation_date,
             modified_at=file.modified_date,
-            # ACLs not supported — return default POSIX bits
-            mode=0o644,
+            mode=self._mode_from_file(file),
             owner=str(file.user_id) if file.user_id else None,
         )
 
     # ------------------------------------------------------------------
-    # ACL operations — not supported
+    # ACL operations
     # ------------------------------------------------------------------
 
     def chmod(self, path: str, mode: int) -> None:
-        raise NotSupportedError("chmod", type(self).__name__)
+        """Set the *public* flag on *path* from the other-read bit of *mode*.
+
+        Setting ``o+r`` (bit ``0o004``) makes the file publicly readable.
+        Clearing it restricts access to collaborators only.  All other mode
+        bits are accepted but have no effect on the Postgres storage backend.
+
+        :raises FileNotFoundError: if *path* does not exist.
+        """
+        file = self._get_file(path)
+        file.public = bool(mode & 0o004)
+        db.session.flush()
 
     def chown(self, path: str, uid: str, gid: str) -> None:
-        raise NotSupportedError("chown", type(self).__name__)
+        """Transfer ownership of *path* to the user identified by *uid*.
+
+        *uid* must be the ``hash_id`` of an existing
+        :class:`~neo4japp.models.auth.AppUser` row.  *gid* is accepted for
+        API compatibility but is a no-op — Lifelike has no group concept at
+        the file level.
+
+        :raises FileNotFoundError: if *path* or the user identified by *uid*
+            does not exist.
+        """
+        file = self._get_file(path)
+        new_owner: Optional[AppUser] = (
+            db.session.query(AppUser)
+            .filter(AppUser.hash_id == uid)
+            .one_or_none()
+        )
+        if new_owner is None:
+            raise FileNotFoundError(f"User not found: {uid!r}")
+        file.user_id = new_owner.id
+        db.session.flush()
 
     # ------------------------------------------------------------------
     # History / versioning

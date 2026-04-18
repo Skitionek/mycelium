@@ -352,31 +352,140 @@ class TestPostgresAdapterCapabilities:
     def test_capabilities(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
         adapter = PostgresAdapter()
-        assert adapter.capabilities.supports_acl is False
+        assert adapter.capabilities.supports_acl is True
         assert adapter.capabilities.supports_versioning is True
 
-    def test_chmod_raises(self):
+    def test_chmod_does_not_raise(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
         adapter = PostgresAdapter()
-        with pytest.raises(NotSupportedError) as exc_info:
-            adapter.chmod("/some/hash", 0o755)
-        assert exc_info.value.capability == "chmod"
+        mock_file = MagicMock()
+        mock_file.public = False
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db"):
+            adapter.chmod("/some/hash", 0o604)  # should not raise
 
-    def test_chown_raises(self):
+    def test_chown_does_not_raise(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
         adapter = PostgresAdapter()
-        with pytest.raises(NotSupportedError):
-            adapter.chown("/some/hash", "uid", "gid")
+        mock_file = MagicMock()
+        mock_user = MagicMock()
+        mock_user.id = 99
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_query = MagicMock()
+            mock_db.session.query.return_value = mock_query
+            mock_query.filter.return_value = mock_query
+            mock_query.one_or_none.return_value = mock_user
+            adapter.chown("/some/hash", "user-hash-id", "")  # should not raise
+
+
+class TestPostgresAdapterAcl:
+    def _make_file(self, public=False):
+        f = MagicMock()
+        f.public = public
+        f.user_id = 7
+        return f
+
+    # chmod
+    def test_chmod_sets_public_true_when_other_read_set(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file(public=False)
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            adapter.chmod("abc", 0o604)
+        assert mock_file.public is True
+        mock_db.session.flush.assert_called_once()
+
+    def test_chmod_clears_public_when_other_read_absent(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file(public=True)
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            adapter.chmod("abc", 0o600)
+        assert mock_file.public is False
+        mock_db.session.flush.assert_called_once()
+
+    def test_chmod_raises_when_file_missing(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        with patch.object(adapter, "_get_file", side_effect=FileNotFoundError("nope")):
+            with pytest.raises(FileNotFoundError):
+                adapter.chmod("missing", 0o644)
+
+    # chown
+    def test_chown_updates_user_id(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file()
+        mock_user = MagicMock()
+        mock_user.id = 42
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_query = MagicMock()
+            mock_db.session.query.return_value = mock_query
+            mock_query.filter.return_value = mock_query
+            mock_query.one_or_none.return_value = mock_user
+            adapter.chown("abc", "new-owner-hash", "")
+        assert mock_file.user_id == 42
+        mock_db.session.flush.assert_called_once()
+
+    def test_chown_raises_when_user_missing(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file()
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_query = MagicMock()
+            mock_db.session.query.return_value = mock_query
+            mock_query.filter.return_value = mock_query
+            mock_query.one_or_none.return_value = None
+            with pytest.raises(FileNotFoundError):
+                adapter.chown("abc", "nonexistent-hash", "")
+
+    def test_chown_raises_when_file_missing(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        with patch.object(adapter, "_get_file", side_effect=FileNotFoundError("nope")):
+            with pytest.raises(FileNotFoundError):
+                adapter.chown("missing", "uid", "gid")
+
+    # stat mode derivation
+    def test_stat_mode_private_file(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file(public=False)
+        mock_file.hash_id = "abc"
+        mock_file.mime_type = "text/plain"
+        mock_file.creation_date = mock_file.modified_date = None
+        mock_file.content = None
+        with patch.object(adapter, "_get_file", return_value=mock_file):
+            result = adapter.stat("abc")
+        assert result.mode == 0o600  # owner rw-, no world-read
+
+    def test_stat_mode_public_file(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file(public=True)
+        mock_file.hash_id = "abc"
+        mock_file.mime_type = "text/plain"
+        mock_file.creation_date = mock_file.modified_date = None
+        mock_file.content = None
+        with patch.object(adapter, "_get_file", return_value=mock_file):
+            result = adapter.stat("abc")
+        assert result.mode == 0o604  # owner rw- + other r--
 
 
 class TestPostgresAdapterStat:
-    def _make_file(self, hash_id="abc", mime="text/plain", size=42):
+    def _make_file(self, hash_id="abc", mime="text/plain", size=42, public=False):
         f = MagicMock()
         f.hash_id = hash_id
         f.mime_type = mime
         f.creation_date = datetime(2024, 1, 1)
         f.modified_date = datetime(2024, 6, 1)
         f.user_id = 7
+        f.public = public
         f.content = MagicMock()
         f.content.raw_file = b"x" * size
         return f
@@ -393,8 +502,18 @@ class TestPostgresAdapterStat:
         assert result.path == "abc"
         assert result.size == 42
         assert result.content_type == "text/plain"
-        assert result.mode == 0o644  # default — no ACL support
+        assert result.mode == 0o600  # private file: owner rw- only
         assert result.owner == "7"
+
+    def test_stat_public_file_has_world_read(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file(public=True)
+
+        with patch.object(adapter, "_get_file", return_value=mock_file):
+            result = adapter.stat("abc")
+
+        assert result.mode == 0o604  # owner rw- + other r--
 
     def test_stat_raises_for_missing_file(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
