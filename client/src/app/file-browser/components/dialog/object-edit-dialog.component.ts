@@ -20,6 +20,7 @@ import {extractDescriptionFromSankey} from 'app/shared-sankey/constants';
 import { FilesystemObject } from '../../models/filesystem-object';
 import { AnnotationConfigurations, ObjectContentSource, ObjectCreateRequest } from '../../schema';
 import { ObjectSelectionDialogComponent } from './object-selection-dialog.component';
+import { GoogleDrivePickerService } from '../../services/google-drive-picker.service';
 
 @Component({
   selector: 'app-object-edit-dialog',
@@ -42,12 +43,17 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
   private _object: FilesystemObject;
   private filePossiblyAnnotatable = false;
 
+  /** Tracks whether the Google Drive Picker is currently loading. */
+  googleDrivePickerLoading = false;
 
 
   readonly form: FormGroup = new FormGroup({
     contentSource: new FormControl('contentValue'),
     contentValue: new FormControl(null),
     contentUrl: new FormControl(''),
+    googleDriveFileId: new FormControl(null),
+    googleDriveAccessToken: new FormControl(null),
+    googleDriveFileName: new FormControl(null),
     parent: new FormControl(null),
     filename: new FormControl('', [Validators.required, filenameValidator]),
     description: new FormControl('', [Validators.maxLength(MAX_DESCRIPTION_LENGTH)]),
@@ -72,9 +78,11 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
     if (this.promptUpload) {
       const contentValueControl = group.get('contentValue');
       const contentUrlControl = group.get('contentUrl');
+      const googleDriveFileIdControl = group.get('googleDriveFileId');
 
       if (group.get('contentSource').value === 'contentValue') {
         contentUrlControl.setErrors(null);
+        googleDriveFileIdControl.setErrors(null);
         if (!contentValueControl.value) {
           contentValueControl.setErrors({
             required: {},
@@ -82,8 +90,17 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
         }
       } else if (group.get('contentSource').value === 'contentUrl') {
         contentValueControl.setErrors(null);
+        googleDriveFileIdControl.setErrors(null);
         if (!contentUrlControl.value) {
           contentUrlControl.setErrors({
+            required: {},
+          });
+        }
+      } else if (group.get('contentSource').value === 'contentGoogleDrive') {
+        contentValueControl.setErrors(null);
+        contentUrlControl.setErrors(null);
+        if (!googleDriveFileIdControl.value) {
+          googleDriveFileIdControl.setErrors({
             required: {},
           });
         }
@@ -104,8 +121,14 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
 
   constructor(modal: NgbActiveModal,
               messageDialog: MessageDialog,
-              protected readonly modalService: NgbModal) {
+              protected readonly modalService: NgbModal,
+              protected readonly googleDrivePickerService: GoogleDrivePickerService) {
     super(modal, messageDialog);
+  }
+
+  /** Whether the Google Drive tab should be shown. */
+  get googleDriveAvailable(): boolean {
+    return this.googleDrivePickerService.isAvailable;
   }
 
   get object() {
@@ -163,6 +186,11 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
           return {
             contentUrl: value.contentUrl,
           };
+        case 'contentGoogleDrive':
+          return {
+            googleDriveFileId: value.googleDriveFileId,
+            googleDriveAccessToken: value.googleDriveAccessToken,
+          } as any;
         default:
           return {};
       }
@@ -217,6 +245,25 @@ export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectE
     this.form.get('contentSource').setValue(newId);
     this.form.get('contentValue').setValue(null);
     this.filePossiblyAnnotatable = newId === 'contentUrl' && this.form.get('contentUrl').value.length;
+  }
+
+  /** Open the Google Drive Picker and populate the form fields on success. */
+  openGoogleDrivePicker() {
+    this.googleDrivePickerLoading = true;
+    this.googleDrivePickerService.pick().then(result => {
+      this.form.get('googleDriveFileId').setValue(result.fileId);
+      this.form.get('googleDriveAccessToken').setValue(result.accessToken);
+      this.form.get('googleDriveFileName').setValue(result.fileName);
+      // Pre-fill filename if it is still the placeholder value
+      if (!this.form.get('filename').dirty) {
+        this.form.get('filename').setValue(this.extractFilename(result.fileName));
+      }
+      this.filePossiblyAnnotatable = true;
+    }).catch(() => {
+      // User cancelled or an error occurred — leave the form unchanged
+    }).finally(() => {
+      this.googleDrivePickerLoading = false;
+    });
   }
 
   urlChanged(event) {

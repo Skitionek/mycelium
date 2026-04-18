@@ -38,6 +38,27 @@
             </app-form-row>
           </ng-template>
         </li>
+        <li ngbNavItem="contentGoogleDrive" *ngIf="googleDriveAvailable">
+          <a ngbNavLink>From Google Drive</a>
+          <ng-template ngbNavContent>
+            <app-form-row label="Google Drive File" [control]="form.get('googleDriveFileId')">
+              <div class="d-flex align-items-center text-truncate">
+                <button type="button" class="btn btn-secondary mr-2"
+                        (click)="openGoogleDrivePicker()"
+                        [disabled]="googleDrivePickerLoading">
+                  <span *ngIf="!googleDrivePickerLoading">Pick from Google Drive</span>
+                  <span *ngIf="googleDrivePickerLoading">
+                    <i class="fa fa-spinner fa-spin"></i> Loading...
+                  </span>
+                </button>
+                <div class="text-truncate" *ngIf="form.get('googleDriveFileName').value">
+                  <i class="fa fa-fw fa-google-drive text-icon"></i>
+                  {{ form.get('googleDriveFileName').value }}
+                </div>
+              </div>
+            </app-form-row>
+          </ng-template>
+        </li>
       </ul>
 
       <div [ngbNavOutlet]="nav" class="mt-4"></div>
