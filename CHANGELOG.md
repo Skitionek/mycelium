@@ -30,6 +30,14 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **Google Drive import**: users can now import files directly from their Google Drive into the Lifelike filesystem.
+  - New `POST /api/google-drive/import` backend endpoint downloads the selected file (or exports Google-native documents as PDF) and creates a standard Lifelike file record.
+  - Native Google document types (Docs, Sheets, Slides, Drawings) are automatically exported as PDF.
+  - The file upload dialog gains a **"From Google Drive"** tab (visible only when `googleDriveClientId` is configured) that opens the Google Drive Picker for file selection.
+  - A new `GoogleDrivePickerService` (Angular) lazily loads the Google Identity Services and Google Picker libraries and manages OAuth token acquisition.
+  - The `googleDriveClientId` field was added to the Angular environment files; set it to your Google Cloud OAuth 2.0 client ID to enable the feature.
+
+### Added
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.

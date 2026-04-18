@@ -26,6 +26,7 @@ import {
   FileAnnotationHistoryResponse,
   FileHierarchyResponse,
   FilesystemObjectData,
+  GoogleDriveImportRequest,
   ObjectBackupCreateRequest,
   ObjectCreateRequest,
   ObjectExportRequest,
@@ -101,6 +102,20 @@ export class FilesystemService {
         }
         return event;
       }),
+    );
+  }
+
+  /**
+   * Import a file from Google Drive.
+   * @param request the import request containing the Drive file ID and OAuth access token
+   */
+  importFromGoogleDrive(request: GoogleDriveImportRequest): Observable<FilesystemObject> {
+    return this.http.post<SingleResult<FilesystemObjectData>>(
+      `/api/google-drive/import`,
+      request,
+      this.apiService.getHttpOptions(true),
+    ).pipe(
+      map(data => new FilesystemObject().update(data.result)),
     );
   }
 
