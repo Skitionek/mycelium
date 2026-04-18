@@ -61,9 +61,60 @@ class MapLinks(RDBMSBase):
 class FileContent(RDBMSBase):
     __tablename__ = 'files_content'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    raw_file = db.Column(db.LargeBinary, nullable=False)
+    # The raw_file column is kept nullable for migration support.
+    # New files are stored in object storage (see get_or_create); the
+    # column acts as a fallback when no object-storage data is found so
+    # that existing rows continue to work without a data migration.
+    _raw_file = db.Column('raw_file', db.LargeBinary, nullable=True)
     checksum_sha256 = db.Column(db.LargeBinary(32), nullable=False, index=True, unique=True)
     creation_date = db.Column(db.DateTime, nullable=False, default=db.func.now())
+
+    # ------------------------------------------------------------------
+    # Object-key helpers
+    # ------------------------------------------------------------------
+
+    @property
+    def object_key(self) -> str:
+        """The object-storage key for this file (hex-encoded SHA-256 checksum)."""
+        return self.checksum_sha256.hex()
+
+    # ------------------------------------------------------------------
+    # raw_file — reads from object storage, falls back to the DB column
+    # ------------------------------------------------------------------
+
+    @property
+    def raw_file(self) -> Optional[bytes]:
+        """Return the raw bytes of this file.
+
+        Reads from the configured object storage backend via the libcloud
+        :class:`~neo4japp.services.file_storage.FileStorageService`.  If the
+        object is not found in storage (e.g. for rows created before the
+        migration) the value of the legacy ``raw_file`` DB column is returned
+        instead.
+        """
+        if self.checksum_sha256:
+            from flask import has_app_context
+            if has_app_context():
+                from neo4japp.database import get_file_storage_service
+                try:
+                    data = get_file_storage_service().retrieve(self.object_key)
+                    if data is not None:
+                        return data
+                except Exception:
+                    pass
+        return self._raw_file
+
+    @raw_file.setter
+    def raw_file(self, value: bytes):
+        # Kept for backward-compatibility so that tests and legacy code can
+        # still do ``row.raw_file = content`` without breaking.  Values set
+        # via this path are only stored in the DB column, not in object
+        # storage; use get_or_create() for production write paths.
+        self._raw_file = value
+
+    # ------------------------------------------------------------------
+    # Convenience properties
+    # ------------------------------------------------------------------
 
     @property
     def raw_file_utf8(self):
@@ -71,19 +122,17 @@ class FileContent(RDBMSBase):
 
     @raw_file_utf8.setter
     def raw_file_utf8(self, value):
-        self.raw_file = value.encode('utf-8')
-        self.checksum_sha256 = hashlib.sha256(self.raw_file).digest()
+        self._raw_file = value.encode('utf-8')
+        self.checksum_sha256 = hashlib.sha256(self._raw_file).digest()
 
     @property
     def raw_file_base64(self):
-        byt = self.raw_file
-        base64.b64encode(self.raw_file)
-        return byt.decode('utf-8')
+        return base64.b64encode(self.raw_file).decode('utf-8')
 
     @raw_file_base64.setter
     def raw_file_base64(self, value):
-        self.raw_file = base64.b64decode(value.encode('utf-8'))
-        self.checksum_sha256 = hashlib.sha256(self.raw_file).digest()
+        self._raw_file = base64.b64decode(value.encode('utf-8'))
+        self.checksum_sha256 = hashlib.sha256(self._raw_file).digest()
 
     @classmethod
     def get_file_lock_hash(cls, checksum_sha256: bytes) -> int:
@@ -110,6 +159,10 @@ class FileContent(RDBMSBase):
         otherwise you will risk a deadlock.
 
         This method does not commit the transaction.
+
+        File bytes are stored in the configured object storage backend via the
+        libcloud :class:`~neo4japp.services.file_storage.FileStorageService`;
+        only metadata (checksum) is persisted in PostgreSQL.
 
         :param file: a file-like object
         :param checksum_sha256: the checksum of the file (computed if not provided)
@@ -153,9 +206,19 @@ class FileContent(RDBMSBase):
             if content is None:
                 content = file.read()
 
+            # Store file bytes in object storage via the libcloud API.
+            from flask import has_app_context
+            if has_app_context():
+                from neo4japp.database import get_file_storage_service
+                get_file_storage_service().store(checksum_sha256.hex(), content)
+                db_raw_file = None  # bytes live in object storage
+            else:
+                # No Flask context (e.g. direct unit-test construction).
+                db_raw_file = content
+
             row = FileContent()
             row.checksum_sha256 = checksum_sha256
-            row.raw_file = content
+            row._raw_file = db_raw_file
             db.session.add(row)
             db.session.flush()
 

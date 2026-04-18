@@ -222,6 +222,40 @@ def get_excel_export_service():
     return ExcelExportService()
 
 
+@scope_flask_app_ctx('file_storage_service')
+def get_file_storage_service():
+    """Return a :class:`~neo4japp.services.file_storage.FileStorageService`
+    backed by the libcloud provider configured via ``FILE_STORAGE_*`` app-config
+    keys.  The service is memoised to the current Flask app/request context so
+    the driver is not re-initialised on every attribute access.
+    """
+    import os
+    from libcloud.storage.providers import get_driver
+    from libcloud.storage.types import Provider
+    from neo4japp.services.file_storage import FileStorageService
+
+    config = current_app.config
+    provider_name = config.get('FILE_STORAGE_PROVIDER', 'LOCAL')
+
+    try:
+        provider = getattr(Provider, provider_name)
+    except AttributeError:
+        raise ValueError(f"Unknown libcloud storage provider: {provider_name!r}")
+
+    driver_cls = get_driver(provider)
+    key = config.get('FILE_STORAGE_KEY', '/tmp/lifelike-file-storage')
+    secret = config.get('FILE_STORAGE_SECRET', '')
+
+    if provider == Provider.LOCAL:
+        os.makedirs(key, exist_ok=True)
+        driver = driver_cls(key)
+    else:
+        driver = driver_cls(key=key, secret=secret)
+
+    container_name = config.get('FILE_STORAGE_CONTAINER', 'lifelike-files')
+    return FileStorageService(driver, container_name)
+
+
 def reset_dao():
     """ Cleans up DAO bound to flask request context
 

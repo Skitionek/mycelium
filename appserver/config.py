@@ -33,6 +33,17 @@ class Config():
     AZURE_ACCOUNT_STORAGE_NAME = os.environ.get('AZURE_ACCOUNT_STORAGE_NAME')
     AZURE_ACCOUNT_STORAGE_KEY = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')
 
+    # Object storage for user file content (via apache-libcloud).
+    # FILE_STORAGE_PROVIDER must be a valid libcloud Provider attribute name,
+    # e.g. "LOCAL", "AZURE_BLOBS", "S3", "GOOGLE_STORAGE".
+    # Defaults to LOCAL (local filesystem) for development / test.
+    FILE_STORAGE_PROVIDER = os.environ.get('FILE_STORAGE_PROVIDER', 'LOCAL')
+    FILE_STORAGE_CONTAINER = os.environ.get('FILE_STORAGE_CONTAINER', 'lifelike-files')
+    # For LOCAL this is the root directory; for cloud providers it is
+    # the account name / access key ID.
+    FILE_STORAGE_KEY = os.environ.get('FILE_STORAGE_KEY', '/tmp/lifelike-file-storage')
+    FILE_STORAGE_SECRET = os.environ.get('FILE_STORAGE_SECRET', '')
+
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
         POSTGRES_USER,
         POSTGRES_PASSWORD,

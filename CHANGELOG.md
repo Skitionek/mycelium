@@ -48,6 +48,16 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - Replaced `azure-storage-file` (`FileService`) in `lmdb_manager` with a new `LibcloudStorageProvider`; `AzureStorageProvider` is now a thin libcloud-Azure subclass. Removed Azure-File-specific `create_remote_dir`.
 - Replaced `azure-storage-blob` (`BlobServiceClient`) in `blueprints/storage.py` with libcloud `get_object` / `download_object_as_stream` / `upload_object_via_stream`.
 - Removed unused `AZURE_BLOB_STORAGE_URL` config entry (libcloud derives the endpoint from the account name).
+- **User file content** now stored in and retrieved from object storage via the new `FileStorageService` (backed by apache-libcloud). `FileContent.get_or_create` uploads bytes to the configured libcloud provider; `FileContent.raw_file` reads from object storage with an automatic fallback to the legacy PostgreSQL `BYTEA` column for rows created before this change.
+- New `FILE_STORAGE_PROVIDER` / `FILE_STORAGE_CONTAINER` / `FILE_STORAGE_KEY` / `FILE_STORAGE_SECRET` app-config keys control the libcloud backend (defaults to `LOCAL_STORAGE` for development).
+
+### Fixed
+- **Security**: pinned `cryptography>=46.0.7` directly to resolve CVE-2026-39892 (buffer overflow in non-contiguous buffer handling).
+
+### Added
+- `neo4japp/services/file_storage.py` — `FileStorageService` wrapping the libcloud `StorageDriver` API with `store`, `retrieve`, and `delete` methods.
+- `get_file_storage_service()` factory in `neo4japp/database.py` — builds the libcloud driver from app config and memoises it to the request context.
+- DB migration `000000000001` — alters `files_content.raw_file` to `nullable=True` so that rows whose bytes have been moved to object storage do not need a back-fill in the same step.
 
 ### Fixed
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
