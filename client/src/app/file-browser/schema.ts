@@ -100,6 +100,10 @@ export interface FilesystemObjectData {
   // as a helper for getting the real name of a root file.
   trueFilename: string;
   filePath: string;
+  /** Set when this item was indexed from Google Drive. */
+  googleDriveId?: string;
+  /** RFC-3339 modification time of the Drive item at last sync. */
+  googleDriveModifiedTime?: string;
 }
 
 interface ContentValue {
@@ -192,6 +196,14 @@ export interface GoogleDriveImportRequest {
   mimeType?: string;
   fallbackOrganism?: OrganismAutocomplete;
   annotationConfigs?: AnnotationConfigurations;
+}
+
+/**
+ * Google Drive sync request — sent to POST /api/google-drive/sync/<hashId>.
+ * Updates the local index metadata for a Drive-indexed item.
+ */
+export interface GoogleDriveSyncRequest {
+  googleDriveAccessToken: string;
 }
 
 /**

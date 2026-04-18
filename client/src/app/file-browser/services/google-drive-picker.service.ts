@@ -7,6 +7,8 @@ export interface DrivePickerResult {
   fileName: string;
   mimeType: string;
   accessToken: string;
+  /** True when the selected item is a Google Drive folder. */
+  isFolder: boolean;
 }
 
 /**
@@ -137,25 +139,33 @@ export class GoogleDrivePickerService {
     reject: (reason: Error) => void,
   ): void {
     const google = (window as any).google;
-    const gapi = (window as any).gapi;
 
-    const docsView = new google.picker.DocsView()
+    // File view — allows selecting any non-folder file
+    const filesView = new google.picker.DocsView()
       .setIncludeFolders(false)
       .setSelectFolderEnabled(false);
 
+    // Folder view — allows navigating into and selecting folders
+    const foldersView = new google.picker.DocsView(google.picker.ViewId.FOLDERS)
+      .setIncludeFolders(true)
+      .setSelectFolderEnabled(true)
+      .setMimeTypes('application/vnd.google-apps.folder');
+
     const picker = new google.picker.PickerBuilder()
-      .enableFeature(google.picker.Feature.NAV_HIDDEN)
       .setOAuthToken(accessToken)
-      .addView(docsView)
+      .addView(filesView)
+      .addView(foldersView)
       .setDeveloperKey('')  // Optional: set an API key for quota purposes
       .setCallback((data: any) => {
         if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
           const doc = data[google.picker.Response.DOCUMENTS][0];
+          const pickedMime = doc[google.picker.Document.MIME_TYPE] as string;
           resolve({
             fileId: doc[google.picker.Document.ID] as string,
             fileName: doc[google.picker.Document.NAME] as string,
-            mimeType: doc[google.picker.Document.MIME_TYPE] as string,
+            mimeType: pickedMime,
             accessToken,
+            isFolder: pickedMime === 'application/vnd.google-apps.folder',
           });
         } else if (data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
           reject(new Error('Google Drive Picker cancelled.'));

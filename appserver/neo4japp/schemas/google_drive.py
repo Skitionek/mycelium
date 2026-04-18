@@ -6,7 +6,7 @@ from neo4japp.schemas.base import CamelCaseSchema
 
 
 class GoogleDriveImportRequestSchema(CamelCaseSchema):
-    """Request schema for importing a file from Google Drive."""
+    """Request schema for indexing a file or folder from Google Drive."""
 
     google_drive_file_id = fields.String(
         required=True,
@@ -37,3 +37,12 @@ class GoogleDriveImportRequestSchema(CamelCaseSchema):
     )
     fallback_organism = fields.Nested(FallbackOrganismSchema, required=False, allow_none=True)
     annotation_configs = fields.Nested(AnnotationConfigurations, required=False)
+
+
+class GoogleDriveSyncRequestSchema(CamelCaseSchema):
+    """Request schema for re-syncing a Drive-indexed Lifelike item."""
+
+    google_drive_access_token = fields.String(
+        required=True,
+        validate=marshmallow.validate.Length(min=1, max=4096),
+    )
