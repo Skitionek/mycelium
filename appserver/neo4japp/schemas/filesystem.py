@@ -339,13 +339,13 @@ class FileVersionSchema(CamelCaseSchema):
     revision = fields.Method('get_revision')
 
     def get_revision(self, obj):
-        """Return the hex-encoded SHA-256 of this version's content.
+        """Return the ``FileVersion.hash_id`` — the libcloud snapshot path.
 
-        Maps to :attr:`FileContent.revision` and is the key used by
+        This is the key used by
         :class:`~neo4japp.services.file_storage.FileStorageService` to
         address this specific version's bytes in the storage backend.
         """
-        return obj.content.revision if obj.content else None
+        return obj.hash_id
 
 
 class FileVersionHistorySchema(ResultListSchema):

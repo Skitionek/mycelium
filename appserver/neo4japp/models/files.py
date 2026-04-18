@@ -67,27 +67,28 @@ class FileContent(RDBMSBase):
 
     @property
     def revision(self) -> str:
-        """Hex-encoded SHA-256 of the file content.
-
-        This is the canonical revision identifier for the file content.  It is
-        also the key used when storing / retrieving bytes via
-        :class:`~neo4japp.services.file_storage.FileStorageService`.
-        """
+        """Hex-encoded SHA-256 of the file content — used as legacy storage key."""
         return self.checksum_sha256.hex()
 
-    def get_bytes(self) -> bytes:
+    def get_bytes(self, path: str = None) -> bytes:
         """Return the file bytes via the configured storage service.
 
         When called inside a Flask request context the bytes are retrieved
         through :func:`~neo4japp.database.get_file_storage_service` so that
         swapping the storage backend (e.g. to S3) requires no changes here.
+
+        :param path: the libcloud object path to retrieve — ``Files.hash_id``
+            for the current file content, or ``FileVersion.hash_id`` for a
+            historical snapshot.  Falls back to ``self.revision`` (checksum hex)
+            when *path* is not given (e.g. legacy code or no owning entity).
         Falls back to reading the ORM column directly when no app context is
         present (e.g. tests or migration scripts that run outside Flask).
         """
         from flask import has_app_context
         if has_app_context():
             from neo4japp.database import get_file_storage_service
-            data = get_file_storage_service().retrieve(self.revision)
+            name = path if path is not None else self.revision
+            data = get_file_storage_service().retrieve(name)
             if data is not None:
                 return data
         return self.raw_file
@@ -125,7 +126,8 @@ class FileContent(RDBMSBase):
         return int.from_bytes(h, byteorder='big', signed=True)
 
     @classmethod
-    def get_or_create(cls, file: BinaryIO, checksum_sha256: bytes = None) -> int:
+    def get_or_create(cls, file: BinaryIO, checksum_sha256: bytes = None,
+                      file_path: str = None) -> int:
         """Get the existing FileContent row for the given file or create a new row
         if needed.
 
@@ -146,6 +148,9 @@ class FileContent(RDBMSBase):
 
         :param file: a file-like object
         :param checksum_sha256: the checksum of the file (computed if not provided)
+        :param file_path: the libcloud object path (``Files.hash_id``) under which to
+            store the bytes.  If omitted the hex-encoded SHA-256 is used as a
+            fallback path.
         :return: the ID of the file
         """
 
@@ -193,10 +198,11 @@ class FileContent(RDBMSBase):
             from flask import has_app_context
             if has_app_context():
                 from neo4japp.database import get_file_storage_service
-                # Use the hex checksum as the revision key so the storage layer
-                # can address this content the same way FileContent.revision does.
-                revision = checksum_sha256.hex()
-                get_file_storage_service().store(revision, content)
+                # Use the caller-supplied path (Files.hash_id) when available so
+                # the storage layer uses path-based object names.  Fall back to
+                # the hex checksum for code paths that don't have the owning file.
+                name = file_path if file_path is not None else checksum_sha256.hex()
+                get_file_storage_service().store(name, content)
             else:
                 # No Flask app context (e.g. unit tests that construct
                 # FileContent directly) — fall back to a direct ORM write.

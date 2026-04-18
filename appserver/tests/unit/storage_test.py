@@ -47,7 +47,8 @@ class TestPostgreSQLStorageDriver:
         from neo4japp.services.storage_drivers.postgresql import DEFAULT_CONTAINER
         return driver.get_container(DEFAULT_CONTAINER)
 
-    def test_upload_then_download(self):
+    def test_upload_then_download_with_checksum_name(self):
+        """Uploading with a hex-checksum object_name then downloading works."""
         data = b'hello libcloud'
         checksum_hex = _checksum_hex(data)
         driver = _make_driver()
@@ -77,32 +78,34 @@ class TestPostgreSQLStorageDriver:
             chunks = list(driver.download_object_as_stream(obj))
             assert b''.join(chunks) == data
 
-    def test_upload_checksum_mismatch_raises(self):
+    def test_upload_with_path_name(self):
+        """Uploading with a path-based (non-hex) object_name is accepted."""
+        data = b'path-addressed content'
+        file_hash_id = 'abc123XYZ'  # base62 hash_id, not a hex checksum
         driver = _make_driver()
-        session = MagicMock()
-        wrong_hex = _checksum_hex(b'wrong data')
-        actual_data = b'actual data'
 
-        with patch.object(type(driver), '_get_session', return_value=session):
-            container = self._make_container(driver)
-            with pytest.raises(ValueError, match='SHA-256 checksum mismatch'):
-                driver.upload_object_via_stream(
-                    iterator=iter([actual_data]),
-                    container=container,
-                    object_name=wrong_hex,
-                )
-
-    def test_upload_bad_object_name_raises(self):
-        driver = _make_driver()
+        row = self._make_row(data)
         session = MagicMock()
-        with patch.object(type(driver), '_get_session', return_value=session):
+        session.query.return_value.filter.return_value.first.return_value = None
+
+        def _find_row_side_effect(object_name):
+            if object_name == file_hash_id:
+                return row
+            return None
+
+        with patch.object(type(driver), '_get_session', return_value=session), \
+             patch.object(type(driver), '_find_row',
+                          staticmethod(_find_row_side_effect)):
             container = self._make_container(driver)
-            with pytest.raises(ValueError, match='object_name must be'):
-                driver.upload_object_via_stream(
-                    iterator=iter([b'x']),
-                    container=container,
-                    object_name='not-a-hex-checksum',
-                )
+            obj = driver.upload_object_via_stream(
+                iterator=iter([data]),
+                container=container,
+                object_name=file_hash_id,
+            )
+            # object name in the returned Object should be the path.
+            assert obj.name == file_hash_id
+            # hash attribute still reflects the actual content checksum.
+            assert obj.hash == _checksum_hex(data)
 
     def test_upload_idempotent(self):
         """Uploading the same bytes twice should not create a new row."""
@@ -123,6 +126,32 @@ class TestPostgreSQLStorageDriver:
             )
             # session.add should NOT have been called.
             session.add.assert_not_called()
+
+    def test_get_object_by_file_hash_id(self):
+        """get_object resolves a Files.hash_id path to the correct Object."""
+        data = b'file content'
+        file_hash_id = 'fileHashId42'
+        driver = _make_driver()
+        row = self._make_row(data)
+
+        with patch.object(type(driver), '_find_row',
+                          staticmethod(lambda name: row if name == file_hash_id else None)):
+            obj = driver.get_object('files_content', file_hash_id)
+            assert obj.name == file_hash_id
+            assert obj.hash == _checksum_hex(data)
+
+    def test_get_object_by_version_hash_id(self):
+        """get_object resolves a FileVersion.hash_id (snapshot) path."""
+        data = b'version snapshot'
+        version_hash_id = 'versionHash99'
+        driver = _make_driver()
+        row = self._make_row(data)
+
+        with patch.object(type(driver), '_find_row',
+                          staticmethod(lambda name: row if name == version_hash_id else None)):
+            obj = driver.get_object('files_content', version_hash_id)
+            assert obj.name == version_hash_id
+            assert obj.hash == _checksum_hex(data)
 
     def test_get_object_not_found_raises(self):
         driver = _make_driver()
@@ -206,14 +235,25 @@ class TestFileStorageService:
         driver = self._make_driver()
         svc = self._make_service(driver)
         data = b'store me'
-        svc.store(_checksum_hex(data), data)
+        svc.store('some-file-hash-id', data)
         driver.upload_object_via_stream.assert_called_once()
+
+    def test_store_uses_provided_name(self):
+        """store() passes the caller-supplied name as object_name."""
+        driver = self._make_driver()
+        svc = self._make_service(driver)
+        data = b'named content'
+        name = 'myFileHashId'
+        svc.store(name, data)
+        call_kwargs = driver.upload_object_via_stream.call_args
+        assert call_kwargs.kwargs.get('object_name') == name or \
+               call_kwargs.args[2] == name
 
     def test_retrieve_returns_bytes_when_found(self):
         data = b'find me'
         driver = self._make_driver(row_data=data)
         svc = self._make_service(driver)
-        result = svc.retrieve(_checksum_hex(data))
+        result = svc.retrieve('any-name')
         assert result == data
 
     def test_retrieve_returns_none_when_missing(self):
