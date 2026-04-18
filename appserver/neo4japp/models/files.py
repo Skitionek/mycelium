@@ -65,9 +65,31 @@ class FileContent(RDBMSBase):
     checksum_sha256 = db.Column(db.LargeBinary(32), nullable=False, index=True, unique=True)
     creation_date = db.Column(db.DateTime, nullable=False, default=db.func.now())
 
+    def get_bytes(self) -> bytes:
+        """Return the file bytes via the configured storage service.
+
+        When called inside a Flask request context the bytes are retrieved
+        through :func:`~neo4japp.database.get_file_storage_service` so that
+        swapping the storage backend (e.g. to S3) requires no changes here.
+        Falls back to reading the ORM column directly when no app context is
+        present (e.g. tests or migration scripts).
+        """
+        try:
+            from flask import has_app_context
+            if has_app_context():
+                from neo4japp.database import get_file_storage_service
+                result = get_file_storage_service().retrieve(
+                    self.checksum_sha256.hex()
+                )
+                if result is not None:
+                    return result
+        except Exception:  # noqa: BLE001
+            pass
+        return self.raw_file
+
     @property
     def raw_file_utf8(self):
-        return self.raw_file.decode('utf-8')
+        return self.get_bytes().decode('utf-8')
 
     @raw_file_utf8.setter
     def raw_file_utf8(self, value):
@@ -76,7 +98,7 @@ class FileContent(RDBMSBase):
 
     @property
     def raw_file_base64(self):
-        return base64.b64encode(self.raw_file).decode('utf-8')
+        return base64.b64encode(self.get_bytes()).decode('utf-8')
 
     @raw_file_base64.setter
     def raw_file_base64(self, value):
