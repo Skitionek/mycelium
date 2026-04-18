@@ -30,6 +30,15 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **`neo4japp/storage/` — IStorageProvider abstraction layer**: a new `storage` package that defines a uniform Python interface (`IStorageProvider`) for pluggable file-storage backends, together with three ready-to-use adapters:
+  - **`PostgresAdapter`** wraps the existing Lifelike Postgres/SQLAlchemy file store (`Files` + `FileVersion` tables).  `supports_acl=False`; full revision history via `file_version`.
+  - **`AzureDataLakeAdapter`** targets Azure Data Lake Storage Gen2.  `supports_acl=True` using ADLS Gen2 native ACL APIs; `supports_versioning=True` using Azure Blob Versioning.
+  - **`GoogleDriveAdapter`** targets Google Drive v3.  `supports_acl=True` mapping Drive permission roles to POSIX-ish bits; `supports_versioning=True` via the Drive Revisions API.
+- **Pydantic data models** (`FileStat`, `Revision`, `StorageCapabilities`) shared across all adapters.
+- **`NotSupportedError`** raised by ACL/versioning methods on adapters that declare the capability absent.
+- **`pydantic==2.11.4`** added to project dependencies.
+- Unit tests (`tests/unit/storage_test.py`) covering interface guards, data models, POSIX helpers, role mapping, and `PostgresAdapter` logic (32 tests, all mocked — no DB required).
+
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
