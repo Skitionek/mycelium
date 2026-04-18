@@ -196,7 +196,10 @@ class FileContent(RDBMSBase):
             from flask import has_app_context
             if has_app_context():
                 from neo4japp.database import get_file_storage_service
-                get_file_storage_service().store(checksum_sha256.hex(), content)
+                # Use the hex checksum as the revision key so the storage layer
+                # can address this content the same way FileContent.revision does.
+                revision = checksum_sha256.hex()
+                get_file_storage_service().store(revision, content)
             else:
                 # No Flask app context (e.g. unit tests that construct
                 # FileContent directly) — fall back to a direct ORM write.
