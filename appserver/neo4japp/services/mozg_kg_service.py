@@ -21,7 +21,6 @@ from neo4japp.models import DomainURLsMap
 from neo4japp.utils.logger import EventLog
 
 from .mozg_client import (
-    BIOCYC_CONNECTION,
     GO_CONNECTION,
     KEGG_CONNECTION,
     NCBI_CONNECTION,

@@ -195,10 +195,6 @@ def precalculateGO_mozg():
         return data if isinstance(data, list) else ([data] if data else [])
 
     # Fetch well-studied model organisms from NCBI taxonomy
-    ncbi_connection = {
-        "driver": "rest",
-        "database": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils",
-    }
     go_connection = {
         "driver": "rest",
         "database": "https://www.ebi.ac.uk/QuickGO/services",
