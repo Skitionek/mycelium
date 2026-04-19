@@ -226,7 +226,6 @@ def precalculateGO_mozg():
                     "geneProductType": "protein",
                     "fields": "goId,goName,symbol",
                     "aspect": "biological_process,molecular_function,cellular_component",
-                    "limit": 25000,
                 },
                 limit=25000,
             )
