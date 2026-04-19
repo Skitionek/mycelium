@@ -30,6 +30,38 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **Mozg knowledge-graph layer** (`mozg/`): new Docker service based on
+  [Mozg](https://github.com/Skitionek/Mozg), a cross-database GraphQL query
+  layer.  Mozg replaces the local Neo4j knowledge graph (`graph-db/`) for
+  enrichment-data queries.  When `MOZG_URL` is set, enrichment lookups for
+  UniProt, STRING, KEGG, BioCyc, GO, RegulonDB, and NCBI gene matching are
+  routed through Mozg to the canonical upstream REST APIs instead of a locally
+  pre-loaded Neo4j instance.
+- **`appserver/neo4japp/services/mozg_client.py`**: thin Python HTTP client
+  for the Mozg `/graphql` endpoint.  Pre-defines connection descriptors for
+  NCBI, UniProt, STRING, KEGG, BioCyc, EBI QuickGO, and RegulonDB.
+- **`appserver/neo4japp/services/mozg_kg_service.py`**: `MozgKgService` and
+  `MozgEnrichmentTableService` — drop-in replacements for `KgService` /
+  `EnrichmentTableService` that delegate all biological-database lookups to
+  Mozg.  Selected automatically when `MOZG_URL` is present; fall back to
+  Neo4j when it is not.
+- **`statistical-enrichment/statistical_enrichment/services/mozg_client.py`**:
+  Mozg client for the statistical-enrichment service.
+- `cache-invalidator` now calls `precalculateGO_mozg()` (EBI QuickGO via
+  Mozg) instead of `precalculateGO()` (local Neo4j) when `MOZG_URL` is set.
+
+### Changed
+- `docker/docker-compose.services.yml`: Mozg service added; `appserver`,
+  `statistical-enrichment`, and `cache-invalidator` gain `MOZG_URL` and
+  `mozg` in their `depends_on`.
+
+### Deprecated
+- **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
+  New biological-database pipelines should not be added there; use Mozg
+  instead.  The Neo4j instance is retained for the graph visualiser and
+  full-text synonym search until those features are migrated.
+
+### Added
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
