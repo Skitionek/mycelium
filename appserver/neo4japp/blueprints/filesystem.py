@@ -1066,7 +1066,8 @@ class FileContentView(FilesystemBaseView):
             etag = file_stat.checksum or hashlib.sha256(content).hexdigest()
         except FileNotFoundError:
             content = b''
-            etag = hashlib.sha256(content).hexdigest()
+            # Pre-computed SHA-256 of empty bytes to avoid unnecessary hashing.
+            etag = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 
         return make_cacheable_file_response(
             request,

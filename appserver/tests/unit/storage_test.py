@@ -6,6 +6,7 @@ cloud credentials.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import sys
 from datetime import datetime
@@ -126,7 +127,6 @@ class TestIStorageProviderAclGuard:
     supports_acl is False and the subclass has not overridden the methods."""
 
     def test_chmod_raises_when_acl_not_supported(self):
-        _NoAclProvider()
         # _NoAclProvider inherits the base chmod; base raises NotSupportedError
         # because capabilities.supports_acl is False.
         # BUT _NoAclProvider overrides chmod with a pass — so to test the
@@ -479,7 +479,6 @@ class TestPostgresAdapterAcl:
 
 class TestPostgresAdapterStat:
     def _make_file(self, hash_id="abc", mime="text/plain", size=42, public=False):
-        import hashlib as _hashlib
         f = MagicMock()
         f.hash_id = hash_id
         f.mime_type = mime
@@ -489,7 +488,7 @@ class TestPostgresAdapterStat:
         f.public = public
         f.content = MagicMock()
         f.content.raw_file = b"x" * size
-        f.content.checksum_sha256 = _hashlib.sha256(b"x" * size).digest()
+        f.content.checksum_sha256 = hashlib.sha256(b"x" * size).digest()
         return f
 
     def test_stat_returns_filestat(self):
