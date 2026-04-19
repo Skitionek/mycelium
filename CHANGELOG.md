@@ -49,6 +49,15 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   Mozg client for the statistical-enrichment service.
 - `cache-invalidator` now calls `precalculateGO_mozg()` (EBI QuickGO via
   Mozg) instead of `precalculateGO()` (local Neo4j) when `MOZG_URL` is set.
+- **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
+- **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
+- **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
+- **`FolderAnnotationService`** (`neo4japp/services/annotations/folder_annotation_service.py`): queries the `file_effective_annotation_config` table (O(1) lookup); falls back to walking the ancestor chain and reading `files_content.raw_file` when the table is unavailable.
+- **`GET /filesystem/objects/<hash_id>/effective-annotations-config`** — return the merged effective config for any file or folder.
+- **`FILE_MIME_TYPE_ANNOTATIONS`** constant (`vnd.lifelike.filesystem/annotations`) added to `constants.py`.
+- **Database migration** `001_add_folder_annotation_config`: adds the `file_effective_annotation_config` table precomputing the fully-merged annotation config for every file (recursive CTE over the ancestor folder chain, reads `files_content.raw_file::jsonb` directly) and the `jsonb_merge_annotation_configs` PostgreSQL function/aggregate for deep-merging `annotation_configs` objects. No new column is added to the `files` table.
+- Unit tests for `FolderAnnotationService` covering: no config files, single folder config, nested config merging, `inherit: false` reset, per-file overrides, partial configs.
+- API test for the `effective-annotations-config` endpoint.
 
 ### Changed
 - `docker/docker-compose.services.yml`: Mozg service added; `appserver`,
@@ -60,17 +69,6 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   New biological-database pipelines should not be added there; use Mozg
   instead.  The Neo4j instance is retained for the graph visualiser and
   full-text synonym search until those features are migrated.
-
-### Added
-- **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
-- **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
-- **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
-- **`FolderAnnotationService`** (`neo4japp/services/annotations/folder_annotation_service.py`): queries the `file_effective_annotation_config` table (O(1) lookup); falls back to walking the ancestor chain and reading `files_content.raw_file` when the table is unavailable.
-- **`GET /filesystem/objects/<hash_id>/effective-annotations-config`** — return the merged effective config for any file or folder.
-- **`FILE_MIME_TYPE_ANNOTATIONS`** constant (`vnd.lifelike.filesystem/annotations`) added to `constants.py`.
-- **Database migration** `001_add_folder_annotation_config`: adds the `file_effective_annotation_config` table precomputing the fully-merged annotation config for every file (recursive CTE over the ancestor folder chain, reads `files_content.raw_file::jsonb` directly) and the `jsonb_merge_annotation_configs` PostgreSQL function/aggregate for deep-merging `annotation_configs` objects. No new column is added to the `files` table.
-- Unit tests for `FolderAnnotationService` covering: no config files, single folder config, nested config merging, `inherit: false` reset, per-file overrides, partial configs.
-- API test for the `effective-annotations-config` endpoint.
 
 ### Security
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).

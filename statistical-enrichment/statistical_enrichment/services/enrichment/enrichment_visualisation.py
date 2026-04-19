@@ -47,8 +47,8 @@ class EnrichmentVisualisationService:
                     "geneProductType": "protein",
                     "aspect": "biological_process,molecular_function,cellular_component",
                     "fields": "goId,goName,symbol",
-                    "limit": 100,
                 },
+                limit=100,
             )
             # Parse QuickGO response: { "results": [...] }
             entries = []
