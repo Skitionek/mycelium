@@ -42,7 +42,6 @@ from typing import BinaryIO, List, Optional
 from neo4japp.storage.interface import (
     FileStat,
     IStorageProvider,
-    NotSupportedError,
     Revision,
     StorageCapabilities,
 )
@@ -194,9 +193,7 @@ class AzureDataLakeAdapter(IStorageProvider):
 
         Blob Versioning must be enabled on the storage account.
         """
-        blob_client = self._blob_client(path)
         container_client = self._blob_service.get_container_client(self._filesystem)
-
         blob_name = _strip_leading_slash(path)
         versions = list(
             container_client.list_blobs(
@@ -217,7 +214,10 @@ class AzureDataLakeAdapter(IStorageProvider):
                     path=path,
                     created_at=blob.get("creation_time"),
                     size=blob.get("size"),
-                    extra={"etag": blob.get("etag"), "is_current_version": blob.get("is_current_version", False)},
+                    extra={
+                        "etag": blob.get("etag"),
+                        "is_current_version": blob.get("is_current_version", False),
+                    },
                 )
             )
         revisions.sort(key=lambda r: r.created_at or "", reverse=True)
@@ -256,12 +256,18 @@ class AzureDataLakeAdapter(IStorageProvider):
         return io.BytesIO(download.readall())
 
     def open_write(
-        self, path: str, stream: BinaryIO, size: Optional[int] = None
-    ) -> None:
+        self,
+        path: str,
+        stream: BinaryIO,
+        *,
+        size: Optional[int] = None,
+        author: Optional[str] = None,
+    ) -> bool:
         """Upload *stream* to *path*, replacing any existing content."""
         client = self._file_client(path)
         data = stream.read()
         client.upload_data(data, overwrite=True, length=len(data))
+        return True
 
 
 # ---------------------------------------------------------------------------

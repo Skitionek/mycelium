@@ -8,7 +8,6 @@ in the ``adapters`` sub-package.
 
 from __future__ import annotations
 
-import io
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import BinaryIO, List, Optional
@@ -70,6 +69,9 @@ class FileStat(BaseModel):
 
     group: Optional[str] = None
     """Opaque group identifier."""
+
+    checksum: Optional[str] = None
+    """Hex SHA-256 digest of the current content, if pre-computed by the provider."""
 
     extra: dict = Field(default_factory=dict)
     """Provider-specific metadata that does not fit the schema above."""
@@ -207,11 +209,25 @@ class IStorageProvider(ABC):
         """
 
     @abstractmethod
-    def open_write(self, path: str, stream: BinaryIO, size: Optional[int] = None) -> None:
+    def open_write(
+        self,
+        path: str,
+        stream: BinaryIO,
+        *,
+        size: Optional[int] = None,
+        author: Optional[str] = None,
+    ) -> bool:
         """Write *stream* to *path*, creating or replacing the file.
 
         :param path: Destination path.
         :param stream: Readable binary stream whose content will be stored.
         :param size: Optional hint for the number of bytes to write.  Some
             providers require this for streaming uploads.
+        :param author: Opaque author identifier (e.g. a user hash-id or
+            e-mail address) recorded on the new revision, if the provider
+            supports versioning.
+        :returns: ``True`` if the stored content changed, ``False`` when the
+            new content is byte-for-byte identical to the current content and
+            the provider detected this (e.g. via content-addressable storage).
+            Cloud providers that do not deduplicate always return ``True``.
         """

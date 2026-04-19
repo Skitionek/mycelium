@@ -54,7 +54,6 @@ from typing import BinaryIO, Dict, List, Optional
 from neo4japp.storage.interface import (
     FileStat,
     IStorageProvider,
-    NotSupportedError,
     Revision,
     StorageCapabilities,
 )
@@ -354,8 +353,13 @@ class GoogleDriveAdapter(IStorageProvider):
         return io.BytesIO(response.read() if hasattr(response, "read") else b"")
 
     def open_write(
-        self, path: str, stream: BinaryIO, size: Optional[int] = None
-    ) -> None:
+        self,
+        path: str,
+        stream: BinaryIO,
+        *,
+        size: Optional[int] = None,
+        author: Optional[str] = None,
+    ) -> bool:
         """Upload *stream* to *path*, replacing the current content and
         creating a new Drive revision.
         """
@@ -370,3 +374,4 @@ class GoogleDriveAdapter(IStorageProvider):
         mime_type = meta.get("mimeType", "application/octet-stream")
         media = MediaIoBaseUpload(stream, mimetype=mime_type, resumable=False)
         self._service.files().update(fileId=path, media_body=media).execute()
+        return True

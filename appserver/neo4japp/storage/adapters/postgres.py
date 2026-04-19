@@ -127,6 +127,7 @@ class PostgresAdapter(IStorageProvider):
     def stat(self, path: str) -> FileStat:
         file = self._get_file(path)
         size = len(file.content.raw_file) if file.content else 0
+        checksum = file.content.checksum_sha256.hex() if file.content else None
         return FileStat(
             path=path,
             size=size,
@@ -135,6 +136,7 @@ class PostgresAdapter(IStorageProvider):
             modified_at=file.modified_date,
             mode=self._mode_from_file(file),
             owner=str(file.user_id) if file.user_id else None,
+            checksum=checksum,
         )
 
     # ------------------------------------------------------------------
@@ -255,22 +257,47 @@ class PostgresAdapter(IStorageProvider):
             raise FileNotFoundError(f"File {path!r} has no content")
         return io.BytesIO(file.content.raw_file)
 
-    def open_write(self, path: str, stream: BinaryIO, size: Optional[int] = None) -> None:
+    def open_write(
+        self,
+        path: str,
+        stream: BinaryIO,
+        *,
+        size: Optional[int] = None,
+        author: Optional[str] = None,
+    ) -> bool:
         """Replace the content of *path* with *stream*.
 
         The previous content is saved as a :class:`FileVersion` if it differs
         from the new content, so that history is preserved.
+
+        :param author: ``hash_id`` of the :class:`AppUser` who performed the
+            write, stored on the new :class:`FileVersion` record.  When
+            omitted, the file's current owner is used.
+        :returns: ``True`` if the content changed, ``False`` if the new
+            content is byte-for-byte identical to the current content.
         """
         file = self._get_file(path)
         new_content_id = FileContent.get_or_create(stream)
 
-        if file.content_id != new_content_id:
-            if file.content_id is not None:
-                version = FileVersion()
-                version.file = file
-                version.content_id = file.content_id
-                version.user_id = file.user_id
-                db.session.add(version)
+        if file.content_id == new_content_id:
+            return False
 
-            file.content_id = new_content_id
-            db.session.flush()
+        if file.content_id is not None:
+            version = FileVersion()
+            version.file = file
+            version.content_id = file.content_id
+            if author is not None:
+                # Resolve author hash_id to a user_id
+                user: Optional[AppUser] = (
+                    db.session.query(AppUser)
+                    .filter(AppUser.hash_id == author)
+                    .one_or_none()
+                )
+                version.user_id = user.id if user is not None else file.user_id
+            else:
+                version.user_id = file.user_id
+            db.session.add(version)
+
+        file.content_id = new_content_id
+        db.session.flush()
+        return True

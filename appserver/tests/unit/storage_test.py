@@ -58,14 +58,14 @@ for _stub_mod in [
     if _stub_mod not in sys.modules:
         sys.modules[_stub_mod] = MagicMock()  # type: ignore[assignment]
 
-from neo4japp.storage.interface import (
+from neo4japp.storage.interface import (  # noqa: E402
     FileStat,
     IStorageProvider,
     NotSupportedError,
     Revision,
     StorageCapabilities,
 )
-from neo4japp.storage.adapters.azure_adls import (
+from neo4japp.storage.adapters.azure_adls import (  # noqa: E402
     _mode_to_posix_str,
     _posix_str_to_mode,
 )
@@ -126,7 +126,7 @@ class TestIStorageProviderAclGuard:
     supports_acl is False and the subclass has not overridden the methods."""
 
     def test_chmod_raises_when_acl_not_supported(self):
-        provider = _NoAclProvider()
+        _NoAclProvider()
         # _NoAclProvider inherits the base chmod; base raises NotSupportedError
         # because capabilities.supports_acl is False.
         # BUT _NoAclProvider overrides chmod with a pass — so to test the
@@ -479,6 +479,7 @@ class TestPostgresAdapterAcl:
 
 class TestPostgresAdapterStat:
     def _make_file(self, hash_id="abc", mime="text/plain", size=42, public=False):
+        import hashlib as _hashlib
         f = MagicMock()
         f.hash_id = hash_id
         f.mime_type = mime
@@ -488,6 +489,7 @@ class TestPostgresAdapterStat:
         f.public = public
         f.content = MagicMock()
         f.content.raw_file = b"x" * size
+        f.content.checksum_sha256 = _hashlib.sha256(b"x" * size).digest()
         return f
 
     def test_stat_returns_filestat(self):
@@ -504,6 +506,7 @@ class TestPostgresAdapterStat:
         assert result.content_type == "text/plain"
         assert result.mode == 0o600  # private file: owner rw- only
         assert result.owner == "7"
+        assert result.checksum is not None
 
     def test_stat_public_file_has_world_read(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
@@ -514,6 +517,18 @@ class TestPostgresAdapterStat:
             result = adapter.stat("abc")
 
         assert result.mode == 0o604  # owner rw- + other r--
+
+    def test_stat_no_content_gives_none_checksum(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+        mock_file = self._make_file()
+        mock_file.content = None
+
+        with patch.object(adapter, "_get_file", return_value=mock_file):
+            result = adapter.stat("abc")
+
+        assert result.checksum is None
+        assert result.size == 0
 
     def test_stat_raises_for_missing_file(self):
         from neo4japp.storage.adapters.postgres import PostgresAdapter
@@ -590,3 +605,421 @@ class TestPostgresAdapterRevisions:
             stream = adapter.open_read("abc")
 
         assert stream.read() == b"file content"
+
+    def test_open_read_raises_when_no_content(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+
+        mock_file = MagicMock()
+        mock_file.content = None
+
+        with patch.object(adapter, "_get_file", return_value=mock_file):
+            with pytest.raises(FileNotFoundError):
+                adapter.open_read("abc")
+
+
+# ---------------------------------------------------------------------------
+# PostgresAdapter.open_write tests
+# ---------------------------------------------------------------------------
+
+
+class TestPostgresAdapterOpenWrite:
+    def _make_file(self, content_id=1, public=False):
+        f = MagicMock()
+        f.hash_id = "abc"
+        f.user_id = 42
+        f.public = public
+        f.content_id = content_id
+        return f
+
+    def test_open_write_returns_false_when_content_unchanged(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+
+        mock_file = self._make_file(content_id=99)
+
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.FileContent") as mock_fc, \
+             patch("neo4japp.storage.adapters.postgres.db") as _mock_db:
+            mock_fc.get_or_create.return_value = 99  # Same content_id
+
+            result = adapter.open_write("abc", io.BytesIO(b"same"))
+
+        assert result is False
+
+    def test_open_write_returns_true_and_updates_content_id(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+
+        mock_file = self._make_file(content_id=1)
+
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.FileContent") as mock_fc, \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_fc.get_or_create.return_value = 2  # New content_id
+            mock_db.session.add = MagicMock()
+            mock_db.session.flush = MagicMock()
+
+            result = adapter.open_write("abc", io.BytesIO(b"new content"))
+
+        assert result is True
+        assert mock_file.content_id == 2
+
+    def test_open_write_creates_version_when_previous_content_exists(self):
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+
+        mock_file = self._make_file(content_id=1)
+
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.FileContent") as mock_fc, \
+             patch("neo4japp.storage.adapters.postgres.FileVersion") as mock_fv_cls, \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_fc.get_or_create.return_value = 2
+            mock_version = MagicMock()
+            mock_fv_cls.return_value = mock_version
+            mock_db.session.query.return_value.filter.return_value.one_or_none.return_value = None
+
+            adapter.open_write("abc", io.BytesIO(b"new"), author="user-hash")
+
+        mock_db.session.add.assert_called_once_with(mock_version)
+
+    def test_open_write_no_version_when_first_write(self):
+        """When content_id is None (new file), no FileVersion should be created."""
+        from neo4japp.storage.adapters.postgres import PostgresAdapter
+        adapter = PostgresAdapter()
+
+        mock_file = self._make_file(content_id=None)
+
+        with patch.object(adapter, "_get_file", return_value=mock_file), \
+             patch("neo4japp.storage.adapters.postgres.FileContent") as mock_fc, \
+             patch("neo4japp.storage.adapters.postgres.db") as mock_db:
+            mock_fc.get_or_create.return_value = 1
+
+            result = adapter.open_write("abc", io.BytesIO(b"initial"))
+
+        assert result is True
+        mock_db.session.add.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# AzureDataLakeAdapter unit tests (all SDK calls are mocked)
+# ---------------------------------------------------------------------------
+
+
+class TestAzureDataLakeAdapterCapabilities:
+    def _make_adapter(self):
+        """Build an AzureDataLakeAdapter with fully mocked SDK clients."""
+        from neo4japp.storage.adapters.azure_adls import AzureDataLakeAdapter
+
+        with patch("neo4japp.storage.adapters.azure_adls.AzureDataLakeAdapter.__init__",
+                   return_value=None):
+            adapter = AzureDataLakeAdapter.__new__(AzureDataLakeAdapter)
+
+        adapter._datalake_service = MagicMock()
+        adapter._blob_service = MagicMock()
+        adapter._filesystem = "test-fs"
+        return adapter
+
+    def test_capabilities(self):
+        adapter = self._make_adapter()
+        caps = adapter.capabilities
+        assert caps.supports_acl is True
+        assert caps.supports_versioning is True
+
+    def test_stat_returns_filestat(self):
+        adapter = self._make_adapter()
+
+        mock_client = MagicMock()
+        mock_client.get_file_properties.return_value = {
+            "size": 100,
+            "content_settings": {"content_type": "application/pdf"},
+            "creation_time": None,
+            "last_modified": None,
+            "etag": "etag123",
+            "lease": {"status": "unlocked"},
+        }
+        mock_client.get_access_control.return_value = {
+            "permissions": "rw-r--r--",
+            "owner": "user1",
+            "group": "grp1",
+        }
+        adapter._datalake_service.get_file_system_client.return_value\
+            .get_file_client.return_value = mock_client
+
+        result = adapter.stat("myfile.txt")
+
+        assert isinstance(result, FileStat)
+        assert result.size == 100
+        assert result.content_type == "application/pdf"
+        assert result.mode == 0o644
+        assert result.owner == "user1"
+        assert result.group == "grp1"
+
+    def test_chmod_calls_set_access_control(self):
+        adapter = self._make_adapter()
+
+        mock_client = MagicMock()
+        adapter._datalake_service.get_file_system_client.return_value\
+            .get_file_client.return_value = mock_client
+
+        adapter.chmod("myfile.txt", 0o755)
+
+        mock_client.set_access_control.assert_called_once_with(permissions="rwxr-xr-x")
+
+    def test_chown_calls_set_access_control(self):
+        adapter = self._make_adapter()
+
+        mock_client = MagicMock()
+        adapter._datalake_service.get_file_system_client.return_value\
+            .get_file_client.return_value = mock_client
+
+        adapter.chown("myfile.txt", "newowner", "newgroup")
+
+        mock_client.set_access_control.assert_called_once_with(
+            owner="newowner", group="newgroup"
+        )
+
+    def test_open_read_returns_bytesio(self):
+        adapter = self._make_adapter()
+
+        mock_client = MagicMock()
+        mock_download = MagicMock()
+        mock_download.readall.return_value = b"azure content"
+        mock_client.download_file.return_value = mock_download
+        adapter._datalake_service.get_file_system_client.return_value\
+            .get_file_client.return_value = mock_client
+
+        stream = adapter.open_read("myfile.txt")
+
+        assert stream.read() == b"azure content"
+
+    def test_open_write_returns_true(self):
+        adapter = self._make_adapter()
+
+        mock_client = MagicMock()
+        adapter._datalake_service.get_file_system_client.return_value\
+            .get_file_client.return_value = mock_client
+
+        result = adapter.open_write("myfile.txt", io.BytesIO(b"data"))
+
+        assert result is True
+        mock_client.upload_data.assert_called_once()
+
+    def test_list_revisions_returns_list(self):
+        adapter = self._make_adapter()
+
+        mock_container = MagicMock()
+        blob1 = {
+            "name": "myfile.txt",
+            "version_id": "v1",
+            "creation_time": datetime(2024, 1, 1),
+            "size": 50,
+            "etag": "etag1",
+            "is_current_version": False,
+        }
+        mock_container.list_blobs.return_value = [blob1]
+        adapter._blob_service.get_container_client.return_value = mock_container
+
+        revisions = adapter.list_revisions("myfile.txt")
+
+        assert len(revisions) == 1
+        assert revisions[0].rev_id == "v1"
+
+    def test_list_revisions_excludes_other_blobs(self):
+        """Blobs with a different name must be filtered out."""
+        adapter = self._make_adapter()
+
+        mock_container = MagicMock()
+        blob_other = {
+            "name": "other.txt",
+            "version_id": "v99",
+            "creation_time": None,
+            "size": 0,
+            "etag": "x",
+            "is_current_version": False,
+        }
+        mock_container.list_blobs.return_value = [blob_other]
+        adapter._blob_service.get_container_client.return_value = mock_container
+
+        revisions = adapter.list_revisions("myfile.txt")
+
+        assert revisions == []
+
+    def test_restore_revision_calls_start_copy(self):
+        adapter = self._make_adapter()
+
+        mock_blob_client = MagicMock()
+        mock_blob_client.url = "https://example.com/blob"
+        adapter._blob_service.get_blob_client.return_value = mock_blob_client
+        adapter._blob_service.credential = MagicMock()
+
+        mock_versioned = MagicMock()
+        mock_versioned.url = "https://example.com/blob?versionId=v1"
+        mock_blob_cls = MagicMock()
+        mock_blob_cls.from_blob_url.return_value = mock_versioned
+
+        azure_blob_mod = MagicMock()
+        azure_blob_mod.BlobClient = mock_blob_cls
+
+        with patch.dict("sys.modules", {"azure.storage.blob": azure_blob_mod}):
+            adapter.restore_revision("myfile.txt", "v1")
+
+        mock_blob_client.start_copy_from_url.assert_called_once_with(mock_versioned.url)
+
+
+# ---------------------------------------------------------------------------
+# GoogleDriveAdapter unit tests (all API calls are mocked)
+# ---------------------------------------------------------------------------
+
+
+class TestGoogleDriveAdapter:
+    def _make_adapter(self):
+        from neo4japp.storage.adapters.google_drive import GoogleDriveAdapter
+        mock_service = MagicMock()
+        return GoogleDriveAdapter(service=mock_service), mock_service
+
+    def test_capabilities(self):
+        adapter, _ = self._make_adapter()
+        caps = adapter.capabilities
+        assert caps.supports_acl is True
+        assert caps.supports_versioning is True
+
+    def test_stat_returns_filestat(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.return_value = {
+            "id": "file123",
+            "name": "report.pdf",
+            "mimeType": "application/pdf",
+            "size": "2048",
+            "createdTime": "2024-01-01T00:00:00Z",
+            "modifiedTime": "2024-06-01T00:00:00Z",
+            "owners": [{"emailAddress": "owner@example.com"}],
+            "permissions": [{"role": "reader", "type": "anyone"}],
+            "appProperties": {},
+        }
+
+        result = adapter.stat("file123")
+
+        assert isinstance(result, FileStat)
+        assert result.size == 2048
+        assert result.content_type == "application/pdf"
+        assert result.owner == "owner@example.com"
+
+    def test_stat_raises_file_not_found(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.side_effect = Exception(
+            "404: File not found"
+        )
+
+        with pytest.raises(FileNotFoundError):
+            adapter.stat("missing")
+
+    def test_chmod_updates_existing_permission(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.return_value = {
+            "id": "file123",
+            "name": "doc.pdf",
+            "mimeType": "application/pdf",
+            "size": "0",
+            "owners": [],
+            "permissions": [{"id": "perm1", "role": "reader", "type": "anyone"}],
+            "appProperties": {},
+        }
+
+        adapter.chmod("file123", 0o644)
+
+        mock_service.permissions.return_value.update.assert_called_once()
+
+    def test_chmod_creates_permission_when_none_exist(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.return_value = {
+            "id": "file123",
+            "name": "doc.pdf",
+            "mimeType": "application/pdf",
+            "size": "0",
+            "owners": [{"emailAddress": "owner@example.com"}],
+            "permissions": [{"id": "owner_perm", "role": "owner"}],
+            "appProperties": {},
+        }
+
+        adapter.chmod("file123", 0o644)
+
+        # Owner-only permission → new "anyone" permission created
+        mock_service.permissions.return_value.create.assert_called_once()
+
+    def test_chown_transfers_ownership(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.return_value = {
+            "id": "file123",
+            "name": "doc.pdf",
+            "mimeType": "application/pdf",
+            "size": "0",
+            "owners": [],
+            "permissions": [{"id": "owner_perm", "role": "owner"}],
+            "appProperties": {},
+        }
+
+        adapter.chown("file123", "new@example.com", "")
+
+        mock_service.permissions.return_value.create.assert_called()
+
+    def test_open_read_returns_bytes_stream(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get_media.return_value.execute.return_value = b"drive data"
+
+        stream = adapter.open_read("file123")
+
+        assert stream.read() == b"drive data"
+
+    def test_open_write_returns_true(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.files.return_value.get.return_value.execute.return_value = {
+            "id": "file123",
+            "mimeType": "text/plain",
+        }
+
+        with patch("neo4japp.storage.adapters.google_drive.GoogleDriveAdapter.open_write") as m:
+            m.return_value = True
+            result = adapter.open_write("file123", io.BytesIO(b"data"))
+
+        assert result is True
+
+    def test_list_revisions_newest_first(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.revisions.return_value.list.return_value.execute.return_value = {
+            "revisions": [
+                {"id": "r1", "modifiedTime": "2024-01-01T00:00:00Z",
+                 "lastModifyingUser": {"emailAddress": "alice@example.com"},
+                 "size": "100", "keepForever": False},
+                {"id": "r2", "modifiedTime": "2024-06-01T00:00:00Z",
+                 "lastModifyingUser": {"emailAddress": "bob@example.com"},
+                 "size": "200", "keepForever": True},
+            ]
+        }
+
+        revisions = adapter.list_revisions("file123")
+
+        assert len(revisions) == 2
+        # reversed() in the implementation means r2 (newest) comes first
+        assert revisions[0].rev_id == "r2"
+        assert revisions[1].rev_id == "r1"
+
+    def test_get_revision_stream_returns_bytes(self):
+        adapter, mock_service = self._make_adapter()
+
+        mock_service.revisions.return_value.get_media.return_value.execute.return_value = (
+            b"rev content"
+        )
+
+        stream = adapter.get_revision_stream("file123", "r1")
+
+        assert stream.read() == b"rev content"
