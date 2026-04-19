@@ -15,6 +15,8 @@ NEO4J_AUTH = os.getenv('NEO4J_AUTH', 'neo4j/password')
 NEO4J_SCHEME = os.getenv('NEO4J_SCHEME', 'bolt')
 NEO4J_DATABASE = os.getenv('NEO4J_DATABASE', 'neo4j')
 
+MOZG_URL = os.getenv('MOZG_URL', '')
+
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
@@ -38,7 +40,7 @@ redis_server = redis.Redis(
     connection_pool=redis.BlockingConnectionPool.from_url(redis_url)
 )
 
-# Neo4j connection
+# Neo4j connection (used when MOZG_URL is not set)
 neo4j_url = f'{NEO4J_SCHEME}://{NEO4J_HOST}:{NEO4J_PORT}/{NEO4J_DATABASE}'
 neo4j_auth = basic_auth(*NEO4J_AUTH.split('/', 1))
 neo4j_driver = GraphDatabase.driver(neo4j_url, auth=neo4j_auth)
@@ -49,7 +51,9 @@ def main():
     next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
     while True:
         try:
-            cache_data('kg_statistics', get_kg_statistics())
+            if not MOZG_URL:
+                # KG statistics come from Neo4j; skip when Mozg is the knowledge-graph layer
+                cache_data('kg_statistics', get_kg_statistics())
             next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
             logger.debug(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
         except Exception as err:
@@ -63,7 +67,10 @@ def main():
             )
         finally:
             try:
-                precalculateGO()
+                if MOZG_URL:
+                    precalculateGO_mozg()
+                else:
+                    precalculateGO()
                 next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
                 logger.info(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
             except Exception as err:
@@ -110,7 +117,8 @@ def get_kg_statistics():
 
 
 def precalculateGO():
-    logger.debug('Precalculating GO...')
+    """Pre-compute GO term data from Neo4j and cache in Redis."""
+    logger.debug('Precalculating GO from Neo4j...')
     graph = neo4j_driver.session()
 
     def fetch_organism_go_query(tx, organism):
@@ -148,6 +156,102 @@ def precalculateGO():
             graph.read_transaction(fetch_organism_go_query, organism),
         )
     graph.close()
+
+
+def precalculateGO_mozg():
+    """Pre-compute GO term data via Mozg (EBI QuickGO) and cache in Redis.
+
+    Replaces :func:`precalculateGO` when ``MOZG_URL`` is set.  Fetches a
+    list of model organisms from NCBI via Mozg, then retrieves their GO
+    annotations from EBI QuickGO and caches the results for the statistical-
+    enrichment service.
+    """
+    import requests
+
+    logger.debug('Precalculating GO via Mozg...')
+
+    _QUERY_GQL = """
+    query MozgQuery($input: QueryInput!) {
+        query(input: $input) { data count }
+    }
+    """
+
+    def mozg_query(connection, from_entity, where=None, limit=None):
+        input_obj = {"connection": connection, "from": from_entity}
+        if where:
+            input_obj["where"] = where
+        if limit:
+            input_obj["limit"] = limit
+        r = requests.post(
+            MOZG_URL,
+            json={"query": _QUERY_GQL, "variables": {"input": input_obj}},
+            timeout=30,
+        )
+        r.raise_for_status()
+        body = r.json()
+        if "errors" in body:
+            raise RuntimeError(f"Mozg error: {body['errors']}")
+        data = body.get("data", {}).get("query", {}).get("data", [])
+        return data if isinstance(data, list) else ([data] if data else [])
+
+    # Fetch well-studied model organisms from NCBI taxonomy
+    ncbi_connection = {
+        "driver": "rest",
+        "database": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils",
+    }
+    go_connection = {
+        "driver": "rest",
+        "database": "https://www.ebi.ac.uk/QuickGO/services",
+    }
+
+    # Use a fixed list of common model organism NCBI taxon IDs
+    model_organisms = [
+        {"id": "9606", "name": "Homo sapiens"},
+        {"id": "10090", "name": "Mus musculus"},
+        {"id": "10116", "name": "Rattus norvegicus"},
+        {"id": "6239", "name": "Caenorhabditis elegans"},
+        {"id": "7227", "name": "Drosophila melanogaster"},
+        {"id": "559292", "name": "Saccharomyces cerevisiae"},
+        {"id": "83333", "name": "Escherichia coli K-12"},
+    ]
+
+    for organism in model_organisms:
+        try:
+            logger.debug(f'Precomputing GO via Mozg for {organism["name"]} ({organism["id"]})')
+            rows = mozg_query(
+                connection=go_connection,
+                from_entity="annotation",
+                where={
+                    "taxonId": organism["id"],
+                    "geneProductType": "protein",
+                    "fields": "goId,goName,symbol",
+                    "aspect": "biological_process,molecular_function,cellular_component",
+                    "limit": 25000,
+                },
+                limit=25000,
+            )
+
+            # Aggregate per GO term
+            go_map: dict = {}
+            raw_results = rows[0].get("results", []) if (rows and isinstance(rows[0], dict)) else []
+            for entry in raw_results:
+                go_id = entry.get("goId", "")
+                go_name = entry.get("goName", go_id)
+                symbol = entry.get("symbol", "")
+                if go_id not in go_map:
+                    go_map[go_id] = {
+                        "goId": go_id,
+                        "goTerm": go_name,
+                        "goLabel": [],
+                        "geneNames": [],
+                    }
+                if symbol and symbol not in go_map[go_id]["geneNames"]:
+                    go_map[go_id]["geneNames"].append(symbol)
+
+            if go_map:
+                cache_data(f'GO_for_{organism["id"]}', list(go_map.values()))
+        except Exception as err:
+            logger.warning(f'Could not precompute GO for {organism["name"]}: {err}')
 
 
 def cache_data(key, value):

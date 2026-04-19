@@ -56,6 +56,12 @@ services:
         target: /app
     user: root
 
+  mozg:
+    build:
+      context: ../mozg
+    environment:
+      - NODE_ENV=development
+
   solr:
     image: solr:9
     command:
