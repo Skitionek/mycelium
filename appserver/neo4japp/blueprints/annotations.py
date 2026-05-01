@@ -526,7 +526,9 @@ class FileAnnotationsGenerationView(FilesystemBaseView):
                     }
             elif file.mime_type == 'vnd.lifelike.document/enrichment-table':
                 try:
-                    enrichment = json.loads(file.content.raw_file_utf8)
+                    enrichment = json.loads(
+                        file.content.get_bytes(path=file.hash_id).decode('utf-8')
+                    )
                 except JSONDecodeError:
                     current_app.logger.error(
                         f'Cannot annotate file with invalid content: {file.hash_id}, {file.filename}')  # noqa
@@ -1126,7 +1128,7 @@ def get_pdf_to_annotate(file_id):
             message=f'File with file id {file_id} not found.',
             code=404)
 
-    res = make_response(doc.content.raw_file)
+    res = make_response(doc.content.get_bytes(path=doc.hash_id))
     res.headers['Content-Type'] = 'application/pdf'
     res.headers['Content-Disposition'] = f'attachment;filename={doc.filename}.pdf'
     return res

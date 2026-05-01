@@ -13,10 +13,13 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [Unreleased]
 
 ### Added
+- `neo4japp/services/storage_drivers/postgresql.py` — `PostgreSQLStorageDriver`, a libcloud `StorageDriver` implementation that stores objects in the `files_content` PostgreSQL table via SQLAlchemy.
+- `neo4japp/services/file_storage.py` — `FileStorageService` wrapping the libcloud `StorageDriver` API with `store`, `retrieve`, and `delete` methods.
+- `get_file_storage_service()` factory in `neo4japp/database.py` — builds the libcloud driver from app config and memoises it to the request context.
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
-- **`FolderAnnotationService`** (`neo4japp/services/annotations/folder_annotation_service.py`): queries the `file_effective_annotation_config` table (O(1) lookup); falls back to walking the ancestor chain and reading `files_content.raw_file` when the table is unavailable.
+- **`FolderAnnotationService`** (`neo4japp/services/annotations/folder_annotation_service.py`): queries the `file_effective_annotation_config` table (O(1) lookup); falls back to walking the ancestor chain and reading file content via `FileContent.get_bytes()` (routed through the storage abstraction) when the table is unavailable.
 - **`GET /filesystem/objects/<hash_id>/effective-annotations-config`** — return the merged effective config for any file or folder.
 - **`FILE_MIME_TYPE_ANNOTATIONS`** constant (`vnd.lifelike.filesystem/annotations`) added to `constants.py`.
 - **Database migration** `001_add_folder_annotation_config`: adds the `file_effective_annotation_config` table precomputing the fully-merged annotation config for every file (recursive CTE over the ancestor folder chain, reads `files_content.raw_file::jsonb` directly) and the `jsonb_merge_annotation_configs` PostgreSQL function/aggregate for deep-merging `annotation_configs` objects. No new column is added to the `files` table.
@@ -26,15 +29,6 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Security
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
-
-### Fixed
-- **CI linting**: upgraded `peter-evans/create-pull-request` from v6 to v7 to fix "Duplicate header: Authorization" error in the MegaLinter auto-fix PR step.
-
-### Changed
-- **GitHub Actions cleanup**: removed the duplicate default CodeQL workflow, kept the advanced scan workflow, and updated stale graph DB workflow action references.
-- **CI linting**: MegaLinter fixes are opened as a separate PR (`APPLY_FIXES_MODE: pull_request`) and auto-approved via `megalinter-auto-approve.yml`; `fast-lint` runs in check-only mode.
-
-### Added
 - **LibreOffice PDF conversion service** (`neo4japp/services/libreoffice.py`): server-side conversion of Office/document files (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.odt`, `.ods`, `.odp`, `.rtf`, `.txt`, `.html`, `.csv`) to PDF using LibreOffice headless mode.
 - **`GET /api/filesystem/objects/<hash_id>/content/pdf`** endpoint: serves any file's content as PDF — passes through existing PDFs unchanged, converts supported document formats on-the-fly.
 - **Client-side transparent rendering**: files with convertible MIME types now open directly in the PDF viewer; conversion is invisible to the user.
@@ -50,6 +44,17 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **`properties.ini.example`** template files for `common/` and `cloudstorage/` so new contributors know which values to set locally
 
 ### Changed
+- **Storage backend**: migrated from Azure-specific SDKs to [apache-libcloud](https://libcloud.apache.org/) Object Storage API (`apache-libcloud==3.9.0`), making it easy to swap in alternative backends (GCS, S3, Azure Blobs) by supplying a different libcloud driver.
+- Replaced `azure-storage-file` (`FileService`) in `lmdb_manager` with a new `LibcloudStorageProvider`; `AzureStorageProvider` is now a thin libcloud-Azure subclass. Removed Azure-File-specific `create_remote_dir`.
+- Replaced `azure-storage-blob` (`BlobServiceClient`) in `blueprints/storage.py` with libcloud `get_object` / `download_object_as_stream` / `upload_object_via_stream`.
+- Removed unused `AZURE_BLOB_STORAGE_URL` config entry (libcloud derives the endpoint from the account name).
+- **User file content** reads and writes now go through the `FileStorageService` libcloud abstraction. The default `PostgreSQLStorageDriver` stores bytes in `files_content.raw_file` (no schema change, no external service required). Switching to Azure Blobs, S3, or GCS only requires setting `FILE_STORAGE_PROVIDER` / `FILE_STORAGE_KEY` / `FILE_STORAGE_SECRET` env vars — no code changes. Objects are addressed by **path** — the `hash_id` of the owning `Files` row for current content, or the `hash_id` of a `FileVersion` row for a historical snapshot (libcloud "snapshot"). `PostgreSQLStorageDriver._find_row` resolves paths in order: `Files.hash_id` → `FileVersion.hash_id` → legacy hex checksum (backward compat).
+- `FileContent.get_bytes(path=None)` accepts an optional `path` parameter (the owning entity's `hash_id`); all call sites now pass the appropriate path so the storage driver can look up bytes by path rather than checksum.
+- `FileContent.get_or_create(buffer, file_path=None)` accepts an optional `file_path` (the owning `Files.hash_id`) that is passed as the libcloud object name to the storage service.
+- `FileVersionSchema.revision` now returns `FileVersion.hash_id` (the snapshot path) instead of the hex-encoded SHA-256 checksum.
+- New `FILE_STORAGE_PROVIDER` / `FILE_STORAGE_CONTAINER` / `FILE_STORAGE_KEY` / `FILE_STORAGE_SECRET` app-config keys control the libcloud backend (default: `POSTGRESQL`).
+- **GitHub Actions cleanup**: removed the duplicate default CodeQL workflow, kept the advanced scan workflow, and updated stale graph DB workflow action references.
+- **CI linting**: MegaLinter fixes are opened as a separate PR (`APPLY_FIXES_MODE: pull_request`) and auto-approved via `megalinter-auto-approve.yml`; `fast-lint` runs in check-only mode.
 - **Credentials now read from environment variables first** (`NEO4J_URI`, `NEO4J_DATABASE`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `AZURE_ACCOUNT_STORAGE_NAME`, `AZURE_ACCOUNT_STORAGE_KEY`) with `properties.ini` as local-dev fallback — no more manual file editing in CI/CD
 - **`generate_liquibase_changelog_file()`** signature updated to accept a `Path` output directory and an optional filename; auto-numbers the file when no name is given
 - **`graphdb-migrate.yml`**: `changelog` input changed from a free-text field to a dropdown of known master files, preventing path-typo mistakes
@@ -59,7 +64,6 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Removed
 - **JIRA prefix validation** removed from `ChangeLog.__init__`, `BaseParser.__init__`, and `app.py` — the `LL-NNNN` format constraint is gone
 - **`jira-` literal prefix** removed from output file names in `liquibase_utils.py`, `base_parser.py`, and `chebi_parser.py`
-
 - **ruff** (`0.15.10`) added as a dev dependency to all Python projects (appserver, statistical-enrichment, cache-invalidator) with a shared root `ruff.toml` config (E/F rules, line-length 100, migrations excluded)
 - **`lint.yml`** GitHub Actions workflow: fast-lint job (ruff + tslint) gates MegaLinter; SARIF report uploaded on every PR/push so findings appear as Security-tab annotations and PR review comments
 - **`.cspell.json`** project dictionary with 418 domain/project-specific words to suppress cspell false-positive warnings

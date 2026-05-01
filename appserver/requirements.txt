@@ -4,6 +4,8 @@ alembic==1.14.1
     # via flask-migrate
 anyio==4.12.1
     # via elasticsearch
+apache-libcloud==3.9.0
+    # via lifelike-appserver
 apispec==6.10.0
     # via flask-apispec
 attrs==26.1.0
@@ -58,9 +60,8 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   tqdm
 cryptography==46.0.7
     # via
-    #   azure-storage-blob
-    #   azure-storage-common
     #   google-auth
+    #   lifelike-appserver
     #   paramiko
     #   pdfminer-six
     #   sendgrid
@@ -148,8 +149,6 @@ intervaltree==3.2.1
     #   lifelike-appserver
 ipy==1.1
     # via lifelike-appserver
-isodate==0.7.2
-    # via azure-storage-blob
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
@@ -235,7 +234,6 @@ pypdf4==1.27.0
     # via lifelike-appserver
 python-dateutil==2.9.0.post0
     # via
-    #   azure-storage-common
     #   elasticsearch
     #   pandas
 python-http-client==3.3.7
@@ -252,8 +250,7 @@ redis==4.0.2
     # via lifelike-appserver
 requests==2.33.1
     # via
-    #   azure-core
-    #   azure-storage-common
+    #   apache-libcloud
     #   google-api-core
     #   google-cloud-storage
     #   lifelike-appserver
@@ -297,8 +294,6 @@ typing-extensions==4.15.0
     # via
     #   alembic
     #   anyio
-    #   azure-core
-    #   azure-storage-blob
     #   cryptography
     #   elasticsearch
     #   exceptiongroup

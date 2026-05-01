@@ -419,7 +419,7 @@ class FilesystemBaseView(MethodView):
                                               f"'{file.mime_type}' (which '{file.hash_id}' is of).",
                                               "contentValue")
 
-                    new_content_id = FileContent.get_or_create(buffer)
+                    new_content_id = FileContent.get_or_create(buffer, file_path=file.hash_id)
                     buffer.seek(0)  # Must rewind
 
                     # Only make a file version if the content actually changed
@@ -775,7 +775,7 @@ class FileListView(FilesystemBaseView):
 
             # Save the file content if there's any
             if size:
-                file.content_id = FileContent.get_or_create(buffer)
+                file.content_id = FileContent.get_or_create(buffer, file_path=file.hash_id)
                 buffer.seek(0)  # Must rewind
                 try:
                     buffer.close()
@@ -1055,7 +1055,7 @@ class FileContentView(FilesystemBaseView):
 
         # Lazy loaded
         if file.content:
-            content = file.content.raw_file
+            content = file.content.get_bytes(path=file.hash_id)
             etag = file.content.checksum_sha256.hex()
         else:
             content = b''
@@ -1081,7 +1081,7 @@ class FileContentPdfView(FilesystemBaseView):
         file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id, lazy_load_content=True)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=True)
 
-        raw: bytes = file.content.raw_file if file.content else b''
+        raw: bytes = file.content.get_bytes(path=file.hash_id) if file.content else b''
 
         if file.mime_type == FILE_MIME_TYPE_PDF:
             # Already a PDF — serve as-is
@@ -1138,7 +1138,7 @@ class MapContentView(FilesystemBaseView):
                                   f'{file.mime_type}')
 
         try:
-            zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+            zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes(path=file.hash_id)))
             json_graph = zip_file.read('graph.json')
         except (KeyError, zipfile.BadZipFile):
             raise ValidationError(
@@ -1192,7 +1192,7 @@ class FileExportView(FilesystemBaseView):
 
     def get_all_linked_maps(self, file: Files, map_hash_set: set, files: list, links: list):
         current_user = g.current_user
-        zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+        zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes(path=file.hash_id)))
         try:
             json_graph = json.loads(zip_file.read('graph.json'))
         except KeyError:
@@ -1332,7 +1332,8 @@ class FileVersionListView(FilesystemBaseView):
 
         query = db.session.query(FileVersion) \
             .options(raiseload('*'),
-                     joinedload(FileVersion.user)) \
+                     joinedload(FileVersion.user),
+                     joinedload(FileVersion.content)) \
             .filter(FileVersion.file_id == file.id) \
             .order_by(desc(FileVersion.creation_date))
 
@@ -1365,7 +1366,7 @@ class FileVersionContentView(FilesystemBaseView):
         file = self.get_nondeleted_recycled_file(Files.id == file_version.file_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=False)
 
-        return file_version.content.raw_file
+        return file_version.content.get_bytes(path=file_version.hash_id)
 
 
 class FileLockBaseView(FilesystemBaseView):

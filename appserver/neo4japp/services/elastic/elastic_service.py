@@ -217,7 +217,7 @@ class ElasticService(ElasticConnection, GraphConnection):
         :return: the bytes to send to Elastic
         """
         if file.content:
-            content = file.content.raw_file
+            content = file.content.get_bytes(path=file.hash_id)
             file_type_service = get_file_type_service()
             return file_type_service.get(file).to_indexable_content(BytesIO(content))
         else:

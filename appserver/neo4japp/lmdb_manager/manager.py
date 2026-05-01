@@ -6,8 +6,8 @@ import sqlalchemy
 
 from dataclasses import dataclass
 from datetime import datetime
-from azure.common import AzureMissingResourceHttpError
-from azure.storage.file import FileService, ContentSettings
+from libcloud.storage.providers import get_driver
+from libcloud.storage.types import Provider, ObjectDoesNotExistError
 from typing import List, Dict, Optional
 from neo4japp.exceptions import RecordNotFound
 from sqlalchemy import Column, String
@@ -19,48 +19,45 @@ from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 logging.basicConfig()
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-logging.getLogger('azure').setLevel(logging.WARNING)
 
 
 class BaseCloudStorageProvider:
     """ Used to provide methods for interacting with cloud
     storages. (e.g. Azure, GCP, AWS) """
 
-    def upload(self, storage_object: str, remote_object_path: str, source_path: str):
-        """Uploads from local destination to remote source.
+    def upload(self, container_name: str, object_name: str, source_path: str):
+        """Uploads from local destination to remote object store.
 
-        :param storage_object: represents what cloud providers call
-        the top level directory (e.g. all files will reside in a particular bucket).
-        :type storage_object: str
-        :param remote_object_path: represents the path to the remote object.
-        :type remote_object_path: str
+        :param container_name: top-level storage container (bucket/share).
+        :type container_name: str
+        :param object_name: path of the object within the container.
+        :type object_name: str
         :param source_path: path string where local files are located.
         :type source_path: str
         :raises NotImplementedError:
         """
         raise NotImplementedError()
 
-    def download(self, storage_object: str, remote_object_path: str, dest_path: str):
+    def download(self, container_name: str, object_name: str, dest_path: str):
         """Downloads a remote object to a local destination. Directories
-        will be created if they do not exists in the local path.
+        will be created if they do not exist in the local path.
 
-        :param storage_object: represents what cloud providers call
-        the top level directory (e.g. all files will reside in a particular bucket).
-        :type storage_object: str
-        :param remote_object_path: represents the path to the remote object.
-        :type remote_object_path: str
+        :param container_name: top-level storage container (bucket/share).
+        :type container_name: str
+        :param object_name: path of the object within the container.
+        :type object_name: str
         :param dest_path: path string to save the file on local.
         :type dest_path: str
         :raises NotImplementedError:
         """
         raise NotImplementedError()
 
-    def get_file_date(self, storage_object: str, remote_object_path: str) -> str:
-        """ Returns the date of a remote object. """
+    def get_file_date(self, container_name: str, object_name: str) -> str:
+        """ Returns the last-modified date of a remote object. """
         raise NotImplementedError()
 
-    def get_remote_hash(self, storage_object: str, remote_object_path: str) -> str:
-        """ Returns the file hash on the remote store """
+    def get_remote_hash(self, container_name: str, object_name: str) -> str:
+        """ Returns the file hash of the remote object. """
         raise NotImplementedError()
 
     def get_hash(self, local_path: str, hashlib_fn) -> str:
@@ -82,57 +79,33 @@ class BaseCloudStorageProvider:
         return hash_.hexdigest()
 
 
-class AzureStorageProvider(BaseCloudStorageProvider):
+class LibcloudStorageProvider(BaseCloudStorageProvider):
+    """ Cloud storage provider backed by the apache-libcloud Object Storage API.
+    Supports any libcloud-compatible backend (Azure Blobs, GCS, S3, etc.). """
 
-    def __init__(self):
-        account_name = os.environ.get('AZURE_ACCOUNT_STORAGE_NAME')
-        account_key = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')
-        self.client = FileService(account_name=account_name, account_key=account_key)
+    def __init__(self, driver):
+        self.driver = driver
         super().__init__()
 
-    def get_remote_hash(self, storage_name: str, remote_object_path: str) -> str:
+    def get_remote_hash(self, container_name: str, object_name: str) -> str:
         try:
-            remote_fi = self.client.get_file_properties(
-                storage_name,
-                os.path.dirname(remote_object_path),
-                os.path.basename(remote_object_path),
-            )
-        except AzureMissingResourceHttpError:
+            obj = self.driver.get_object(container_name, object_name)
+        except ObjectDoesNotExistError:
             raise RecordNotFound('Missing Resource', 'File not found.')
-        else:
-            return remote_fi.properties.content_settings.content_md5
+        return obj.hash
 
-    def create_remote_dir(self, storage_name: str, remote_object_dir: str) -> str:
-        """ Creates the directories in azure storage if they do not exist """
-        if self.client.exists(storage_name, remote_object_dir):
-            return remote_object_dir
-        else:
-            try:
-                self.client.create_directory(storage_name, remote_object_dir)
-            except AzureMissingResourceHttpError as err:
-                if err.error_code == 'ParentNotFound':
-                    return self.create_remote_dir(storage_name, os.path.dirname(remote_object_dir))
-                else:
-                    raise
-            finally:
-                self.create_remote_dir(storage_name, remote_object_dir)
-                return remote_object_dir
-
-    def upload(self, storage_name: str, remote_object_path: str, source_path: str):
+    def upload(self, container_name: str, object_name: str, source_path: str):
         local_src_hash = self.get_hash(source_path, hashlib.md5)
-        self.create_remote_dir(storage_name, os.path.dirname(remote_object_path))
-        self.client.create_file_from_path(
-            storage_name,
-            os.path.dirname(remote_object_path),
-            os.path.basename(remote_object_path),
+        container = self.driver.get_container(container_name)
+        self.driver.upload_object(
             source_path,
-            content_settings=ContentSettings(content_md5=local_src_hash),
-            progress_callback=lambda c, t: log.debug(
-                f'Uploading {os.path.dirname(source_path)} - {c/t * 100}'
-            )
+            container,
+            object_name,
+            extra={'content_md5': local_src_hash},
         )
+        log.debug(f'Uploaded "{source_path}" to "{container_name}/{object_name}"')
 
-    def download(self, storage_name: str, remote_object_path: str, dest_path: str):
+    def download(self, container_name: str, object_name: str, dest_path: str):
         existing_checksum = None
         # Calculate file checksum if it exists
         if os.path.exists(dest_path):
@@ -142,25 +115,26 @@ class AzureStorageProvider(BaseCloudStorageProvider):
             # Checks to see if there's an existing directory
             if not os.path.exists(base_dir) and base_dir != '':
                 os.makedirs(base_dir)
-        remote_fi_md5 = self.get_remote_hash(storage_name, remote_object_path)
-        if not remote_fi_md5 == existing_checksum:
-            self.client.get_file_to_path(
-                storage_name,
-                os.path.dirname(remote_object_path),
-                os.path.basename(remote_object_path),
-                dest_path,
-                progress_callback=lambda c, t: log.debug(
-                    f'Downloading {os.path.dirname(dest_path)} - {c/t * 100}')
-            )
-            log.debug(f'Saving file "{remote_object_path}" to "{dest_path}"')
+        remote_md5 = self.get_remote_hash(container_name, object_name)
+        if remote_md5 != existing_checksum:
+            obj = self.driver.get_object(container_name, object_name)
+            self.driver.download_object(obj, dest_path, overwrite_existing=True)
+            log.debug(f'Saving file "{object_name}" to "{dest_path}"')
 
-    def get_file_date(self, storage_name: str, remote_object_path: str):
-        remote_fi = self.client.get_file_properties(
-            storage_name,
-            os.path.dirname(remote_object_path),
-            os.path.basename(remote_object_path),
-        )
-        return remote_fi.properties.last_modified
+    def get_file_date(self, container_name: str, object_name: str):
+        obj = self.driver.get_object(container_name, object_name)
+        return obj.extra.get('last_modified')
+
+
+class AzureStorageProvider(LibcloudStorageProvider):
+    """ LibcloudStorageProvider pre-configured for Azure Blob Storage. """
+
+    def __init__(self):
+        account_name = os.environ.get('AZURE_ACCOUNT_STORAGE_NAME')
+        account_key = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')
+        cls = get_driver(Provider.AZURE_BLOBS)
+        driver = cls(key=account_name, secret=account_key)
+        super().__init__(driver)
 
 
 @dataclass
@@ -261,10 +235,8 @@ class LMDBManager:
             data_mdb_path = os.path.join(source_dir, lmdb_file.category, 'data.mdb')
             data_mdb_md5 = self.cloud_provider.get_hash(data_mdb_path, hashlib.md5)
             try:
-                self.cloud_provider.create_remote_dir(
-                    'lmdb', os.path.dirname(lmdb_file.data_mdb_path))
                 remote_data_mdb_md5 = self.cloud_provider.get_remote_hash(
-                    'lmdb', lmdb_file.data_mdb_path)
+                    self.storage_object, lmdb_file.data_mdb_path)
             except RecordNotFound:
                 log.debug(
                     f'No hash found. Uploading new file to {lmdb_file.data_mdb_path}')

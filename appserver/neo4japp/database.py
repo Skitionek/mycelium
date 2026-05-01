@@ -217,6 +217,37 @@ def get_excel_export_service():
     return ExcelExportService()
 
 
+@scope_flask_app_ctx('file_storage_service')
+def get_file_storage_service():
+    """Return a :class:`~neo4japp.services.file_storage.FileStorageService`
+    backed by the configured storage driver.
+
+    The driver is controlled by the ``FILE_STORAGE_PROVIDER`` app-config key.
+    Currently only ``"POSTGRESQL"`` is supported; all user-file byte reads and
+    writes go through this service via the
+    :class:`~neo4japp.services.storage_drivers.postgresql.PostgreSQLStorageDriver`.
+
+    The service is memoised to the current Flask app/request context so
+    the driver is not re-initialised on every call.
+    """
+    from neo4japp.services.file_storage import FileStorageService
+    from neo4japp.services.storage_drivers.postgresql import PostgreSQLStorageDriver
+
+    config = current_app.config
+    provider_name = str(config.get('FILE_STORAGE_PROVIDER', 'POSTGRESQL')).upper()
+    container_name = config.get('FILE_STORAGE_CONTAINER', 'files_content')
+
+    if provider_name != 'POSTGRESQL':
+        raise ValueError(
+            'Unsupported FILE_STORAGE_PROVIDER {!r}. Only "POSTGRESQL" is '
+            'currently supported.'.format(provider_name)
+        )
+
+    driver = PostgreSQLStorageDriver()
+
+    return FileStorageService(driver, container_name)
+
+
 def reset_dao():
     """ Cleans up DAO bound to flask request context
 

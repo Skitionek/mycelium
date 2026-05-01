@@ -953,18 +953,11 @@ class MapTypeProvider(BaseFileTypeProvider):
         folder = tempfile.TemporaryDirectory()
 
         try:
-            zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+            zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes(path=file.hash_id)))
             json_graph = json.loads(zip_file.read('graph.json'))
         except KeyError:
             current_app.logger.info(
                 f'Invalid map file: {file.hash_id} Cannot find map graph inside the zip!',
-                extra=EventLog(
-                    event_type=LogEventType.MAP_EXPORT_FAILURE.value).to_dict()
-            )
-            raise ValidationError('Cannot retrieve contents of the file - it might be corrupted')
-        except zipfile.BadZipFile:
-            current_app.logger.info(
-                f'Invalid map file: {file.hash_id} File is a bad zipfile.',
                 extra=EventLog(
                     event_type=LogEventType.MAP_EXPORT_FAILURE.value).to_dict()
             )
@@ -1394,7 +1387,7 @@ def get_content_offsets(file):
         calculated) in pixels.
     """
     x_values, y_values = [], []
-    zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+    zip_file = zipfile.ZipFile(io.BytesIO(file.content.get_bytes(path=file.hash_id)))
     try:
         json_graph = json.loads(zip_file.read('graph.json'))
     except KeyError:
