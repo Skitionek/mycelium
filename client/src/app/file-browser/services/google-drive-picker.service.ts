@@ -116,7 +116,7 @@ export class GoogleDrivePickerService {
     return this.gisLoadPromise;
   }
 
-  private requestAccessToken(): Promise<string> {
+  requestAccessToken(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: environment.googleDriveClientId,
