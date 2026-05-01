@@ -2,6 +2,8 @@
 #    uv export --no-dev --no-hashes -o requirements.txt
 alembic==1.14.1
     # via flask-migrate
+annotated-types==0.8.0
+    # via pydantic
 attrs==26.1.0
     # via
     #   appserver
@@ -54,7 +56,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
     # via
     #   click
     #   tqdm
-cryptography==50.0.0
+cryptography==46.0.6
     # via
     #   azure-storage-blob
     #   azure-storage-common
@@ -127,7 +129,7 @@ greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     # via sqlalchemy
 gunicorn==26.0.0
     # via appserver
-idna==3.15
+idna==3.11
     # via requests
 intervaltree==3.2.1
     # via
@@ -147,9 +149,9 @@ jsonlines==4.0.0
     # via bioc
 lmdb==2.2.1
     # via appserver
-lxml==6.1.0
+lxml==6.0.2
     # via bioc
-mako==1.3.12
+mako==1.3.10
     # via alembic
 markupsafe==3.0.3
     # via
@@ -203,12 +205,16 @@ protobuf==6.33.6
     #   proto-plus
 psycopg2-binary==2.9.12
     # via appserver
-pyasn1==0.6.4
+pyasn1==0.6.3
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
 pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
+pydantic==2.11.4
+    # via appserver
+pydantic-core==2.33.2
+    # via pydantic
 pyjwt==2.13.0
     # via appserver
 pynacl==1.6.2
@@ -278,15 +284,20 @@ typing-extensions==4.15.0
     #   cryptography
     #   marshmallow
     #   marshmallow-dataclass
+    #   pydantic
+    #   pydantic-core
     #   pyjwt
     #   sqlalchemy
     #   typeguard
     #   typing-inspect
+    #   typing-inspection
 typing-inspect==0.9.0
     # via marshmallow-dataclass
+typing-inspection==0.4.4
+    # via pydantic
 tzdata==2025.3
     # via pandas
-urllib3==2.7.0
+urllib3==2.6.3
     # via
     #   elastic-apm
     #   requests
