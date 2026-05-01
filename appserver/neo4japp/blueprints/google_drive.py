@@ -15,8 +15,7 @@ POST /google-drive/sync/<hash_id>
     descendants if it is a directory) using a fresh access token.
 """
 
-import os
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 import requests as http_requests
