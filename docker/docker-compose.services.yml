@@ -18,7 +18,7 @@ services:
       test: ["CMD", "pg_isready", "-U", "postgres", "-q"]
       start_period: 10s
 
-  ## Neo4j graph database
+  ## Neo4j graph database (used for graph-visualiser and full-text-search)
   neo4j:
     image: neo4j:4.4-community
     restart: unless-stopped
@@ -72,28 +72,57 @@ services:
       - NEO4J_AUTH=neo4j/password
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - REDIS_HOST=redis
+      - MOZG_URL=http://mozg:4000/graphql
     depends_on:
       - postgres
       - neo4j
       - elasticsearch
+      - mozg
 
   statistical-enrichment:
     environment:
       - NEO4J_HOST=neo4j
       - NEO4J_AUTH=neo4j/password
       - REDIS_HOST=redis
+      - MOZG_URL=http://mozg:4000/graphql
     depends_on:
       - neo4j
       - redis
+      - mozg
 
   cache-invalidator:
     environment:
       - NEO4J_HOST=neo4j
       - NEO4J_AUTH=neo4j/password
       - REDIS_HOST=redis
+      - MOZG_URL=http://mozg:4000/graphql
     depends_on:
       - neo4j
       - redis
+      - mozg
+
+  ## Mozg – cross-database GraphQL knowledge-graph query layer
+  ## Replaces the direct Neo4j knowledge-graph (graph-db) for enrichment queries.
+  ## See mozg/README.md for details.
+  mozg:
+    build:
+      context: ../mozg
+    restart: unless-stopped
+    container_name: mozg
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://localhost:4000/graphql?query=%7B__typename%7D",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres:

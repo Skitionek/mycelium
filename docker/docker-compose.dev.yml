@@ -54,6 +54,12 @@ services:
         target: /app
     user: root
 
+  mozg:
+    build:
+      context: ../mozg
+    environment:
+      - NODE_ENV=development
+
   elasticsearch:
     build:
       context: .
