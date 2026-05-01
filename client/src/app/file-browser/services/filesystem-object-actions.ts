@@ -142,7 +142,7 @@ export class FilesystemObjectActions {
       `Syncing '${target.effectiveName}' with Google Drive…`,
       'Syncing…',
     );
-    return this.googleDrivePickerService['requestAccessToken']().then(accessToken => {
+    return this.googleDrivePickerService.requestAccessToken().then(accessToken => {
       return firstValueFrom(
         this.filesystemService.syncGoogleDriveItem(target.hashId, {googleDriveAccessToken: accessToken}).pipe(
           map(result => {
