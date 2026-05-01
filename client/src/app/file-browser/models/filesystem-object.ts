@@ -149,6 +149,15 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
   // tslint:disable-next-line:variable-name
   annotations_date_tooltip?: string;
   annotationsTooltipContent: string;
+  /** Drive item ID when this object was indexed from Google Drive. */
+  googleDriveId?: string;
+  /** RFC-3339 modification time at the last sync, when indexed from Google Drive. */
+  googleDriveModifiedTime?: string;
+
+  /** Returns true when this item was indexed from Google Drive. */
+  get isGoogleDriveIndexed(): boolean {
+    return !!this.googleDriveId;
+  }
 
   get isDirectory() {
     return this.mimeType === MimeTypes.Directory;
@@ -633,7 +642,7 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       'annotationsDate', 'uploadUrl', 'highlight', 'fallbackOrganism',
       'creationDate', 'modifiedDate', 'recyclingDate', 'privileges', 'recycled',
       'effectivelyRecycled', 'fallbackOrganism', 'annotationConfigs', 'filePath',
-      'trueFilename']) {
+      'trueFilename', 'googleDriveId', 'googleDriveModifiedTime']) {
       if (key in data) {
         this[key] = data[key];
       }

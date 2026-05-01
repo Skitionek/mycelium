@@ -192,6 +192,10 @@ class Files(RDBMSBase, FullTimestampMixin, RecyclableMixin, HashIdMixin):  # typ
     deletion_date = db.Column(TIMESTAMP(timezone=True), nullable=True)
     recycling_date = db.Column(TIMESTAMP(timezone=True), nullable=True)
 
+    # Google Drive indexing fields
+    google_drive_id = db.Column(db.String(200), nullable=True, index=True)
+    google_drive_modified_time = db.Column(TIMESTAMP(timezone=True), nullable=True)
+
     """
     Annotations related columns
     """

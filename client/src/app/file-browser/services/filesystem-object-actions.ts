@@ -34,6 +34,7 @@ import { AnnotationsService } from './annotations.service';
 import { ObjectCreationService } from './object-creation.service';
 import { AnnotationGenerationResultData } from '../schema';
 import { ObjectReannotateResultsDialogComponent } from '../components/dialog/object-reannotate-results-dialog.component';
+import { GoogleDrivePickerService } from './google-drive-picker.service';
 
 @Injectable()
 export class FilesystemObjectActions {
@@ -49,7 +50,8 @@ export class FilesystemObjectActions {
               protected readonly errorHandler: ErrorHandler,
               protected readonly filesystemService: FilesystemService,
               protected readonly objectCreationService: ObjectCreationService,
-              protected readonly objectTypeService: ObjectTypeService) {
+              protected readonly objectTypeService: ObjectTypeService,
+              protected readonly googleDrivePickerService: GoogleDrivePickerService) {
   }
 
   protected createProgressDialog(message: string, title = 'Working...') {
@@ -111,6 +113,36 @@ export class FilesystemObjectActions {
       title: 'Upload File',
       promptUpload: true,
     });
+  }
+
+  /**
+   * Re-sync the Google Drive index for a Drive-indexed item using a fresh
+   * OAuth token obtained via the Picker service.
+   * @param target a Drive-indexed file or directory
+   */
+  syncGoogleDriveIndex(target: FilesystemObject): Promise<boolean> {
+    if (!target.isGoogleDriveIndexed) {
+      return Promise.resolve(false);
+    }
+    const progressDialogRef = this.createProgressDialog(
+      `Syncing '${target.effectiveName}' with Google Drive…`,
+      'Syncing…',
+    );
+    return this.googleDrivePickerService.requestAccessToken().then(accessToken => {
+      return firstValueFrom(
+        this.filesystemService.syncGoogleDriveItem(target.hashId, {googleDriveAccessToken: accessToken}).pipe(
+          map(result => {
+            this.snackBar.open(
+              `Google Drive sync complete — ${result.updatedCount} item(s) updated.`,
+              'Close',
+              {duration: 5000},
+            );
+            return true;
+          }),
+          this.errorHandler.create({label: 'Sync Google Drive index'}),
+        ),
+      );
+    }).catch(() => false).finally(() => progressDialogRef.close());
   }
 
   /**

@@ -9,6 +9,7 @@ import { ObjectEditDialogComponent, ObjectEditDialogValue } from 'app/file-brows
 import { EnrichmentDocument } from 'app/enrichment/models/enrichment-document';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
 import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
+import { GoogleDrivePickerService } from 'app/file-browser/services/google-drive-picker.service';
 
 @Component({
   selector: 'app-enrichment-table-edit-dialog',
@@ -39,8 +40,9 @@ export class EnrichmentTableEditDialogComponent extends ObjectEditDialogComponen
               protected readonly search: SharedSearchService,
               protected readonly errorHandler: ErrorHandler,
               protected readonly progressDialog: ProgressDialog,
-              protected readonly modalService: NgbModal) {
-    super(modal, messageDialog, modalService);
+              protected readonly modalService: NgbModal,
+              googleDrivePickerService: GoogleDrivePickerService) {
+    super(modal, messageDialog, modalService, googleDrivePickerService);
     this.form.addControl('entitiesList', new FormControl('', Validators.required));
     this.form.addControl('domainsList', new FormArray([]));
     this.form.get('organism').setValidators([Validators.required]);
