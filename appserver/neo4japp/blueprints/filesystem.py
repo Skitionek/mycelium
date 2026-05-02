@@ -29,7 +29,6 @@ from neo4japp.exceptions import AccessRequestRequiredError, RecordNotFound, NotA
 from neo4japp.models import (
     Projects,
     Files,
-    FileContent,
     AppUser,
     FileVersion,
     FileBackup
@@ -64,6 +63,7 @@ from neo4japp.schemas.filesystem import (
 from neo4japp.services.file_types.exports import ExportFormatError
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
 from neo4japp.services.libreoffice import convert_to_pdf
+from neo4japp.storage.adapters.postgres import PostgresAdapter
 from neo4japp.utils.collections import window
 from neo4japp.utils.http import make_cacheable_file_response
 from neo4japp.utils.network import read_url
@@ -330,8 +330,9 @@ class FilesystemBaseView(MethodView):
                                       f"become a child of another file.", "parentHashId")
 
         if 'content_value' in params and len(target_files) > 1:
-            # We don't allow multiple files to be changed due to a potential deadlock
-            # in FileContent.get_or_create(), and also because it's a weird use case
+            # We don't allow multiple files to be changed in a single call because
+            # the storage adapter acquires a per-file lock and batch updates are
+            # not a supported use case.
             raise NotImplementedError(
                 "Cannot update the content of multiple files with this method")
 
@@ -419,19 +420,13 @@ class FilesystemBaseView(MethodView):
                                               f"'{file.mime_type}' (which '{file.hash_id}' is of).",
                                               "contentValue")
 
-                    new_content_id = FileContent.get_or_create(buffer)
-                    buffer.seek(0)  # Must rewind
+                    storage = PostgresAdapter()
+                    content_changed = storage.open_write(
+                        file.hash_id, buffer, author=user.hash_id
+                    )
+                    buffer.seek(0)  # Rewind after write
 
-                    # Only make a file version if the content actually changed
-                    if file.content_id != new_content_id:
-                        # Create file version
-                        version = FileVersion()
-                        version.file = file
-                        version.content_id = file.content_id
-                        version.user = user
-                        db.session.add(version)
-
-                        file.content_id = new_content_id
+                    if content_changed:
                         provider.handle_content_update(file)
                         changed_fields.add('content_value')
 
@@ -773,14 +768,9 @@ class FileListView(FilesystemBaseView):
             file.doi = provider.extract_doi(buffer)
             buffer.seek(0)  # Must rewind
 
-            # Save the file content if there's any
-            if size:
-                file.content_id = FileContent.get_or_create(buffer)
-                buffer.seek(0)  # Must rewind
-                try:
-                    buffer.close()
-                except Exception:
-                    pass
+            # Save the file content if there's any — defer to after the Files row
+            # is flushed so the adapter can resolve the hash_id.
+            content_buffer = buffer if size else None
 
         # ========================================
         # Annotation options
@@ -807,6 +797,7 @@ class FileListView(FilesystemBaseView):
         # Trial 3: Try adding (N+1) to the filename and try again (in case of a race condition)
         # Trial 4: Give up
         # Trial 3 only does something if the transaction mode is in READ COMMITTED or worse (!)
+        storage = PostgresAdapter()
         for trial in range(4):
             if 1 <= trial <= 2:  # Try adding (N+1)
                 try:
@@ -823,11 +814,20 @@ class FileListView(FilesystemBaseView):
             try:
                 db.session.begin_nested()
                 db.session.add(file)
+                db.session.flush()  # Makes the Files row visible within the transaction
+                if content_buffer is not None:
+                    storage.open_write(file.hash_id, content_buffer, author=current_user.hash_id)
                 db.session.commit()
                 break
             except IntegrityError:
                 # Warning: this could catch some other integrity error
                 db.session.rollback()
+
+        if content_buffer is not None:
+            try:
+                content_buffer.close()
+            except Exception:
+                pass
 
         db.session.commit()
 
@@ -1050,16 +1050,18 @@ class FileContentView(FilesystemBaseView):
         """Fetch a single file's content."""
         current_user = g.current_user
 
-        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id, lazy_load_content=True)
+        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=True)
 
-        # Lazy loaded
-        if file.content:
-            content = file.content.raw_file
-            etag = file.content.checksum_sha256.hex()
-        else:
+        storage = PostgresAdapter()
+        try:
+            content = storage.open_read(hash_id).read()
+            file_stat = storage.stat(hash_id)
+            etag = file_stat.checksum or hashlib.sha256(content).hexdigest()
+        except FileNotFoundError:
             content = b''
-            etag = hashlib.sha256(content).digest()
+            # Pre-computed SHA-256 of empty bytes to avoid unnecessary hashing.
+            etag = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
 
         return make_cacheable_file_response(
             request,
@@ -1078,17 +1080,18 @@ class FileContentPdfView(FilesystemBaseView):
     def get(self, hash_id: str):
         current_user = g.current_user
 
-        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id, lazy_load_content=True)
+        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=True)
 
-        raw: bytes = file.content.raw_file if file.content else b''
+        storage = PostgresAdapter()
+        try:
+            raw = storage.open_read(hash_id).read()
+        except FileNotFoundError:
+            raw = b''
 
         if file.mime_type == FILE_MIME_TYPE_PDF:
             # Already a PDF — serve as-is
-            if file.content:
-                etag = file.content.checksum_sha256.hex()
-            else:
-                etag = hashlib.sha256(raw).hexdigest()
+            etag = hashlib.sha256(raw).hexdigest()
             return make_cacheable_file_response(
                 request,
                 raw,
@@ -1130,7 +1133,7 @@ class MapContentView(FilesystemBaseView):
         """Fetch a content (graph.json) from a map."""
         current_user = g.current_user
 
-        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id, lazy_load_content=True)
+        file = self.get_nondeleted_recycled_file(Files.hash_id == hash_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=True)
 
         if file.mime_type != FILE_MIME_TYPE_MAP:
@@ -1138,7 +1141,8 @@ class MapContentView(FilesystemBaseView):
                                   f'{file.mime_type}')
 
         try:
-            zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+            storage = PostgresAdapter()
+            zip_file = zipfile.ZipFile(storage.open_read(hash_id))
             json_graph = zip_file.read('graph.json')
         except (KeyError, zipfile.BadZipFile):
             raise ValidationError(
@@ -1192,7 +1196,8 @@ class FileExportView(FilesystemBaseView):
 
     def get_all_linked_maps(self, file: Files, map_hash_set: set, files: list, links: list):
         current_user = g.current_user
-        zip_file = zipfile.ZipFile(io.BytesIO(file.content.raw_file))
+        storage = PostgresAdapter()
+        zip_file = zipfile.ZipFile(storage.open_read(file.hash_id))
         try:
             json_graph = json.loads(zip_file.read('graph.json'))
         except KeyError:
@@ -1357,15 +1362,15 @@ class FileVersionContentView(FilesystemBaseView):
 
         file_version = db.session.query(FileVersion) \
             .options(raiseload('*'),
-                     joinedload(FileVersion.user),
-                     joinedload(FileVersion.content)) \
+                     joinedload(FileVersion.user)) \
             .filter(FileVersion.hash_id == hash_id) \
             .one()
 
         file = self.get_nondeleted_recycled_file(Files.id == file_version.file_id)
         self.check_file_permissions([file], current_user, ['readable'], permit_recycled=False)
 
-        return file_version.content.raw_file
+        storage = PostgresAdapter()
+        return storage.get_revision_stream(file.hash_id, file_version.hash_id).read()
 
 
 class FileLockBaseView(FilesystemBaseView):
