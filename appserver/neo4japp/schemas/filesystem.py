@@ -62,7 +62,7 @@ ProjectPrivilegesSchema = marshmallow_dataclass.class_schema(ProjectPrivileges)
 class ProjectListRequestSchema(CamelCaseSchema):
     sort = SortField(columns={
         'name': Projects.name
-    }, missing=lambda: [Projects.name])
+    }, load_default=lambda: [Projects.name])
 
 
 class ProjectListSchema(ResultListSchema):
@@ -239,7 +239,7 @@ class BulkFileUpdateRequestSchema(CamelCaseSchema):
     upload_url = fields.String(validate=marshmallow.validate.Length(min=0, max=2048))
     fallback_organism = fields.Nested(FallbackOrganismSchema, allow_none=True)
     annotation_configs = fields.Nested(AnnotationConfigurations)
-    public = fields.Boolean(default=False)
+    public = fields.Boolean(dump_default=False)
     content_value = fields.Field(required=False)
     hashes_of_linked = fields.List(fields.String, required=False)
 

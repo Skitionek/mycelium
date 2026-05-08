@@ -137,7 +137,7 @@ class AnnotationUUIDListSchema(ResultListSchema):
 
 class GlobalAnnotationListItemSchema(CamelCaseSchema):
     global_id = fields.Integer()
-    synonym_id = fields.Integer(required=False, missing=lambda: None)
+    synonym_id = fields.Integer(required=False, load_default=None)
     file_uuid = fields.String()
     creator = fields.String()
     file_deleted = fields.Boolean()
@@ -173,11 +173,11 @@ class CustomAnnotationSchema(BaseAnnotationSchema):
 
 class CustomAnnotationCreateSchema(CamelCaseSchema):
     annotation = fields.Nested(CustomAnnotationSchema, required=True)
-    annotate_all = fields.Boolean(required=False, missing=lambda: False)
+    annotate_all = fields.Boolean(required=False, load_default=False)
 
 
 class CustomAnnotationDeleteSchema(CamelCaseSchema):
-    remove_all = fields.Boolean(required=False, missing=lambda: False)
+    remove_all = fields.Boolean(required=False, load_default=False)
 
 
 # this is used in the admin global annotations table

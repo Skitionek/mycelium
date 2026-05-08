@@ -58,7 +58,7 @@ class UserSearchSchema(CamelCaseSchema):
         marshmallow.validate.Length(min=1, max=100),
         marshmallow.validate.Regexp('[^\\s]+')
     ])
-    exclude_self = fields.Boolean(missing=lambda: False)
+    exclude_self = fields.Boolean(load_default=False)
 
 
 # Responses
