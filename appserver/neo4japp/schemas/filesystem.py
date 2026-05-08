@@ -75,7 +75,7 @@ class ProjectSearchRequestSchema(ProjectListRequestSchema):
 
 class ProjectCreateSchema(CamelCaseSchema):
     name = fields.String(required=True,
-                         validators=[
+                         validate=[
                              marshmallow.validate.Regexp('^[A-Za-z0-9-]+$'),
                              marshmallow.validate.Length(min=1, max=50),
                          ])

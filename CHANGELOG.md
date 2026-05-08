@@ -13,7 +13,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [Unreleased]
 
 ### Changed
-- **marshmallow 3 → 4**: Updated appserver schemas to use marshmallow 4.x API — replaced `missing=` with `load_default=`, `default=` with `dump_default=`, updated `self.missing` to `self.load_default` in custom `StringIntegerField`, and replaced the now-abstract `fields.Number` with `fields.Float` in `RankedItemSchema`. ([#233])
+- **marshmallow 3 → 4**: Updated appserver schemas to use marshmallow 4.x API — replaced `missing=` with `load_default=`, `default=` with `dump_default=`, `validators=` with `validate=`, updated `self.missing` to `self.load_default` in custom `StringIntegerField`, and replaced the now-abstract `fields.Number` with `fields.Float` in `RankedItemSchema`. ([#233])
 
 ### Added
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
