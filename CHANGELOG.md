@@ -12,6 +12,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ## [Unreleased]
 
+### Changed
+- **marshmallow 3 → 4**: Updated appserver schemas to use marshmallow 4.x API — replaced `missing=` with `load_default=`, `default=` with `dump_default=`, `validators=` with `validate=`, updated `self.missing` to `self.load_default` in custom `StringIntegerField`, and replaced the now-abstract `fields.Number` with `fields.Float` in `RankedItemSchema`. ([#233])
+
 ### Added
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).

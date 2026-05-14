@@ -170,7 +170,7 @@ markupsafe==3.0.3
     #   mako
     #   sentry-sdk
     #   werkzeug
-marshmallow==3.26.2
+marshmallow==4.3.0
     # via
     #   flask-apispec
     #   flask-marshmallow

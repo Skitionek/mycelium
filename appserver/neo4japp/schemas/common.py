@@ -8,10 +8,10 @@ from neo4japp.utils.request import Pagination
 
 class PaginatedRequestSchema(CamelCaseSchema):
     page = StringIntegerField(required=False,
-                              missing=lambda: 1,
+                              load_default=1,
                               validate=marshmallow.validate.Range(min=1, max=10000))
     limit = StringIntegerField(required=False,
-                               missing=lambda: 50,
+                               load_default=50,
                                validate=marshmallow.validate.Range(min=1, max=1000))
 
     @post_load
@@ -21,7 +21,7 @@ class PaginatedRequestSchema(CamelCaseSchema):
 
 class RankedItemSchema(CamelCaseSchema):
     """When you need to assign a rank to each item."""
-    rank = fields.Number()
+    rank = fields.Float()
     # item = YourField()
 
 

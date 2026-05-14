@@ -2,6 +2,7 @@ import os.path
 import re
 from typing import Optional, Dict
 
+import marshmallow
 from marshmallow import fields, ValidationError
 
 from neo4japp.utils.request import parse_sort
@@ -38,8 +39,8 @@ class StringIntegerField(fields.Integer):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if value == '':
-            if self.missing is not None:
-                value = self.missing() if callable(self.missing) else self.missing
+            if self.load_default is not marshmallow.missing:
+                value = self.load_default() if callable(self.load_default) else self.load_default
             elif not self.allow_none:
                 self.fail('null')
             else:

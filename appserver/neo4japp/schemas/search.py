@@ -18,14 +18,14 @@ class ContentSearchSchema(CamelCaseSchema):
     q = SearchQuery(
         required=True,
     )
-    types = ma.String(default='', required=False)
-    folders = ma.String(default='', required=False)
+    types = ma.String(dump_default='', required=False)
+    folders = ma.String(dump_default='', required=False)
 
 
 class SynonymSearchSchema(CamelCaseSchema):
     term = fields.String()
-    organisms = fields.String(default='', required=False)
-    types = fields.String(default='', required=False)
+    organisms = fields.String(dump_default='', required=False)
+    types = fields.String(dump_default='', required=False)
 
 # Response
 # ----------------------------------------
