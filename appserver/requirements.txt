@@ -212,7 +212,7 @@ pillow==12.2.0
     # via mycelium-appserver
 proto-plus==1.27.1
     # via google-api-core
-protobuf==6.33.6
+protobuf==7.34.1
     # via
     #   google-api-core
     #   googleapis-common-protos
