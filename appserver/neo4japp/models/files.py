@@ -138,13 +138,12 @@ class FileContent(RDBMSBase):
 
         This method does not commit the transaction.
 
-        File bytes are written via the
-        :class:`~neo4japp.services.file_storage.FileStorageService` which
-        defaults to the
-        :class:`~neo4japp.services.storage_drivers.postgresql.PostgreSQLStorageDriver`
-        (PostgreSQL-backed).  A different driver (e.g. Azure Blobs, S3) can be
-        configured via the ``FILE_STORAGE_PROVIDER`` app-config key without
-        changing this code.
+        File bytes are always persisted to ``files_content.raw_file`` in
+        PostgreSQL to satisfy the ``NOT NULL`` schema constraint.  When a
+        :class:`~neo4japp.services.file_storage.FileStorageService` is
+        available (i.e. inside a Flask app context), the bytes are also
+        forwarded to the configured storage backend so they can be retrieved
+        via :meth:`get_bytes` when an external provider is used.
 
         :param file: a file-like object
         :param checksum_sha256: the checksum of the file (computed if not provided)
@@ -191,26 +190,28 @@ class FileContent(RDBMSBase):
             if content is None:
                 content = file.read()
 
-            # Write via the FileStorageService so that the storage backend can
-            # be swapped (e.g. to Azure Blobs or S3) without changing this code.
-            # The default PostgreSQLStorageDriver creates the FileContent row
-            # (including raw_file) directly in the database.
+            # Always persist to files_content.raw_file so the NOT NULL
+            # constraint is satisfied regardless of the configured storage
+            # provider.  This also guarantees the subsequent ID query
+            # succeeds for any backend.
+            row = FileContent()
+            row.checksum_sha256 = checksum_sha256
+            row.raw_file = content
+            db.session.add(row)
+            db.session.flush()
+
+            # Also forward the bytes to the configured external storage
+            # service (e.g. Azure Blobs, S3).  The default
+            # PostgreSQLStorageDriver is a no-op here because it finds the
+            # row just created above and skips the insert.
             from flask import has_app_context
             if has_app_context():
                 from neo4japp.database import get_file_storage_service
-                # Use the caller-supplied path (Files.hash_id) when available so
-                # the storage layer uses path-based object names.  Fall back to
-                # the hex checksum for code paths that don't have the owning file.
+                # Use the caller-supplied path (Files.hash_id) when
+                # available so the storage layer uses path-based object
+                # names.  Fall back to the hex checksum otherwise.
                 name = file_path if file_path is not None else checksum_sha256.hex()
                 get_file_storage_service().store(name, content)
-            else:
-                # No Flask app context (e.g. unit tests that construct
-                # FileContent directly) — fall back to a direct ORM write.
-                row = FileContent()
-                row.checksum_sha256 = checksum_sha256
-                row.raw_file = content
-                db.session.add(row)
-                db.session.flush()
 
             return db.session.query(FileContent.id) \
                 .filter(FileContent.checksum_sha256 == checksum_sha256) \
