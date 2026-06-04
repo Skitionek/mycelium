@@ -1,0 +1,87 @@
+<div class="module" *ngIf="({object: object$ | async}) as ctx">
+  <app-module-progress *ngIf="loading">
+    Loading SDRF file...
+  </app-module-progress>
+
+  <ng-container *ngIf="ctx.object">
+    <app-module-header
+      [object]="ctx.object"
+      (dragStarted)="dragStarted($event, ctx.object)">
+      <app-module-menu
+        [object]="ctx.object"
+        [forEditing]="true"
+        [showOpen]="false"
+        [showDelete]="false"
+        (objectUpdate)="objectUpdate()">
+      </app-module-menu>
+
+      <div *ngIf="dirty" class="ml-1">
+        <span class="badge badge-danger badge-pill"
+              ngbTooltip="Has unsaved changes" container="body">
+          <i class="fa fa-pencil-alt"></i>
+        </span>
+      </div>
+
+      <div class="btn-group ml-2">
+        <button class="btn btn-secondary"
+                (click)="save(ctx.object)"
+                [disabled]="!dirty || !ctx.object.privileges.writable"
+                ngbTooltip="Save changes" placement="bottom" container="body">
+          <i class="fas fa-fw fa-save"></i> Save
+        </button>
+        <button class="btn btn-secondary"
+                (click)="addRow()"
+                [disabled]="!ctx.object.privileges.writable"
+                ngbTooltip="Add row" placement="bottom" container="body">
+          <i class="fas fa-fw fa-plus"></i> Add Row
+        </button>
+        <button class="btn btn-secondary"
+                (click)="downloadTsv(ctx.object)"
+                [disabled]="!document"
+                ngbTooltip="Download as TSV" placement="bottom" container="body">
+          <i class="fas fa-fw fa-download"></i> Download
+        </button>
+      </div>
+    </app-module-header>
+
+    <div *ngIf="document" class="sdrf-table-wrapper flex-fill overflow-auto">
+      <table class="sdrf-table">
+        <thead>
+          <tr>
+            <th class="sdrf-row-num"></th>
+            <th *ngFor="let col of document.columns; let ci = index"
+                [class]="'sdrf-col sdrf-col-' + col.type"
+                [title]="col.header">
+              {{ col.header }}
+            </th>
+            <th class="sdrf-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of document.rows; let ri = index">
+            <td class="sdrf-row-num text-muted">{{ ri + 1 }}</td>
+            <td *ngFor="let cell of row; let ci = index"
+                class="sdrf-cell"
+                [contentEditable]="ctx.object.privileges.writable"
+                [textContent]="cell"
+                (blur)="onCellEdit(ri, ci, $event.target.textContent)"
+                spellcheck="false">
+            </td>
+            <td class="sdrf-col-actions">
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="removeRow(ri)"
+                      [disabled]="!ctx.object.privileges.writable"
+                      ngbTooltip="Delete row" placement="left" container="body">
+                <i class="fas fa-fw fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!document && !loading" class="module-body flex-fill d-flex align-items-center justify-content-center text-muted">
+      No content to display.
+    </div>
+  </ng-container>
+</div>

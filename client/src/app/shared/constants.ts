@@ -89,7 +89,8 @@ export enum MimeTypes {
   Pdf = 'application/pdf',
   BioC = 'vnd.mycelium.document/bioc',
   Pdb = 'chemical/x-pdb',
-  Cif = 'chemical/x-cif'
+  Cif = 'chemical/x-cif',
+  Sdrf = 'vnd.mycelium.document/sdrf'
 }
 
 export const PROTEIN_STRUCTURE_MIME_TYPES: ReadonlySet<string> = new Set([
@@ -161,6 +162,7 @@ export enum FAClass {
   PowerPoint = 'fak fa-powerpoint-solid',
   Word = 'fak fa-word-solid',
   Cytoscape = 'fak fa-cytoscape-solid',
+  Sdrf = 'fa fa-table',
 
 }
 

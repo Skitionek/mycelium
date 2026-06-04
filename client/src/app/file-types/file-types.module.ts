@@ -11,6 +11,7 @@ import { DefaultObjectTypeProvider } from './providers/default.type-provider';
 import { PdfTypeProvider } from './providers/pdf.type-provider';
 import { GraphTypeProvider } from './providers/graph.type-provider.service';
 import { MolstarTypeProvider } from './providers/molstar.type-provider';
+import { SdrfTypeProvider } from './providers/sdrf.type-provider';
 
 
 @NgModule({
@@ -58,6 +59,11 @@ import { MolstarTypeProvider } from './providers/molstar.type-provider';
     {
       provide: TYPE_PROVIDER,
       useClass: PdfTypeProvider,
+      multi: true,
+    },
+    {
+      provide: TYPE_PROVIDER,
+      useClass: SdrfTypeProvider,
       multi: true,
     }
   ]
