@@ -918,7 +918,7 @@ class MapTypeProvider(BaseFileTypeProvider):
             raise ValueError
 
     def to_indexable_content(self, buffer: BufferedIOBase):
-        # Do not catch exceptions here - there are handled in search_index_service.py
+        # Do not catch exceptions here - they are handled in search_index_service.py
         zip_file = zipfile.ZipFile(io.BytesIO(buffer.read()))
         content_json = json.loads(zip_file.read('graph.json'))
 
