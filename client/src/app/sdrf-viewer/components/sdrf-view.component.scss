@@ -1,0 +1,107 @@
+// SDRF viewer — component styles
+// Angular build budget: warning 6 KB, error 16 KB per component stylesheet.
+
+.module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sdrf-table-wrapper {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.sdrf-table {
+  border-collapse: collapse;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  min-width: 100%;
+
+  th, td {
+    border: 1px solid #dee2e6;
+    padding: 4px 8px;
+    vertical-align: top;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.8rem;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// Color-coded column header groups
+.sdrf-col-source-name,
+.sdrf-col-assay-name {
+  background: #e9ecef !important;
+}
+
+.sdrf-col-technology-type {
+  background: #e8d5f5 !important;
+}
+
+.sdrf-col-characteristics {
+  background: #d0e8ff !important;
+}
+
+.sdrf-col-comment {
+  background: #ffecd0 !important;
+}
+
+.sdrf-col-factor-value {
+  background: #d0f5d0 !important;
+}
+
+.sdrf-col-other {
+  background: #f8f9fa !important;
+}
+
+// Row number column
+.sdrf-row-num {
+  min-width: 36px;
+  text-align: right;
+  color: #6c757d;
+  background: #f8f9fa;
+  user-select: none;
+  font-size: 0.75rem;
+}
+
+// Editable cells
+.sdrf-cell {
+  min-width: 120px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &[contenteditable='true'] {
+    cursor: text;
+
+    &:focus {
+      outline: 2px solid #0d6efd;
+      outline-offset: -2px;
+      background: #fff;
+      white-space: pre-wrap;
+      overflow: visible;
+      max-width: unset;
+    }
+  }
+}
+
+// Actions column
+.sdrf-col-actions {
+  width: 48px;
+  text-align: center;
+  background: #f8f9fa;
+  border-left: 2px solid #dee2e6;
+  position: sticky;
+  right: 0;
+  z-index: 1;
+}

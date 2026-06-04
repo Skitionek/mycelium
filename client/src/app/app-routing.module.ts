@@ -34,6 +34,7 @@ import { SankeyViewComponent } from 'app/sankey-viewer/components/sankey-view.co
 import { TraceViewComponent } from 'app/trace-viewer/components/trace-view.component';
 import { SankeyManyToManyViewComponent } from 'app/sankey-many-to-many-viewer/components/sankey-view.component';
 import { MolstarViewComponent } from 'app/molstar-viewer/components/molstar-view.component';
+import { SdrfViewComponent } from 'app/sdrf-viewer/components/sdrf-view.component';
 
 /**
  * Routes that can appear as tab content within the workspace. These are also
@@ -236,6 +237,15 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
     data: {
       title: 'Protein Structure Viewer',
       fontAwesomeIcon: 'dna',
+    },
+  },
+  {
+    path: 'projects/:project_name/sdrf/:file_id',
+    component: SdrfViewComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'SDRF Viewer',
+      fontAwesomeIcon: 'table',
     },
   },
   {

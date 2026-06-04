@@ -1,0 +1,29 @@
+<div class="p-2 overflow-auto" *ngIf="document">
+  <p class="mb-1 text-muted small">
+    {{ document.columns.length }} columns &bull; {{ document.rows.length }} rows
+  </p>
+  <table class="table table-sm table-bordered sdrf-preview-table">
+    <thead class="thead-light">
+      <tr>
+        <th *ngFor="let col of document.columns"
+            class="text-truncate"
+            [title]="col.header"
+            style="max-width:140px; font-size:0.75rem;">
+          {{ col.header }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of document.rows.slice(0, previewRowCount)">
+        <td *ngFor="let cell of row"
+            class="text-truncate"
+            style="max-width:140px; font-size:0.75rem;">
+          {{ cell }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p *ngIf="document.rows.length > previewRowCount" class="text-muted small mt-1">
+    … and {{ document.rows.length - previewRowCount }} more row(s)
+  </p>
+</div>
