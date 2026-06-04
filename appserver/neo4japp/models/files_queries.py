@@ -204,9 +204,15 @@ def build_file_hierarchy_query(condition, projects_table, files_table,
 
     # By default, we query for all columns within the File table.
     if file_attr_excl:
-        col_defer = [defer(attr) for attr in file_attr_excl]
+        file_col_defer = []
+        for attr in file_attr_excl:
+            if isinstance(attr, str):
+                file_attr = getattr(files_table, attr)
+            else:
+                file_attr = attr
+            file_col_defer.append(defer(file_attr))
     else:
-        col_defer = []
+        file_col_defer = []
 
     # Main query
     query = db.session.query(files_table,  # Warning: Do not change this order, but you can add
@@ -218,8 +224,8 @@ def build_file_hierarchy_query(condition, projects_table, files_table,
         .join(projects_table, projects_table.id == q_hierarchy_project.c.project_id) \
         .outerjoin(t_parent_files, t_parent_files.id == files_table.parent_id) \
         .options(
-            contains_eager(files_table.parent, alias=t_parent_files).options(*col_defer),
-            *col_defer,
+            contains_eager(files_table.parent, alias=t_parent_files),
+            *file_col_defer,
         ) \
         .order_by(q_hierarchy.c.level)
 
