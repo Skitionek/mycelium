@@ -12,7 +12,7 @@ from neo4japp.models import (
     projects_collaborator_role,
 )
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
-from neo4japp.services.elastic import ElasticService
+from neo4japp.services.elastic import SearchIndexService
 from datetime import datetime
 
 
@@ -30,9 +30,9 @@ def generate_headers(jwt_token):
 
 @pytest.fixture(scope='function')
 def mock_elastic(monkeypatch):
-    monkeypatch.setattr(ElasticService, 'index_files', lambda *a, **kw: None)
-    monkeypatch.setattr(ElasticService, 'delete_files', lambda *a, **kw: None)
-    monkeypatch.setattr(ElasticService, 'index_maps', lambda *a, **kw: None)
+    monkeypatch.setattr(SearchIndexService, 'index_files', lambda *a, **kw: None)
+    monkeypatch.setattr(SearchIndexService, 'delete_files', lambda *a, **kw: None)
+    monkeypatch.setattr(SearchIndexService, 'index_maps', lambda *a, **kw: None)
 
 
 @pytest.fixture(scope='function')

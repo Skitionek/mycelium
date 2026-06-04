@@ -14,7 +14,7 @@ from sqlalchemy.types import TIMESTAMP
 from typing import BinaryIO, Optional, List, Dict
 
 from neo4japp.constants import LogEventType
-from neo4japp.database import db, get_elastic_service
+from neo4japp.database import db, get_search_index_service
 from neo4japp.exceptions import ServerException
 from neo4japp.models.projects import Projects
 from neo4japp.models.common import (
@@ -385,16 +385,16 @@ class Files(RDBMSBase, FullTimestampMixin, RecyclableMixin, HashIdMixin):  # typ
 @event.listens_for(Files, 'after_insert')
 def file_insert(mapper, connection, target: Files):
     """
-    Handles creating a new elastic document for the newly inserted file. Note: if this fails, the
+    Handles creating a new search index document for the newly inserted file. Note: if this fails, the
     file insert will be rolled back.
     """
     try:
-        elastic_service = get_elastic_service()
+        search_index_service = get_search_index_service()
         current_app.logger.info(
             f'Attempting to index newly created file with hash_id: {target.hash_id}',
             extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
         )
-        elastic_service.index_files([target.hash_id])
+        search_index_service.index_files([target.hash_id])
     except Exception as e:
         current_app.logger.error(
             f'Elastic index failed for file with hash_id: {target.hash_id}',
@@ -411,7 +411,7 @@ def file_insert(mapper, connection, target: Files):
 @event.listens_for(Files, 'after_update')
 def file_update(mapper, connection, target: Files):
     """
-    Handles updating this document in elastic. Note: if this fails, the file update will be rolled
+    Handles updating this document in the search index. Note: if this fails, the file update will be rolled
     back.
     """
     # Import what we need, when we need it (Helps to avoid circular dependencies)
@@ -419,7 +419,7 @@ def file_update(mapper, connection, target: Files):
     from neo4japp.services.file_types.providers import DirectoryTypeProvider
 
     try:
-        elastic_service = get_elastic_service()
+        search_index_service = get_search_index_service()
         files_to_update = [target.hash_id]
         if target.mime_type == DirectoryTypeProvider.MIME_TYPE:
             family = get_nondeleted_recycled_children_query(
@@ -439,7 +439,7 @@ def file_update(mapper, connection, target: Files):
                 f'Attempting to delete files in elastic with hash_ids: {files_to_update}',
                 extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
             )
-            elastic_service.delete_files(files_to_update)
+            search_index_service.delete_files(files_to_update)
             # TODO: Should we handle the case where a document's deleted state goes from "deleted"
             # to "not deleted"? What would that mean for folders? Re-index all children as well?
         else:
@@ -453,7 +453,7 @@ def file_update(mapper, connection, target: Files):
             # TODO: Only need to update children if the folder name changes (is this true? any
             # other cases where we would do this? Maybe safer to just always update file path
             # any time the parent changes...)
-            elastic_service.index_files(files_to_update)
+            search_index_service.index_files(files_to_update)
     except Exception as e:
         current_app.logger.error(
             f'Elastic update failed for files with hash_ids: {files_to_update}',
@@ -470,7 +470,7 @@ def file_update(mapper, connection, target: Files):
 @event.listens_for(Files, 'after_delete')
 def file_delete(mapper, connection, target: Files):
     """
-    Handles deleting this document from elastic. Note: if this fails, the file deletion will be
+    Handles deleting this document from the search index. Note: if this fails, the file deletion will be
     rolled back.
     """
     # Import what we need, when we need it (Helps to avoid circular dependencies)
@@ -480,7 +480,7 @@ def file_delete(mapper, connection, target: Files):
     # NOTE: This event is rarely triggered, because we're currently flagging files for deletion
     # rather than removing them outright. See the `after_update` event for Files.
     try:
-        elastic_service = get_elastic_service()
+        search_index_service = get_search_index_service()
         files_to_delete = [target.hash_id]
         if target.mime_type == DirectoryTypeProvider.MIME_TYPE:
             family = get_nondeleted_recycled_children_query(
@@ -495,7 +495,7 @@ def file_delete(mapper, connection, target: Files):
             f'Attempting to delete files in elastic with hash_ids: {files_to_delete}',
             extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
         )
-        elastic_service.delete_files(files_to_delete)
+        search_index_service.delete_files(files_to_delete)
     except Exception as e:
         current_app.logger.error(
             f'Elastic search delete failed for file with hash_id: {target.hash_id}',

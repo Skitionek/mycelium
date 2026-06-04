@@ -457,7 +457,7 @@ SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 SENDGRID_API_CLIENT = SendGridAPIClient(SENDGRID_API_KEY)
 
 # Start shared search constants
-FILE_INDEX_ID = os.getenv('SOLR_FILE_COLLECTION', os.getenv('ELASTICSEARCH_FILE_INDEX', 'file'))
+FILE_INDEX_ID = os.getenv('SOLR_FILE_COLLECTION', 'file')
 FRAGMENT_SIZE = 1024
 
 APPSERVER_URL = os.getenv('APPSERVER_URL', 'http://localhost:5000')

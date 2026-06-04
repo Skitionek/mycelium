@@ -30,7 +30,7 @@ from neo4japp.constants import (
     LogEventType
 )
 from neo4japp.services.annotations.constants import LMDB_DATA_DIR
-from neo4japp.database import db, get_account_service, get_elastic_service, get_file_type_service
+from neo4japp.database import db, get_account_service, get_search_index_service, get_file_type_service
 from neo4japp.factory import create_app
 from neo4japp.lmdb_manager import LMDBManager, AzureStorageProvider
 from neo4japp.models import AppUser
@@ -196,22 +196,24 @@ def set_role(email, role):
     db.session.commit()
 
 
-@app.cli.command('reset-elastic')
-def reset_elastic():
-    """Seeds Elastic with all pipelines and indices. Typically should be used when a new Elastic DB
-    is first created, but will also update/re-index the entire database if run later."""
-    elastic_service = get_elastic_service()
-    elastic_service.recreate_indices_and_pipelines()
+@app.cli.command('reset-search-index')
+def reset_search_index():
+    """Seeds the search index with all pipelines and indices.
+    Typically used when a new search backend is first created, but it can also
+    update/re-index the entire database when run later.
+    """
+    search_index_service = get_search_index_service()
+    search_index_service.recreate_indices_and_pipelines()
 
 
-@app.cli.command('recreate-elastic-index')
+@app.cli.command('recreate-search-index')
 @click.argument('index_id', nargs=1)
 @click.argument('index_mapping_file', nargs=1)
 def update_or_create_index(index_id, index_mapping_file):
-    """Given an index id and mapping file, creates a new elastic index. If the index already exists,
+    """Given an index id and mapping file, creates a new search index. If the index already exists,
     we recreate it and re-index all documents."""
-    elastic_service = get_elastic_service()
-    elastic_service.update_or_create_index(index_id, index_mapping_file)
+    search_index_service = get_search_index_service()
+    search_index_service.update_or_create_index(index_id, index_mapping_file)
 
 
 @app.cli.command('load-lmdb')

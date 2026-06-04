@@ -108,7 +108,7 @@ class BaseFileTypeProvider:
 
     def to_indexable_content(self, buffer: BufferedIOBase) -> BufferedIOBase:
         """
-        Return a new buffer that is suited for indexing by Elasticsearch. For
+        Return a new buffer that is suited for indexing by Solr. For
         some file formats, this operation may return a whole different type of file
         with just the keywords that need to be indexed from the original. By default,
         this method returns an empty byte buffer.
@@ -123,9 +123,9 @@ class BaseFileTypeProvider:
 
     def should_highlight_content_text_matches(self) -> bool:
         """
-        Return whether the 'highlight terms' returned from Elasticsearch should be shown
-        to the user. For some formats, we may give Elasticsearch a file that can be indexed
-        by Elasticsearch (in :func:`to_indexable_content()`) but may not be useful for
+        Return whether the 'highlight terms' returned from Solr should be shown
+        to the user. For some formats, we may give Solr a file that can be indexed
+        by Solr (in :func:`to_indexable_content()`) but may not be useful for
         display.
 
         :return: whether highlights should be shown
@@ -178,7 +178,7 @@ class GenericFileTypeProvider(BaseFileTypeProvider):
 
     def to_indexable_content(self, buffer: BufferedIOBase):
         if self.mime_type.startswith('text/'):
-            return buffer  # Have Elasticsearch index these files
+            return buffer  # Have Solr index these files
         else:
             return typing.cast(BufferedIOBase, BytesIO())
 
