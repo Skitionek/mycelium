@@ -25,7 +25,10 @@ class Config():
     NEO4J_PORT = os.environ.get('NEO4J_PORT', '7687')
     NEO4J_DATABASE = os.environ.get('NEO4J_DATABASE', 'neo4j')
 
-    ELASTICSEARCH_URL = os.environ.get('ELASTICSEARCH_URL', 'http://localhost:9200')
+    SOLR_URL = os.environ.get(
+        'SOLR_URL',
+        os.environ.get('ELASTICSEARCH_URL', 'http://localhost:8983/solr'),
+    )
 
     AZURE_ACCOUNT_STORAGE_NAME = os.environ.get('AZURE_ACCOUNT_STORAGE_NAME')
     AZURE_ACCOUNT_STORAGE_KEY = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')

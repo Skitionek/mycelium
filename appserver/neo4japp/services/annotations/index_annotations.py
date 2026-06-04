@@ -3,11 +3,9 @@ import json
 import lmdb
 import sys
 
-from collections import deque
 from getopt import getopt, GetoptError
 
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import parallel_bulk
+import requests
 
 from neo4japp.services.annotations.constants import (
     ANATOMY_LMDB,
@@ -27,7 +25,27 @@ from neo4japp.models import GlobalList
 from neo4japp.services.annotations.constants import ManualAnnotationType
 
 
-es = Elasticsearch(hosts=['http://elasticsearch'], timeout=5000)
+SOLR_URL = os.environ.get('SOLR_URL', 'http://solr:8983/solr').rstrip('/')
+
+
+def _solr_update_url(collection):
+    return f'{SOLR_URL}/{collection}/update'
+
+
+def _solr_replace_collection(collection, documents):
+    requests.post(
+        _solr_update_url(collection),
+        params={'commit': 'true'},
+        json={'delete': {'query': '*:*'}},
+        timeout=60,
+    ).raise_for_status()
+    if documents:
+        requests.post(
+            _solr_update_url(collection),
+            params={'commit': 'true'},
+            json=[{'id': str(doc['_id']), **doc['_source']} for doc in documents],
+            timeout=60,
+        ).raise_for_status()
 
 """
 Don't delete - useful for testing locally to confirm the
@@ -125,9 +143,7 @@ def seed_exclusions():
             GlobalList.type == ManualAnnotationType.EXCLUSION.value
         ).all()
 
-        es.indices.delete(index='annotation_exclusion', ignore=[404])
-        es.indices.create(index='annotation_exclusion')
-        deque(parallel_bulk(es, add_exclusion_to_elastic(exclusions)), maxlen=0)
+        _solr_replace_collection('annotation_exclusion', list(add_exclusion_to_elastic(exclusions)))
 
 
 def main(argv):
@@ -149,9 +165,7 @@ def main(argv):
 
             print(f'Processing {parentdir}')
             # first delete the index to clear the data
-            es.indices.delete(index=entity_type, ignore=[404])
-            es.indices.create(index=entity_type)
-            deque(parallel_bulk(es, process_lmdb(env, db, entity_type)), maxlen=0)
+            _solr_replace_collection(entity_type, list(process_lmdb(env, db, entity_type)))
             env.close()
         elif opt == '-a':
             for parentdir, subdirs, files in os.walk(os.path.join(directory, 'lmdb')):
@@ -162,9 +176,7 @@ def main(argv):
                     env, db = open_env(entity_type, parentdir)
 
                     # first delete the index to clear the data
-                    es.indices.delete(index=entity_type, ignore=[404])
-                    es.indices.create(index=entity_type)
-                    deque(parallel_bulk(es, process_lmdb(env, db, entity_type)), maxlen=0)
+                    _solr_replace_collection(entity_type, list(process_lmdb(env, db, entity_type)))
                     env.close()
         elif opt == '-e':
             seed_exclusions()
