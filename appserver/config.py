@@ -27,7 +27,7 @@ class Config():
 
     SOLR_URL = os.environ.get(
         'SOLR_URL',
-        os.environ.get('ELASTICSEARCH_URL', 'http://localhost:8983/solr'),
+        'http://localhost:8983/solr',
     )
 
     AZURE_ACCOUNT_STORAGE_NAME = os.environ.get('AZURE_ACCOUNT_STORAGE_NAME')

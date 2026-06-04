@@ -94,7 +94,6 @@ ENV NEO4J_SCHEME=bolt
 # Solr configuration
 ENV SOLR_URL=http://solr:8983/solr
 ENV SOLR_FILE_COLLECTION=file
-ENV ELASTICSEARCH_FILE_INDEX=file
 
 # Statistical enrichment service
 ENV STATISTICAL_ENRICHMENT_URL=http://statistical-enrichment:5000

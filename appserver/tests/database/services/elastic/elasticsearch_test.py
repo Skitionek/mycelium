@@ -56,8 +56,8 @@ def return_fields():
 
 
 @pytest.fixture(scope='function')
-def pdf_document(elastic_service):
-    elastic_service.elastic_client.create(
+def pdf_document(search_index_service):
+    search_index_service.search_index_client.create(
         index=FILE_INDEX_ID,
         pipeline=ATTACHMENT_PIPELINE_ID,
         id='1',
@@ -81,8 +81,8 @@ def pdf_document(elastic_service):
 
 
 @pytest.fixture(scope='function')
-def map_document(elastic_service):
-    elastic_service.elastic_client.create(
+def map_document(search_index_service):
+    search_index_service.search_index_client.create(
         index=FILE_INDEX_ID,
         pipeline=ATTACHMENT_PIPELINE_ID,
         id='2',
@@ -106,14 +106,14 @@ def map_document(elastic_service):
 
 
 def test_should_not_get_results_from_empty_db(
-    elastic_service,
+    search_index_service,
     highlight,
     query_filter_map_and_pdf,
     text_fields,
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='BOLA3',
         offset=0,
@@ -130,7 +130,7 @@ def test_should_not_get_results_from_empty_db(
 
 
 def test_can_get_results_from_pdf(
-    elastic_service,
+    search_index_service,
     pdf_document,
     highlight,
     query_filter_map_and_pdf,
@@ -138,7 +138,7 @@ def test_can_get_results_from_pdf(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='BOLA3',
         offset=0,
@@ -156,7 +156,7 @@ def test_can_get_results_from_pdf(
 
 
 def test_can_get_results_from_pdf_with_asterisk_wildcard_phrase(
-    elastic_service,
+    search_index_service,
     pdf_document,
     highlight,
     query_filter_map_and_pdf,
@@ -164,7 +164,7 @@ def test_can_get_results_from_pdf_with_asterisk_wildcard_phrase(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='BO*A3',
         offset=0,
@@ -181,7 +181,7 @@ def test_can_get_results_from_pdf_with_asterisk_wildcard_phrase(
 
 
 def test_can_get_results_from_pdf_with_question_mark_wildcard_phrase(
-    elastic_service,
+    search_index_service,
     pdf_document,
     highlight,
     query_filter_map_and_pdf,
@@ -189,7 +189,7 @@ def test_can_get_results_from_pdf_with_question_mark_wildcard_phrase(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='BO?A3',
         offset=0,
@@ -206,7 +206,7 @@ def test_can_get_results_from_pdf_with_question_mark_wildcard_phrase(
 
 
 def test_can_get_results_from_map(
-    elastic_service,
+    search_index_service,
     map_document,
     highlight,
     query_filter_map_and_pdf,
@@ -214,7 +214,7 @@ def test_can_get_results_from_map(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='COVID',
         offset=0,
@@ -231,7 +231,7 @@ def test_can_get_results_from_map(
 
 
 def test_can_get_results_from_map_with_wildcard_phrase(
-    elastic_service,
+    search_index_service,
     map_document,
     highlight,
     query_filter_map_and_pdf,
@@ -239,7 +239,7 @@ def test_can_get_results_from_map_with_wildcard_phrase(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='CO*ID',
         offset=0,
@@ -256,7 +256,7 @@ def test_can_get_results_from_map_with_wildcard_phrase(
 
 
 def test_can_get_results_with_quoted_phrase(
-    elastic_service,
+    search_index_service,
     map_document,
     highlight,
     query_filter_map_and_pdf,
@@ -264,7 +264,7 @@ def test_can_get_results_with_quoted_phrase(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='"mock map document"',
         offset=0,
@@ -281,7 +281,7 @@ def test_can_get_results_with_quoted_phrase(
 
 
 def test_using_wildcard_in_phrase_does_not_work(
-    elastic_service,
+    search_index_service,
     pdf_document,
     highlight,
     query_filter_map_and_pdf,
@@ -289,7 +289,7 @@ def test_using_wildcard_in_phrase_does_not_work(
     text_field_boosts,
     return_fields
 ):
-    res, _ = elastic_service.search(
+    res, _ = search_index_service.search(
         index_id=FILE_INDEX_ID,
         user_search_query='"BO*A3"',
         offset=0,
@@ -425,11 +425,11 @@ def test_using_wildcard_in_phrase_does_not_work(
     ],
 )
 def test_pre_process_query(
-    elastic_service,
+    search_index_service,
     test,
     expected
 ):
-    res = elastic_service._pre_process_query(test)
+    res = search_index_service._pre_process_query(test)
     assert res == expected
 
 
@@ -2000,15 +2000,15 @@ def test_pre_process_query(
     ],
 )
 def test_user_query_parser(
-    elastic_service,
+    search_index_service,
     test,
     expected
 ):
     text_fields = ['description', 'data.content', 'filename']
     text_field_boosts = {'description': 1, 'data.content': 1, 'filename': 3}
 
-    processed_query = elastic_service._pre_process_query(test)
-    parser = elastic_service._get_query_parser(text_fields, text_field_boosts)
+    processed_query = search_index_service._pre_process_query(test)
+    parser = search_index_service._get_query_parser(text_fields, text_field_boosts)
     res = parser.parseString(processed_query)[0].to_dict()
 
     assert res == expected
@@ -2032,11 +2032,11 @@ def test_user_query_parser(
     ],
 )
 def test_strip_unmatched_quotations(
-    elastic_service,
+    search_index_service,
     test,
     expected
 ):
-    res = elastic_service._strip_unmatched_quotations(test)
+    res = search_index_service._strip_unmatched_quotations(test)
     assert res == expected
 
 
@@ -2118,11 +2118,11 @@ def test_strip_unmatched_quotations(
     ],
 )
 def test_strip_unmatched_parens(
-    elastic_service,
+    search_index_service,
     test,
     expected
 ):
-    res = elastic_service._strip_unmatched_parens(test)
+    res = search_index_service._strip_unmatched_parens(test)
     assert res == expected
 
 
@@ -2160,9 +2160,9 @@ def test_strip_unmatched_parens(
     ]
 )
 def test_get_words_phrases_and_wildcards(
-    elastic_service,
+    search_index_service,
     test,
     expected
 ):
-    res = elastic_service._get_words_phrases_and_wildcards(test)
+    res = search_index_service._get_words_phrases_and_wildcards(test)
     assert set(res) == set(expected)

@@ -68,7 +68,7 @@ def process_lmdb(env, db, entity_type):
             }
 
 
-def add_exclusion_to_elastic(exclusions):
+def add_exclusion_to_search_index(exclusions):
     # make sure there are exclusions before indexing
     if exclusions[0]:
         for i, exclusion, in enumerate(exclusions):
@@ -143,7 +143,7 @@ def seed_exclusions():
             GlobalList.type == ManualAnnotationType.EXCLUSION.value
         ).all()
 
-        _solr_replace_collection('annotation_exclusion', list(add_exclusion_to_elastic(exclusions)))
+        _solr_replace_collection('annotation_exclusion', list(add_exclusion_to_search_index(exclusions)))
 
 
 def main(argv):

@@ -28,7 +28,7 @@ from neo4japp.services import (
     KgService,
     VisualizerService,
 )
-from neo4japp.services.elastic import ElasticService
+from neo4japp.services.elastic import SearchIndexService
 from neo4japp.util import (
     get_first_known_label_from_node,
     snake_to_camel_dict,
@@ -137,14 +137,14 @@ def visualizer_service(app, graph, session):
 
 
 @pytest.fixture(scope='function')
-def elastic_service(app, session):
-    elastic_service = ElasticService()
+def search_index_service(app, session):
+    search_index_service = SearchIndexService()
 
     # Ensures that anytime the elastic service is requested for a test, that the environment is
     # clean
-    elastic_service.recreate_indices_and_pipelines()
+    search_index_service.recreate_indices_and_pipelines()
 
-    return elastic_service
+    return search_index_service
 
 # Begin Graph Data Fixtures #
 

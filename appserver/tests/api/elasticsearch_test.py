@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 
 from neo4japp.constants import FILE_INDEX_ID, FRAGMENT_SIZE
-from neo4japp.services.elastic import ElasticService
+from neo4japp.services.elastic import SearchIndexService
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
 
 
@@ -66,7 +66,7 @@ def test_user_can_search_content(
     session,
     test_user,
     test_user_with_pdf,
-    elastic_service,
+    search_index_service,
     text_fields,
     text_field_boosts,
     highlight,
@@ -77,7 +77,7 @@ def test_user_can_search_content(
     headers = generate_headers(login_resp['accessToken']['token'])
 
     with patch.object(
-        ElasticService,
+        SearchIndexService,
         'search',
         return_value=({'hits': {'hits': [], 'total': 0}}, [])
     ) as mock_search:
@@ -112,7 +112,7 @@ def test_user_can_search_content_with_single_types(
     session,
     test_user,
     test_user_with_pdf,
-    elastic_service,
+    search_index_service,
     text_fields,
     text_field_boosts,
     highlight,
@@ -123,7 +123,7 @@ def test_user_can_search_content_with_single_types(
     headers = generate_headers(login_resp['accessToken']['token'])
 
     with patch.object(
-        ElasticService,
+        SearchIndexService,
         'search',
         return_value=({'hits': {'hits': [], 'total': 0}}, [])
     ) as mock_search:
@@ -159,7 +159,7 @@ def test_user_can_search_content_with_multiple_types(
     session,
     test_user,
     test_user_with_pdf,
-    elastic_service,
+    search_index_service,
     text_fields,
     text_field_boosts,
     highlight,
@@ -170,7 +170,7 @@ def test_user_can_search_content_with_multiple_types(
     headers = generate_headers(login_resp['accessToken']['token'])
 
     with patch.object(
-        ElasticService,
+        SearchIndexService,
         'search',
         return_value=({'hits': {'hits': [], 'total': 0}}, [])
     ) as mock_search:
@@ -206,7 +206,7 @@ def test_user_can_search_content_with_folder(
     session,
     test_user,
     test_user_with_pdf,
-    elastic_service,
+    search_index_service,
     text_fields,
     text_field_boosts,
     highlight,
@@ -217,7 +217,7 @@ def test_user_can_search_content_with_folder(
     headers = generate_headers(login_resp['accessToken']['token'])
 
     with patch.object(
-        ElasticService,
+        SearchIndexService,
         'search',
         return_value=({'hits': {'hits': [], 'total': 0}}, [])
     ) as mock_search:

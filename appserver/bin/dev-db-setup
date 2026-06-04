@@ -9,6 +9,6 @@ echo "Seed appserver using docker-compose exec appserver flask seed"
 echo "Setting up neo4j indexes"
 # Sets up the indexes for neo4j
 echo "Set up the indexes manually by running"
-# Sets up the pipeline for elasticsearch
-echo "Configuring Elasticsearch"
-flask reset-elastic
+# Sets up the search index
+echo "Configuring search index"
+flask reset-search-index

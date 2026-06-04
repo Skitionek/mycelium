@@ -92,10 +92,10 @@ class GraphConnection:
         self.graph = get_neo4j_db()
 
 
-class ElasticConnection:
+class SearchIndexConnection:
     def __init__(self):
         super().__init__()
-        self.elastic_client = {
+        self.search_index_client = {
             'base_url': current_app.config['SOLR_URL'].rstrip('/'),
             'request_timeout': 180,
         }
@@ -204,11 +204,11 @@ def get_projects_service():
     return g.projects_service
 
 
-def get_elastic_service():
-    if 'elastic_service' not in g:
-        from neo4japp.services.elastic import ElasticService
-        g.elastic_service = ElasticService()
-    return g.elastic_service
+def get_search_index_service():
+    if 'search_index_service' not in g:
+        from neo4japp.services.elastic import SearchIndexService
+        g.search_index_service = SearchIndexService()
+    return g.search_index_service
 
 
 def get_excel_export_service():

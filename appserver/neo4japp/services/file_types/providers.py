@@ -339,7 +339,7 @@ class PDFTypeProvider(BaseFileTypeProvider):
     dash_types_re = re.compile(bytes("[‐᠆﹣－⁃−¬]+", BYTE_ENCODING))
 
     def to_indexable_content(self, buffer: BufferedIOBase):
-        return buffer  # Elasticsearch can index PDF files directly
+        return buffer  # Solr can index PDF files directly
 
     def should_highlight_content_text_matches(self) -> bool:
         return True
@@ -918,7 +918,7 @@ class MapTypeProvider(BaseFileTypeProvider):
             raise ValueError
 
     def to_indexable_content(self, buffer: BufferedIOBase):
-        # Do not catch exceptions here - there are handled in elastic_service.py
+        # Do not catch exceptions here - there are handled in search_index_service.py
         zip_file = zipfile.ZipFile(io.BytesIO(buffer.read()))
         content_json = json.loads(zip_file.read('graph.json'))
 

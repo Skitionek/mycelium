@@ -212,12 +212,12 @@ def init_default_access(mapper, connection, target):
 @event.listens_for(Projects, 'after_update')
 def project_update(mapper, connection, target: Projects):
     # Import what we need, when we need it (Helps to avoid circular dependencies)
-    from neo4japp.database import get_elastic_service
+    from neo4japp.database import get_search_index_service
     from neo4japp.models.files import Files
     from neo4japp.models.files_queries import get_nondeleted_recycled_children_query
 
     try:
-        elastic_service = get_elastic_service()
+        search_index_service = get_search_index_service()
         family = get_nondeleted_recycled_children_query(
             Files.id == target.root_id,
             children_filter=and_(
@@ -233,7 +233,7 @@ def project_update(mapper, connection, target: Projects):
             extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
         )
         # TODO: Change this to an update operation, and only update file path
-        elastic_service.index_files(files_to_update)
+        search_index_service.index_files(files_to_update)
     except Exception as e:
         current_app.logger.error(
             f'Elastic search update failed for project with root_id: {target.root_id}',

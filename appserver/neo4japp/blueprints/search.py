@@ -14,7 +14,7 @@ from neo4japp.blueprints.filesystem import FilesystemBaseView
 from neo4japp.data_transfer_objects.common import ResultQuery
 from neo4japp.database import (
     get_search_service_dao,
-    get_elastic_service,
+    get_search_index_service,
     get_file_type_service
 )
 from neo4japp.exceptions import ServerException
@@ -122,7 +122,7 @@ def get_folders_from_params(advanced_args):
 
 def get_filepaths_filter(accessible_folders: List[Files], accessible_projects: List[Projects]):
     """
-    Generates an elastic boolean query which filters documents based on folder/project access. Takes
+    Generates a search boolean query which filters documents based on folder/project access. Takes
     as input two options:
         - accessible_folders: a list of Files objects representing folders to be included in the
         query
@@ -210,7 +210,7 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
                 'data.content': {},
             },
             # Need to be very careful with this option. If fragment_size is too large, search
-            # will be slow because elastic has to generate large highlight fragments. Setting
+            # will be slow because Solr has to generate large highlight fragments. Setting
             # to 0 generates cleaner sentences, but also runs the risk of pulling back huge
             # sentences.
             'fragment_size': FRAGMENT_SIZE,
@@ -234,7 +234,7 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
             accessible_folders,
             accessible_projects
         )
-        # These are the document fields that will be returned by elastic
+        # These are the document fields that will be returned by the search index
         return_fields = ['id']
 
         filter_ = [
@@ -253,8 +253,8 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
             }
         ]
 
-        elastic_service = get_elastic_service()
-        elastic_result, search_phrases = elastic_service.search(
+        search_index_service = get_search_index_service()
+        search_result, search_phrases = search_index_service.search(
             index_id=FILE_INDEX_ID,
             user_search_query=user_search_query,
             offset=offset,
@@ -266,14 +266,13 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
             highlight=highlight
         )
 
-        elastic_result = elastic_result['hits']
+        search_result = search_result['hits']
 
         highlight_tag_re = re.compile('@@@@(/?)\\$')
 
-        # So while we have the results from Elasticsearch, they don't contain up to date or
-        # complete data about the matched files, so we'll take the hash IDs returned by Elastic
-        # and query our database
-        file_ids = [doc['fields']['id'][0] for doc in elastic_result['hits']]
+        # Search index results do not contain complete up-to-date data about matched files, so we
+        # use returned file IDs to query our database.
+        file_ids = [doc['fields']['id'][0] for doc in search_result['hits']]
         file_map = {
             file.id: file
             for file in self.get_nondeleted_recycled_files(
@@ -283,7 +282,7 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
         }
 
         results = []
-        for document in elastic_result['hits']:
+        for document in search_result['hits']:
             file_id = document['fields']['id'][0]
             file: Optional[Files] = file_map.get(file_id)
 
@@ -307,7 +306,7 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
         return jsonify(ContentSearchResponseSchema(context={
             'user_privilege_filter': g.current_user.id,
         }).dump({
-            'total': elastic_result['total'],
+            'total': search_result['total'],
             'query': ResultQuery(phrases=search_phrases),
             'results': results,
             'dropped_folders': dropped_folders

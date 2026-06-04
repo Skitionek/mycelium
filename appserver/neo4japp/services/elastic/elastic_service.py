@@ -16,7 +16,7 @@ from typing import Any, Dict, List
 from urllib.parse import urlencode
 
 from neo4japp.constants import FILE_INDEX_ID, LogEventType
-from neo4japp.database import ElasticConnection, GraphConnection
+from neo4japp.database import SearchIndexConnection, GraphConnection
 from neo4japp.exceptions import ServerException
 from neo4japp.models import Files, Projects
 from neo4japp.models.files_queries import build_file_hierarchy_query
@@ -25,7 +25,7 @@ from neo4japp.utils import EventLog
 ParserElement.enablePackrat()
 
 
-class ElasticService(ElasticConnection, GraphConnection):
+class SearchIndexService(SearchIndexConnection, GraphConnection):
     ALLOWED_FILTER_FIELDS = frozenset({
         'file_path.tree',
         'mime_type',
@@ -37,16 +37,16 @@ class ElasticService(ElasticConnection, GraphConnection):
         return index_id
 
     def _select_url(self, index_id: str) -> str:
-        return f'{self.elastic_client["base_url"]}/{self._collection(index_id)}/select'
+        return f'{self.search_index_client["base_url"]}/{self._collection(index_id)}/select'
 
     def _update_url(self, index_id: str) -> str:
-        return f'{self.elastic_client["base_url"]}/{self._collection(index_id)}/update'
+        return f'{self.search_index_client["base_url"]}/{self._collection(index_id)}/update'
 
     def _extract_url(self, index_id: str) -> str:
         return f'{self._update_url(index_id)}/extract'
 
     def _request(self, method: str, url: str, **kwargs):
-        timeout = self.elastic_client['request_timeout']
+        timeout = self.search_index_client['request_timeout']
         return requests.request(method=method, url=url, timeout=timeout, **kwargs)
 
     # Begin indexing methods
