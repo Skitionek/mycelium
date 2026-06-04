@@ -456,8 +456,8 @@ FROM_EMAIL = "Mycelium <no-reply@example.com>"
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
 SENDGRID_API_CLIENT = SendGridAPIClient(SENDGRID_API_KEY)
 
-# Start shared Elastic constants
-FILE_INDEX_ID = os.getenv('ELASTICSEARCH_FILE_INDEX', 'file')
+# Start shared search constants
+FILE_INDEX_ID = os.getenv('SOLR_FILE_COLLECTION', os.getenv('ELASTICSEARCH_FILE_INDEX', 'file'))
 FRAGMENT_SIZE = 1024
 
 APPSERVER_URL = os.getenv('APPSERVER_URL', 'http://localhost:5000')
