@@ -91,8 +91,8 @@ ENV NEO4J_AUTH=neo4j/password
 ENV NEO4J_DATABASE=neo4j
 ENV NEO4J_SCHEME=bolt
 
-# Elasticsearch configuration
-ENV ELASTICSEARCH_URL=http://elasticsearch:9200
+# Solr configuration
+ENV SOLR_URL=http://solr:8983/solr
 ENV ELASTICSEARCH_FILE_INDEX=file
 
 # Statistical enrichment service

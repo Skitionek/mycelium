@@ -1,131 +1,67 @@
-import base64
-
-from elasticsearch.exceptions import RequestError as ElasticRequestError
-from elasticsearch.helpers import parallel_bulk, streaming_bulk
-from flask import current_app
-from io import BytesIO
 import json
 
 from pyparsing import (
-    CaselessLiteral,
     Optional,
     ParserElement,
     QuotedString,
     Word,
     ZeroOrMore,
-    infixNotation,
-    opAssoc,
     printables,
 )
+import requests
 from sqlalchemy import and_
 from sqlalchemy.orm import joinedload, raiseload
-from typing import (
-    Any,
-    Dict,
-    List,
-)
+from typing import Any, Dict, List
+from urllib.parse import urlencode
 
 from neo4japp.constants import FILE_INDEX_ID, LogEventType
-from neo4japp.database import get_file_type_service, ElasticConnection, GraphConnection
+from neo4japp.database import ElasticConnection, GraphConnection
 from neo4japp.exceptions import ServerException
-from neo4japp.models import (
-    Files, Projects,
-)
+from neo4japp.models import Files, Projects
 from neo4japp.models.files_queries import build_file_hierarchy_query
-from neo4japp.services.elastic import (
-    ATTACHMENT_PIPELINE_ID,
-    ELASTIC_INDEX_SEED_PAIRS,
-    ELASTIC_PIPELINE_SEED_PAIRS,
-)
-from neo4japp.services.elastic.query_parser_helpers import (
-    BoolMust,
-    BoolMustNot,
-    BoolOperand,
-    BoolShould
-)
 from neo4japp.utils import EventLog
-from app import app
 
 ParserElement.enablePackrat()
 
 
 class ElasticService(ElasticConnection, GraphConnection):
+    def _collection(self, index_id: str) -> str:
+        return index_id
+
+    def _select_url(self, index_id: str) -> str:
+        return f'{self.elastic_client["base_url"]}/{self._collection(index_id)}/select'
+
+    def _update_url(self, index_id: str) -> str:
+        return f'{self.elastic_client["base_url"]}/{self._collection(index_id)}/update'
+
+    def _extract_url(self, index_id: str) -> str:
+        return f'{self._update_url(index_id)}/extract'
+
+    def _request(self, method: str, url: str, **kwargs):
+        timeout = self.elastic_client['request_timeout']
+        return requests.request(method=method, url=url, timeout=timeout, **kwargs)
+
     # Begin indexing methods
     def update_or_create_index(self, index_id, index_mapping_file):
-        """Creates an index with the given index id and mapping file. If the index already exists,
-        we update it and re-index any documents using that index."""
-        with open(index_mapping_file) as f:
-            index_definition_data = f.read()
-        index_definition = json.loads(index_definition_data)
-
-        if self.elastic_client.indices.exists(index_id):
-            # Here, we delete the index and re-create it. The reason for this is that, if
-            # we update the type of a field in the index, elastic will complain and fail to update
-            # the index. So to prevent this from happening, we just trash the index and re-create
-            # it.
-            try:
-                self.elastic_client.indices.delete(index=index_id)
-                current_app.logger.info(
-                    f'Deleted ElasticSearch index {index_id}',
-                    extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
-                )
-            except Exception as e:
-                current_app.logger.error(
-                    f'Failed to delete ElasticSearch index {index_id}',
-                    exc_info=e,
-                    extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-                )
-                return
-
         try:
-            self.elastic_client.indices.create(index=index_id, body=index_definition)
-            current_app.logger.info(
-                f'Created ElasticSearch index {index_id}',
-                extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
-            )
+            self._request(
+                'post',
+                self._update_url(index_id),
+                params={'commit': 'true'},
+                json={'delete': {'query': '*:*'}},
+            ).raise_for_status()
         except Exception as e:
-            current_app.logger.error(
-                f'Failed to create ElasticSearch index {index_id}',
-                exc_info=e,
-                extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-            )
-            return
-
-        # If we trash the index we also need to re-index all the documents that used it.
-        # Currently we take the safe route and simply re-index ALL documents, regardless of
-        # which index was actually re-created.
+            raise ServerException(
+                title='Search Index Error',
+                message=f'Failed to recreate Solr collection {index_id}.',
+            ) from e
         self.reindex_all_documents()
 
     def update_or_create_pipeline(self, pipeline_id, pipeline_definition_file):
-        """Creates a pipeline with the given pipeline id and definition file. If the pipeline
-        already exists, we update it."""
-        with open(pipeline_definition_file) as f:
-            pipeline_definition = f.read()
-        pipeline_definition_json = json.loads(pipeline_definition)
-
-        try:
-            self.elastic_client.ingest.put_pipeline(id=pipeline_id, body=pipeline_definition_json)
-        except Exception as e:
-            current_app.logger.error(
-                f'Failed to create or update ElasticSearch pipeline {pipeline_id}',
-                exc_info=e,
-                extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-            )
-            return
-
-        current_app.logger.info(
-            f'Created or updated ElasticSearch pipeline {pipeline_id}',
-            extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
-        )
+        return 'done'
 
     def recreate_indices_and_pipelines(self):
-        """Recreates all currently defined Elastic pipelines and indices. If any indices/pipelines
-        do not exist, we create them here. If an index/pipeline does exist, we update it."""
-        for (pipeline_id, pipeline_definition_file) in ELASTIC_PIPELINE_SEED_PAIRS:
-            self.update_or_create_pipeline(pipeline_id, pipeline_definition_file)
-
-        for (index_id, index_mapping_file) in ELASTIC_INDEX_SEED_PAIRS:
-            self.update_or_create_index(index_id, index_mapping_file)
+        self.update_or_create_index(FILE_INDEX_ID, None)
         return 'done'
 
     def reindex_all_documents(self):
@@ -135,19 +71,15 @@ class ElasticService(ElasticConnection, GraphConnection):
         raise NotImplementedError()
 
     def delete_files(self, hash_ids: List[str]):
-        self._streaming_bulk_documents([
-            self._get_delete_obj(hash_id, FILE_INDEX_ID)
-            for hash_id in hash_ids
-        ])
-        self.elastic_client.indices.refresh(FILE_INDEX_ID)
+        self._request(
+            'post',
+            self._update_url(FILE_INDEX_ID),
+            params={'commit': 'true'},
+            json={'delete': [{'id': hash_id} for hash_id in hash_ids]},
+            headers={'Content-Type': 'application/json'},
+        ).raise_for_status()
 
     def index_files(self, hash_ids: List[str] = None, batch_size: int = 100):
-        """
-        Adds the files with the given ids to Elastic. If no IDs are given,
-        all non-deleted files will be indexed.
-        :param ids: a list of file table IDs (integers)
-        :param batch_size: number of documents to index per batch
-        """
         filters = [
             Files.deletion_date.is_(None),
             Files.recycling_date.is_(None),
@@ -156,41 +88,31 @@ class ElasticService(ElasticConnection, GraphConnection):
         if hash_ids is not None:
             filters.append(Files.hash_id.in_(hash_ids))
 
-        # Gets the file/project pairs -- plus _all_ parents -- for the given file ids
-        query = self._get_file_hierarchy_query(
-            and_(*filters)
-        )
+        query = self._get_file_hierarchy_query(and_(*filters))
 
-        # Removes any unnecessary parent rows, we only need to index what was given in hash_ids,
-        # if anything
         if hash_ids is not None:
-            query = query.filter(
-                Files.hash_id.in_(hash_ids)
-            )
+            query = query.filter(Files.hash_id.in_(hash_ids))
 
-        # Just return Files and Projects data, we don't care about any other columns
         query = query.with_entities(Files, Projects)
+        for file, project in self._windowed_query(query, Files.hash_id, batch_size):
+            self._index_file(file, project, FILE_INDEX_ID)
 
-        self._streaming_bulk_documents(
-            self._lazy_create_index_docs_for_streaming_bulk(
-                self._windowed_query(query, Files.hash_id, batch_size)
-            )
-        )
+        self._request(
+            'post',
+            self._update_url(FILE_INDEX_ID),
+            params={'commit': 'true'},
+            json={},
+            headers={'Content-Type': 'application/json'},
+        ).raise_for_status()
 
     def _get_file_hierarchy_query(self, filter):
-        """
-        Generate the query to get files that will be indexed.
-        :param filter: SQL Alchemy filter
-        :return: the query
-        """
-        return build_file_hierarchy_query(filter, Projects, Files) \
-            .options(raiseload('*'),
-                     joinedload(Files.user),
-                     joinedload(Files.content))
+        return build_file_hierarchy_query(filter, Projects, Files).options(
+            raiseload('*'),
+            joinedload(Files.user),
+            joinedload(Files.content),
+        )
 
     def _windowed_query(self, q, column, windowsize):
-        """"Break a Query into chunks on a given column."""
-
         single_entity = q.is_single_entity
         q = q.add_column(column).order_by(column)
         last_id = None
@@ -209,183 +131,76 @@ class ElasticService(ElasticConnection, GraphConnection):
                 else:
                     yield row[0:-1]
 
-    def _transform_data_for_indexing(self, file: Files) -> BytesIO:
-        """
-        Get the file's contents in a format that can be indexed by Elastic, or is
-        better indexed by Elatic.
-        :param file: the file
-        :return: the bytes to send to Elastic
-        """
-        if file.content:
-            content = file.content.raw_file
-            file_type_service = get_file_type_service()
-            return file_type_service.get(file).to_indexable_content(BytesIO(content))
-        else:
-            return BytesIO()
+    def _normalize_bool(self, value: bool) -> str:
+        return 'true' if value else 'false'
 
-    def _lazy_create_index_docs_for_parallel_bulk(self, batch):
-        """
-        Creates a generator out of the elastic document creation
-        process to prevent loading everything into memory.
-        :param batch: iterable of file/project pairs
-        :return: indexable object in generator form
-        """
+    def _path_tree(self, path: str) -> List[str]:
+        parts = [p for p in path.split('/') if p]
+        if not parts:
+            return ['/']
+        acc = []
+        current = ''
+        for part in parts:
+            current = f'{current}/{part}'
+            acc.append(current)
+        return acc
 
-        # Preserve context that is lost from threading when used
-        # with the elasticsearch parallel_bulk
-        with app.app_context():
-            for file, project in batch:
-                yield self._get_index_obj(file, project, FILE_INDEX_ID)
-
-    def _lazy_create_index_docs_for_streaming_bulk(self, batch):
-        """
-        Creates a generator out of the elastic document creation
-        process to prevent loading everything into memory.
-        :param batch: iterable of file/project pairs
-        :return: indexable object in generator form
-        """
-        for file, project in batch:
-            yield self._get_index_obj(file, project, FILE_INDEX_ID)
-
-    def _get_update_action_obj(self, file_hash_id: str, index_id: str, changes: dict = {}) -> dict:
-        # 'filename': file.filename,
-        # 'description': file.description,
-        # 'uploaded_date': file.creation_date,
-        # 'data': base64.b64encode(indexable_content).decode('utf-8'),
-        # 'user_id': file.user_id,
-        # 'username': file.user.username,
-        # 'project_id': project.id,
-        # 'project_hash_id': project.hash_id,
-        # 'project_name': project.name,
-        # 'doi': file.doi,
-        # 'public': file.public,
-        # 'id': file.id,
-        # 'hash_id': file.hash_id,
-        # 'mime_type': file.mime_type,
-        # 'data_ok': data_ok,
-        return {
-            '_op_type': 'update',
-            '_index': index_id,
-            '_id': file_hash_id,
-            'doc': changes,
+    def _index_file(self, file: Files, project: Projects, index_id: str):
+        content = file.content.raw_file if file.content else None
+        literal_fields = {
+            'filename_txt': file.filename or '',
+            'file_path_s': file.filename_path or '',
+            'description_txt': file.description or '',
+            'uploaded_date_dt': str(file.creation_date) if file.creation_date else '',
+            'user_id_i': file.user_id,
+            'username_s': file.user.username if file.user else '',
+            'project_id_i': project.id,
+            'project_hash_id_s': project.hash_id or '',
+            'project_name_txt': project.name or '',
+            'doi_s': file.doi or '',
+            'public_b': self._normalize_bool(bool(file.public)),
+            'id_i': file.id,
+            'hash_id_s': file.hash_id,
+            'mime_type_s': file.mime_type or '',
+            'data_ok_b': 'true',
+            'file_path_ss': self._path_tree(file.filename_path or ''),
         }
 
-    def _get_delete_obj(self, file_hash_id: str, index_id: str) -> dict:
-        return {
-            '_op_type': 'delete',
-            '_index': index_id,
-            '_id': file_hash_id
-        }
-
-    def _get_index_obj(self, file: Files, project: Projects, index_id) -> dict:
-        """
-        Generate an index operation object from the given file and project
-        :param file: the file
-        :param project: the project that file is within
-        :param index_id: the index
-        :return: a document
-        """
-        try:
-            indexable_content = self._transform_data_for_indexing(file).getvalue()
-            data_ok = True
-        except Exception as e:
-            # We should still index the file even if we can't transform it for
-            # indexing because the file won't ever appear otherwise and it will be
-            # harder to track down the bug
-            indexable_content = b''
-            data_ok = False
-
-            # TODO: Threading caused us to lose context, but we should rethink
-            # how we do logging. Do we actually need to use the app_context?
-            current_app.logger.error(
-                f'Failed to generate indexable data for file '
-                f'#{file.id} (hash={file.hash_id}, mime type={file.mime_type})',
-                exc_info=e,
-                extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-            )
-
-        return {
-            '_index': index_id,
-            'pipeline': ATTACHMENT_PIPELINE_ID,
-            '_id': file.hash_id,
-            '_source': {
-                'filename': file.filename,
-                'file_path': file.filename_path,
-                'description': file.description,
-                'uploaded_date': file.creation_date,
-                'data': base64.b64encode(indexable_content).decode('utf-8'),
-                'user_id': file.user_id,
-                'username': file.user.username,
-                'project_id': project.id,
-                'project_hash_id': project.hash_id,
-                'project_name': project.name,
-                'doi': file.doi,
-                'public': file.public,
-                'id': file.id,
-                'hash_id': file.hash_id,
-                'mime_type': file.mime_type,
-                'data_ok': data_ok,
+        if content:
+            params = {
+                'literal.id': file.hash_id,
+                'fmap.content': 'data_content_txt',
+                'commitWithin': '1000',
+                'overwrite': 'true',
+                'resource.name': file.filename or file.hash_id,
             }
-        }
+            for key, value in literal_fields.items():
+                if isinstance(value, list):
+                    for list_val in value:
+                        params.setdefault(f'literal.{key}', [])
+                        params[f'literal.{key}'].append(str(list_val))
+                elif value != '':
+                    params[f'literal.{key}'] = str(value)
 
-    def _parallel_bulk_documents(self, documents):
-        """
-        Performs a series of bulk operations in elastic, determined by the `documents` input.
-        These operations are executed in parallel, on 4 threads by default.
-        """
-        # `raise_on_exception` set to False so that we don't error out if one of the documents
-        # fails to index
-        results = parallel_bulk(
-            self.elastic_client,
-            documents,
-            raise_on_error=False,
-            raise_on_exception=False
-        )
-
-        for success, info in results:
-            # TODO: Evaluate the data egress size. When seeding the staging database
-            # locally, this could output ~1gb of data. Question: Should we conditionally
-            # turn this off?
-            if success:
-                current_app.logger.info(
-                    f'Elastic search bulk operation succeeded: {info}',
-                    extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
-                )
-            else:
-                current_app.logger.warning(
-                    f'Elastic search bulk operation failed: {info}',
-                    extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-                )
-
-    def _streaming_bulk_documents(self, documents):
-        """
-        Performs a series of bulk operations in elastic, determined by the `documents` input.
-        These operations are done in series.
-        """
-        # `raise_on_exception` set to False so that we don't error out if one of the documents
-        # fails to index
-        results = streaming_bulk(
-            client=self.elastic_client,
-            actions=documents,
-            max_retries=5,
-            raise_on_error=False,
-            raise_on_exception=False
-        )
-
-        for success, info in results:
-            # TODO: Evaluate the data egress size. When seeding the staging database
-            # locally, this could output ~1gb of data. Question: Should we conditionally
-            # turn this off?
-            if success:
-                current_app.logger.info(
-                    f'Elastic search bulk operation succeeded: {info}',
-                    extra=EventLog(event_type=LogEventType.ELASTIC.value).to_dict()
-                )
-            else:
-                current_app.logger.warning(
-                    f'Elastic search bulk operation failed: {info}',
-                    extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
-                )
+            query = urlencode(params, doseq=True)
+            response = self._request(
+                'post',
+                f'{self._extract_url(index_id)}?{query}',
+                files={'file': (file.filename or file.hash_id, content)},
+            )
+            response.raise_for_status()
+        else:
+            doc = {'id': file.hash_id}
+            for key, value in literal_fields.items():
+                if value != '':
+                    doc[key] = value
+            self._request(
+                'post',
+                self._update_url(index_id),
+                params={'commitWithin': '1000'},
+                json={'add': {'doc': doc}},
+                headers={'Content-Type': 'application/json'},
+            ).raise_for_status()
 
     # End indexing methods
 
@@ -416,7 +231,7 @@ class ElasticService(ElasticConnection, GraphConnection):
         return s
 
     def _strip_unmatched_quotations(self, s: str) -> str:
-        if (s.count('"') % 2 == 1):
+        if s.count('"') % 2 == 1:
             odd_quote_idx = s.rfind('"')
             return s[:odd_quote_idx] + s[odd_quote_idx + 1:]
         return s
@@ -427,26 +242,9 @@ class ElasticService(ElasticConnection, GraphConnection):
         return s
 
     def _strip_reserved_characters(self, s: str) -> str:
-        """Strips "reserved" characters from the input string and returns the new string. Currently
-        this only includes open and closed parentheses, but may include additional characters in
-        the future.
-
-        Args:
-            s (str): String to strip reserved characters from.
-
-        Returns:
-            (str): The input string stripped of all reserved characters.
-        """
-
-        # Remove all parens
-        s = ''.join([c for c in s if c not in ['(', ')']])
-        return s
+        return ''.join([c for c in s if c not in ['(', ')']])
 
     def _get_words_phrases_and_wildcards(self, string):
-        """
-        Extracts all word, phrase, and wildcard tokens from the given input string. Duplicates are
-        removed, and the keywords "and," "not," and "or" are discarded.
-        """
         if not len(string):
             return []
 
@@ -455,17 +253,13 @@ class ElasticService(ElasticConnection, GraphConnection):
         token = QuotedString('"', unquoteResults=False) | Word(printables)
         parser = ZeroOrMore(token)
 
-        unique_non_keyword_tokens = list(set([
-                t for t in list(parser.parseString(string))
-                if t.lower() not in ['and', 'not', 'or']
-            ])
+        unique_non_keyword_tokens = list(
+            set([t for t in list(parser.parseString(string)) if t.lower() not in ['and', 'not', 'or']])
         )
 
         words_phrases_and_wildcards = []
         for token in unique_non_keyword_tokens:
             if '"' in token:
-                # Token is a phrase, with '"' as the first and last characters. *Don't* remove
-                # punctuation!
                 words_phrases_and_wildcards.append(token[1:-1])
             else:
                 token = self._strip_reserved_characters(token).strip()
@@ -475,21 +269,11 @@ class ElasticService(ElasticConnection, GraphConnection):
         return words_phrases_and_wildcards
 
     def _pre_process_query(self, query):
-        """
-        Given a user-generated query string, returns a new string in a psuedo-Lucene grammar. The
-        user-generated query is expected to be a space-delimited list of search terms, operators,
-        and filters.
-
-        The output of this function is expected to be used as the input to the parser generated by
-        `_get_query_parser` below.
-        """
         query = self._strip_unmatched_characters(query)
 
         open_parens = Word('(')
         closed_parens = Word(')')
-        term = term = Word(printables)
-        # Need to include these optional parens, otherwise something like '(r and "p and q")' will
-        # be tokenized as ['(r', 'and', '"p', 'and', 'q")']
+        term = Word(printables)
         quoted_term = QuotedString('"', unquoteResults=False)
         quoted_term_with_parens = Optional(open_parens) + quoted_term + Optional(closed_parens)
         quoted_term_with_parens.setParseAction(''.join)
@@ -498,10 +282,8 @@ class ElasticService(ElasticConnection, GraphConnection):
 
         unstackable_logical_ops = ['and', 'or']
         new_query = []
-        _next = None
         tokens = list(query_parser.parseString(query))
         for i, curr in enumerate(tokens):
-            # If we're at the last element in the list, just add it to the new list of tokens.
             if i == len(tokens) - 1:
                 new_query += [curr]
                 continue
@@ -514,21 +296,16 @@ class ElasticService(ElasticConnection, GraphConnection):
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
                         title='Content Search Error',
-                        message='Your query appears malformed. A logical operator (AND/OR) was ' +
-                                'encountered immediately following a NOT operator, e.g. ' +
-                                '"dog not and cat." Please examine your query for possible ' +
-                                'errors and try again.',
-                        code=400
+                        message='Your query appears malformed.',
+                        code=400,
                     )
                 new_query += [curr]
             elif curr.lower() in unstackable_logical_ops:
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
                         title='Content Search Error',
-                        message='Your query appears malformed. Two logical operators (AND/OR) ' +
-                                'were encountered in succession, e.g. "dog and and cat." Please ' +
-                                'examine your query for possible errors and try again.',
-                        code=400
+                        message='Your query appears malformed.',
+                        code=400,
                     )
                 new_query += [curr]
             elif _next.lower() not in unstackable_logical_ops + [')']:
@@ -537,123 +314,115 @@ class ElasticService(ElasticConnection, GraphConnection):
                 new_query += [curr]
         return ' '.join(new_query)
 
-    def _get_query_parser(
+    def _map_field(self, field: str) -> str:
+        field_map = {
+            'description': 'description_txt',
+            'filename': 'filename_txt',
+            'data.content': 'data_content_txt',
+            'file_path.tree': 'file_path_ss',
+            'mime_type': 'mime_type_s',
+            'project_id': 'project_id_i',
+            'public': 'public_b',
+        }
+        return field_map.get(field, field.replace('.', '_'))
+
+    def _format_value(self, value):
+        if isinstance(value, bool):
+            return self._normalize_bool(value)
+        if isinstance(value, (int, float)):
+            return str(value)
+        value = str(value).replace('"', '\\"')
+        return f'"{value}"'
+
+    def _convert_filter_clause(self, clause: dict) -> str:
+        if 'term' in clause:
+            field, value = next(iter(clause['term'].items()))
+            return f'{self._map_field(field)}:{self._format_value(value)}'
+        if 'terms' in clause:
+            field, values = next(iter(clause['terms'].items()))
+            joined = ' OR '.join([f'{self._map_field(field)}:{self._format_value(v)}' for v in values])
+            return f'({joined})'
+        if 'bool' in clause:
+            bool_clause = clause['bool']
+            if 'must' in bool_clause:
+                return '(' + ' AND '.join([self._convert_filter_clause(c) for c in bool_clause['must']]) + ')'
+            if 'should' in bool_clause:
+                return '(' + ' OR '.join([self._convert_filter_clause(c) for c in bool_clause['should']]) + ')'
+            if 'must_not' in bool_clause:
+                return 'NOT (' + ' AND '.join([self._convert_filter_clause(c) for c in bool_clause['must_not']]) + ')'
+        raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
+
+    def search(
         self,
-        text_fields: List[str],
-        text_field_boosts: Dict[str, int],
-    ):
-        """
-        Generates a parser which expects a pseudo-Lucene query string, and returns an object
-        representing:
-
-        - A simple Elastic match query in the case of a single term
-        - An Elastic bool query in the case of a logical expression
-
-        See the helper classes in `query_parser_helpers.py` for the object structure.
-        """
-        boolOperand = QuotedString('"', unquoteResults=False) | Word(printables, excludeChars='()')
-        boolOperand.setParseAction(
-            lambda token: BoolOperand(
-                token,
-                text_fields,
-                text_field_boosts
-            ),
-        )
-
-        # Define expression, based on expression operand and list of operations in precedence order
-        boolExpr = infixNotation(
-            boolOperand,
-            [
-                (CaselessLiteral('not'), 1, opAssoc.RIGHT, BoolMustNot),
-                (CaselessLiteral('and'), 2, opAssoc.LEFT, BoolMust),
-                (CaselessLiteral('or'), 2, opAssoc.LEFT, BoolShould),
-            ],
-        )
-
-        return boolExpr
-
-    def _build_query_clause(
-        self,
+        index_id: str,
         user_search_query: str,
         text_fields: List[str],
         text_field_boosts: Dict[str, int],
         return_fields: List[str],
-        filter_: List[Any],
-        highlight: Dict[Any, Any],
+        offset: int = 0,
+        limit: int = 10,
+        filter_=None,
+        highlight=None,
     ):
-        """
-        Given a user-generated query string and Elastic match option objects, generates an Elastic
-        match object.
-        """
+        filter_ = filter_ or []
+        highlight = highlight or {}
+
         if user_search_query == '':
-            # Even if the user_search_query is empty, we may still want to get results. E.g. if a
-            # user is looking only for content in a specific folder.
-            return {
-                'query': {
-                    'bool': {
-                        'must': filter_,
-                    }
-                },
-                'fields': return_fields,
-                'highlight': highlight,
-                # Set `_source` to False so we only return the properties specified in `fields`
-                '_source': False,
-            }, []
+            solr_query = '*:*'
+            search_phrases = []
+        else:
+            solr_query = self._pre_process_query(user_search_query)
+            search_phrases = self._get_words_phrases_and_wildcards(user_search_query)
 
-        words_phrases_and_wildcards = self._get_words_phrases_and_wildcards(user_search_query)
-        processed_query = self._pre_process_query(user_search_query)
-        parser = self._get_query_parser(text_fields, text_field_boosts)
-        result = parser.parseString(processed_query)[0].to_dict()
-
-        return {
-            'query': {
-                'bool': {
-                    'must': [result] + filter_,
-                }
-            },
-            'fields': return_fields,
-            'highlight': highlight,
-            # Set `_source` to False so we only return the properties specified in `fields`
-            '_source': False,
-        }, words_phrases_and_wildcards
-
-    def search(
-            self,
-            index_id: str,
-            user_search_query: str,
-            text_fields: List[str],
-            text_field_boosts: Dict[str, int],
-            return_fields: List[str],
-            offset: int = 0,
-            limit: int = 10,
-            filter_=None,
-            highlight=None
-    ):
-        es_query, search_phrases = self._build_query_clause(
-            user_search_query=user_search_query,
-            text_fields=text_fields,
-            text_field_boosts=text_field_boosts,
-            return_fields=return_fields,
-            filter_=filter_,
-            highlight=highlight,
-        )
+        qf = ' '.join([f'{self._map_field(field)}^{text_field_boosts.get(field, 1)}' for field in text_fields])
+        fq = [self._convert_filter_clause(clause) for clause in filter_]
+        params = {
+            'defType': 'edismax',
+            'q': solr_query or '*:*',
+            'qf': qf,
+            'start': offset,
+            'rows': limit,
+            'wt': 'json',
+            'hl': 'true',
+            'hl.fl': self._map_field('data.content'),
+            'hl.fragsize': highlight.get('fragment_size', 100),
+            'hl.snippets': highlight.get('number_of_fragments', 100),
+            'hl.simple.pre': (highlight.get('pre_tags') or ['@@@@$'])[0],
+            'hl.simple.post': (highlight.get('post_tags') or ['@@@@/$'])[0],
+            'fl': 'id,id_i,score',
+        }
 
         try:
-            es_response = self.elastic_client.search(
-                index=index_id,
-                body=es_query,
-                from_=offset,
-                size=limit,
-                rest_total_hits_as_int=True,
-            )
-        except ElasticRequestError:
+            response = self._request('get', self._select_url(index_id), params=[*params.items(), *[('fq', f) for f in fq]])
+            response.raise_for_status()
+            solr_response = response.json()
+        except Exception as e:
             raise ServerException(
                 title='Content Search Error',
-                message='Something went wrong during content search. Please simplify your query ' +
-                        '(e.g. remove terms, filters, flags, etc.) and try again.',
-                code=400
-            )
+                message='Something went wrong during content search. Please simplify your query and try again.',
+                code=400,
+            ) from e
 
-        es_response['hits']['hits'] = [doc for doc in es_response['hits']['hits']]
-        return es_response, search_phrases
+        docs = solr_response.get('response', {}).get('docs', [])
+        highlighting = solr_response.get('highlighting', {})
+        hits = []
+        for doc in docs:
+            doc_id = doc.get('id')
+            file_id = doc.get('id_i')
+            hit = {
+                '_id': doc_id,
+                '_score': doc.get('score', 0.0),
+                'fields': {'id': [file_id] if file_id is not None else []},
+            }
+            snippets = highlighting.get(doc_id, {}).get('data_content_txt')
+            if snippets:
+                hit['highlight'] = {'data.content': snippets}
+            hits.append(hit)
+
+        return {
+            'hits': {
+                'total': solr_response.get('response', {}).get('numFound', 0),
+                'hits': hits,
+            }
+        }, search_phrases
     # End search methods

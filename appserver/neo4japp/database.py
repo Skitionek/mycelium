@@ -1,7 +1,6 @@
 import hashlib
 import os
 
-from elasticsearch import Elasticsearch
 from flask import current_app, g
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
@@ -96,10 +95,10 @@ class GraphConnection:
 class ElasticConnection:
     def __init__(self):
         super().__init__()
-        self.elastic_client = Elasticsearch(
-            hosts=[current_app.config['ELASTICSEARCH_URL']],
-            request_timeout=180
-        )
+        self.elastic_client = {
+            'base_url': current_app.config['SOLR_URL'].rstrip('/'),
+            'request_timeout': 180,
+        }
 
 
 """

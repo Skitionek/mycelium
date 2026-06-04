@@ -35,24 +35,20 @@ services:
       test: ["CMD", "wget", "localhost:7474", "-O", "-"]
       start_period: 1m
 
-  ## Ekasticsearch search engine
-  elasticsearch:
-    image: ghcr.io/sbrg/mycelium-elasticsearch:7.16.3
+  ## Apache Solr search engine
+  solr:
+    image: solr:9
     restart: unless-stopped
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
+    container_name: solr
+    command:
+      - solr-precreate
+      - file
     ports:
-      - 9200
+      - 8983
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+      - solr:/var/solr
     healthcheck:
-      test: ["CMD", "curl", "-f", "localhost:9200/_cluster/health"]
+      test: ["CMD", "curl", "-f", "localhost:8983/solr/admin/cores?action=STATUS"]
       start_period: 1m
 
   redis:
@@ -70,12 +66,12 @@ services:
       - POSTGRES_PASSWORD=postgres
       - NEO4J_HOST=neo4j
       - NEO4J_AUTH=neo4j/password
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - SOLR_URL=http://solr:8983/solr
       - REDIS_HOST=redis
     depends_on:
       - postgres
       - neo4j
-      - elasticsearch
+      - solr
 
   statistical-enrichment:
     environment:
@@ -98,4 +94,4 @@ services:
 volumes:
   postgres:
   neo4j:
-  elasticsearch:
+  solr:
