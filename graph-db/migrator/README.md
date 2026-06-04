@@ -14,7 +14,7 @@ docker run --rm \
   --env AZURE_ACCOUNT_STORAGE_NAME=mycelium \
   --env AZURE_ACCOUNT_STORAGE_KEY=<storage-key> \
   --env CHANGELOG_DIR=mycelium-graph \
-  ghcr.io/sbrg/mycelium-graphdb-migrator:latest
+  ghcr.io/Skitionek/mycelium-graphdb-migrator:latest
 
 # Or you can run your own local changelog files by setting a volume mount
 # pointing to your changelog directory by adding a `--volume` argument
