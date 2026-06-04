@@ -152,7 +152,9 @@ export class SdrfViewComponent implements OnInit, OnDestroy {
   }
 
   objectUpdate() {
-    this.object$.pipe().subscribe(obj => this.emitModuleProperties(obj));
+    this.subscriptions.add(
+      this.object$.subscribe(obj => this.emitModuleProperties(obj)),
+    );
     this.load();
   }
 
