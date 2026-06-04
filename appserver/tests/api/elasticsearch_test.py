@@ -84,12 +84,11 @@ def test_user_can_search_content(
         resp = client.get(
             '/search/content',
             headers=headers,
-            data={
+            query_string={
                 'q': 'BOLA3',
                 'limit': 10,
                 'page': 1
-            },
-            content_type='multipart/form-data'
+            }
         )
 
         assert resp.status_code == 200
@@ -131,13 +130,12 @@ def test_user_can_search_content_with_single_types(
         resp = client.get(
             '/search/content',
             headers=headers,
-            data={
+            query_string={
                 'q': '',
                 'types': 'pdf',
                 'limit': 10,
                 'page': 1
-            },
-            content_type='multipart/form-data'
+            }
         )
 
         assert resp.status_code == 200
@@ -178,13 +176,12 @@ def test_user_can_search_content_with_multiple_types(
         resp = client.get(
             '/search/content',
             headers=headers,
-            data={
+            query_string={
                 'q': 'BOLA3',
                 'limit': 10,
                 'page': 1,
                 'types': 'enrichment-table;map;pdf',
-            },
-            content_type='multipart/form-data'
+            }
         )
 
         assert resp.status_code == 200
@@ -225,15 +222,14 @@ def test_user_can_search_content_with_folder(
         resp = client.get(
             '/search/content',
             headers=headers,
-            data={
+            query_string={
                 'q': '',
                 # We don't care about actually finding  a folder with this hash id in this test,
                 # just that the param is properly handled
                 'folders': 'ABCDEF123456',
                 'limit': 10,
                 'page': 1
-            },
-            content_type='multipart/form-data'
+            }
         )
 
         assert resp.status_code == 200

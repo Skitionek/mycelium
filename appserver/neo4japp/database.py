@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from neo4j import GraphDatabase, basic_auth
 from sqlalchemy import MetaData, Table, UniqueConstraint
+from sqlalchemy import __version__ as sqlalchemy_version
 
 from neo4japp.utils.flask import scope_flask_app_ctx
 
@@ -49,10 +50,15 @@ convention = {
 ma = Marshmallow()
 migrate = Migrate(compare_type=True)
 metadata = MetaData(naming_convention=convention)
+
+# SQLAlchemy 2.x accepts "values_plus_batch" while 1.x expects "values_only".
+sqlalchemy_major = int(sqlalchemy_version.split('.', 1)[0])
+executemany_mode = 'values_plus_batch' if sqlalchemy_major >= 2 else 'values_only'
+
 db = SQLAlchemy(
     metadata=metadata,
     engine_options={
-        'executemany_mode': 'values_only',
+        'executemany_mode': executemany_mode,
         'insertmanyvalues_page_size': 10000
     }
 )

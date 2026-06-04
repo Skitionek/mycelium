@@ -83,9 +83,9 @@ def seed():
         trans = conn.begin()
         for table in truncated_tables:
             logger.info(f"Truncating {table}...")
-            conn.execute(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL;')
-            conn.execute(f'TRUNCATE TABLE "{table}" RESTART IDENTITY CASCADE;')
-            conn.execute(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL;')
+            conn.execute(text(f'ALTER TABLE "{table}" DISABLE TRIGGER ALL;'))
+            conn.execute(text(f'TRUNCATE TABLE "{table}" RESTART IDENTITY CASCADE;'))
+            conn.execute(text(f'ALTER TABLE "{table}" ENABLE TRIGGER ALL;'))
         trans.commit()
 
         logger.info("Inserting fixtures...")
@@ -125,9 +125,11 @@ def seed():
 
             if 'id' in table.columns:
                 logger.info(f"Updating sequence for {table.name}...")
-                conn.execute(f'SELECT pg_catalog.setval('
-                             f'pg_get_serial_sequence(\'{table.name}\', \'id\'), '
-                             f'MAX(id) + 1) FROM {table.name};')
+                conn.execute(text(
+                    f"SELECT pg_catalog.setval(" \
+                    f"pg_get_serial_sequence('{table.name}', 'id'), " \
+                    f"MAX(id) + 1) FROM {table.name};"
+                ))
             else:
                 logger.info(f"No ID column for {class_name}")
 

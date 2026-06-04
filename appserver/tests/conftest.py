@@ -57,7 +57,11 @@ def session(app, request):
     connection = db.engine.connect()
     transaction = connection.begin()
     options = {'bind': connection, 'binds': {}}
-    session = db.create_scoped_session(options=options)
+    if hasattr(db, 'create_scoped_session'):
+        session = db.create_scoped_session(options=options)
+    else:
+        # Flask-SQLAlchemy >=3 removed create_scoped_session.
+        session = db._make_scoped_session(options=options)
     db.session = session
 
     def teardown():

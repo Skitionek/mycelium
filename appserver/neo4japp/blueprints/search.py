@@ -172,8 +172,8 @@ def get_filepaths_filter(accessible_folders: List[Files], accessible_projects: L
 class ContentSearchView(ProjectBaseView, FilesystemBaseView):
     decorators = [auth.login_required]
 
-    @use_args(ContentSearchSchema)
-    @use_args(PaginatedRequestSchema)
+    @use_args(ContentSearchSchema, location='query')
+    @use_args(PaginatedRequestSchema, location='query')
     def get(self, params: dict, pagination: Pagination):
         current_app.logger.info(
             f'Term: {params["q"]}',
@@ -316,8 +316,8 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
 class SynonymSearchView(FilesystemBaseView):
     decorators = [auth.login_required]
 
-    @use_args(SynonymSearchSchema)
-    @use_args(PaginatedRequestSchema)
+    @use_args(SynonymSearchSchema, location='query')
+    @use_args(PaginatedRequestSchema, location='query')
     def get(self, params, pagination: Pagination):
         search_term = params.get('term', None)
 
