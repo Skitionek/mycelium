@@ -1,5 +1,6 @@
 import json
 
+from flask import current_app
 from pyparsing import (
     Optional,
     ParserElement,
@@ -25,6 +26,13 @@ ParserElement.enablePackrat()
 
 
 class ElasticService(ElasticConnection, GraphConnection):
+    ALLOWED_FILTER_FIELDS = frozenset({
+        'file_path.tree',
+        'mime_type',
+        'project_id',
+        'public',
+    })
+
     def _collection(self, index_id: str) -> str:
         return index_id
 
@@ -58,6 +66,7 @@ class ElasticService(ElasticConnection, GraphConnection):
         self.reindex_all_documents()
 
     def update_or_create_pipeline(self, pipeline_id, pipeline_definition_file):
+        # Solr uses the extract handler (Tika) directly and does not require ingest pipelines.
         return 'done'
 
     def recreate_indices_and_pipelines(self):
@@ -162,45 +171,54 @@ class ElasticService(ElasticConnection, GraphConnection):
             'id_i': file.id,
             'hash_id_s': file.hash_id,
             'mime_type_s': file.mime_type or '',
-            'data_ok_b': 'true',
+            'data_ok_b': self._normalize_bool(True),
             'file_path_ss': self._path_tree(file.filename_path or ''),
         }
 
         if content:
-            params = {
-                'literal.id': file.hash_id,
-                'fmap.content': 'data_content_txt',
-                'commitWithin': '1000',
-                'overwrite': 'true',
-                'resource.name': file.filename or file.hash_id,
-            }
-            for key, value in literal_fields.items():
-                if isinstance(value, list):
-                    for list_val in value:
-                        params.setdefault(f'literal.{key}', [])
-                        params[f'literal.{key}'].append(str(list_val))
-                elif value != '':
-                    params[f'literal.{key}'] = str(value)
+            try:
+                params = {
+                    'literal.id': file.hash_id,
+                    'fmap.content': 'data_content_txt',
+                    'commitWithin': '1000',
+                    'overwrite': 'true',
+                    'resource.name': file.filename or file.hash_id,
+                }
+                for key, value in literal_fields.items():
+                    if isinstance(value, list):
+                        for list_val in value:
+                            params.setdefault(f'literal.{key}', [])
+                            params[f'literal.{key}'].append(str(list_val))
+                    elif value != '':
+                        params[f'literal.{key}'] = str(value)
 
-            query = urlencode(params, doseq=True)
-            response = self._request(
-                'post',
-                f'{self._extract_url(index_id)}?{query}',
-                files={'file': (file.filename or file.hash_id, content)},
-            )
-            response.raise_for_status()
-        else:
-            doc = {'id': file.hash_id}
-            for key, value in literal_fields.items():
-                if value != '':
-                    doc[key] = value
-            self._request(
-                'post',
-                self._update_url(index_id),
-                params={'commitWithin': '1000'},
-                json={'add': {'doc': doc}},
-                headers={'Content-Type': 'application/json'},
-            ).raise_for_status()
+                query = urlencode(params, doseq=True)
+                response = self._request(
+                    'post',
+                    f'{self._extract_url(index_id)}?{query}',
+                    files={'file': (file.filename or file.hash_id, content)},
+                )
+                response.raise_for_status()
+                return
+            except Exception as e:
+                literal_fields['data_ok_b'] = self._normalize_bool(False)
+                current_app.logger.error(
+                    f'Failed to extract searchable content for file '
+                    f'#{file.id} (hash={file.hash_id}, mime type={file.mime_type})',
+                    exc_info=e,
+                    extra=EventLog(event_type=LogEventType.ELASTIC_FAILURE.value).to_dict()
+                )
+        doc = {'id': file.hash_id}
+        for key, value in literal_fields.items():
+            if value != '':
+                doc[key] = value
+        self._request(
+            'post',
+            self._update_url(index_id),
+            params={'commitWithin': '1000'},
+            json={'add': {'doc': doc}},
+            headers={'Content-Type': 'application/json'},
+        ).raise_for_status()
 
     # End indexing methods
 
@@ -296,7 +314,8 @@ class ElasticService(ElasticConnection, GraphConnection):
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
                         title='Content Search Error',
-                        message='Your query appears malformed.',
+                        message='Your query appears malformed. A logical operator (AND/OR) was '
+                                + 'encountered immediately following a NOT operator.',
                         code=400,
                     )
                 new_query += [curr]
@@ -304,7 +323,8 @@ class ElasticService(ElasticConnection, GraphConnection):
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
                         title='Content Search Error',
-                        message='Your query appears malformed.',
+                        message='Your query appears malformed. Two logical operators (AND/OR) '
+                                + 'were encountered in succession.',
                         code=400,
                     )
                 new_query += [curr]
@@ -337,9 +357,13 @@ class ElasticService(ElasticConnection, GraphConnection):
     def _convert_filter_clause(self, clause: dict) -> str:
         if 'term' in clause:
             field, value = next(iter(clause['term'].items()))
+            if field not in self.ALLOWED_FILTER_FIELDS:
+                raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
             return f'{self._map_field(field)}:{self._format_value(value)}'
         if 'terms' in clause:
             field, values = next(iter(clause['terms'].items()))
+            if field not in self.ALLOWED_FILTER_FIELDS:
+                raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
             joined = ' OR '.join([f'{self._map_field(field)}:{self._format_value(v)}' for v in values])
             return f'({joined})'
         if 'bool' in clause:
@@ -393,13 +417,16 @@ class ElasticService(ElasticConnection, GraphConnection):
         }
 
         try:
-            response = self._request('get', self._select_url(index_id), params=[*params.items(), *[('fq', f) for f in fq]])
+            request_params = list(params.items())
+            request_params.extend([('fq', clause) for clause in fq])
+            response = self._request('get', self._select_url(index_id), params=request_params)
             response.raise_for_status()
             solr_response = response.json()
         except Exception as e:
             raise ServerException(
                 title='Content Search Error',
-                message='Something went wrong during content search. Please simplify your query and try again.',
+                message='Something went wrong during content search. Please simplify your query '
+                        + '(e.g. remove terms, filters, flags, etc.) and try again.',
                 code=400,
             ) from e
 
