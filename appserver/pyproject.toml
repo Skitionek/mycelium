@@ -37,7 +37,7 @@ dependencies = [
   "fastjsonschema==2.21.2",
   "marshmallow-dataclass==8.7.1",
   "marshmallow-enum==1.5.1",
-  "deepdiff==9.0.0",
+  "deepdiff==9.1.0",
   "timeflake==0.4.3",
   "scipy==1.15.3",
   "sqlalchemy==2.0.44",
