@@ -13,21 +13,28 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [Unreleased]
 
 ### Added
+- **Mozg knowledge-graph layer** (`mozg/`): new Docker service based on
+  [Mozg](https://github.com/Skitionek/Mozg), a cross-database GraphQL query
+  layer.  Mozg replaces the local Neo4j knowledge graph (`graph-db/`) for
+  enrichment-data queries.  When `MOZG_URL` is set, enrichment lookups for
+  UniProt, STRING, KEGG, BioCyc, GO, RegulonDB, and NCBI gene matching are
+  routed through Mozg to the canonical upstream REST APIs instead of a locally
+  pre-loaded Neo4j instance.
+- **`appserver/neo4japp/services/mozg_client.py`**: thin Python HTTP client
+  for the Mozg `/graphql` endpoint.  Pre-defines connection descriptors for
+  NCBI, UniProt, STRING, KEGG, BioCyc, EBI QuickGO, and RegulonDB.
+- **`appserver/neo4japp/services/mozg_kg_service.py`**: `MozgKgService` and
+  `MozgEnrichmentTableService` — drop-in replacements for `KgService` /
+  `EnrichmentTableService` that delegate all biological-database lookups to
+  Mozg.  Selected automatically when `MOZG_URL` is present; fall back to
+  Neo4j when it is not.
+- **`statistical-enrichment/statistical_enrichment/services/mozg_client.py`**:
+  Mozg client for the statistical-enrichment service.
+- `cache-invalidator` now calls `precalculateGO_mozg()` (EBI QuickGO via
+  Mozg) instead of `precalculateGO()` (local Neo4j) when `MOZG_URL` is set.
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
-
-### Changed
-- **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
-- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback); Inter loaded from Google Fonts ([#245]).
-- **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
-- **Elevation**: Heavy box-shadows replaced with subtle `1px solid #e2e8f0` borders on module headers, toolbars, dropdowns and popovers for a "clinical lab" aesthetic ([#245]).
-- **Knowledge Graph nodes**: Default node stroke and edge colour updated from `#2B7CE9` to Deep Sea Teal `#004B49`; default node background updated to `#F1F5F9` ([#245]).
-- **Release automation**: each successful push CI run on `main`/`master` now rolls `[Unreleased]` into a dated changelog section, creates a date-based git tag, and publishes a GitHub Release.
-- **`get_mycelium_global_inclusions_by_type_query` / `get_mycelium_global_inclusion_exist_query`**: Renamed from `get_lifelike_*` to `get_mycelium_*` to match the `db_Mycelium` label they query; call sites in `annotation_graph_service.py` and `manual_annotation_service.py` updated accordingly ([#254]).
-- **DB constraint/index names**: `constraint_lifelike_name` → `constraint_mycelium_name` and `index_lifelike_id` → `index_mycelium_id` in `changelog-0030.xml` to match the `db_Mycelium` node label they target ([#254]).
-
-### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
@@ -38,6 +45,25 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Database migration** `001_add_folder_annotation_config`: adds the `file_effective_annotation_config` table precomputing the fully-merged annotation config for every file (recursive CTE over the ancestor folder chain, reads `files_content.raw_file::jsonb` directly) and the `jsonb_merge_annotation_configs` PostgreSQL function/aggregate for deep-merging `annotation_configs` objects. No new column is added to the `files` table.
 - Unit tests for `FolderAnnotationService` covering: no config files, single folder config, nested config merging, `inherit: false` reset, per-file overrides, partial configs.
 - API test for the `effective-annotations-config` endpoint.
+
+### Changed
+- **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
+- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback); Inter loaded from Google Fonts ([#245]).
+- **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
+- **Elevation**: Heavy box-shadows replaced with subtle `1px solid #e2e8f0` borders on module headers, toolbars, dropdowns and popovers for a "clinical lab" aesthetic ([#245]).
+- **Knowledge Graph nodes**: Default node stroke and edge colour updated from `#2B7CE9` to Deep Sea Teal `#004B49`; default node background updated to `#F1F5F9` ([#245]).
+- **Release automation**: each successful push CI run on `main`/`master` now rolls `[Unreleased]` into a dated changelog section, creates a date-based git tag, and publishes a GitHub Release.
+- **`get_mycelium_global_inclusions_by_type_query` / `get_mycelium_global_inclusion_exist_query`**: Renamed from `get_lifelike_*` to `get_mycelium_*` to match the `db_Mycelium` label they query; call sites in `annotation_graph_service.py` and `manual_annotation_service.py` updated accordingly ([#254]).
+- **DB constraint/index names**: `constraint_lifelike_name` → `constraint_mycelium_name` and `index_lifelike_id` → `index_mycelium_id` in `changelog-0030.xml` to match the `db_Mycelium` node label they target ([#254]).
+- `docker/docker-compose.services.yml`: Mozg service added; `appserver`,
+  `statistical-enrichment`, and `cache-invalidator` gain `MOZG_URL` and
+  `mozg` in their `depends_on`.
+
+### Deprecated
+- **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
+  New biological-database pipelines should not be added there; use Mozg
+  instead.  The Neo4j instance is retained for the graph visualiser and
+  full-text synonym search until those features are migrated.
 
 ### Security
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
