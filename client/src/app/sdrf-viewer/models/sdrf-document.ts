@@ -34,6 +34,8 @@ export interface SdrfValidationError {
 export function classifySdrfColumn(header: string): SdrfColumn {
   const h = header.trim().toLowerCase();
 
+  // Matches "prefix[param]" where param is non-empty.
+  // Empty brackets (e.g. "characteristics[]") are not valid SDRF and fall through to 'other'.
   const bracketMatch = h.match(/^([^[]+)\[([^\]]+)\]$/);
 
   if (h === 'source name') {

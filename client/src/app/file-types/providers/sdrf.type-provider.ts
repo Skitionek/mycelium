@@ -107,9 +107,8 @@ export class SdrfTypeProvider extends AbstractObjectTypeProvider {
       export: () => {
         return this.filesystemService.getContent(object.hashId).pipe(
           map(blob => {
-            const name = object.filename.endsWith('.tsv')
-              ? object.filename
-              : object.filename + '.sdrf.tsv';
+            const name = (object.filename || 'file')
+              .replace(/\.tsv$/i, '') + '.sdrf.tsv';
             return new File([blob], name);
           }),
         );

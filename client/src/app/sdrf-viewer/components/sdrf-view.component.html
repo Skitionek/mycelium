@@ -64,7 +64,7 @@
                 class="sdrf-cell"
                 [contentEditable]="ctx.object.privileges.writable"
                 [textContent]="cell"
-                (blur)="onCellEdit(ri, ci, $event.target.textContent)"
+                (blur)="onCellEdit(ri, ci, $event.target.textContent ?? '')"
                 spellcheck="false">
             </td>
             <td class="sdrf-col-actions">
