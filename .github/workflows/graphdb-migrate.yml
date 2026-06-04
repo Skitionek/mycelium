@@ -72,7 +72,7 @@ jobs:
     permissions:
       contents: read
     container:
-      image: ghcr.io/sbrg/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
+      image: ghcr.io/Skitionek/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
       options: --user root
       env:
         NEO4J_HOST: ${{ github.event.inputs.neo4j_host }}
