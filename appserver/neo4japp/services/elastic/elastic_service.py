@@ -1,5 +1,3 @@
-import json
-
 from flask import current_app
 from pyparsing import (
     Optional,
@@ -12,7 +10,7 @@ from pyparsing import (
 import requests
 from sqlalchemy import and_
 from sqlalchemy.orm import joinedload, raiseload
-from typing import Any, Dict, List
+from typing import Dict, List
 from urllib.parse import urlencode
 
 from neo4japp.constants import FILE_INDEX_ID, LogEventType
@@ -272,7 +270,13 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
         parser = ZeroOrMore(token)
 
         unique_non_keyword_tokens = list(
-            set([t for t in list(parser.parseString(string)) if t.lower() not in ['and', 'not', 'or']])
+            set(
+                [
+                    t
+                    for t in list(parser.parseString(string))
+                    if t.lower() not in ['and', 'not', 'or']
+                ]
+            )
         )
 
         words_phrases_and_wildcards = []
@@ -358,23 +362,51 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
         if 'term' in clause:
             field, value = next(iter(clause['term'].items()))
             if field not in self.ALLOWED_FILTER_FIELDS:
-                raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
+                raise ServerException(
+                    title='Content Search Error',
+                    message='Unsupported search filter.',
+                    code=400,
+                )
             return f'{self._map_field(field)}:{self._format_value(value)}'
         if 'terms' in clause:
             field, values = next(iter(clause['terms'].items()))
             if field not in self.ALLOWED_FILTER_FIELDS:
-                raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
-            joined = ' OR '.join([f'{self._map_field(field)}:{self._format_value(v)}' for v in values])
+                raise ServerException(
+                    title='Content Search Error',
+                    message='Unsupported search filter.',
+                    code=400,
+                )
+            joined = ' OR '.join(
+                [f'{self._map_field(field)}:{self._format_value(v)}' for v in values]
+            )
             return f'({joined})'
         if 'bool' in clause:
             bool_clause = clause['bool']
             if 'must' in bool_clause:
-                return '(' + ' AND '.join([self._convert_filter_clause(c) for c in bool_clause['must']]) + ')'
+                return (
+                    '('
+                    + ' AND '.join([self._convert_filter_clause(c) for c in bool_clause['must']])
+                    + ')'
+                )
             if 'should' in bool_clause:
-                return '(' + ' OR '.join([self._convert_filter_clause(c) for c in bool_clause['should']]) + ')'
+                return (
+                    '('
+                    + ' OR '.join([self._convert_filter_clause(c) for c in bool_clause['should']])
+                    + ')'
+                )
             if 'must_not' in bool_clause:
-                return 'NOT (' + ' AND '.join([self._convert_filter_clause(c) for c in bool_clause['must_not']]) + ')'
-        raise ServerException(title='Content Search Error', message='Unsupported search filter.', code=400)
+                return (
+                    'NOT ('
+                    + ' AND '.join(
+                        [self._convert_filter_clause(c) for c in bool_clause['must_not']]
+                    )
+                    + ')'
+                )
+        raise ServerException(
+            title='Content Search Error',
+            message='Unsupported search filter.',
+            code=400,
+        )
 
     def search(
         self,
@@ -398,7 +430,9 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
             solr_query = self._pre_process_query(user_search_query)
             search_phrases = self._get_words_phrases_and_wildcards(user_search_query)
 
-        qf = ' '.join([f'{self._map_field(field)}^{text_field_boosts.get(field, 1)}' for field in text_fields])
+        qf = ' '.join(
+            [f'{self._map_field(field)}^{text_field_boosts.get(field, 1)}' for field in text_fields]
+        )
         fq = [self._convert_filter_clause(clause) for clause in filter_]
         params = {
             'defType': 'edismax',

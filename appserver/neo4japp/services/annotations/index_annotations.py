@@ -143,7 +143,10 @@ def seed_exclusions():
             GlobalList.type == ManualAnnotationType.EXCLUSION.value
         ).all()
 
-        _solr_replace_collection('annotation_exclusion', list(add_exclusion_to_search_index(exclusions)))
+        _solr_replace_collection(
+            'annotation_exclusion',
+            list(add_exclusion_to_search_index(exclusions)),
+        )
 
 
 def main(argv):
