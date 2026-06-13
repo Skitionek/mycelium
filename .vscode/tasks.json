@@ -114,10 +114,7 @@
     {
       "label": "test: all",
       "dependsOrder": "sequence",
-      "dependsOn": [
-        "test: backend (uv)",
-        "test: client"
-      ],
+      "dependsOn": ["test: backend (uv)", "test: client"],
       "group": {
         "kind": "test",
         "isDefault": true
@@ -159,20 +156,13 @@
     {
       "label": "client: install-and-dev-start",
       "dependsOrder": "sequence",
-      "dependsOn": [
-        "client: install-deps",
-        "client: dev-start"
-      ]
+      "dependsOn": ["client: install-deps", "client: dev-start"]
     },
     {
       "label": "lint: ruff",
       "type": "shell",
       "command": "${env:HOME}/.local/bin/uvx",
-      "args": [
-        "ruff",
-        "check",
-        "."
-      ],
+      "args": ["ruff", "check", "."],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -182,11 +172,7 @@
       "label": "format: ruff",
       "type": "shell",
       "command": "${env:HOME}/.local/bin/uvx",
-      "args": [
-        "ruff",
-        "format",
-        "."
-      ],
+      "args": ["ruff", "format", "."],
       "options": {
         "cwd": "${workspaceFolder}"
       }
