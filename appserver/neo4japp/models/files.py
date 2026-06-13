@@ -385,8 +385,8 @@ class Files(RDBMSBase, FullTimestampMixin, RecyclableMixin, HashIdMixin):  # typ
 @event.listens_for(Files, 'after_insert')
 def file_insert(mapper, connection, target: Files):
     """
-    Handles creating a new search index document for the newly inserted file. Note: if this fails, the
-    file insert will be rolled back.
+    Handles creating a new search index document for the newly inserted file.
+    Note: if this fails, the file insert will be rolled back.
     """
     try:
         search_index_service = get_search_index_service()
@@ -411,8 +411,8 @@ def file_insert(mapper, connection, target: Files):
 @event.listens_for(Files, 'after_update')
 def file_update(mapper, connection, target: Files):
     """
-    Handles updating this document in the search index. Note: if this fails, the file update will be rolled
-    back.
+    Handles updating this document in the search index.
+    Note: if this fails, the file update will be rolled back.
     """
     # Import what we need, when we need it (Helps to avoid circular dependencies)
     from neo4japp.models.files_queries import get_nondeleted_recycled_children_query
@@ -470,8 +470,8 @@ def file_update(mapper, connection, target: Files):
 @event.listens_for(Files, 'after_delete')
 def file_delete(mapper, connection, target: Files):
     """
-    Handles deleting this document from the search index. Note: if this fails, the file deletion will be
-    rolled back.
+    Handles deleting this document from the search index.
+    Note: if this fails, the file deletion will be rolled back.
     """
     # Import what we need, when we need it (Helps to avoid circular dependencies)
     from neo4japp.models.files_queries import get_nondeleted_recycled_children_query

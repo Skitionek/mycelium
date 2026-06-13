@@ -30,7 +30,12 @@ from neo4japp.constants import (
     LogEventType
 )
 from neo4japp.services.annotations.constants import LMDB_DATA_DIR
-from neo4japp.database import db, get_account_service, get_search_index_service, get_file_type_service
+from neo4japp.database import (
+    db,
+    get_account_service,
+    get_search_index_service,
+    get_file_type_service,
+)
 from neo4japp.factory import create_app
 from neo4japp.lmdb_manager import LMDBManager, AzureStorageProvider
 from neo4japp.models import AppUser
