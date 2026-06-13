@@ -2288,10 +2288,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/schematics@~21.1.0":
-  version "21.1.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-21.1.0.tgz#601be1f77594fde6af2b384b95a3cd0b0a65a9b8"
-  integrity sha512-WSnEEA/yvHHs2uyDvlYCrZ5weB2v1clG8NVJbHgaYCt+JZlD/flq+nO9QFL8qZ4y1xDmJ4kMg0Vy4g6jfENejg==
+"@ngrx/schematics@~21.1.1":
+  version "21.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-21.1.1.tgz#7473134fd03ea5e60e6e67b9af3468ef191d59ff"
+  integrity sha512-HOSCJ6NMNEaauIFCuD9u4FMGsRmOPkWqz5K3zQeaY5D212ZX28WT2V5RGHX7WVxVN97JGXgiQUjqYXt32ApzeA==
 
 "@ngrx/store-devtools@~14.3.0":
   version "14.3.3"
