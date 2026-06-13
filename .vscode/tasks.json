@@ -163,6 +163,33 @@
         "client: install-deps",
         "client: dev-start"
       ]
+    },
+    {
+      "label": "lint: ruff",
+      "type": "shell",
+      "command": "${env:HOME}/.local/bin/uvx",
+      "args": [
+        "ruff",
+        "check",
+        "."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test"
+    },
+    {
+      "label": "format: ruff",
+      "type": "shell",
+      "command": "${env:HOME}/.local/bin/uvx",
+      "args": [
+        "ruff",
+        "format",
+        "."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }
