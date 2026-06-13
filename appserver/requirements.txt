@@ -13,7 +13,7 @@ azure-common==1.1.28
     # via
     #   azure-storage-common
     #   azure-storage-file
-azure-core==1.39.0
+azure-core==1.41.0
     # via azure-storage-blob
 azure-storage-blob==12.28.0
     # via mycelium-appserver
@@ -117,7 +117,7 @@ google-auth==2.49.1
     #   google-cloud-storage
 google-cloud-core==2.5.0
     # via google-cloud-storage
-google-cloud-storage==3.10.1
+google-cloud-storage==3.12.0
     # via mycelium-appserver
 google-crc32c==1.8.0
     # via
@@ -125,7 +125,7 @@ google-crc32c==1.8.0
     #   google-resumable-media
 google-resumable-media==2.9.0
     # via google-cloud-storage
-googleapis-common-protos==1.73.1
+googleapis-common-protos==1.75.0
     # via google-api-core
 graphviz==0.21
     # via mycelium-appserver
@@ -281,7 +281,7 @@ svg-stack==0.1.0
     # via mycelium-appserver
 timeflake==0.4.3
     # via mycelium-appserver
-tqdm==4.67.3
+tqdm==4.68.2
     # via bioc
 typeguard==4.5.2
     # via marshmallow-dataclass

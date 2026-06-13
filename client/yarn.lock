@@ -1782,10 +1782,10 @@
   dependencies:
     "@marijn/find-cluster-break" "^1.0.0"
 
-"@codemirror/view@6.43.0", "@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.27.0", "@codemirror/view@^6.35.0", "@codemirror/view@^6.37.0":
-  version "6.43.0"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.0.tgz#a577da65f1d5d8f7cbf08e14849284c12f38365a"
-  integrity sha512-V7ZCLQO3Jus9hzh2jVCCPW3mO4IBMr43O37PqSUYautJSnnJF41YlgLw21x0fLJTYvJ+Vkm6Gp+qKGH9pltgXA==
+"@codemirror/view@6.43.1", "@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.27.0", "@codemirror/view@^6.35.0", "@codemirror/view@^6.37.0":
+  version "6.43.1"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.1.tgz#bfe3ea568e38812631749c1b6c9c7869784143a5"
+  integrity sha512-+BIjw/AG3tDQ4pJgTLPYdAW25eDE66YsvM4LKyVPgGzVgZ4a9Wj1SRX8kPVKgBDdPt8oHtZ15F0qx7p0oOHdHw==
   dependencies:
     "@codemirror/state" "^6.6.0"
     crelt "^1.0.6"
@@ -2288,10 +2288,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/schematics@~21.1.0":
-  version "21.1.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-21.1.0.tgz#601be1f77594fde6af2b384b95a3cd0b0a65a9b8"
-  integrity sha512-WSnEEA/yvHHs2uyDvlYCrZ5weB2v1clG8NVJbHgaYCt+JZlD/flq+nO9QFL8qZ4y1xDmJ4kMg0Vy4g6jfENejg==
+"@ngrx/schematics@~21.1.1":
+  version "21.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-21.1.1.tgz#7473134fd03ea5e60e6e67b9af3468ef191d59ff"
+  integrity sha512-HOSCJ6NMNEaauIFCuD9u4FMGsRmOPkWqz5K3zQeaY5D212ZX28WT2V5RGHX7WVxVN97JGXgiQUjqYXt32ApzeA==
 
 "@ngrx/store-devtools@~14.3.0":
   version "14.3.3"
@@ -2953,10 +2953,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>=10.0.0", "@types/node@^25.9.1":
-  version "25.9.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.9.1.tgz#3bda556db500ae4319c08e7fc9ab94f19013ba0b"
-  integrity sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg==
+"@types/node@*", "@types/node@>=10.0.0", "@types/node@^25.9.3":
+  version "25.9.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.9.3.tgz#11dfe7a33e68fa5c560f0aa76cc5595621ef26b9"
+  integrity sha512-603BddQMv3pUcr4U2dhujk83N2tTDVr/34wII2B6bJy6g+8WD6yUb11jszNs0gdi4PesVWl7ABt8nYMVpnLUcg==
   dependencies:
     undici-types ">=7.24.0 <7.24.7"
 
@@ -6993,10 +6993,10 @@ jasmine-core@~2.8.0:
   resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-2.8.0.tgz#bcc979ae1f9fd05701e45e52e65d3a5d63f1a24e"
   integrity sha1-vMl5rh+f0FcB5F5S5l06XWPxok4=
 
-jasmine-core@~6.2.0:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-6.2.0.tgz#1e63642766d26e68afd2681d00ace3475004385a"
-  integrity sha512-b16WZG/pFEFj8qRW1ss7nDuNGYz9ji8BDGj7fJNrROauk5rj/diO3KPOuyIpcgUChdC+c0PfQ8iUk4nHE+EN4w==
+jasmine-core@~6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-6.3.0.tgz#ff8e4e771a4c8e7bebd0966bc4625f000f78fa84"
+  integrity sha512-eMm5qBovNjNoGOcgE/W207+wrcK5zrQv0Rg/rWGboUJUmZp0dFCpHTyjpuDAfCwRCqg7f9U2q2jtv/aUuzdCQg==
 
 jasmine-marbles@^0.9.2:
   version "0.9.2"
