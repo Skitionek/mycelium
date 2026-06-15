@@ -15,7 +15,7 @@ dependencies = [
   "gunicorn==22.0.0",
   "marshmallow-sqlalchemy==1.5.0",
   "openpyxl==3.0.9",
-  "pyjwt==2.12.1",
+  "pyjwt==2.13.0",
   "psycopg2-binary==2.9.12",
   "bioc==2.1",
   "pdfminer-six==20260107",
