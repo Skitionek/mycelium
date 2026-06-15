@@ -220,7 +220,7 @@ pyasn1-modules==0.4.2
     # via google-auth
 pycparser==3.0 ; implementation_name != 'PyPy'
     # via cffi
-pyjwt==2.12.1
+pyjwt==2.13.0
     # via mycelium-appserver
 pynacl==1.6.2
     # via paramiko
