@@ -2,7 +2,7 @@
 #    uv export --no-dev --no-hashes -o requirements.txt
 alembic==1.14.1
     # via flask-migrate
-anyio==4.12.1
+anyio==4.14.0
 apispec==6.10.0
     # via flask-apispec
 attrs==26.1.0
