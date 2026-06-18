@@ -34,7 +34,7 @@ blinker==1.9.0
     #   sentry-sdk
 cachelib==0.14.0
     # via flask-caching
-certifi==2026.5.20
+certifi==2026.6.17
     # via
     #   elastic-apm
     #   elastic-transport
