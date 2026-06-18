@@ -64,6 +64,6 @@ dev = [
   "httpretty==1.1.4",
   "types-paramiko==4.0.0.20260408",
   "types-redis==4.6.0.20241004",
-  "types-requests==2.33.0.20260402",
+  "types-requests==2.33.0.20260518",
   "pytest-cov==7.1.0",
 ]
