@@ -133,7 +133,7 @@ greenlet==3.5.1 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     # via sqlalchemy
 gunicorn==22.0.0
     # via mycelium-appserver
-idna==3.15
+idna==3.18
     # via
     #   anyio
     #   requests
