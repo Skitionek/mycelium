@@ -281,7 +281,7 @@ svg-stack==0.1.0
     # via mycelium-appserver
 timeflake==0.4.3
     # via mycelium-appserver
-tqdm==4.68.2
+tqdm==4.68.3
     # via bioc
 typeguard==4.5.2
     # via marshmallow-dataclass
