@@ -55,7 +55,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          prs=$(gh api repos/:owner/:repo/pulls \
+          prs=$(gh api repos/$GITHUB_REPOSITORY/pulls \
             --jq '.[] | select(.user.login == "dependabot[bot]" and .mergeable_state == "behind") | .number')
           
           for pr in $prs; do
