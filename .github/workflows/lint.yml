@@ -60,14 +60,3 @@ jobs:
           echo "A PR with formatting fixes has been created. Please merge it before proceeding."
           echo "PR: ${{ steps.cpr.outputs.pull-request-url }}"
           exit 1
-
-      # ── Upload SARIF for PR annotations ───────────────────────────────────
-      - name: Upload SARIF report
-        if: >
-          (github.event_name == 'pull_request' || github.event_name == 'push') &&
-          always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: megalinter-reports/megalinter-report.sarif
-          # Annotations appear as PR review comments / Security tab findings
-          category: megalinter
