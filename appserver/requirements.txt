@@ -187,7 +187,7 @@ numpy==2.2.6
     # via
     #   pandas
     #   scipy
-openpyxl==3.0.9
+openpyxl==3.1.5
     # via mycelium-appserver
 orderly-set==5.5.0
     # via deepdiff
