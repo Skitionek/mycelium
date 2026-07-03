@@ -51,13 +51,13 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Rebase Dependabot PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Initialize a dummy git repo to satisfy the CLI dependency
-          git init
-
           prs=$(gh pr list --repo $GITHUB_REPOSITORY --app dependabot --json number,mergeStateStatus --jq '.[] | select(.mergeStateStatus == "BEHIND") | .number')
           
           for pr in $prs; do
