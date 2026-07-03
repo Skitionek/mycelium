@@ -110,7 +110,7 @@ google-api-core==2.30.2
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.49.1
+google-auth==2.55.1
     # via
     #   google-api-core
     #   google-cloud-core
@@ -151,7 +151,7 @@ jinja2==3.1.6
     # via flask
 jsonlines==4.0.0
     # via bioc
-lmdb==2.2.0
+lmdb==2.2.1
     # via mycelium-appserver
 lxml==6.1.0
     # via bioc
@@ -187,7 +187,7 @@ numpy==2.2.6
     # via
     #   pandas
     #   scipy
-openpyxl==3.0.9
+openpyxl==3.1.5
     # via mycelium-appserver
 orderly-set==5.5.0
     # via deepdiff

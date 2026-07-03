@@ -51,12 +51,14 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Rebase Dependabot PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          prs=$(gh api repos/$GITHUB_REPOSITORY/pulls \
-            --jq '.[] | select(.user.login == "dependabot[bot]" and .mergeable_state == "behind") | .number')
+          prs=$(gh pr list --repo $GITHUB_REPOSITORY --app dependabot --json number,mergeStateStatus --jq '.[] | select(.mergeStateStatus == "BEHIND") | .number')
           
           for pr in $prs; do
             echo "Rebasing PR #$pr"
