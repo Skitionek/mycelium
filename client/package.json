@@ -91,7 +91,7 @@
     "@angular/compiler-cli": "~14.3.0",
     "@angular/language-service": "~14.3.0",
     "@babel/core": "^8.0.1",
-    "@compodoc/compodoc": "^1.2.1",
+    "@compodoc/compodoc": "^2.0.0",
     "@types/color": "^4.2.1",
     "@types/d3": "^7.4.3",
     "@types/jasmine": "^6.0.0",
