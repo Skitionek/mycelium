@@ -55,8 +55,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          prs=$(gh api repos/$GITHUB_REPOSITORY/pulls \
-            --jq '.[] | select(.user.login == "dependabot[bot]" and .mergeable_state == "behind") | .number')
+          prs=$(gh pr list --app dependabot --json number,mergeStateStatus --jq '.[] | select(.mergeStateStatus == "BEHIND") | .number')
           
           for pr in $prs; do
             echo "Rebasing PR #$pr"
