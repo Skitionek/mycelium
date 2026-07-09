@@ -38,7 +38,7 @@
     "@codemirror/lang-python": "6.2.1",
     "@codemirror/lang-xml": "6.1.0",
     "@codemirror/language": "6.12.4",
-    "@codemirror/state": "6.7.0",
+    "@codemirror/state": "6.7.1",
     "@codemirror/view": "6.43.2",
     "@egjs/hammerjs": "^2.0.17",
     "@ng-bootstrap/ng-bootstrap": "13.1.1",
