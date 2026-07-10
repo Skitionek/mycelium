@@ -135,7 +135,6 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
         path: '',
         redirectTo: '/search',
         pathMatch: 'full',
-        canActivate: [AuthGuard],
       },
       {
         path: 'graph',
