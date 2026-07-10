@@ -74,6 +74,19 @@ This will take a few minutes to complete, after which you can start using Myceli
 
 You can log in using the default admin user `admin@example.com` and password `password`.
 
+## Speed up Codespaces startup with prebuilds
+
+To reduce startup time for new Codespaces, enable GitHub Codespaces prebuilds for this repository:
+
+1. Open your repository on GitHub.
+2. Go to **Settings** -> **Codespaces**.
+3. In **Prebuild configurations**, click **Set up prebuild**.
+4. Choose branch `main` (and any long-lived development branches you use).
+5. Select `.devcontainer/devcontainer.json` as the dev container configuration.
+6. Enable updates on push (recommended) so the prebuild stays warm after merges.
+
+This repository now runs `.devcontainer/post-create.sh` during container creation, which builds and starts the development stack ahead of time. When prebuilds are enabled, that setup work happens during prebuild generation instead of when each developer starts a fresh Codespace.
+
 ## Other installation methods
 
 You can see more details about how to deploy Mycelium in a production environment,
