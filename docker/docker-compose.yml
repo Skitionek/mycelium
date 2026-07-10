@@ -3,7 +3,7 @@ version: "3.8"
 services:
   ## Frontend web server
   frontend:
-    image: ghcr.io/Skitionek/mycelium-frontend:${FRONTEND_IMAGE_TAG:-latest}
+    image: ghcr.io/skitionek/mycelium-frontend:${FRONTEND_IMAGE_TAG:-latest}
     restart: unless-stopped
     container_name: frontend
     environment:
@@ -15,7 +15,7 @@ services:
 
   ## Backend application server
   appserver:
-    image: ghcr.io/Skitionek/mycelium-appserver:${APPSERVER_IMAGE_TAG:-latest}
+    image: ghcr.io/skitionek/mycelium-appserver:${APPSERVER_IMAGE_TAG:-latest}
     restart: unless-stopped
     container_name: appserver
     ports:
@@ -32,7 +32,7 @@ services:
 
   ## PDF parsing service
   pdfparser:
-    image: lifelike.azurecr.io/kg-pdfparser:latest:${PDFPARSER_IMAGE_TAG:-latest}
+    image: lifelike.azurecr.io/kg-pdfparser:${PDFPARSER_IMAGE_TAG:-latest}
     restart: unless-stopped
     container_name: pdfparser
     tty: true
@@ -43,7 +43,7 @@ services:
 
   ## Statistical enrichment service
   statistical-enrichment:
-    image: ghcr.io/Skitionek/mycelium-statistical-enrichment:${STATISTICAL_ENRICHMENT_IMAGE_TAG:-latest}
+    image: ghcr.io/skitionek/mycelium-statistical-enrichment:${STATISTICAL_ENRICHMENT_IMAGE_TAG:-latest}
     restart: unless-stopped
     container_name: statistical-enrichment
     ports:
@@ -51,7 +51,7 @@ services:
 
   # Cache invalidator service
   cache-invalidator:
-    image: ghcr.io/Skitionek/mycelium-cache-invalidator:${CACHE_INVALIDATOR_IMAGE_TAG:-latest}
+    image: ghcr.io/skitionek/mycelium-cache-invalidator:${CACHE_INVALIDATOR_IMAGE_TAG:-latest}
     restart: unless-stopped
     container_name: cache-invalidator
 
