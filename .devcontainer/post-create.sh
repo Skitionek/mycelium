@@ -58,4 +58,4 @@ echo "Building and starting the full Mycelium stack (development mode)..."
 set_host_workspace_path
 retry_with_compatible_api_if_needed
 
-echo "Mycelium stack is ready. The client will be available on http://localhost:8080"
+echo "Mycelium stack is ready. The client will be available on http://localhost:4200"

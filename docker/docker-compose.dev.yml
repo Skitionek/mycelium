@@ -5,8 +5,11 @@ services:
   frontend:
     build:
       context: ../client
+      target: angular-build
       args:
         - ANGULAR_CONFIG=dev
+    ports:
+      - 4200:4200
     environment:
       APPSERVER_URL: http://appserver:5000
 
@@ -18,7 +21,7 @@ services:
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - FRONTEND_URL=http://localhost:8080
+      - FRONTEND_URL=http://localhost:4200
       # Unset to use the default LMDB data directory
       - LMDB_DATA_DIR=
     volumes:
