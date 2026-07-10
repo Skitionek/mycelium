@@ -45,6 +45,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
 ### Fixed
+- **Development frontend startup**: the Docker dev override now builds the Angular dev-server stage for `frontend`, publishes port `4200`, and points `FRONTEND_URL` at the live dev server so source edits show up without rebuilding the static bundle.
 - **Knowledge Graph visualizer route**: removed the invalid `canActivate` guard from the `kg-visualizer/` redirect route so Angular router configuration validates correctly on startup.
 - **Search endpoint request parsing**: `GET /search/content` and `GET /search/synonyms` now parse request arguments from query parameters explicitly, restoring compatibility with newer `webargs` parsing behavior.
 - **Search API test compatibility**: updated search API tests to send GET parameters via query strings, avoiding form-body parsing regressions in the test client stack.
