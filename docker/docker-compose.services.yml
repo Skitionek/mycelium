@@ -60,6 +60,20 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
 
+  ## Elasticsearch search engine
+  elasticsearch:
+    image: us.gcr.io/able-goods-221820/mycelium-elasticsearch:latest
+    restart: unless-stopped
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - 9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "localhost:9200/_cluster/health"]
+      start_period: 30s
+
   appserver:
     environment:
       - POSTGRES_HOST=postgres
