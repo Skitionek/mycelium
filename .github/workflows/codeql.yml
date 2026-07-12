@@ -44,24 +44,3 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
-
-  rebase-dependabot:
-    name: Auto-Rebase Dependabot PRs
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Rebase Dependabot PRs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          prs=$(gh pr list --repo $GITHUB_REPOSITORY --app dependabot --json number,mergeStateStatus --jq '.[] | select(.mergeStateStatus == "BEHIND") | .number')
-          
-          for pr in $prs; do
-            echo "Rebasing PR #$pr"
-            gh pr comment "$pr" --body "@dependabot rebase"
-          done
-
