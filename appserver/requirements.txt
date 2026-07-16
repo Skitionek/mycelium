@@ -203,7 +203,7 @@ paramiko==5.0.0
     # via mycelium-appserver
 pdfminer-six==20260107
     # via mycelium-appserver
-pillow==12.2.0
+pillow==12.3.0
     # via mycelium-appserver
 proto-plus==1.28.0
     # via google-api-core
