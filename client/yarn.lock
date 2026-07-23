@@ -2748,10 +2748,10 @@
   dependencies:
     undici-types "~8.3.0"
 
-"@types/node@^22.19.21":
-  version "22.19.21"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.19.21.tgz#5c9d843ea385b31ee937a9f743443830620a32de"
-  integrity sha512-VMeFBSCKQKmm2swI2kW51SFusDqekC6q9trBCvJ/JliDchFSuoYYKN7yVNjPthP1HKZcx3U1gI/wTcEBjEFKTA==
+"@types/node@^22.20.1":
+  version "22.20.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.20.1.tgz#84e7cdf63cdaa20c134aa317ccc901aa21e16f0e"
+  integrity sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q==
   dependencies:
     undici-types "~6.21.0"
 
@@ -6191,10 +6191,10 @@ immutable@^4.0.0:
   resolved "https://registry.yarnpkg.com/immutable/-/immutable-4.3.8.tgz#02d183c7727fb2bb1d5d0380da0d779dce9296a7"
   integrity sha512-d/Ld9aLbKpNwyl0KiM2CT1WYvkitQ1TSvmRtkcV8FKStiDoA7Slzgjmb/1G2yhKM1p0XeNOieaTbFZmU1d3Xuw==
 
-immutable@^5.1.6:
-  version "5.1.6"
-  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.1.6.tgz#21639bc80f9a0713e141a5f5a154ef9fdabf36dd"
-  integrity sha512-q1swsS8K7L8usSHuOqF2TAoCCkonYz0SG38wLAggaa4Wml70zixIvt2ql4coQ2C2B3hTjltJry4r6bULwgAXLQ==
+immutable@^5.1.9:
+  version "5.1.9"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-5.1.9.tgz#ac23c3a01992ab665e14ac9ffff298f28cd74a0c"
+  integrity sha512-m8nVez3rwrgmWxtLMt1ZYXB2Lv7OKYn/disyxAlSDYAlKSlFoPPfIAmAM/M5xqL4m4C/wAPw7S2/CNaUii1Hxg==
 
 import-fresh@^3.2.1:
   version "3.3.0"
@@ -7811,29 +7811,29 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
-molstar@5.10.1:
-  version "5.10.1"
-  resolved "https://registry.yarnpkg.com/molstar/-/molstar-5.10.1.tgz#c80cf44d077e4bc49e8567c100cab115ab7c8ffc"
-  integrity sha512-eKff0Z/6UCRAb+O6rLyAtquIuXvn9Tge0SLdDL2TBm3X2pVFEX0a5atunNSL01zhQb2sNIm3XgmvDec6WBPvjg==
+molstar@5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/molstar/-/molstar-5.11.0.tgz#591a8bdac7eac9851dffb49e5a9e0764a4f1acd6"
+  integrity sha512-Jv2oHkKoCpzrhqLmGlknepm0pfRsoTDebsGRkvXpbUFb6p+JIAkhLyM3uqV2twC6VR83ZbXtdswOtouPhozpuQ==
   dependencies:
     "@types/argparse" "^2.0.17"
     "@types/benchmark" "^2.1.5"
     "@types/compression" "1.8.1"
     "@types/express" "^5.0.6"
-    "@types/node" "^22.19.21"
+    "@types/node" "^22.20.1"
     "@types/swagger-ui-dist" "3.30.6"
     argparse "^2.0.1"
     compression "^1.8.1"
     cors "^2.8.6"
     express "^5.2.1"
     h264-mp4-encoder "^1.0.12"
-    immutable "^5.1.6"
+    immutable "^5.1.9"
     io-ts "^2.2.22"
     mutative "^1.3.0"
     react-markdown "^10.1.0"
     remark-gfm "^4.0.1"
     rxjs "^7.8.2"
-    swagger-ui-dist "^5.32.6"
+    swagger-ui-dist "^5.32.9"
     tslib "^2.8.1"
 
 moment@>=2.13.0, moment@^2.30.1:
@@ -10169,10 +10169,10 @@ svg-pan-zoom@^3.6.2:
   resolved "https://registry.yarnpkg.com/svg-pan-zoom/-/svg-pan-zoom-3.6.2.tgz#be136506211b242627a234a9656f8128fcbbabed"
   integrity sha512-JwnvRWfVKw/Xzfe6jriFyfey/lWJLq4bUh2jwoR5ChWQuQoOH8FEh1l/bEp46iHHKHEJWIyFJETbazraxNWECg==
 
-swagger-ui-dist@^5.32.6:
-  version "5.32.6"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.32.6.tgz#4a6a56786915ea4bfea43f00ff17890df8124d4c"
-  integrity sha512-75ttZNaYCLoFPnozPZcTUU6mS3wKT8l7WLjU5zJSHFeJa23i5vtnze6IiCl4jDMPeQTXVXIgovq4M11NNfQvSA==
+swagger-ui-dist@^5.32.9:
+  version "5.32.11"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.32.11.tgz#8f3666148ff801cf4a82456bebbc4f255242a639"
+  integrity sha512-NEZzRuxHHQkbG3GCjNbzz+XRDoM7AztnXyzc2VCW5RXUvZBDW7bb3W29/SPfvav3yOzqnDTOLP2Xzbjxo0bldQ==
   dependencies:
     "@scarf/scarf" "=1.4.0"
 

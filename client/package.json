@@ -69,7 +69,7 @@
     "jszip-utils": "^0.1.0",
     "keycharm": "^0.4.0",
     "lodash": "^4.18.1",
-    "molstar": "5.10.1",
+    "molstar": "5.11.0",
     "moment": "^2.30.1",
     "ng2-charts": "^4.0.0",
     "ngrx-store-localstorage": "^14.0.0",
