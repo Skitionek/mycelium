@@ -45,6 +45,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
 ### Fixed
+- **Client production bundle budget failure**: reenabled Angular production optimization and build optimizer in `client/angular.json`, reducing the initial bundle size.
 - **VS Code client debug task**: added a background readiness matcher for `client: dev-start` and a full-stack debug compound so the browser can attach once the Angular dev server is ready.
 - **Development frontend startup**: the Docker dev override now builds the Angular dev-server stage for `frontend`, publishes port `4200`, and points `FRONTEND_URL` at the live dev server so source edits show up without rebuilding the static bundle.
 - **Knowledge Graph visualizer route**: removed the invalid `canActivate` guard from the `kg-visualizer/` redirect route so Angular router configuration validates correctly on startup.
