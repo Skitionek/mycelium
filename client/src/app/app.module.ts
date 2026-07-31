@@ -1,7 +1,6 @@
 import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 
-import { NgChartsModule } from 'ng2-charts';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { RootStoreModule } from 'app/root-store';
@@ -10,11 +9,8 @@ import { AuthModule } from 'app/auth/auth.module';
 import { UserModule } from 'app/users/users.module';
 import { AppRoutingModule } from 'app/app-routing.module';
 import { AppComponent } from 'app/app.component';
-import { SearchModule } from 'app/search/search.module';
 import { SharedModule } from 'app/shared/shared.module';
-import { KgStatisticsComponent } from 'app/kg-statistics.component';
 import { httpInterceptorProviders } from 'app/shared/http-interceptors';
-import { VisualizationModule } from 'app/visualization/visualization.module';
 import { DrawingToolModule } from 'app/drawing-tool/drawing-tool.module';
 import { FileBrowserModule } from 'app/file-browser/file-browser.module';
 import { WorkspaceComponent } from 'app/workspace.component';
@@ -23,18 +19,9 @@ import { UnloadConfirmationGuard } from 'app/shared/guards/UnloadConfirmation.gu
 import { DashboardComponent } from 'app/dashboard.component';
 import { AppVersionDialogComponent } from 'app/app-version-dialog.component';
 import { FileNavigatorModule } from 'app/file-navigator/file-navigator.module';
-import { ShortestPathModule } from 'app/shortest-path/shortest-path.module';
-import { PdfViewerLibModule } from 'app/pdf-viewer/pdf-viewer-lib.module';
 import { GlobalErrorHandler } from 'app/global-error-handler';
 import { EnrichmentTablesModule } from 'app/enrichment/enrichment-tables.module';
 import { EnrichmentVisualisationsModule } from 'app/enrichment/enrichment-visualisation.module';
-import { BiocViewerLibModule } from 'app/bioc-viewer/bioc-viewer-lib.module';
-import { CodemirrorViewerLibModule } from 'app/codemirror-viewer/codemirror-viewer-lib.module';
-import { MolstarViewerLibModule } from 'app/molstar-viewer/molstar-viewer-lib.module';
-import { SdrfViewerLibModule } from 'app/sdrf-viewer/sdrf-viewer-lib.module';
-import { SankeyViewerLibModule } from 'app/sankey-viewer/sankey-viewer-lib.module';
-import { TraceViewerLibModule } from 'app/trace-viewer/trace-viewer-lib.module';
-import { SankeyManyToManyViewerLibModule } from 'app/sankey-many-to-many-viewer/sankey-viewer-lib.module';
 import { FileTypesModule } from 'app/file-types/file-types.module';
 
 @NgModule({
@@ -43,36 +30,23 @@ import { FileTypesModule } from 'app/file-types/file-types.module';
     WorkspaceComponent,
     AppVersionDialogComponent,
     DashboardComponent,
-    KgStatisticsComponent,
   ],
   imports: [
     BrowserModule,
-    PdfViewerLibModule,
     AdminModule,
     AuthModule,
     SharedModule,
     AppRoutingModule,
     FileTypesModule,
     FileBrowserModule,
-    VisualizationModule,
     UserModule,
     // ngrx
     RootStoreModule,
-    SearchModule,
-    NgChartsModule,
     DrawingToolModule,
-    SankeyViewerLibModule,
-    SankeyManyToManyViewerLibModule,
-    TraceViewerLibModule,
     NgbModule,
     FileNavigatorModule,
-    BiocViewerLibModule,
-    CodemirrorViewerLibModule,
-    MolstarViewerLibModule,
     EnrichmentVisualisationsModule,
-    ShortestPathModule,
     EnrichmentTablesModule,
-    SdrfViewerLibModule,
   ],
   providers: [
     httpInterceptorProviders,
