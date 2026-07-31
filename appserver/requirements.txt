@@ -285,7 +285,7 @@ tqdm==4.68.3
     # via bioc
 typeguard==4.5.2
     # via marshmallow-dataclass
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
     #   alembic
     #   anyio
