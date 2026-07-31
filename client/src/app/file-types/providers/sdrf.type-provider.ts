@@ -1,7 +1,7 @@
-import { ComponentFactory, ComponentFactoryResolver, Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-import { from, Observable, of } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 import { FilesystemService } from 'app/file-browser/services/filesystem.service';
@@ -19,7 +19,6 @@ import {
   PreviewOptions,
 } from 'app/file-types/providers/base-object.type-provider';
 import { SdrfDocument } from 'app/sdrf-viewer/models/sdrf-document';
-import { SdrfPreviewComponent } from 'app/sdrf-viewer/components/sdrf-preview.component';
 
 export const SDRF_MIMETYPE = MimeTypes.Sdrf;
 export const SDRF_SHORTHAND = 'sdrf';
@@ -31,8 +30,6 @@ export class SdrfTypeProvider extends AbstractObjectTypeProvider {
     abstractObjectTypeProviderHelper: AbstractObjectTypeProviderHelper,
     protected readonly filesystemService: FilesystemService,
     protected readonly objectCreationService: ObjectCreationService,
-    protected readonly componentFactoryResolver: ComponentFactoryResolver,
-    protected readonly injector: Injector,
   ) {
     super(abstractObjectTypeProviderHelper);
   }
@@ -49,18 +46,7 @@ export class SdrfTypeProvider extends AbstractObjectTypeProvider {
     contentValue$: Observable<Blob>,
     options?: PreviewOptions,
   ) {
-    const factory: ComponentFactory<SdrfPreviewComponent> =
-      this.componentFactoryResolver.resolveComponentFactory(SdrfPreviewComponent);
-    const componentRef = factory.create(this.injector);
-    const instance: SdrfPreviewComponent = componentRef.instance;
-
-    return contentValue$.pipe(
-      mergeMap(blob => from(SdrfDocument.fromBlob(blob))),
-      map(doc => {
-        instance.document = doc;
-        return componentRef;
-      }),
-    );
+    return of(undefined);
   }
 
   getCreateDialogOptions(): RankedItem<CreateDialogAction>[] {

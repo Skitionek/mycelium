@@ -13,7 +13,7 @@ import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 import { getObjectMatchExistingTab } from 'app/file-browser/utils/objects';
 import { PDFResult, PDFSnippets } from 'app/interfaces';
 import { DirectoryObject } from 'app/interfaces/projects.interface';
-import { FileViewComponent } from 'app/pdf-viewer/components/file-view.component';
+import type { FileViewComponent } from 'app/pdf-viewer/components/file-view.component';
 import { PaginatedResultListComponent } from 'app/shared/components/base/paginated-result-list.component';
 import { ModuleProperties } from 'app/shared/modules';
 import { RankedItem, SearchableRequestOptions } from 'app/shared/schemas/common';

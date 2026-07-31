@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  Inject,
   ElementRef,
   EventEmitter,
   Input,
@@ -8,6 +9,7 @@ import {
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
 import { combineLatest, Subscription } from 'rxjs';
@@ -44,10 +46,12 @@ export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwa
   private structureData: string | undefined;
   private structureFormat: ProteinStructureFormat | undefined;
   private readonly subscriptions = new Subscription();
+  private static scriptLoadPromise: Promise<void> | null = null;
 
   constructor(
     protected readonly filesystemService: FilesystemService,
     protected readonly route: ActivatedRoute,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
     this.loadTask = new BackgroundTask((id: string) =>
       combineLatest([
@@ -118,6 +122,7 @@ export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwa
 
     try {
       this.disposeViewer();
+      await this.ensureMolstarLoaded();
       const container = this.molstarContainer.nativeElement;
       container.innerHTML = '';
       if (!molstar?.Viewer?.create) {
@@ -139,6 +144,42 @@ export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwa
     } catch (error) {
       this.renderError = 'Unable to render this protein structure.';
     }
+  }
+
+  private ensureMolstarLoaded(): Promise<void> {
+    if (molstar?.Viewer?.create) {
+      return Promise.resolve();
+    }
+
+    if (MolstarViewComponent.scriptLoadPromise) {
+      return MolstarViewComponent.scriptLoadPromise;
+    }
+
+    MolstarViewComponent.scriptLoadPromise = new Promise<void>((resolve, reject) => {
+      const existingScript = this.document.querySelector<HTMLScriptElement>('script[data-molstar="true"]');
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(), { once: true });
+        existingScript.addEventListener('error', () => reject(new Error('Failed to load Mol* viewer script.')), {
+          once: true,
+        });
+        return;
+      }
+
+      const script = this.document.createElement('script');
+      script.src = new URL('assets/vendor/molstar/molstar.js', this.document.baseURI).toString();
+      script.async = true;
+      script.dataset.molstar = 'true';
+      script.addEventListener('load', () => resolve(), { once: true });
+      script.addEventListener('error', () => reject(new Error('Failed to load Mol* viewer script.')), {
+        once: true,
+      });
+      this.document.body.appendChild(script);
+    }).catch((error) => {
+      MolstarViewComponent.scriptLoadPromise = null;
+      throw error;
+    });
+
+    return MolstarViewComponent.scriptLoadPromise;
   }
 
   private emitModuleProperties(): void {

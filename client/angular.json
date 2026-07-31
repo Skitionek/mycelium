@@ -29,6 +29,11 @@
                 "glob": "*.css",
                 "input": "src/environments/",
                 "output": "/environments/"
+              },
+              {
+                "glob": "molstar.js",
+                "input": "node_modules/molstar/build/viewer",
+                "output": "/assets/vendor/molstar"
               }
             ],
             "styles": [
@@ -39,8 +44,7 @@
             ],
             "scripts": [
               "node_modules/vis-network/dist/vis-network.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js",
-              "node_modules/molstar/build/viewer/molstar.js"
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json",
             "customWebpackConfig": {
