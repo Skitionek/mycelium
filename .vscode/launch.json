@@ -42,10 +42,7 @@
       "python": "${workspaceFolder}/appserver/.venv/bin/python",
       "module": "pytest",
       "cwd": "${workspaceFolder}/appserver",
-      "args": [
-        "tests/unit/",
-        "-v"
-      ],
+      "args": ["tests/unit/", "-v"],
       "env": {
         "POSTGRES_HOST": "localhost",
         "POSTGRES_PORT": "5432",
@@ -86,10 +83,7 @@
       "python": "${workspaceFolder}/cache-invalidator/.venv/bin/python",
       "module": "pytest",
       "cwd": "${workspaceFolder}/cache-invalidator",
-      "args": [
-        "tests/",
-        "-v"
-      ],
+      "args": ["tests/", "-v"],
       "justMyCode": false,
       "preLaunchTask": "uv sync: cache-invalidator"
     },
@@ -133,10 +127,7 @@
       "python": "${workspaceFolder}/statistical-enrichment/.venv/bin/python",
       "module": "pytest",
       "cwd": "${workspaceFolder}/statistical-enrichment",
-      "args": [
-        "tests/",
-        "-v"
-      ],
+      "args": ["tests/", "-v"],
       "justMyCode": false,
       "preLaunchTask": "uv sync: statistical-enrichment"
     },
