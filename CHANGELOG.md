@@ -13,9 +13,18 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [Unreleased]
 
 ### Added
+- **Google Drive index**: files and folders from Google Drive can now be indexed into the Lifelike filesystem. Google Drive remains the single source of truth — **no file content is downloaded or stored** in Lifelike; only metadata is indexed.
+  - New `POST /api/google-drive/import` backend endpoint indexes a Drive file or folder (recursively) under a Lifelike parent directory. Metadata (name, MIME type, Drive ID, last-modified timestamp) is persisted; `upload_url` is set to the Drive view/folder URL.
+  - New `POST /api/google-drive/sync/<hash_id>` endpoint re-syncs metadata (name, MIME type, modified time) for a Drive-indexed item and all its Drive-indexed descendants.
+  - New DB migration `002_add_google_drive_fields`: adds `google_drive_id` (VARCHAR 200, indexed) and `google_drive_modified_time` (TIMESTAMPTZ) columns to the `files` table.
+  - `FilesystemObject` model gains `googleDriveId`, `googleDriveModifiedTime`, and `isGoogleDriveIndexed` computed property.
+  - `FilesystemObjectActions.syncGoogleDriveIndex()` action triggers a re-sync by acquiring a fresh OAuth token via the Picker service.
+  - The Google Drive Picker now offers two views — **Files** and **Folders** — so users can index either individual files or an entire directory tree in one action.
+  - The file upload dialog's **"From Google Drive"** tab now labels the operation correctly ("metadata indexed, content stays in Drive" / "folder — will be indexed recursively") and shows a folder/file icon next to the selected item name.
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
+- **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
 
 ### Changed
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
@@ -26,9 +35,6 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Release automation**: each successful push CI run on `main`/`master` now rolls `[Unreleased]` into a dated changelog section, creates a date-based git tag, and publishes a GitHub Release.
 - **`get_mycelium_global_inclusions_by_type_query` / `get_mycelium_global_inclusion_exist_query`**: Renamed from `get_lifelike_*` to `get_mycelium_*` to match the `db_Mycelium` label they query; call sites in `annotation_graph_service.py` and `manual_annotation_service.py` updated accordingly ([#254]).
 - **DB constraint/index names**: `constraint_lifelike_name` → `constraint_mycelium_name` and `index_lifelike_id` → `index_mycelium_id` in `changelog-0030.xml` to match the `db_Mycelium` node label they target ([#254]).
-
-### Added
-- **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.

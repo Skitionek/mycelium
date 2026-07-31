@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { BehaviorSubject, firstValueFrom, Observable, iif, of, merge } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, iif, of, merge, from } from 'rxjs';
 import { filter, finalize, map, mergeMap, tap } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,7 +13,12 @@ import { ErrorHandler } from 'app/shared/services/error-handler.service';
 import { ResultMapping } from 'app/shared/schemas/common';
 import { Progress, ProgressMode } from 'app/interfaces/common-dialog.interface';
 
-import { PDFAnnotationGenerationRequest, ObjectCreateRequest, AnnotationGenerationResultData } from '../schema';
+import {
+  PDFAnnotationGenerationRequest,
+  ObjectCreateRequest,
+  GoogleDriveImportRequest,
+  AnnotationGenerationResultData,
+} from '../schema';
 import { FilesystemObject } from '../models/filesystem-object';
 import {
   ObjectEditDialogComponent,
@@ -108,6 +113,55 @@ export class ObjectCreationService {
   }
 
   /**
+   * Import a file from Google Drive with a progress dialog.
+   * @param request the Google Drive import request
+   * @param annotationOptions options for the annotation process
+   */
+  executeGoogleDriveImportWithProgressDialog(
+    request: GoogleDriveImportRequest,
+    annotationOptions: PDFAnnotationGenerationRequest = {},
+  ): Observable<FilesystemObject> {
+    const progressObservable = new BehaviorSubject<Progress>(new Progress({
+      status: 'Importing from Google Drive...',
+    }));
+    const progressDialogRef = this.progressDialog.display({
+      title: `Importing '${request.filename || 'file from Google Drive'}'`,
+      progressObservable,
+    });
+    let results: [FilesystemObject[], ResultMapping<AnnotationGenerationResultData>[]] = null;
+
+    return this.filesystemService.importFromGoogleDrive(request).pipe(
+      mergeMap((object: FilesystemObject) => {
+        progressObservable.next(new Progress({
+          mode: ProgressMode.Indeterminate,
+          status: 'Saved; Parsing and identifying annotations...',
+        }));
+        const annotationsService = this.annotationsService.generateAnnotations(
+          [object.hashId], annotationOptions,
+        ).pipe(map(result => {
+          const check = Object.entries(result.mapping).map(r => r[1].success);
+          if (check.some(c => c === false)) {
+            results = [[object], [result]];
+            const modalRef = this.modalService.open(ObjectReannotateResultsDialogComponent);
+            modalRef.componentInstance.objects = results[0];
+            modalRef.componentInstance.results = results[1];
+          }
+          return object;
+        }));
+        return iif(
+          () => object.isAnnotatable,
+          merge(annotationsService),
+          of(object),
+        );
+      }),
+      finalize(() => {
+        progressDialogRef.close();
+      }),
+      this.errorHandler.create({label: 'Import from Google Drive'}),
+    );
+  }
+
+  /**
    * Open a dialog to create a new file or folder.
    * @param target the base object to start from
    * @param options options for the dialog
@@ -129,17 +183,36 @@ export class ObjectCreationService {
       }
     }
     dialogRef.componentInstance.accept = ((value: ObjectEditDialogValue) => {
-      return firstValueFrom(this.executePutWithProgressDialog({
+      const mergedRequest = {
         ...value.request,
         ...(options.request || {}),
-        // NOTE: Due to the cast to ObjectCreateRequest, we do not guarantee,
-        // via the type checker, that we will be forming a 100% legitimate request,
-        // because it's possible to provide multiple sources of content due to this cast, which
-        // the server will reject because it does not make sense
-      } as ObjectCreateRequest, {
-        annotationConfigs: value.annotationConfigs,
-        organism: value.organism,
-      }));
+      } as any;
+
+      // Route Google Drive imports to the dedicated endpoint
+      if (mergedRequest.googleDriveFileId && mergedRequest.googleDriveAccessToken) {
+        const gdRequest: GoogleDriveImportRequest = {
+          googleDriveFileId: mergedRequest.googleDriveFileId,
+          googleDriveAccessToken: mergedRequest.googleDriveAccessToken,
+          parentHashId: mergedRequest.parentHashId,
+          filename: mergedRequest.filename,
+          description: mergedRequest.description,
+          public: mergedRequest.public,
+          mimeType: mergedRequest.mimeType,
+          fallbackOrganism: mergedRequest.fallbackOrganism,
+          annotationConfigs: mergedRequest.annotationConfigs,
+        };
+        return firstValueFrom(this.executeGoogleDriveImportWithProgressDialog(gdRequest, {
+          annotationConfigs: value.annotationConfigs,
+          organism: value.organism,
+        }));
+      }
+
+      return firstValueFrom(this.executePutWithProgressDialog(
+        mergedRequest as ObjectCreateRequest, {
+          annotationConfigs: value.annotationConfigs,
+          organism: value.organism,
+        },
+      ));
     });
     return dialogRef.result;
   }

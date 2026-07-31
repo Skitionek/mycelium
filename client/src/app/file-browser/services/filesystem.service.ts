@@ -26,6 +26,8 @@ import {
   FileAnnotationHistoryResponse,
   FileHierarchyResponse,
   FilesystemObjectData,
+  GoogleDriveImportRequest,
+  GoogleDriveSyncRequest,
   ObjectBackupCreateRequest,
   ObjectCreateRequest,
   ObjectExportRequest,
@@ -101,6 +103,34 @@ export class FilesystemService {
         }
         return event;
       }),
+    );
+  }
+
+  /**
+   * Import a file from Google Drive.
+   * @param request the import request containing the Drive file ID and OAuth access token
+   */
+  importFromGoogleDrive(request: GoogleDriveImportRequest): Observable<FilesystemObject> {
+    return this.http.post<SingleResult<FilesystemObjectData>>(
+      `/api/google-drive/import`,
+      request,
+      this.apiService.getHttpOptions(true),
+    ).pipe(
+      map(data => new FilesystemObject().update(data.result)),
+    );
+  }
+
+  /**
+   * Re-sync a Drive-indexed item's metadata from Google Drive.
+   * @param hashId the Lifelike hash ID of the item to sync
+   * @param request contains the fresh Google Drive OAuth access token
+   * @returns the number of records updated
+   */
+  syncGoogleDriveItem(hashId: string, request: GoogleDriveSyncRequest): Observable<{updatedCount: number}> {
+    return this.http.post<{updatedCount: number}>(
+      `/api/google-drive/sync/${encodeURIComponent(hashId)}`,
+      request,
+      this.apiService.getHttpOptions(true),
     );
   }
 

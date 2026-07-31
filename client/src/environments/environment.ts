@@ -4,6 +4,13 @@
 
 export const environment = {
   production: false,
+  /**
+   * Google OAuth 2.0 client ID used for the Google Drive Picker.
+   * Obtain one at https://console.cloud.google.com/ and set it here (or via
+   * a build-time replacement) before enabling Google Drive import.
+   * Leave empty to hide the "From Google Drive" tab in the upload dialog.
+   */
+  googleDriveClientId: '',
 };
 
 /*

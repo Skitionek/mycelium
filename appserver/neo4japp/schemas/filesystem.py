@@ -145,6 +145,8 @@ class FileSchema(CamelCaseSchema):
     true_filename = fields.String()
     fallback_organism = fields.Nested(FallbackOrganismSchema)
     annotation_configs = fields.Nested(AnnotationConfigurations)
+    google_drive_id = fields.String()
+    google_drive_modified_time = fields.DateTime()
 
     def get_user_privilege_filter(self):
         try:
