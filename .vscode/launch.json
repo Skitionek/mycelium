@@ -178,6 +178,13 @@
         "Python: Cache Invalidator Pytest (uv)",
         "Python: Statistical Enrichment Pytest (uv)"
       ]
+    },
+    {
+      "name": "Full Stack: Appserver + Client (dev)",
+      "configurations": [
+        "Python: Appserver Flask (uv)",
+        "TypeScript: Client in Chrome"
+      ]
     }
   ]
 }
