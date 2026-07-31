@@ -48,7 +48,8 @@ services:
     volumes:
       - solr:/var/solr
     healthcheck:
-      test: ["CMD", "curl", "-f", "localhost:8983/solr/admin/cores?action=STATUS"]
+      test:
+        ["CMD", "curl", "-f", "localhost:8983/solr/admin/cores?action=STATUS"]
       start_period: 1m
 
   redis:
