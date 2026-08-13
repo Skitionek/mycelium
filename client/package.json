@@ -113,7 +113,7 @@
     "karma-viewport": "^1.0.9",
     "lint-staged": "^17.3.0",
     "ng-bullet": "^1.0.3",
-    "ng-mocks": "^14.15.3",
+    "ng-mocks": "^14.16.1",
     "protractor": "~7.0.0",
     "ts-node": "~10.9.2",
     "tslint": "~6.1.3",
