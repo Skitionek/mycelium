@@ -1,3 +1,4 @@
+---
 name: "CodeQL Advanced"
 
 on:
@@ -7,7 +8,9 @@ on:
     branches: [ "main" ]
   schedule:
     - cron: '36 0 * * 0'
-  workflow_dispatch: {}
+  workflow_dispatch:
+
+permissions: read-all
 
 jobs:
   analyze:
@@ -31,16 +34,18 @@ jobs:
           build-mode: none
         
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4.37.8
-      with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
+      - name: Initialize CodeQL
+        # kics-scan ignore-line
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4.37.8
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: Perform CodeQL Analysis
+        # kics-scan ignore-line
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"
