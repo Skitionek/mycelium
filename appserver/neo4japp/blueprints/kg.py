@@ -48,6 +48,10 @@ def _query_graph_from_neo4j(query_id):
     if node_count > 0:
         # Real data exists — run an actual shortest-path query
         try:
+            def _element_id(entity):
+                """Neo4j 5 exposes element_id; older drivers only expose id."""
+                return entity.element_id if hasattr(entity, 'element_id') else entity.id
+
             def _run_path_query(tx):
                 result = tx.run(
                     '''
@@ -68,7 +72,7 @@ def _query_graph_from_neo4j(query_id):
                 for record in path_result:
                     p = record['path']
                     for node in p.nodes:
-                        nid = node.element_id if hasattr(node, 'element_id') else node.id
+                        nid = _element_id(node)
                         if nid not in seen_nodes:
                             seen_nodes.add(nid)
                             lbl = list(node.labels)[0] if node.labels else 'default'
@@ -80,8 +84,8 @@ def _query_graph_from_neo4j(query_id):
                                 'databaseLabel': lbl,
                             })
                     for rel in p.relationships:
-                        s = rel.start_node.element_id if hasattr(rel.start_node, 'element_id') else rel.start_node.id
-                        e = rel.end_node.element_id if hasattr(rel.end_node, 'element_id') else rel.end_node.id
+                        s = _element_id(rel.start_node)
+                        e = _element_id(rel.end_node)
                         edge_key = (s, e, rel.type)
                         if edge_key not in seen_edges:
                             seen_edges.add(edge_key)
