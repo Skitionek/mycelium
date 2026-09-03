@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: 1fr;
-  grid-gap: $spacer / 2;
+  grid-gap: calc($spacer / 2);
 
   &::before {
     content: '';
@@ -61,6 +61,6 @@
 
 .tile-toolbar {
   position: absolute;
-  top: ($spacer / 2);
-  right: ($spacer / 2);
+  top: calc($spacer / 2);
+  right: calc($spacer / 2);
 }

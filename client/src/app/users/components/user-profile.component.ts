@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject } from 'rxjs';
@@ -40,7 +40,7 @@ export class UserProfileComponent implements OnInit  {
 
   constructor(private readonly accountService: AccountService,
               private readonly progressDialog: ProgressDialog,
-              private readonly snackBar: MatSnackBar,
+              private readonly snackBar: MatLegacySnackBar,
               private readonly errorHandler: ErrorHandler,
               private store: Store<State>) {
   }

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { BehaviorSubject, throwError, zip, of, EMPTY } from 'rxjs';
 import { concatMap, mergeMap, catchError, delay } from 'rxjs/operators';
@@ -28,7 +28,7 @@ export class AdminSettingsComponent {
     constructor(
         private readonly progressDialog: ProgressDialog,
         private readonly errorHandler: ErrorHandler,
-        private readonly snackBar: MatSnackBar,
+        private readonly snackBar: MatLegacySnackBar,
         private storage: StorageService,
         private filesystemService: FilesystemService,
         private worksheetViewerService: EnrichmentTableService,

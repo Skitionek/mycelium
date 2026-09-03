@@ -1,17 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatLegacyFormFieldModule } from '@angular/material/legacy-form-field';
+import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatRadioModule } from '@angular/material/radio';
+import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
+import { MatLegacyDialogModule } from '@angular/material/legacy-dialog';
+import { MatLegacyInputModule } from '@angular/material/legacy-input';
+import { MatLegacySelectModule } from '@angular/material/legacy-select';
+import { MatLegacyButtonModule } from '@angular/material/legacy-button';
+import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
 import { RouterModule } from '@angular/router';
 
 import { SharedModule } from 'app/shared/shared.module';
@@ -36,16 +35,15 @@ import { SankeySearchControlModule } from './components/search-control/sankey-se
     CommonModule,
     FormsModule,
     BrowserAnimationsModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
+    MatLegacyFormFieldModule,
+    MatLegacyCheckboxModule,
     MatSidenavModule,
-    MatDialogModule,
-    MatChipsModule,
-    MatSelectModule,
-    MatInputModule,
-    FlexLayoutModule,
-    MatButtonModule,
-    MatRadioModule,
+    MatLegacyDialogModule,
+    MatLegacyChipsModule,
+    MatLegacySelectModule,
+    MatLegacyInputModule,
+    MatLegacyButtonModule,
+    MatLegacyRadioModule,
     SharedModule,
     FileBrowserModule,
     RouterModule.forRoot([]),

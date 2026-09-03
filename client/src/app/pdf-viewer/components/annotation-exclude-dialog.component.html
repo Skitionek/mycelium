@@ -8,11 +8,11 @@
       <input type="text" class="form-control" id="text" [value]="text" disabled>
     </app-form-row>
     <app-form-row for="reason" label="Reason" [control]="form.get('reason')">
-      <div class="custom-control custom-radio" *ngFor="let choice of reasonChoices; index as i">
-        <input type="radio" id="reason-{{ i }}" name="reason" class="custom-control-input"
+      <div class="form-check" *ngFor="let choice of reasonChoices; index as i">
+        <input type="radio" id="reason-{{ i }}" name="reason" class="form-check-input"
                (change)="chooseReason(choice, $event.target.checked)"
                [checked]="form.get('reason').value === choice">
-        <label class="custom-control-label" for="reason-{{ i }}">{{ choice }}</label>
+        <label class="form-check-label" for="reason-{{ i }}">{{ choice }}</label>
       </div>
     </app-form-row>
 
@@ -20,14 +20,14 @@
       <input type="text" class="form-control" id="comment" formControlName="comment">
     </app-form-row>
 
-    <div class="custom-control custom-checkbox mt-4" *ngIf="isGeneOrProtein">
-      <input type="checkbox" class="custom-control-input" id="case-insensitivity" formControlName="isCaseInsensitive">
-      <label class="custom-control-label" for="case-insensitivity">Exclude using case insensitivity</label>
+    <div class="form-check mt-4" *ngIf="isGeneOrProtein">
+      <input type="checkbox" class="form-check-input" id="case-insensitivity" formControlName="isCaseInsensitive">
+      <label class="form-check-label" for="case-insensitivity">Exclude using case insensitivity</label>
     </div>
 
-    <div class="custom-control custom-checkbox mt-4">
-      <input type="checkbox" class="custom-control-input" id="exclude-globally" formControlName="excludeGlobally">
-      <label class="custom-control-label" for="exclude-globally">Exclude this annotation from a global list</label>
+    <div class="form-check mt-4">
+      <input type="checkbox" class="form-check-input" id="exclude-globally" formControlName="excludeGlobally">
+      <label class="form-check-label" for="exclude-globally">Exclude this annotation from a global list</label>
     </div>
 
     <div *ngIf="form.get('excludeGlobally').value" class="text-muted mt-3">
@@ -37,7 +37,7 @@
   </app-modal-body>
 
   <app-modal-footer>
-    <button type="button" class="btn btn-secondary mr-2" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
     <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Create</button>
   </app-modal-footer>
 </form>

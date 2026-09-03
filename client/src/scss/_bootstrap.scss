@@ -1,5 +1,5 @@
 @import './variables';
-@import '~bootstrap/scss/bootstrap';
+@import 'bootstrap/scss/bootstrap';
 @import './mixins';
 @import './type';
 @import './buttons';
@@ -11,13 +11,11 @@
 @import './tabs';
 @import './tile';
 @import './search';
-@import './modal';
 @import './tables';
 @import './breadcrumb';
 @import './as_splitter';
 @import './forms';
 @import './dropdown';
-@import './popovers';
 @import './window';
 @import './text';
 @import './progress';
@@ -27,7 +25,6 @@
 
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  font-size: $font-size-base;
   overflow: hidden;
 }
 

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -38,7 +38,7 @@ export class UserBrowserComponent implements OnInit, OnDestroy {
   constructor(private readonly accountService: AccountService,
               private readonly modalService: NgbModal,
               private readonly progressDialog: ProgressDialog,
-              private readonly snackBar: MatSnackBar,
+              private readonly snackBar: MatLegacySnackBar,
               private readonly errorHandler: ErrorHandler,
               private store: Store<State> ) {
   }

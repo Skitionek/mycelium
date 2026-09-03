@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -18,7 +18,7 @@ export class CopyLinkDialogComponent {
 
   constructor(public readonly modal: NgbActiveModal,
               public readonly messageDialog: MessageDialog,
-              public readonly snackBar: MatSnackBar) {
+              public readonly snackBar: MatLegacySnackBar) {
   }
 
   copyToClipboard() {

@@ -12,6 +12,15 @@
   left: 0;
   width: 100%;
   height: 100%;
+
+  // Ensure routed components fill the tab content area
+  > router-outlet + *,
+  > named-router-outlet + * {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+  }
 }
 
 .workspace-hidden-tab-content {
@@ -30,7 +39,7 @@
   position: relative;
   background: $gray-200;
   color: $text-muted;
-  border-left: 4px solid $gray-300;
+  border-start: 4px solid $gray-300;
   vertical-align: top;
   width: 20px;
   padding: 1rem;

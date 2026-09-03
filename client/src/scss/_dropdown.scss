@@ -1,5 +1,33 @@
+// ng-bootstrap 15's NgbDropdown directive overrides display to 'block'.
+// Restore inline-block where explicitly requested.
+.d-inline-block[ngbDropdown],
+.d-inline-block.dropdown {
+  display: inline-block !important;
+}
+
 .dropdown-menu {
   box-shadow: $dropdown-menu-box-shadow;
+
+  // ng-bootstrap 15 sets position:static as an inline style on dropdown menus;
+  // !important is needed to override the inline style.
+  &.show {
+    position: absolute !important;
+    z-index: $zindex-dropdown !important;
+  }
+}
+
+// When ng-bootstrap renders a dropdown with container="body", the menu is
+// wrapped in a <div class="dropdown"> appended to the <body>.  Ensure the
+// wrapper doesn't collapse.
+body > .dropdown {
+  position: absolute;
+  z-index: $zindex-dropdown;
+}
+
+// Tile cards and other containers with overflow:hidden clip absolutely-positioned
+// dropdown menus.  The dropdown container needs to break out of the clipping.
+.tile, .tile-deck {
+  overflow: visible;
 }
 
 .dropdown-body {
@@ -19,4 +47,55 @@
 
 .context-menu-body {
   z-index: $zindex-dropdown + 50;
+}
+
+// ---------------------------------------------------------------------------
+// CDK overlay & Material menu fixes
+// ---------------------------------------------------------------------------
+
+// Angular CDK overlay: the CDK positions overlay panes using the bounding-box
+// wrapper, so .cdk-overlay-pane can stay position:static.  However, we must
+// NOT override it because the CDK already handles this correctly.
+// (removed earlier override that broke CDK overlay positioning)
+
+// Bootstrap .dropdown-item inside a Material menu panel: the object-menu
+// component uses ngbDropdownItem (renders .dropdown-item) but is hosted in
+// a <mat-menu> (renders .mat-menu-panel).  Harmonise the styles.
+.mat-menu-panel {
+  .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0 16px;
+    line-height: 36px;      // mat-menu-item default height
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.87);
+    background: none;
+    border: 0;
+    text-align: start;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover, &:focus {
+      background: rgba(0, 0, 0, 0.04);
+      text-decoration: none;
+    }
+
+    &[disabled], &:disabled {
+      color: rgba(0, 0, 0, 0.38);
+      cursor: default;
+    }
+  }
+
+  .dropdown-divider {
+    margin: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .dropdown-header {
+    padding: 0 16px;
+    line-height: 36px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.54);
+  }
 }

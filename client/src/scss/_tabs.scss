@@ -7,7 +7,7 @@
   .nav {
     display: flex;
     align-self: flex-end;
-    align-items: start;
+    align-items: flex-end;
     flex-wrap: nowrap;
     min-width: 0;
     padding: 0.5rem 0.5rem 0;
@@ -83,7 +83,7 @@
 
   &.compressed-tabs {
     .nav-link {
-      padding: $nav-link-padding-y ($nav-link-padding-x / 2);
+      padding: $nav-link-padding-y calc($nav-link-padding-x / 2);
     }
   }
 }

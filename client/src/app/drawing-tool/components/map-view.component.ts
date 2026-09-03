@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Input, NgZone, OnDestroy } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import {Observable, Subscription, forkJoin} from 'rxjs';
@@ -42,7 +42,7 @@ export class MapViewComponent<ExtraResult = void> extends MapComponent<ExtraResu
 
   constructor(filesystemService: FilesystemService,
               objectTypeService: ObjectTypeService,
-              snackBar: MatSnackBar,
+              snackBar: MatLegacySnackBar,
               modalService: NgbModal,
               messageDialog: MessageDialog,
               ngZone: NgZone, route: ActivatedRoute,

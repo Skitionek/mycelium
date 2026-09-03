@@ -22,10 +22,10 @@ ul {
   th, td {
     border: 0;
     border-bottom: 1px solid $gray-500;
-    border-right: 1px solid $gray-500;
+    border-end: 1px solid $gray-500;
 
     &:last-child {
-      border-right: 0;
+      border-end: 0;
     }
   }
 

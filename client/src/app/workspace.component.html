@@ -5,7 +5,7 @@
                 (dragEnd)="splitterDragEnded($event)">
         <as-split-area *ngFor="let pane of panes" [size]="pane.size">
           <div class="h-100 d-flex flex-column">
-            <div class="nav-workspace-tabs flex-shrink-0 align-items-start">
+            <div class="nav-workspace-tabs flex-shrink-0 align-items-center">
               <div class="nav flex-fill" cdkDropList cdkDropListOrientation="horizontal"
                    (cdkDropListDropped)="tabDropped($event)"
                    [cdkDropListData]="pane">
@@ -15,7 +15,7 @@
                      appContextMenu>
                   <div class="nav-link d-flex text-truncate" [class.active]="pane.activeTab === tab"
                        (click)="handleTabClick($event, pane, tab); $event.preventDefault()">
-                    <div class="d-block d-flex align-items-center text-truncate mr-2">
+                    <div class="d-block d-flex align-items-center text-truncate me-2">
                       <span class="d-block text-truncate">
                         <i class="fas fa-spinner fa-pulse fa-fw" *ngIf="tab.loading; else notLoading"></i>
                         <ng-template #notLoading>
@@ -24,15 +24,15 @@
                         </ng-template>
                         {{tab.title}}
                       </span>
-                      <span class="badge badge-danger badge-pill ml-1" *ngIf="tab.badge != null && tab.badge !== '*'">
+                      <span class="badge bg-danger rounded-pill ms-1" *ngIf="tab.badge != null && tab.badge !== '*'">
                         {{tab.badge}}
                       </span>
-                      <span class="badge badge-danger badge-pill ml-1" *ngIf="tab.badge === '*'"
+                      <span class="badge bg-danger rounded-pill ms-1" *ngIf="tab.badge === '*'"
                             ngbTooltip="Has unsaved changes" container="body">
                         <i class="fa fa-pencil-alt"></i>
                       </span>
                     </div>
-                    <a href="#" (click)="closeTab(pane, tab); $event.preventDefault()" class="ml-auto text-muted">
+                    <a href="#" (click)="closeTab(pane, tab); $event.preventDefault()" class="ms-auto text-muted">
                       <i class="fa fa-fw fa-times"></i>
                     </a>
                   </div>
@@ -49,14 +49,14 @@
                        (click)="clearWorkbench(); $event.preventDefault()">Clear workbench</a>
                   </div>
                 </div>
-                <div class="ml-2 mt-1 d-flex align-items-start">
+                <div class="ms-2 d-flex align-items-center">
                   <div ngbDropdown container="body">
                     <button type="button" class="btn btn-secondary btn-sm dropdown-no-arrow"
                             ngbDropdownToggle ngbTooltip="New Tab"
                             container="body">
                       <i class="fa fa-fw fa-plus"></i>
                     </button>
-                    <div ngbDropdownMenu class="dropdown-menu dropdown-menu-right">
+                    <div ngbDropdownMenu class="dropdown-menu dropdown-menu-end">
                       <button class="dropdown-item" (click)="addTab(pane, '/projects')">
                         File Browser
                       </button>
@@ -78,7 +78,7 @@
                    [class.workspace-hidden-tab-content]="pane.activeTab !== tab"
                    appDataTransferData [uriData]="[{title: tab.title, uri: tab.absoluteUrl}]">
                 <router-outlet
-                  [attr.name]="tab.outletName"
+                  [name]="tab.outletName"
                   (activate)="onComponentActivate(tab.outletName, $event); setFocus(pane)"
                   (deactivate)="onComponentDeactivate(tab.outletName)">
                 </router-outlet>

@@ -12,7 +12,7 @@ import {
   OnChanges,
   NgZone
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { zoom as d3_zoom, zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 import { select as d3_select, ValueFn as d3_ValueFn, Selection as d3_Selection } from 'd3-selection';
@@ -37,7 +37,7 @@ import { SankeyLayoutService } from './sankey-layout.service';
 export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   constructor(
     readonly clipboard: ClipboardService,
-    readonly snackBar: MatSnackBar,
+    readonly snackBar: MatLegacySnackBar,
     readonly sankey: SankeyLayoutService,
     readonly wrapper: ElementRef,
     private zone: NgZone

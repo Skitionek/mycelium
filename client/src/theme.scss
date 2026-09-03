@@ -1,6 +1,6 @@
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
 
-@include mat-core();
+@include mat.legacy-core();
 
 $light-primary-text: white;
 $dark-primary-text: black;
@@ -74,8 +74,13 @@ $lifelike-secondary-colors: (
 );
 
 
-$lifelike-primary: mat-palette($lifelike-primary-colors);
-$lifelike-accent: mat-palette($lifelike-secondary-colors, 500, A100, 900, 50);
-$lifelike-theme: mat-light-theme($lifelike-primary, $lifelike-accent);
+$lifelike-primary: mat.define-palette($lifelike-primary-colors);
+$lifelike-accent: mat.define-palette($lifelike-secondary-colors, 500, A100, 900);
+$lifelike-theme: mat.define-light-theme((
+  color: (
+    primary: $lifelike-primary,
+    accent: $lifelike-accent,
+  )
+));
 
-@include angular-material-theme($lifelike-theme);
+@include mat.all-legacy-component-themes($lifelike-theme);

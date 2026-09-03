@@ -1,5 +1,5 @@
 <div class="h-100 shadow bg-white" [ngClass]="routeBuilderContainerClass">
-  <button class="toggle-route-builder-button border border-primary rounded-left border-right-0 bg-secondary px-3 d-flex align-items-center"
+  <button class="toggle-route-builder-button border border-primary rounded-left border-end-0 bg-secondary px-3 d-flex align-items-center"
           (click)="toggleRouteBuilderOpen()">
     <i [ngClass]="routeBuilderOpen ? 'fa fa-caret-right' : 'fa fa-caret-left'"></i>
   </button>
@@ -24,13 +24,13 @@
     </div>
     <div *ngIf="(loadShortestPathQueries?.status$ | async) as status">
       <div *ngIf="status.placeholdersShown" class="d-flex justify-content-start">
-        <div class="d-flex justify-content-center align-items-center mr-2">
+        <div class="d-flex justify-content-center align-items-center me-2">
           <i class="fa fa-spinner fa-spin text-white"></i>
         </div>
         <p class="text-white m-0 d-flex align-items-center">Loading pre-defined queries...</p>
       </div>
       <div *ngIf="status.failedErrorShown" class="d-flex justify-content-start">
-        <div class="fa-stack fa-lg mr-2" style="width: 20px;">
+        <div class="fa-stack fa-lg me-2" style="width: 20px;">
           <i class="fas fa-circle fa-stack-1x text-white"></i>
           <i class="fas fa-exclamation-circle fa-stack-1x fa-inverse text-danger"></i>
         </div>
@@ -38,7 +38,7 @@
       </div>
       <div *ngIf="status.resultsShown && !status.failedErrorShown">
         <label class="text-white">Pre-defined Queries:</label>
-        <select class="custom-select" (change)="requestQueryLoadFromParent($event)">
+        <select class="form-select" (change)="requestQueryLoadFromParent($event)">
           <option *ngFor="let query of queries" [value]="query[0]">{{ query[1] }}</option>
         </select>
       </div>

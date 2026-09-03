@@ -1,4 +1,4 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { MapImageProviderService } from 'app/drawing-tool/services/map-image-provider.service';
 import { NodeCreation } from 'app/graph-viewer/actions/nodes';
@@ -16,7 +16,7 @@ export class ImageUploadBehavior extends AbstractCanvasBehavior {
 
   constructor(protected readonly graphView: CanvasGraphView,
               protected readonly mapImageProvider: MapImageProviderService,
-              protected readonly snackBar: MatSnackBar) {
+              protected readonly snackBar: MatLegacySnackBar) {
     super();
   }
 

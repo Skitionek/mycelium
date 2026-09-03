@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { HttpClient } from '@angular/common/http';
 
 import { Subscription } from 'rxjs';
@@ -112,7 +112,7 @@ export class KgStatisticsComponent {
   chartPlugins = [pluginDataLabels];
   totalCount: any = 0;
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
+  constructor(private http: HttpClient, private snackBar: MatLegacySnackBar) {
     this.loadTask = new BackgroundTask<void, StatisticsDataResponse>(() => {
       return this.http.get<StatisticsDataResponse>('/api/kg-statistics');
     });

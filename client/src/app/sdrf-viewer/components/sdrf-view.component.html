@@ -15,14 +15,14 @@
         (objectUpdate)="objectUpdate()">
       </app-module-menu>
 
-      <div *ngIf="dirty" class="ml-1">
-        <span class="badge badge-danger badge-pill"
+      <div *ngIf="dirty" class="ms-1">
+        <span class="badge bg-danger rounded-pill"
               ngbTooltip="Has unsaved changes" container="body">
           <i class="fa fa-pencil-alt"></i>
         </span>
       </div>
 
-      <div class="btn-group ml-2">
+      <div class="btn-group ms-2">
         <button class="btn btn-secondary"
                 (click)="save(ctx.object)"
                 [disabled]="!dirty || !ctx.object.privileges.writable"

@@ -45,6 +45,11 @@
   flex-wrap: wrap;
   margin-top: $spacer * -0.25;
 
+  // Ensure all buttons and dropdowns in the toolbar are vertically aligned
+  .btn {
+    vertical-align: middle;
+  }
+
   & > * {
     margin-top: $spacer * 0.25;
   }
@@ -109,7 +114,7 @@
   }
 
   .module-body-split-sidebar {
-    border-left: 1px solid $border-color;
+    border-start: 1px solid $border-color;
     background: $light;
     min-width: 400px;
   }
@@ -127,7 +132,7 @@
   }
 
   .module-body-split-sidebar {
-    border-left: 1px solid $border-color;
+    border-start: 1px solid $border-color;
     display: none;
 
     @include module-breakpoint-up(md) {

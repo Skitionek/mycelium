@@ -7,7 +7,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { BehaviorSubject } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
@@ -38,7 +38,7 @@ export class FilesystemObjectTargetDirective {
   constructor(protected readonly progressDialog: ProgressDialog,
               protected readonly filesystemService: FilesystemService,
               protected readonly errorHandler: ErrorHandler,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly elementRef: ElementRef,
               protected readonly objectCreationService: ObjectCreationService,
               protected readonly messageDialog: MessageDialog) {

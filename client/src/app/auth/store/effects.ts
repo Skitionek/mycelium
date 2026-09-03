@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { select, Store } from '@ngrx/store';
 import { from } from 'rxjs';
@@ -37,7 +37,7 @@ export class AuthEffects {
     private readonly store$: Store<State>,
     private readonly authService: AuthenticationService,
     private readonly modalService: NgbModal,
-    private readonly snackbar: MatSnackBar,
+    private readonly snackbar: MatLegacySnackBar,
   ) {
   }
 

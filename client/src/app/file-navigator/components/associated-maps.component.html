@@ -41,7 +41,7 @@
     <ng-container *ngIf="status.resultsShown">
       <div class="module-section">
         <div class="module-section-header d-flex align-items-center">
-          <h2 class="module-section-header-title mr-2">
+          <h2 class="module-section-header-title me-2">
             Associated Maps
             <span ngbTooltip="Maps that have a link to this file will appear here."
                   container="body">
@@ -49,12 +49,12 @@
             </span>
           </h2>
 
-          <div class="d-flex ml-auto">
+          <div class="d-flex ms-auto">
             <button type="button" class="btn btn-secondary" (click)="openMapCreateDialog()">
               <i class="fa fa-fw fa-plus-circle" aria-hidden="true"></i> New Map
             </button>
 
-            <button class="btn btn-secondary ml-2"
+            <button class="btn btn-secondary ms-2"
                     ngbTooltip="Reload List"
                     container="body"
                     placement="bottom top left right"

@@ -9,7 +9,7 @@
         <app-form-row for="parent" [label]="parentLabel" [control]="form.get('parent')"
                       *ngIf="promptParent">
           <div class="d-flex align-items-center text-truncate">
-            <button type="button" class="btn btn-secondary mr-2" (click)="showParentDialog()">
+            <button type="button" class="btn btn-secondary me-2" (click)="showParentDialog()">
               Browse...
             </button>
             <div class="text-truncate"
@@ -35,10 +35,10 @@
         </app-form-row>
 
         <app-form-row [control]="form.get('public')">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="public"
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="public"
                    formControlName="public">
-            <label class="custom-control-label" for="public">Publicly share with the
+            <label class="form-check-label" for="public">Publicly share with the
               community</label>
           </div>
         </app-form-row>
@@ -102,7 +102,7 @@
     </app-modal-body>
 
     <app-modal-footer>
-      <button type="button" class="btn btn-secondary mr-2" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
       <button type="submit" class="btn btn-primary" [disabled]="form.invalid" >{{ submitButtonLabel }}</button>
     </app-modal-footer>
   </div>

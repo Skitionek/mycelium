@@ -3,7 +3,7 @@
         <li ngbNavItem="properties">
             <a ngbNavLink>Properties</a>
             <ng-template ngbNavContent>
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="label">
                         Node Label:
                     </label>
@@ -12,7 +12,7 @@
                            #displayName>
                 </div>
 
-                <div class="form-group">
+                <div class="mb-3">
                     <label for="detail">Detail:</label>
                     <div class="form-control textarea-grow-wrap" [attr.data-replicated-value]="node.data.detail">
                         <textarea  [(ngModel)]="node.data.detail" cdkTextareaAutosize
@@ -23,22 +23,22 @@
                     </div>
                 </div>
 
-                <div class="form-group" *ngIf="mayShowDetailText()">
-                    <div class="custom-control custom-checkbox">
-                        <input class="custom-control-input" type="checkbox" id="show-detail" value="1"
+                <div class="mb-3" *ngIf="mayShowDetailText()">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="show-detail" value="1"
                                [(ngModel)]="node.style.showDetail" (change)="doSave()">
-                        <label class="custom-control-label" for="show-detail">
+                        <label class="form-check-label" for="show-detail">
                             Show detail text instead of the label
                         </label>
                     </div>
                 </div>
 
-                <div class="form-group mb-4">
+                <div class="mb-3 mb-4">
                     <label for="type" ngbTooltip="Node type" container="body">
                         Type:
                     </label>
                     <div class="d-flex flex-column flex-fill">
-                        <select [(ngModel)]="node.label" (change)="doSave()" class="custom-select w-100"
+                        <select [(ngModel)]="node.label" (change)="doSave()" class="form-select w-100"
                                 id="type"
                                 (ngModelChange)="handleTypeChange()" [disabled]="fixedType">
                             <option *ngFor="let choice of nodeTypeChoices" [value]="choice.label">
@@ -50,7 +50,7 @@
                                 Type:
                             </label>
                             <select [(ngModel)]="node.data.subtype" (change)="doSave()"
-                                    class="custom-select flex-fill"
+                                    class="form-select flex-fill"
                                     id="subtype">
                                 <option *ngFor="let choice of nodeSubtypeChoices" [value]="choice">
                                     {{choice | titlecase}}
@@ -90,11 +90,11 @@
                 <fieldset class="fieldset-properties">
                     <legend>Label Style</legend>
 
-                    <div class="form-group d-flex align-items-center">
-                        <label for="font-size" class="my-0 mr-2" ngbTooltip="Font size" container="body">
+                    <div class="mb-3 d-flex align-items-center">
+                        <label for="font-size" class="my-0 me-2" ngbTooltip="Font size" container="body">
                             <i class="fa fa-fw fa-text-height"></i>
                         </label>
-                        <app-percent-input min="20" max="1000" step="20" class="mr-1"
+                        <app-percent-input min="20" max="1000" step="20" class="me-1"
                                            [(value)]="node.style.fontSizeScale" (change)="doSave()"
                                            default="100"
                                            inputId="font-size"
@@ -102,8 +102,8 @@
                         %
                     </div>
 
-                    <div class="form-group d-flex align-items-center">
-                        <label class="my-0 mr-2" ngbTooltip="Text color" container="body">
+                    <div class="mb-3 d-flex align-items-center">
+                        <label class="my-0 me-2" ngbTooltip="Text color" container="body">
                             <i class="fa fa-fw fa-fill"></i>
                         </label>
                         <app-color-chooser-component
@@ -116,8 +116,8 @@
                 <fieldset class="fieldset-properties mt-4">
                     <legend>Border Style</legend>
 
-                    <div class="form-group d-flex align-items-center">
-                        <label for="stroke-color" class="my-0 mr-2" ngbTooltip="Border color" container="body">
+                    <div class="mb-3 d-flex align-items-center">
+                        <label for="stroke-color" class="my-0 me-2" ngbTooltip="Border color" container="body">
                             <i class="fa fa-fw fa-fill"></i>
                         </label>
                         <app-color-chooser-component
@@ -126,11 +126,11 @@
                                 (colorChange)="doSave()"></app-color-chooser-component>
                     </div>
 
-                    <div class="form-group d-flex align-items-center">
-                        <label for="line-type" class="my-0 mr-2" ngbTooltip="Border line type" container="body">
+                    <div class="mb-3 d-flex align-items-center">
+                        <label for="line-type" class="my-0 me-2" ngbTooltip="Border line type" container="body">
                             <i class="fa fa-fw fa-border-style"></i>
                         </label>
-                        <select [(ngModel)]="node.style.lineType" (change)="doSave()" class="custom-select"
+                        <select [(ngModel)]="node.style.lineType" (change)="doSave()" class="form-select"
                                 id="line-type">
                             <option *ngFor="let choice of lineTypeChoices" [value]="choice[0]">
                                 {{choice[1].name}}
@@ -138,12 +138,12 @@
                         </select>
                     </div>
 
-                    <div class="form-group d-flex align-items-center">
-                        <label for="line-width-scale" class="my-0 mr-2" ngbTooltip="Border line thickness"
+                    <div class="mb-3 d-flex align-items-center">
+                        <label for="line-width-scale" class="my-0 me-2" ngbTooltip="Border line thickness"
                                container="body">
                             <i class="fa fa-fw fa-window-minimize"></i>
                         </label>
-                        <app-percent-input min="20" max="1000" step="20" class="mr-1"
+                        <app-percent-input min="20" max="1000" step="20" class="me-1"
                                            [(value)]="node.style.lineWidthScale" (change)="doSave()"
                                            default="100"
                                            inputId="line-width-scale"
@@ -165,7 +165,7 @@
 <ng-template #search>
     <fieldset class="fieldset-properties mb-4"
               *ngIf="(node.display_name != null && node.display_name.length) || node.data?.search">
-        <legend>Search Internal <i class="fas fa-external-link-alt ml-1"></i></legend>
+        <legend>Search Internal <i class="fas fa-external-link-alt ms-1"></i></legend>
 
         <ul class="list-unstyled m-0">
             <li class="text-truncate">
@@ -187,7 +187,7 @@
     </fieldset>
     <fieldset class="fieldset-properties mb-4"
               *ngIf="(node.display_name != null && node.display_name.length) || node.data?.search">
-        <legend>Search External <i class="fas fa-external-link-alt ml-1"></i></legend>
+        <legend>Search External <i class="fas fa-external-link-alt ms-1"></i></legend>
         <app-quick-search [query]="node.display_name"
                           [links]="node.data?.search"></app-quick-search>
     </fieldset>

@@ -5,7 +5,7 @@
         Mycelium
       </div>
 
-      <div class="ml-auto">
+      <div class="ms-auto">
         <ng-container *ngIf="(buildInfo$ | async) as buildInfo; else buildInfoLoading">
           <span *ngIf="buildInfo.buildTimestamp !== 'undefined'; else undefinedTimestamp">
             Version:

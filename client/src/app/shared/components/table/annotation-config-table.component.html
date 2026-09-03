@@ -1,11 +1,11 @@
-<div class="custom-control custom-checkbox" *ngIf="fileType !== 'vnd.mycelium.document/enrichment-table'">
+<div class="form-check" *ngIf="fileType !== 'vnd.mycelium.document/enrichment-table'">
   <input
     id="exclude-references-checkbox"
-    class="custom-control-input"
+    class="form-check-input"
     type="checkbox"
     [checked]="form.get('excludeReferences').value"
     (change)="excludeReferences($event)">
-  <label class="custom-control-label" for="exclude-references-checkbox">Exclude reference section from annotation</label>
+  <label class="form-check-label" for="exclude-references-checkbox">Exclude reference section from annotation</label>
 </div><br>
 
 <div>
@@ -22,25 +22,25 @@
       <tr *ngFor="let model of models">
         <th scope="row">{{model}}</th>
         <td>
-          <div class="custom-control custom-checkbox">
+          <div class="form-check">
             <input
               id="{{model}}-nlp-checkbox"
-              class="custom-control-input"
+              class="form-check-input"
               type="checkbox"
               [checked]="form.get('annotationMethods').get(model).get('nlp').value"
               (change)="checkboxChange(model, 'nlp', 'rulesBased', $event)">
-            <label class="custom-control-label" for="{{model}}-nlp-checkbox"></label>
+            <label class="form-check-label" for="{{model}}-nlp-checkbox"></label>
           </div>
         </td>
         <td>
-          <div class="custom-control custom-checkbox">
+          <div class="form-check">
             <input
               id="{{model}}-rules-based-checkbox"
-              class="custom-control-input"
+              class="form-check-input"
               type="checkbox"
               [checked]="form.get('annotationMethods').get(model).get('rulesBased').value"
               (change)="checkboxChange(model, 'rulesBased', 'nlp', $event)">
-            <label class="custom-control-label" for="{{model}}-rules-based-checkbox"></label>
+            <label class="form-check-label" for="{{model}}-rules-based-checkbox"></label>
           </div>
         </td>
       </tr>
