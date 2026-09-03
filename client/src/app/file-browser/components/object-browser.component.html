@@ -44,7 +44,7 @@
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary ml-2" disabled>
+                            <button class="btn btn-primary ms-2" disabled>
                                 <i class="fa fa-fw fa-upload"></i> Upload
                             </button>
                         </div>
@@ -69,10 +69,10 @@
                             <thead>
                             <tr>
                                 <th class="text-truncate">
-                                    <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input"
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input"
                                                id="select-all-placeholder">
-                                        <label class="custom-control-label"
+                                        <label class="form-check-label"
                                                for="select-all-placeholder">Name</label>
                                     </div>
                                 </th>
@@ -100,7 +100,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-end">
-                                        <div ngbDropdown class="d-inline-block ml-auto">
+                                        <div ngbDropdown class="d-inline-block ms-auto">
                                             <button class="btn btn-sm" ngbDropdownToggle>
                                                     <span class="placeholder-box"><i
                                                             class="fas fa-cog fa-fw"></i></span>
@@ -124,7 +124,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-end">
-                                        <div ngbDropdown class="d-inline-block ml-auto">
+                                        <div ngbDropdown class="d-inline-block ms-auto">
                                             <button class="btn btn-sm" ngbDropdownToggle>
                                                     <span class="placeholder-box"><i
                                                             class="fas fa-cog fa-fw"></i></span>
@@ -152,17 +152,17 @@
 
                 <!-- Title bar -->
                 <div class="module-title-bar">
-                    <button type="button" class="module-title-bar-back mr-2" (click)="goUp(result.value)"
+                    <button type="button" class="module-title-bar-back me-2" (click)="goUp(result.value)"
                             *ngIf="result.value.parent">
                         <i class="fa fa-fw fa-arrow-left"></i>
                     </button>
                     <h1 class="module-title">
-                        <app-project-icon [project]="result.value.project" size="24px" class="mr-1"
+                        <app-project-icon [project]="result.value.project" size="24px" class="me-1"
                                           *ngIf="result.value.parent == null"></app-project-icon>
                         {{ result.value.effectiveName }}
                     </h1>
 
-                    <div ngbDropdown class="d-inline-block ml-1" container="body">
+                    <div ngbDropdown class="d-inline-block ms-1" container="body">
                         <a href="#" class="dropdown-no-arrow" ngbDropdownToggle
                            (click)="$event.preventDefault()">
                             <i class="fas fa-chevron-down fa-fw text-icon"></i>
@@ -203,16 +203,18 @@
                                     </ng-container>
                                     <button ngbDropdownItem (click)="openUploadDialog(result.value)">Upload File...
                                     </button>
+                                    <button ngbDropdownItem (click)="openUploadFolderDialog(result.value)">Upload Folder...
+                                    </button>
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary ml-2"
+                            <button class="btn btn-primary ms-2"
                                     (click)="openUploadDialog(result.value)"
                                     [disabled]="!result.value.privileges.writable">
                                 <i class="fa fa-fw fa-upload"></i> Upload
                             </button>
 
-                            <div ngbDropdown class="d-inline-block ml-2" container="body"
+                            <div ngbDropdown class="d-inline-block ms-2" container="body"
                                  *ngIf="result.value.children.selection.length && result.value.privileges.writable">
                                 <button class="btn btn-secondary" ngbDropdownToggle>
                                     Actions
@@ -236,7 +238,7 @@
                                 </div>
                             </div>
 
-                            <div ngbDropdown class="d-inline-block ml-2" container="body"
+                            <div ngbDropdown class="d-inline-block ms-2" container="body"
                                  ngbTooltip="Entity Cloud">
                                 <button class="btn btn-secondary" ngbDropdownToggle>
                                     <i class="fa fa-fw fa-cloud"></i>
@@ -257,19 +259,17 @@
                             </div>
                         </div>
 
-                        <div class="ml-auto d-flex">
+                        <div class="ms-auto d-flex">
                             <div class="input-group" [class.bg-highlight]="result.value.children.filter != null">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-transparent border-right-0">
-                                        <i class="fa fa-search"></i>
-                                    </div>
-                                </div>
-                                <input class="form-control py-2 pl-0 border-left-0 border bg-transparent"
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fa fa-search"></i>
+                                </span>
+                                <input class="form-control py-2 ps-0 border-start-0 border bg-transparent"
                                        (keyup)="applyFilter(result.value, $event.target.value)"
                                        placeholder="Find" maxlength="40">
                             </div>
 
-                            <button class="btn btn-secondary ml-2"
+                            <button class="btn btn-secondary ms-2"
                                     ngbTooltip="Reload List"
                                     container="body"
                                     placement="bottom top left right"

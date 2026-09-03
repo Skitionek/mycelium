@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, firstValueFrom, forkJoin, from, merge, of } from 'rxjs';
@@ -46,7 +46,7 @@ export class FilesystemObjectActions {
 
   constructor(protected readonly annotationsService: AnnotationsService,
               protected readonly router: Router,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly route: ActivatedRoute,
@@ -117,6 +117,14 @@ export class FilesystemObjectActions {
       title: 'Upload File',
       promptUpload: true,
     });
+  }
+
+  /**
+   * Open a dialog to upload a folder (with its entire structure).
+   * @param parent the folder to upload the folder into
+   */
+  openUploadFolderDialog(parent: FilesystemObject): Promise<any> {
+    return this.objectCreationService.openFolderUploadDialog(parent);
   }
 
   /**
