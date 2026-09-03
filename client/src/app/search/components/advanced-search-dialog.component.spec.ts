@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { MockComponent } from 'ng-mocks';
+import { of } from 'rxjs';
 
 import { FilesystemService } from 'app/file-browser/services/filesystem.service';
 import { RootStoreModule } from 'app/root-store';
@@ -17,8 +18,12 @@ import { ContentSearchService } from '../services/content-search.service';
 describe('AdvancedSearchDialogComponent', () => {
   let component: AdvancedSearchDialogComponent;
   let fixture: ComponentFixture<AdvancedSearchDialogComponent>;
+  let filesystemServiceSpy: jasmine.SpyObj<FilesystemService>;
 
   beforeEach(waitForAsync(() => {
+    filesystemServiceSpy = jasmine.createSpyObj('FilesystemService', ['getHierarchy']);
+    filesystemServiceSpy.getHierarchy.and.returnValue(of({ results: [] } as any));
+
     TestBed.configureTestingModule({
       imports: [
         RootStoreModule,
@@ -32,7 +37,7 @@ describe('AdvancedSearchDialogComponent', () => {
       ],
       providers: [
         ContentSearchService,
-        FilesystemService,
+        { provide: FilesystemService, useValue: filesystemServiceSpy },
         NgbActiveModal,
       ]
     })

@@ -138,6 +138,7 @@
               "src/theme.scss",
               "src/styles.scss"
             ],
+            "include": ["src/**/*.spec.ts"],
             "scripts": ["node_modules/molstar/build/viewer/molstar.js"],
             "customWebpackConfig": {
               "path": "./webpack.config.js"
