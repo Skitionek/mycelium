@@ -63,9 +63,17 @@ describe('VisualizationSettingsComponent', () => {
     });
 
     it('should show checkboxes for each label provided by the parent', () => {
-        const checkboxElements = document.getElementsByClassName('form-check');
-        expect(checkboxElements.length).toEqual(2);
-        expect(checkboxElements[0].textContent.trim()).toEqual('MockNode1');
-        expect(checkboxElements[1].textContent.trim()).toEqual('MockNode2');
+        const checkboxInputElements = document.querySelectorAll(
+            `input[id^="${instance.expandEntityInputIdPrefix}"]`
+        );
+
+        expect(checkboxInputElements.length).toEqual(2);
+
+        const labelElements = Array.from(checkboxInputElements).map(
+            (input) => document.querySelector(`label[for="${input.id}"]`)?.textContent.trim()
+        );
+
+        expect(labelElements[0]).toEqual('MockNode1');
+        expect(labelElements[1]).toEqual('MockNode2');
     });
 });

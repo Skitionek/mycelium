@@ -46,13 +46,13 @@ describe('WarningPillComponent', () => {
         (warningControllerSpy.warnings as BehaviorSubject<any[]>).next([]);
         fixture.detectChanges();
         const el: HTMLElement = fixture.nativeElement;
-        expect(el.querySelector('.badge-warning')).toBeNull();
+        expect(el.querySelector('.bg-warning')).toBeNull();
     });
 
     it('should render the badge when there are warnings', () => {
         (warningControllerSpy.warnings as BehaviorSubject<any[]>).next(['warning one']);
         fixture.detectChanges();
         const el: HTMLElement = fixture.nativeElement;
-        expect(el.querySelector('.badge-warning')).not.toBeNull();
+        expect(el.querySelector('.bg-warning')).not.toBeNull();
     });
 });
