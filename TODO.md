@@ -22,6 +22,22 @@ Persistent task list for sequential cleanup/fix work. Forked conversations shoul
 - [ ] Revisit `client/src/scss/_dropdown.scss` ng-bootstrap/CDK workarounds once ng-bootstrap positioning behaviour is confirmed; several `!important` rules may be removable.
 - [ ] Review `client/src/scss/_tabs.scss` (99 lines) against Bootstrap 5 `nav-tabs` — the custom divider/hover styling may be reducible.
 
+### CI
+
+- [ ] Don't publish images in PR checks. `.github/workflows/docker.yml` triggers on
+      `pull_request` and passes `push: true` unconditionally, so every PR pushes tags to
+      GHCR. Build on PRs for validation but only push on `main`/tags, e.g.
+      `push: ${{ github.event_name != 'pull_request' }}`, and drop `packages: write`
+      from the PR path.
+
+### Branch maintenance
+
+- [ ] Rebase `chore/angular16-bootstrap5-migration` onto current `main`. The remote has moved
+      on (dependabot bumps, and `feat/kg-shortest-path-queries` was force-rebased upstream),
+      so the migration branch and everything stacked on top of it — `feat/file-browser-folder-upload`,
+      `chore/scss-bootstrap4-cleanup` — are built on a stale base. Rebase the stack bottom-up and
+      re-run the frontend build plus a UI smoke test afterwards.
+
 ### Verification
 
 - [ ] After each styling cleanup task, rebuild frontend with Docker Compose.
