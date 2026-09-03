@@ -1,4 +1,3 @@
-
 services:
   ## Frontend web server
   frontend:
