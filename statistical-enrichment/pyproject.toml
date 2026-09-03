@@ -7,7 +7,7 @@ dependencies = [
   "flask-caching==2.4.1",
   "flask-marshmallow==1.5.0",
   "gunicorn==26.0.0",
-  "neo4j==6.2.0",
+  "neo4j==6.3.0",
   "pandas==2.3.3",
   "redis==8.1.0",
   "scipy==1.15.3",
