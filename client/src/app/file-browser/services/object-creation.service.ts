@@ -1,7 +1,7 @@
 import { HttpEventType } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { BehaviorSubject, firstValueFrom, Observable, iif, of, merge } from 'rxjs';
 import { filter, finalize, map, mergeMap, tap } from 'rxjs/operators';
@@ -19,6 +19,10 @@ import {
   ObjectEditDialogComponent,
   ObjectEditDialogValue,
 } from '../components/dialog/object-edit-dialog.component';
+import {
+  FolderUploadDialogComponent,
+  FolderUploadDialogValue,
+} from '../components/dialog/folder-upload-dialog.component';
 import { AnnotationsService } from './annotations.service';
 import { FilesystemService } from './filesystem.service';
 import { ObjectReannotateResultsDialogComponent } from '../components/dialog/object-reannotate-results-dialog.component';
@@ -27,7 +31,7 @@ import { ObjectReannotateResultsDialogComponent } from '../components/dialog/obj
 export class ObjectCreationService {
 
   constructor(protected readonly annotationsService: AnnotationsService,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly route: ActivatedRoute,
@@ -144,6 +148,142 @@ export class ObjectCreationService {
     return dialogRef.result;
   }
 
+  /**
+   * Open a dialog to upload a folder.
+   * @param parent the parent folder to upload into
+   */
+  openFolderUploadDialog(parent: FilesystemObject): Promise<{uploadedCount: number}> {
+    const dialogRef = this.modalService.open(FolderUploadDialogComponent);
+    dialogRef.componentInstance.title = 'Upload Folder';
+    dialogRef.componentInstance.parent = parent;
+    dialogRef.componentInstance.accept = ((value: FolderUploadDialogValue) => {
+      return this.executeFolderUpload(value.parent, value.files);
+    });
+    return dialogRef.result;
+  }
+
+  /**
+   * Upload a set of files that represent a folder structure, creating subdirectories as needed.
+   * @param parent the parent object to upload under
+   * @param files the files from the folder input (each has webkitRelativePath)
+   */
+  private async executeFolderUpload(parent: FilesystemObject, files: File[]): Promise<{uploadedCount: number}> {
+    const progressObservable = new BehaviorSubject<Progress>(new Progress({
+      status: 'Preparing folder structure...',
+    }));
+    const progressDialogRef = this.progressDialog.display({
+      title: 'Uploading Folder',
+      progressObservable,
+    });
+
+    try {
+      // Build a tree structure from the flat file list
+      const tree = this.buildFolderTree(files);
+
+      // Upload the tree recursively
+      let uploadedCount = 0;
+      const totalFiles = files.length;
+
+      const uploadNode = async (node: FolderTreeNode, parentHashId: string) => {
+        // Create this directory
+        progressObservable.next(new Progress({
+          mode: ProgressMode.Determinate,
+          status: `Creating folder '${node.name}'...`,
+          value: uploadedCount / totalFiles,
+        }));
+
+        const dir = await firstValueFrom(
+          this.filesystemService.createDirectory(node.name, parentHashId)
+        );
+
+        // Upload files in this directory
+        for (const file of node.files) {
+          progressObservable.next(new Progress({
+            mode: ProgressMode.Determinate,
+            status: `Uploading '${file.name}'...`,
+            value: uploadedCount / totalFiles,
+          }));
+
+          await firstValueFrom(this.executePutWithProgressDialogSilent({
+            filename: file.name,
+            parentHashId: dir.hashId,
+            contentValue: file,
+          }));
+
+          uploadedCount++;
+          progressObservable.next(new Progress({
+            mode: ProgressMode.Determinate,
+            status: `Uploaded '${file.name}'`,
+            value: uploadedCount / totalFiles,
+          }));
+        }
+
+        // Recurse into subdirectories
+        for (const child of node.children.values()) {
+          await uploadNode(child, dir.hashId);
+        }
+      };
+
+      // The tree root is the top-level folder
+      for (const rootNode of tree.values()) {
+        await uploadNode(rootNode, parent.hashId);
+      }
+
+      progressObservable.next(new Progress({
+        mode: ProgressMode.Determinate,
+        status: 'Upload complete!',
+        value: 1,
+      }));
+
+      return {uploadedCount};
+    } finally {
+      progressDialogRef.close();
+    }
+  }
+
+  /**
+   * Create a file without showing a separate progress dialog (for use within folder upload).
+   */
+  private executePutWithProgressDialogSilent(request: ObjectCreateRequest): Observable<FilesystemObject> {
+    return this.filesystemService.create(request).pipe(
+      filter(event => event.bodyValue != null),
+      map(event => event.bodyValue),
+      this.errorHandler.create({label: 'Upload file'}),
+    );
+  }
+
+  /**
+   * Build a tree structure from a flat list of files with webkitRelativePath.
+   */
+  private buildFolderTree(files: File[]): Map<string, FolderTreeNode> {
+    const roots = new Map<string, FolderTreeNode>();
+
+    for (const file of files) {
+      const parts = (file as any).webkitRelativePath.split('/');
+      // parts[0] is the root folder name, parts[1..n-1] are subdirs, parts[n] is the file
+
+      let currentLevel = roots;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const dirName = parts[i];
+        if (!currentLevel.has(dirName)) {
+          currentLevel.set(dirName, {
+            name: dirName,
+            files: [],
+            children: new Map(),
+          });
+        }
+        const node = currentLevel.get(dirName);
+        if (i === parts.length - 2) {
+          // This is the direct parent directory of the file
+          node.files.push(file);
+        }
+        currentLevel = node.children;
+      }
+    }
+
+    return roots;
+  }
+
 }
 
 export interface CreateDialogOptions {
@@ -153,4 +293,13 @@ export interface CreateDialogOptions {
   promptParent?: boolean;
   parentLabel?: string;
   request?: Partial<ObjectCreateRequest>;
+}
+
+/**
+ * Represents one node in a folder tree being uploaded.
+ */
+interface FolderTreeNode {
+  name: string;
+  files: File[];
+  children: Map<string, FolderTreeNode>;
 }

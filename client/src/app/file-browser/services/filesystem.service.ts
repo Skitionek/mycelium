@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subscription, throwError, from, defer } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, filter, map, tap } from 'rxjs/operators';
 
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
 import { ApiService } from 'app/shared/services/api.service';
@@ -47,7 +47,7 @@ export class FilesystemService {
   protected lmdbsDates = new BehaviorSubject<object>({});
 
   constructor(protected readonly router: Router,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly errorHandler: ErrorHandler,
@@ -342,6 +342,23 @@ export class FilesystemService {
     return outdated.reduce(
       (tooltip: string, [name, date]: [string, string]) => `${tooltip}\n- ${name}, ${new Date(date).toDateString()}`,
       'Outdated:',
+    );
+  }
+
+  /**
+   * Create a directory (folder) under the specified parent.
+   * @param filename the directory name
+   * @param parentHashId the parent folder's hash ID
+   * @returns the created directory object
+   */
+  createDirectory(filename: string, parentHashId: string): Observable<FilesystemObject> {
+    return this.create({
+      filename,
+      parentHashId,
+      mimeType: 'vnd.mycelium.filesystem/directory',
+    }).pipe(
+      filter(event => event.type === HttpEventType.Response),
+      map(event => (event as any).bodyValue as FilesystemObject),
     );
   }
 
