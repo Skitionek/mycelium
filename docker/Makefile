@@ -5,7 +5,7 @@ DOCKER_REGISTRY:=us.gcr.io/able-goods-221820
 #  docker-compose.yml           -> Base services containers
 #  docker-compose.services.yml  -> Third party services (PostgreSQL, Neo4j, Elasticsearch, Redis)
 #  docker-compose.dev.yml       -> Override base services for local development
-COMPOSE_COMMAND=docker-compose -p mycelium \
+COMPOSE_COMMAND=docker compose -p mycelium \
   -f ${DOCKER_DIR}/docker-compose.yml \
   -f ${DOCKER_DIR}/docker-compose.services.yml
 # ------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ up: ##@docker Run all containers. [c=<names>]
 
 up-dev: ##@docker Build and run all container(s) for development. [c=<names>]
 	@echo "\nBuilding and running containers...\nThis may take a while if running for the first time. \n"
-	@${COMPOSE_COMMAND} -f ${DOCKER_DIR}/docker-compose.dev.yml ${args} up -d --build --wait ${c}
+	@${COMPOSE_COMMAND} -f ${DOCKER_DIR}/docker-compose.dev.yml ${args} up -d --build --force-recreate --remove-orphans --wait ${c}
 	@echo "\nTo access mycelium, point your browser at: http://localhost:8080\n"
 
 tag ?= latest

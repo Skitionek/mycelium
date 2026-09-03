@@ -1,11 +1,9 @@
-version: "3.8"
 
 services:
   ## Frontend web server
   frontend:
     image: ghcr.io/skitionek/mycelium-frontend:${FRONTEND_IMAGE_TAG:-latest}
     restart: unless-stopped
-    container_name: frontend
     environment:
       - APPSERVER_URL=http://appserver:5000
     ports:
@@ -17,7 +15,6 @@ services:
   appserver:
     image: ghcr.io/skitionek/mycelium-appserver:${APPSERVER_IMAGE_TAG:-latest}
     restart: unless-stopped
-    container_name: appserver
     ports:
       - 5000:5000
     environment:
@@ -34,7 +31,6 @@ services:
   pdfparser:
     image: lifelike.azurecr.io/kg-pdfparser:${PDFPARSER_IMAGE_TAG:-latest}
     restart: unless-stopped
-    container_name: pdfparser
     tty: true
     ports:
       - 7600
@@ -45,7 +41,6 @@ services:
   statistical-enrichment:
     image: ghcr.io/skitionek/mycelium-statistical-enrichment:${STATISTICAL_ENRICHMENT_IMAGE_TAG:-latest}
     restart: unless-stopped
-    container_name: statistical-enrichment
     ports:
       - 5000
 
@@ -53,7 +48,6 @@ services:
   cache-invalidator:
     image: ghcr.io/skitionek/mycelium-cache-invalidator:${CACHE_INVALIDATOR_IMAGE_TAG:-latest}
     restart: unless-stopped
-    container_name: cache-invalidator
 
 networks:
   default:
