@@ -3,7 +3,7 @@
      (click)="onContainerClick($event)">
   <div class="select-input-inner-container d-flex flex-wrap">
     <div *ngFor="let choice of selectedChoices"
-         class="d-inline-block badge-pill badge-secondary mb-1 mr-1 cursor-default">
+         class="d-inline-block rounded-pill bg-secondary mb-1 me-1 cursor-default">
       <button type="button" (click)="deselect(choice)"
               class="btn btn-link btn-sm select-input-choice-remove">
         <i class="fa fa-times"></i>

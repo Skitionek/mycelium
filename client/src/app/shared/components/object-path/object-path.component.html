@@ -8,7 +8,7 @@
     <a [appLink]="item.getCommands(forEditing)" [newTab]="newTab"
        [appFSObjectTarget]="item.isDirectory ? item : null" (refreshRequest)="refreshRequest.emit()">
       <app-project-icon *ngIf="!item.parent"
-                        [project]="item.project" size="16" class="mr-1"></app-project-icon>
+                        [project]="item.project" size="16" class="me-1"></app-project-icon>
       {{ item.isDirectory && item.parent == null && rootName ? rootName : item.effectiveName }}
     </a>
     <div appContextMenuBody>

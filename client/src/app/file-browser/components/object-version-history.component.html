@@ -20,11 +20,11 @@
               [class.active]="log.results.isSelected(version)">
             <td (click)="log.results.toggle(version)">
               <ng-container *ngIf="showCheckboxes; else noCheckboxes">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" id="version-{{ version.hashId }}"
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="version-{{ version.hashId }}"
                          (change)="log.results.toggle(version)"
                          [checked]="log.results.isSelected(version)">
-                  <label class="custom-control-label d-block" for="version-{{ version.hashId }}">
+                  <label class="form-check-label d-block" for="version-{{ version.hashId }}">
                     {{ version.creationDate | date: 'short' }}
                   </label>
                 </div>
@@ -86,28 +86,28 @@
         <tbody>
         <tr>
           <td>
-            <div class="custom-control custom-checkbox">
+            <div class="form-check">
               <span class="placeholder-box">Loading loading</span>
             </div>
           </td>
         </tr>
         <tr>
           <td>
-            <div class="custom-control custom-checkbox">
+            <div class="form-check">
               <span class="placeholder-box">Loading loading</span>
             </div>
           </td>
         </tr>
         <tr>
           <td>
-            <div class="custom-control custom-checkbox">
+            <div class="form-check">
               <span class="placeholder-box">Loading loading</span>
             </div>
           </td>
         </tr>
         <tr>
           <td>
-            <div class="custom-control custom-checkbox">
+            <div class="form-check">
               <span class="placeholder-box">Loading loading</span>
             </div>
           </td>

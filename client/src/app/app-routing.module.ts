@@ -1,8 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { createRouteWithDynamicOutlets } from 'route-with-dynamic-outlets';
-
 import { AdminPanelComponent } from 'app/admin/components/admin-panel.component';
 import { ObjectBrowserComponent } from 'app/file-browser/components/object-browser.component';
 import { LoginComponent } from 'app/auth/components/login.component';
@@ -294,11 +292,9 @@ const routes: Routes = [
       title: 'Terms of Service',
     },
   },
-  // Workspace route: uses createRouteWithDynamicOutlets so each tab is rendered
-  // as a named Angular router outlet. The dynamicOutletFactory returns a route
-  // with WORKSPACE_CONTENT_ROUTES as children, allowing any workspace-accessible
-  // path to be rendered inside a named outlet.
-  createRouteWithDynamicOutlets({
+  // Workspace route: each tab is rendered as a named Angular router outlet.
+  // Routes are pre-registered for the common outlet names (left-N, right-N).
+  {
     path: 'workspaces/:space_id',
     component: WorkspaceComponent,
     canActivate: [AuthGuard],
@@ -306,11 +302,17 @@ const routes: Routes = [
       title: 'Workbench',
     },
     canDeactivate: [UnloadConfirmationGuard],
-    dynamicOutletFactory: () => ({
-      path: '',
-      children: WORKSPACE_CONTENT_ROUTES,
-    }),
-  }),
+    children: [
+      ...['left', 'right'].flatMap(side =>
+        Array.from({length: 10}, (_, i) =>
+          WORKSPACE_CONTENT_ROUTES.map(route => ({
+            ...route,
+            outlet: `${side}-${i}`,
+          }))
+        ).flat()
+      ),
+    ],
+  },
   // Content routes also available at root level for direct (non-workspace) navigation
   ...WORKSPACE_CONTENT_ROUTES,
   // Old links

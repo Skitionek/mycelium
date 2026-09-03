@@ -1,5 +1,5 @@
 import { Component, ElementRef, NgZone, Output, EventEmitter, Input, HostBinding, ViewEncapsulation } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -20,7 +20,7 @@ export class AnnotationToolbarComponent {
   constructor(protected readonly elementRef: ElementRef,
               protected readonly modalService: NgbModal,
               protected readonly zone: NgZone,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly errorHandler: ErrorHandler) {
   }
 

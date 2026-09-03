@@ -32,7 +32,7 @@
 
     <div *ngIf="(name || selected.entity.data?.search) && isNode">
       <fieldset class="fieldset-properties mt-4">
-        <legend>Search Internal <i class="fas fa-external-link-alt ml-1"></i></legend>
+        <legend>Search Internal <i class="fas fa-external-link-alt ms-1"></i></legend>
 
         <ul class="list-unstyled m-0">
           <li class="text-truncate">
@@ -54,7 +54,7 @@
       </fieldset>
 
       <fieldset class="fieldset-properties mt-4">
-        <legend>Search External <i class="fas fa-external-link-alt ml-1"></i></legend>
+        <legend>Search External <i class="fas fa-external-link-alt ms-1"></i></legend>
         <app-quick-search [query]="name" [links]="selected.entity.data?.search"></app-quick-search>
       </fieldset>
     </div>

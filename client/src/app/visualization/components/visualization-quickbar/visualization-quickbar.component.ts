@@ -3,7 +3,7 @@ import {
     EventEmitter,
     Output,
 } from '@angular/core';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MatLegacySlideToggleChange } from '@angular/material/legacy-slide-toggle';
 
 @Component({
     selector: 'app-visualization-quickbar',
@@ -15,7 +15,7 @@ export class VisualizationQuickbarComponent {
 
     constructor() {}
 
-    animationToggle($event: MatSlideToggleChange) {
+    animationToggle($event: MatLegacySlideToggleChange) {
         this.animationStatus.emit($event.checked);
     }
 }

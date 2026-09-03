@@ -14,7 +14,7 @@
           <ng-template ngbNavContent>
             <app-form-row for="content-value" label="File" [control]="form.get('contentValue')">
               <div class="d-flex align-items-center text-truncate">
-                <button type="button" class="btn btn-secondary mr-2" (click)="showFileDialog()">
+                <button type="button" class="btn btn-secondary me-2" (click)="showFileDialog()">
                   Browse...
                 </button>
                 <div class="text-truncate" *ngIf="form.get('contentValue').value != null; else noFileChosen">
@@ -45,7 +45,7 @@
 
     <app-form-row for="parent" [label]="parentLabel" [control]="form.get('parent')" *ngIf="promptParent">
       <div class="d-flex align-items-center text-truncate">
-        <button type="button" class="btn btn-secondary mr-2" (click)="showParentDialog()">
+        <button type="button" class="btn btn-secondary me-2" (click)="showParentDialog()">
           Browse...
         </button>
         <div class="text-truncate" *ngIf="form.get('parent').value != null; else noParentChosen">
@@ -68,9 +68,9 @@
     </app-form-row>
 
     <app-form-row [control]="form.get('public')" *ngIf="!object.isDirectory">
-      <div class="custom-control custom-checkbox">
-        <input type="checkbox" class="custom-control-input" id="public" formControlName="public">
-        <label class="custom-control-label" for="public">Publicly share with the community</label>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="public" formControlName="public">
+        <label class="form-check-label" for="public">Publicly share with the community</label>
       </div>
     </app-form-row>
 
@@ -107,7 +107,7 @@
   </app-modal-body>
 
   <app-modal-footer>
-    <button type="button" class="btn btn-secondary mr-2" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
     <button type="submit" class="btn btn-primary" [disabled]="form.invalid" >Save</button>
   </app-modal-footer>
 </form>

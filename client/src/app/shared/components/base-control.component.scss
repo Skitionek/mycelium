@@ -1,4 +1,4 @@
-@import "~scss/variables";
+@import "scss/variables";
 
 :host {
   display: contents;
@@ -11,11 +11,11 @@
     border-bottom: $input-border-width solid $input-group-addon-border-color;
 
     &:first-child {
-      border-left: $input-border-width solid $input-group-addon-border-color;
+      border-start: $input-border-width solid $input-group-addon-border-color;
     }
 
     &:last-child {
-      border-right: $input-border-width solid $input-group-addon-border-color;
+      border-end: $input-border-width solid $input-group-addon-border-color;
     }
   }
 

@@ -5,8 +5,8 @@
       <legend class="m-0">Filters</legend>
 
       <!-- Minimum frequency input -->
-      <div class="form-group d-flex align-items-start">
-        <label class="mt-2 mr-2 text-nowrap" [for]="minimumValueInputId">Min. {{ sortingAlgorithm.valueDescription }}:</label>
+      <div class="mb-3 d-flex align-items-start">
+        <label class="mt-2 me-2 text-nowrap" [for]="minimumValueInputId">Min. {{ sortingAlgorithm.valueDescription }}:</label>
         <div>
           <input [id]="minimumValueInputId"
                  [ngClass]="filtersForm.get('minimumValue').invalid ? 'form-control invalid-input' : 'form-control'"
@@ -32,8 +32,8 @@
 
       <!-- TODO: Removing this for now, may bring back in the future -->
       <!-- Maximum frequency input -->
-      <!-- <div class="form-group d-flex align-items-start">
-        <label class="mt-2 mr-2 text-nowrap" [for]="maximumValueInputId">Max. Entity Frequency:</label>
+      <!-- <div class="mb-3 d-flex align-items-start">
+        <label class="mt-2 me-2 text-nowrap" [for]="maximumValueInputId">Max. Entity Frequency:</label>
         <div>
           <input [id]="maximumValueInputId"
                  [ngClass]="filtersForm.get('maximumValue').invalid ? 'form-control invalid-input' : 'form-control'"
@@ -61,9 +61,9 @@
   <fieldset class="fieldset-properties mt-2">
     <legend>Grouping</legend>
 
-    <div class="form-group d-flex align-items-center">
-      <label [for]="id + '-group-by-options'" class="my-0 mr-2 text-nowrap">Group By:</label>
-      <select [(ngModel)]="selectedGroupByOption" class="custom-select" [id]="id + '-group-by-options'" (change)="groupAndSortData()">
+    <div class="mb-3 d-flex align-items-center">
+      <label [for]="id + '-group-by-options'" class="my-0 me-2 text-nowrap">Group By:</label>
+      <select [(ngModel)]="selectedGroupByOption" class="form-select" [id]="id + '-group-by-options'" (change)="groupAndSortData()">
         <option *ngFor="let option of groupByOptions" [value]="option">
           {{option}}
         </option>
@@ -71,18 +71,18 @@
     </div>
 
     <!-- TODO: Maybe bring these back in the future when we have additional options -->
-    <!-- <div class="form-group d-flex align-items-center">
-      <label [for]="id + '-order-by-options'" class="my-0 mr-2 text-nowrap">Order By:</label>
-      <select [(ngModel)]="selectedOrderByOption" class="custom-select" [id]="id + '-order-by-options'" (change)="groupAndSortData()">
+    <!-- <div class="mb-3 d-flex align-items-center">
+      <label [for]="id + '-order-by-options'" class="my-0 me-2 text-nowrap">Order By:</label>
+      <select [(ngModel)]="selectedOrderByOption" class="form-select" [id]="id + '-order-by-options'" (change)="groupAndSortData()">
         <option *ngFor="let option of orderByOptions" [value]="option">
           {{option}}
         </option>
       </select>
     </div>
 
-    <div class="form-group d-flex align-items-center">
-      <label [for]="id + '-sort-direction-options'" class="my-0 mr-2 text-nowrap">Sort Direction:</label>
-      <select [(ngModel)]="selectedOrderDirection" class="custom-select" [id]="id + '-sort-direction-options'" (change)="groupAndSortData()">
+    <div class="mb-3 d-flex align-items-center">
+      <label [for]="id + '-sort-direction-options'" class="my-0 me-2 text-nowrap">Sort Direction:</label>
+      <select [(ngModel)]="selectedOrderDirection" class="form-select" [id]="id + '-sort-direction-options'" (change)="groupAndSortData()">
         <option *ngFor="let option of orderDirections" [value]="option">
           {{option}}
         </option>
@@ -107,33 +107,33 @@
 
   <div *ngFor="let keyvalue of legend | keyvalue">
     <div *ngIf="disabledTypeMap.get(keyvalue.key); else notDisabled">
-      <div class="custom-control custom-checkbox">
+      <div class="form-check">
         <input [id]="id + '-legend-filter-' + keyvalue.key"
-               class="custom-control-input"
+               class="form-check-input"
                type="checkbox"
                value="1"
                [checked]="isTypeVisible(keyvalue.key)"
                (change)="changeTypeVisibility(keyvalue.key, $event)">
-        <label class="custom-control-label text-nowrap"
+        <label class="form-check-label text-nowrap"
                [for]="id + '-legend-filter-' + keyvalue.key"
                [autoClose]="false"
                container="body"
                placement="right bottom top"
                ngbTooltip="Entities of this type are not visible with the filters above.">
           <span class="entity-type-legend" [ngStyle]="{background: keyvalue.value}"></span> {{keyvalue.key}}
-          <i class="fa fa-exclamation-triangle text-danger ml-2"></i>
+          <i class="fa fa-exclamation-triangle text-danger ms-2"></i>
         </label>
       </div>
     </div>
     <ng-template #notDisabled>
-      <div class="custom-control custom-checkbox">
+      <div class="form-check">
         <input [id]="id + '-legend-filter-' + keyvalue.key"
-               class="custom-control-input"
+               class="form-check-input"
                type="checkbox"
                value="1"
                [checked]="isTypeVisible(keyvalue.key)"
                (change)="changeTypeVisibility(keyvalue.key, $event)">
-        <label class="custom-control-label text-nowrap" [for]="id + '-legend-filter-' + keyvalue.key">
+        <label class="form-check-label text-nowrap" [for]="id + '-legend-filter-' + keyvalue.key">
           <span class="entity-type-legend" [ngStyle]="{background: keyvalue.value}"></span> {{keyvalue.key}}
         </label>
       </div>
@@ -144,14 +144,14 @@
 <fieldset class="fieldset-properties mt-2">
   <legend>Annotations</legend>
   <div *ngFor="let data of annotationVisibility">
-    <div class="custom-control custom-checkbox">
+    <div class="form-check">
       <input [id]="id + 'filter-' + data.identifier"
-          class="custom-control-input"
+          class="form-check-input"
           type="checkbox"
           value="1"
           [checked]="data.visible"
           (change)="changeWordVisibility(data.identifier, $event)">
-      <label class="custom-control-label" [for]="id + 'filter-' + data.identifier">
+      <label class="form-check-label" [for]="id + 'filter-' + data.identifier">
         <span class="entity-type-legend" [ngStyle]="{background: data.entity.color}"></span> {{data.entity.text}} <span>({{data.entity.frequency}})</span>
       </label>
     </div>

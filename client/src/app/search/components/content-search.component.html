@@ -10,7 +10,7 @@
         </ng-container>
       </div>
       <div class="d-flex w-100 justify-content-start">
-        <div class="btn btn-link p-0 mr-3" (click)="openAdvancedSearch()">Advanced Search</div>
+        <div class="btn btn-link p-0 me-3" (click)="openAdvancedSearch()">Advanced Search</div>
         <div class="btn btn-link p-0" (click)="openSynonymSearch()">Find Synonyms</div>
       </div>
     </div>
@@ -85,7 +85,7 @@
                     <div class="search-results-item-header text-truncate">
                       <h5 class="text-truncate" [style.padding]="'1px 0'">
                         <app-file-type-label [object]="result.item" [showLabel]="false"
-                          class="mr-1"></app-file-type-label>
+                          class="me-1"></app-file-type-label>
                         <a [appLink]="result.item.getCommands(false)" [newTab]="true" [sideBySide]="true"
                            (dragstart)="itemDragStart($event, result.item, true)">
                           <app-term-highlight

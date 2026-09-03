@@ -16,15 +16,15 @@
             [showNewWindowButton]="false"
     >
         <div class="d-flex align-items-center px-2 mx-auto">
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" [id]="id + '-toggle-shown-text-checkbox'"
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" [id]="id + '-toggle-shown-text-checkbox'"
                        [checked]="false"
                        (change)="toggleShownText()">
-                <label class="custom-control-label" [for]="id + '-toggle-shown-text-checkbox'">Show Primary
+                <label class="form-check-label" [for]="id + '-toggle-shown-text-checkbox'">Show Primary
                     Names</label>
             </div>
         </div>
-        <div class="btn-group d-flex align-items-stretch ml-auto" role="group">
+        <div class="btn-group d-flex align-items-stretch ms-auto" role="group">
             <button class="btn btn-secondary text-nowrap"
                     ngbTooltip="Copy Cloud to Clipboard"
                     placement="bottom top left right"

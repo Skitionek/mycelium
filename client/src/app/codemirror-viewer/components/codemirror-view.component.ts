@@ -103,7 +103,7 @@ export class CodemirrorViewComponent implements AfterViewInit, OnDestroy, Module
       state: EditorState.create({
         doc: initialContent,
         extensions: this.buildExtensions(),
-      }),
+      }) as any,
       parent: this.editorContainer.nativeElement,
     });
   }
@@ -115,7 +115,7 @@ export class CodemirrorViewComponent implements AfterViewInit, OnDestroy, Module
     }
 
     this.editorView.setState(
-      EditorState.create({ doc: text, extensions: this.buildExtensions() })
+      EditorState.create({ doc: text, extensions: this.buildExtensions() }) as any
     );
   }
 

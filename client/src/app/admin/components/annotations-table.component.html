@@ -22,7 +22,7 @@
         </div>
       </div>
       <button [disabled]="results.selection.length === 0"
-              class="btn btn-danger ml-2"
+              class="btn btn-danger ms-2"
               (click)="deleteAnnotation(results.selection)"
               ngbTooltip="Delete annotation(s)">
         Delete
@@ -35,11 +35,11 @@
     <thead>
       <tr>
         <th>
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="select-all"
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="select-all"
                    [checked]="results.isAllSelected()"
                    (change)="results.toggleAll()">
-            <label class="custom-control-label" for="select-all"></label>
+            <label class="form-check-label" for="select-all"></label>
           </div>
         </th>
         <th *ngFor="let header of headers" scope="col">{{ header }}</th>
@@ -132,11 +132,11 @@
       <tr *ngFor="let object of results.view; index as objectIndex"
           [class.active]="this.results.isSelected(object)">
         <td class="align-middle text-nowrap" (click)="results.toggle(object)">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="object-{{ objectIndex }}"
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="object-{{ objectIndex }}"
                    (change)="results.toggle(object)"
                    [checked]="results.isSelected(object)">
-            <label class="custom-control-label d-block" for="object-{{ objectIndex }}"></label>
+            <label class="form-check-label d-block" for="object-{{ objectIndex }}"></label>
           </div>
         </td>
 

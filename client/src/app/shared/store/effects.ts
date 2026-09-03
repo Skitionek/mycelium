@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { Actions, createEffect, ofType, } from '@ngrx/effects';
 import { map, tap } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { MessageDialog } from '../services/message-dialog.service';
 export class SharedNgrxEffects {
   constructor(
     private actions$: Actions,
-    private snackBar: MatSnackBar,
+    private snackBar: MatLegacySnackBar,
     private messageDialog: MessageDialog,
   ) {
   }

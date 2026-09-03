@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
@@ -33,7 +33,7 @@ export class EnrichmentVisualisationService {
   constructor(protected readonly http: HttpClient,
               protected readonly apiService: ApiService,
               protected readonly errorHandler: ErrorHandler,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly enrichmentService: EnrichmentService) {
   }
 

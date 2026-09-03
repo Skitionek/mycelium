@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySnackBarModule } from '@angular/material/legacy-snack-bar';
 
 import { SharedModule } from 'app/shared/shared.module';
 import { RootStoreModule } from 'app/root-store';
@@ -17,7 +17,7 @@ describe('PdfViewerLibComponent', () => {
         BrowserAnimationsModule,
         PdfViewerLibModule,
         SharedModule,
-        MatSnackBarModule,
+        MatLegacySnackBarModule,
         RootStoreModule,
       ]
     }).compileComponents();
