@@ -96,7 +96,7 @@ flask-caching==2.4.1
     # via mycelium-appserver
 flask-cors==6.0.0
     # via mycelium-appserver
-flask-httpauth==4.8.0
+flask-httpauth==4.8.1
     # via mycelium-appserver
 flask-marshmallow==1.4.0
     # via mycelium-appserver
