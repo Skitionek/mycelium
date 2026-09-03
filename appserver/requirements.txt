@@ -314,7 +314,7 @@ werkzeug==3.1.6
     #   flask-cors
     #   mycelium-appserver
     #   sendgrid
-wrapt==2.1.2
+wrapt==2.4.0
     # via
     #   deprecated
     #   elastic-apm
