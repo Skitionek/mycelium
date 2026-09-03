@@ -51,6 +51,9 @@ $form-group-margin-bottom: 0.5rem;
 // Modal (Bootstrap 5 default: 500px)
 $modal-md: 600px;
 
+// Breadcrumb chevron divider (Bootstrap 5 default: "/")
+$breadcrumb-divider: quote(">");
+
 // Border radius — 6px "rounded-md" for a clean lab aesthetic
 $border-radius:    6px;
 $border-radius-sm: 4px;
