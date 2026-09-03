@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { from, Observable, Subscription, throwError } from 'rxjs';
@@ -36,7 +36,7 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   createActions$: Observable<CreateDialogAction[]> = from([]);
 
   constructor(protected readonly router: Router,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly messageDialog: MessageDialog,
               protected readonly errorHandler: ErrorHandler,
@@ -155,6 +155,18 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
       this.snackBar.open(`${getObjectLabel(object)} successfully uploaded.`, 'Close', {
         duration: 5000,
       });
+      this.load(this.hashId);
+    }, () => {
+    });
+  }
+
+  openUploadFolderDialog(parent: FilesystemObject) {
+    return this.actions.openUploadFolderDialog(parent).then(result => {
+      this.snackBar.open(
+        `Folder uploaded successfully (${result.uploadedCount} file${result.uploadedCount !== 1 ? 's' : ''}).`,
+        'Close',
+        {duration: 5000},
+      );
       this.load(this.hashId);
     }, () => {
     });
