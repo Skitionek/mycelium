@@ -18,20 +18,8 @@
   }
 }
 
-.tile-deck-xs {
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-}
-
 .tile-deck-sm {
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-}
-
-.tile-deck-md {
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-}
-
-.tile-deck-lg {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .tile {

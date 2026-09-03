@@ -36,7 +36,7 @@
           <div *ngIf="!change.inclusionChanges.length && !change.exclusionChanges.length" class="text-muted">
             <em>No changes.</em>
           </div>
-          <ul class="list-condensed overflow-auto" style="max-height: 200px">
+          <ul class="m-0 ps-4 overflow-auto" style="max-height: 200px">
             <li *ngFor="let item of change.inclusionChanges">
               <div
                 [class.text-success]="item.action === 'added'"
@@ -107,7 +107,7 @@
         <span class="placeholder-box">Loading loading</span>
       </td>
       <td>
-        <ul class="list-condensed m-0">
+        <ul class="m-0 ps-4">
           <li>
             <span class="placeholder-box">Loading loading loading loading</span>
           </li>
@@ -122,7 +122,7 @@
         <span class="placeholder-box">Loading loading</span>
       </td>
       <td>
-        <ul class="list-condensed m-0">
+        <ul class="m-0 ps-4">
           <li>
             <span class="placeholder-box">Loading loading</span>
           </li>

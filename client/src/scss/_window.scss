@@ -11,10 +11,6 @@
   background: $window-header-bg;
   align-items: center;
   cursor: pointer;
-
-  .window-btn {
-    margin-left: auto;
-  }
 }
 
 .window-header-selectable {
@@ -32,26 +28,4 @@
 
 .window-body {
   padding: 1rem;
-}
-
-.window-btn {
-  float: right;
-  border: 0;
-  margin: 0;
-  padding: 0;
-  line-height: 1;
-  background: transparent;
-  color: $btn-close-color;
-
-  // Override <a>'s hover style
-  &:hover {
-    color: $btn-close-color;
-    text-decoration: none;
-  }
-
-  &:not(:disabled):not(.disabled) {
-    &:hover, &:focus {
-      opacity: .75;
-    }
-  }
 }

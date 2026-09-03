@@ -1,21 +1,7 @@
+// Matches the border of a Bootstrap form control, for wrappers that visually
+// group controls but are not themselves .form-control elements.
 .input-border {
   border: $border-width solid $input-border-color !important;
-}
-
-.input-border-top {
-  border-top: $border-width solid $input-border-color !important;
-}
-
-.input-border-end {
-  border-inline-end: $border-width solid $input-border-color !important;
-}
-
-.input-border-bottom {
-  border-bottom: $border-width solid $input-border-color !important;
-}
-
-.input-border-start {
-  border-inline-start: $border-width solid $input-border-color !important;
 }
 
 .bg-highlight {
