@@ -1,33 +1,14 @@
-// ng-bootstrap 15's NgbDropdown directive overrides display to 'block'.
-// Restore inline-block where explicitly requested.
-.d-inline-block[ngbDropdown],
-.d-inline-block.dropdown {
-  display: inline-block !important;
-}
-
 .dropdown-menu {
   box-shadow: $dropdown-menu-box-shadow;
 
-  // ng-bootstrap 15 sets position:static as an inline style on dropdown menus;
-  // !important is needed to override the inline style.
+  // ng-bootstrap 15 positions the menu via a Popper-managed wrapper and leaves
+  // an inline `position: static` on the menu itself; !important is the only way
+  // to beat an inline style.  Verified: without this the menu renders static and
+  // is mispositioned.  Popper sets the wrapper's own position/z-index inline.
   &.show {
     position: absolute !important;
     z-index: $zindex-dropdown !important;
   }
-}
-
-// When ng-bootstrap renders a dropdown with container="body", the menu is
-// wrapped in a <div class="dropdown"> appended to the <body>.  Ensure the
-// wrapper doesn't collapse.
-body > .dropdown {
-  position: absolute;
-  z-index: $zindex-dropdown;
-}
-
-// Tile cards and other containers with overflow:hidden clip absolutely-positioned
-// dropdown menus.  The dropdown container needs to break out of the clipping.
-.tile, .tile-deck {
-  overflow: visible;
 }
 
 .dropdown-body {
@@ -44,18 +25,9 @@ body > .dropdown {
   z-index: $zindex-dropdown + 50;
 }
 
-// ---------------------------------------------------------------------------
-// CDK overlay & Material menu fixes
-// ---------------------------------------------------------------------------
-
-// Angular CDK overlay: the CDK positions overlay panes using the bounding-box
-// wrapper, so .cdk-overlay-pane can stay position:static.  However, we must
-// NOT override it because the CDK already handles this correctly.
-// (removed earlier override that broke CDK overlay positioning)
-
-// Bootstrap .dropdown-item inside a Material menu panel: the object-menu
-// component uses ngbDropdownItem (renders .dropdown-item) but is hosted in
-// a <mat-menu> (renders .mat-menu-panel).  Harmonise the styles.
+// The object menu is shared between an ngb dropdown and a Material <mat-menu>,
+// so its items are .dropdown-item even inside .mat-menu-panel.  Give those items
+// Material menu metrics so the two hosts look consistent.
 .mat-menu-panel {
   .dropdown-item {
     display: block;
