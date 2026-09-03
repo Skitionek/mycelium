@@ -10371,10 +10371,10 @@ vis-data@7.1.2:
   resolved "https://registry.npmjs.org/vis-data/-/vis-data-7.1.2.tgz"
   integrity sha512-RPSegFxEcnp3HUEJSzhS2vBdbJ2PSsrYYuhRlpHp2frO/MfRtTYbIkkLZmPkA/Sg3pPfBlR235gcoKbtdm4mbw==
 
-vis-network@10.1.0, vis-network@^10.1.0:
-  version "10.1.0"
-  resolved "https://registry.npmjs.org/vis-network/-/vis-network-10.1.0.tgz"
-  integrity sha512-D7b5p/C6SwWv1BlH9EDdtP0Tje/PJzSBWKef9qy2DyTC14QB7KBcnAZxIyW2m7mFYyfoeR+k5GF747zDcIhaKA==
+vis-network@10.1.2, vis-network@^10.1.0:
+  version "10.1.2"
+  resolved "https://registry.yarnpkg.com/vis-network/-/vis-network-10.1.2.tgz#35f3f8ec5b985e7700e8977ad1cd13ce6bcd705a"
+  integrity sha512-1Kj7GD7XNjygliqRWXv/VPT1X/2eKz2e09PvwDtETHwuvKJ0emid7/PmWoFqCMypun8rLbjgmalSfPkiVZ8ZMg==
 
 vis-util@5.0.2:
   version "5.0.2"
