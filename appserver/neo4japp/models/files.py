@@ -139,11 +139,11 @@ class FileContent(RDBMSBase):
         # in the same transaction (!). If later we require batch file adding, consider
         # sorting the files in a stable manner (like by the checksum) and then acquiring
         # the locks in the same order.
-        db.session.execute(db.select([
+        db.session.execute(db.select(
             db.func.pg_advisory_xact_lock(
                 db.cast(cls.get_file_lock_hash(checksum_sha256), db.BIGINT)
             )
-        ]))
+        ))
 
         try:
             return db.session.query(FileContent.id) \
