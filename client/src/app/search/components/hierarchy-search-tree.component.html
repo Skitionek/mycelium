@@ -1,13 +1,13 @@
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
     <div class="row-spacer"></div>
-    <div class="custom-control custom-checkbox">
-      <input type="checkbox" class="custom-control-input" [id]="node.data.id + '-checkbox'"
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" [id]="node.data.id + '-checkbox'"
              [checked]="checklistSelection.isSelected(node)"
              (change)="itemSelectionToggle(node)">
-      <label class="custom-control-label" [for]="node.data.id + '-checkbox'">
+      <label class="form-check-label" [for]="node.data.id + '-checkbox'">
         <!-- For top-level nodes, show a project icon instead of a folder icon -->
-        {{node.data.trueFilename}}<i [class]="'ml-1 tree-icon ' + (node.level === 0 ? 'fas fa-layer-group' : node.data.fontAwesomeIcon)"></i>
+        {{node.data.trueFilename}}<i [class]="'ms-1 tree-icon ' + (node.level === 0 ? 'fas fa-layer-group' : node.data.fontAwesomeIcon)"></i>
       </label>
     </div>
   </mat-tree-node>
@@ -18,12 +18,12 @@
       <i [class]="'fas fa-' + (treeControl.isExpanded(node) ? 'chevron-down' : 'chevron-right')"></i>
     </button>
 
-    <div class="custom-control custom-checkbox">
-      <input type="checkbox" class="custom-control-input" [id]="node.data.id + '-checkbox'"
+    <div class="form-check">
+      <input type="checkbox" class="form-check-input" [id]="node.data.id + '-checkbox'"
              [checked]="checklistSelection.isSelected(node)"
              (change)="itemSelectionToggle(node)">
-      <label class="custom-control-label" [for]="node.data.id + '-checkbox'">
-        {{node.data.trueFilename}}<i [class]="'ml-1 tree-icon ' + (node.level === 0 ? 'fas fa-layer-group' : node.data.fontAwesomeIcon)"></i>
+      <label class="form-check-label" [for]="node.data.id + '-checkbox'">
+        {{node.data.trueFilename}}<i [class]="'ms-1 tree-icon ' + (node.level === 0 ? 'fas fa-layer-group' : node.data.fontAwesomeIcon)"></i>
       </label>
     </div>
   </mat-tree-node>

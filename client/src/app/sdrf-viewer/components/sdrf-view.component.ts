@@ -8,7 +8,7 @@ import {
   Output,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { BehaviorSubject, from, Observable, Subject, Subscription } from 'rxjs';
 import { finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
@@ -42,7 +42,7 @@ export class SdrfViewComponent implements OnInit, OnDestroy {
   constructor(
     protected readonly route: ActivatedRoute,
     protected readonly filesystemService: FilesystemService,
-    protected readonly snackBar: MatSnackBar,
+    protected readonly snackBar: MatLegacySnackBar,
     protected readonly errorHandler: ErrorHandler,
     protected readonly progressDialog: ProgressDialog,
     protected readonly changeDetectorRef: ChangeDetectorRef,

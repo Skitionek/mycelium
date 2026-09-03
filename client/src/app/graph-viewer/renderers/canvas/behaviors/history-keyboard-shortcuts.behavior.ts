@@ -1,4 +1,4 @@
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { isCtrlOrMetaPressed } from 'app/shared/utils';
 
@@ -10,7 +10,7 @@ import { CanvasGraphView } from '../canvas-graph-view';
  */
 export class HistoryKeyboardShortcutsBehavior extends AbstractCanvasBehavior {
   constructor(private readonly graphView: CanvasGraphView,
-              private readonly snackBar: MatSnackBar) {
+              private readonly snackBar: MatLegacySnackBar) {
     super();
   }
 

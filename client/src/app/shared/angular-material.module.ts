@@ -6,39 +6,40 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CdkStepperModule } from '@angular/cdk/stepper';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatLegacyAutocompleteModule } from '@angular/material/legacy-autocomplete';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { MatButtonModule } from '@angular/material/button';
+import { MatLegacyButtonModule } from '@angular/material/legacy-button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatLegacyCardModule } from '@angular/material/legacy-card';
+import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox';
+import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatLegacyDialogModule } from '@angular/material/legacy-dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatNativeDateModule , MatRippleModule} from '@angular/material/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatRadioModule } from '@angular/material/radio';
-import { MatSelectModule } from '@angular/material/select';
+import { MatLegacyInputModule } from '@angular/material/legacy-input';
+import { MatLegacyListModule } from '@angular/material/legacy-list';
+import { MatLegacyMenuModule } from '@angular/material/legacy-menu';
+import { MatLegacyNativeDateModule } from '@angular/material/legacy-core';
+import { MatRippleModule} from '@angular/material/core';
+import { MatLegacyPaginatorModule } from '@angular/material/legacy-paginator';
+import { MatLegacyProgressBarModule } from '@angular/material/legacy-progress-bar';
+import { MatLegacyProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
+import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
+import { MatLegacySelectModule } from '@angular/material/legacy-select';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySliderModule } from '@angular/material/legacy-slider';
+import { MatLegacySlideToggleModule } from '@angular/material/legacy-slide-toggle';
+import { MatLegacySnackBarModule } from '@angular/material/legacy-snack-bar';
 import { MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatLegacyTableModule } from '@angular/material/legacy-table';
+import { MatLegacyTabsModule } from '@angular/material/legacy-tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 
 
@@ -49,40 +50,40 @@ import { MatTreeModule } from '@angular/material/tree';
         CdkTableModule,
         CdkTreeModule,
         DragDropModule,
-        MatAutocompleteModule,
+        MatLegacyAutocompleteModule,
         MatBadgeModule,
         MatBottomSheetModule,
-        MatButtonModule,
+        MatLegacyButtonModule,
         MatButtonToggleModule,
-        MatCardModule,
-        MatCheckboxModule,
-        MatChipsModule,
+        MatLegacyCardModule,
+        MatLegacyCheckboxModule,
+        MatLegacyChipsModule,
         MatDatepickerModule,
-        MatDialogModule,
+        MatLegacyDialogModule,
         MatDividerModule,
         MatExpansionModule,
         MatGridListModule,
         MatIconModule,
-        MatInputModule,
-        MatListModule,
-        MatMenuModule,
-        MatNativeDateModule,
-        MatPaginatorModule,
-        MatProgressBarModule,
-        MatProgressSpinnerModule,
-        MatRadioModule,
+        MatLegacyInputModule,
+        MatLegacyListModule,
+        MatLegacyMenuModule,
+        MatLegacyNativeDateModule,
+        MatLegacyPaginatorModule,
+        MatLegacyProgressBarModule,
+        MatLegacyProgressSpinnerModule,
+        MatLegacyRadioModule,
         MatRippleModule,
-        MatSelectModule,
+        MatLegacySelectModule,
         MatSidenavModule,
-        MatSliderModule,
-        MatSlideToggleModule,
-        MatSnackBarModule,
+        MatLegacySliderModule,
+        MatLegacySlideToggleModule,
+        MatLegacySnackBarModule,
         MatSortModule,
         MatStepperModule,
-        MatTableModule,
-        MatTabsModule,
+        MatLegacyTableModule,
+        MatLegacyTabsModule,
         MatToolbarModule,
-        MatTooltipModule,
+        MatLegacyTooltipModule,
         MatTreeModule,
         PortalModule,
         ScrollingModule,

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnDestroy, Output, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -89,7 +89,7 @@ export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
   constructor(
     protected readonly filesystemService: FilesystemService,
     protected readonly fileObjectActions: FilesystemObjectActions,
-    protected readonly snackBar: MatSnackBar,
+    protected readonly snackBar: MatLegacySnackBar,
     protected readonly modalService: NgbModal,
     protected readonly route: ActivatedRoute,
     protected readonly errorHandler: ErrorHandler,

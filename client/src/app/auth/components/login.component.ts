@@ -1,7 +1,7 @@
 import { Platform } from '@angular/cdk/platform';
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { Store } from '@ngrx/store';
@@ -38,7 +38,7 @@ export class LoginComponent {
     private readonly platform: Platform,
     private readonly modalService: NgbModal,
     private readonly progressDialog: ProgressDialog,
-    private readonly snackBar: MatSnackBar,
+    private readonly snackBar: MatLegacySnackBar,
     private readonly errorHandler: ErrorHandler,
     private readonly accountService: AccountService
   ) {

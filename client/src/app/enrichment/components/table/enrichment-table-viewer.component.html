@@ -17,14 +17,14 @@
                                    (objectUpdate)="objectUpdate()">
                   </app-module-menu>
             <div *ngIf="queuedChanges$.value">
-                <span class="badge badge-danger badge-pill ml-1"
+                <span class="badge bg-danger rounded-pill ms-1"
                       ngbTooltip="Has unsaved changes" container="body">
                   <i class="fa fa-pencil-alt"></i>
                 </span>
             </div>
 
             <!-- Decided to remove this for now, may bring back in the future. -->
-            <!-- <div class="btn-group ml-2">
+            <!-- <div class="btn-group ms-2">
               <button type="button" class="btn btn-secondary"
                       ngbTooltip="Save" placement="bottom" container="body" (click)="save()"
                       [disabled]="!result.object.value.privileges.writable">
@@ -51,7 +51,7 @@
                 </button>
             </div>
 
-            <div class="btn-group ml-auto">
+            <div class="btn-group ms-auto">
                 <button class="btn btn-secondary"
                         [appLink]="[
                             '/enrichment-visualisation',
@@ -85,7 +85,7 @@
                 </button>
             </div>
 
-            <div class="ml-auto">
+            <div class="ms-auto">
                 <ng-container *ngIf="annotation.id; else textSearchControl">
                     <app-result-control [value]="annotation.text"
                                         [annotationColor]="annotation.color"

@@ -10,7 +10,7 @@ import {
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -75,7 +75,7 @@ export class MapComponent<ExtraResult = void> implements OnDestroy, AfterViewIni
 
   constructor(
     readonly filesystemService: FilesystemService,
-    readonly snackBar: MatSnackBar,
+    readonly snackBar: MatLegacySnackBar,
     readonly modalService: NgbModal,
     readonly messageDialog: MessageDialog,
     readonly ngZone: NgZone,

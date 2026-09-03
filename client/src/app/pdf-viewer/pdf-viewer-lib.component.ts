@@ -14,7 +14,7 @@ import {
   ApplicationRef,
   Injector,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ComponentPortal, DomPortalOutlet } from '@angular/cdk/portal';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -200,7 +200,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     private appRef: ApplicationRef,
     private injector: Injector,
     protected readonly zone: NgZone,
-    protected readonly snackBar: MatSnackBar,
+    protected readonly snackBar: MatLegacySnackBar,
     protected readonly errorHandler: ErrorHandler,
     protected readonly internalSearch: InternalSearchService,
   ) {

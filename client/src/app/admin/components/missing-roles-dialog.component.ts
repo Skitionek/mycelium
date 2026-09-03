@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject } from 'rxjs';
@@ -26,7 +26,7 @@ export class MissingRolesDialogComponent extends CommonFormDialogComponent {
               messageDialog: MessageDialog,
               private readonly accountService: AccountService,
               private readonly progressDialog: ProgressDialog,
-              private readonly snackBar: MatSnackBar,
+              private readonly snackBar: MatLegacySnackBar,
               private readonly errorHandler: ErrorHandler) {
     super(modal, messageDialog);
     this.accountService = accountService;

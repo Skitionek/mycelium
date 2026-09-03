@@ -15,13 +15,13 @@
                          (objectUpdate)="emitModuleProperties()">
         </app-module-menu>
         <div *ngIf="unsavedChanges$.value">
-                <span class="badge badge-danger badge-pill ml-1"
+                <span class="badge bg-danger rounded-pill ms-1"
                       ngbTooltip="Has unsaved changes" container="body">
                   <i class="fa fa-pencil-alt"></i>
                 </span>
         </div>
 
-        <div class="btn-group ml-1">
+        <div class="btn-group ms-1">
             <button type="button" class="btn btn-secondary"
                     ngbTooltip="Save" placement="bottom" container="body" (click)="save()">
                 <i class="fa fa-fw fa-save"></i>
@@ -43,7 +43,7 @@
             </button>
         </div>
 
-        <div class="btn-group pr-1 mx-auto">
+        <div class="btn-group pe-1 mx-auto">
             <button type="button" class="btn btn-secondary" container="body"
                     ngbTooltip="Fit Map to Window" placement="bottom"
                     (click)="zoomToFit()">
@@ -83,7 +83,7 @@
                         <button type="button" class="btn btn-primary" (click)="reload()">
                             Reload
                         </button>
-                        <button type="button" class="btn btn-secondary ml-2" (click)="dismissReloadPopup()">
+                        <button type="button" class="btn btn-secondary ms-2" (click)="dismissReloadPopup()">
                             Dismiss
                         </button>
                     </div>
@@ -120,14 +120,14 @@
                                         <div class="module-body">
                                             <div class="row align-items-center mb-0">
                                                 <div class="col-sm-6">Node Count:</div>
-                                                <div class="col-sm-6 text-right">
+                                                <div class="col-sm-6 text-end">
                                                     {{ graphCanvas.nodes.length | number }}
                                                 </div>
                                             </div>
 
                                             <div class="row align-items-center">
                                                 <div class="col-sm-6">Edge Count:</div>
-                                                <div class="col-sm-6 text-right">
+                                                <div class="col-sm-6 text-end">
                                                     {{ graphCanvas.edges.length | number }}
                                                 </div>
                                             </div>

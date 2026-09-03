@@ -21,7 +21,7 @@
                 <col style="width: 15%; max-width: 140px" class="d-none d-cbp-sm-table-column">
                 <!-- Annotated -->
                 <col style="width: 90px" class="d-none d-cbp-md-table-column"> <!-- Created -->
-                <col class="w-20" [ngStyle.gt-xs]="'width:120px'"> <!-- Author -->
+                <col class="w-20"> <!-- Author -->
                 <col style="width: 80px"> <!-- Dropdown -->
             </colgroup>
             <thead>
@@ -29,11 +29,11 @@
                 <th class="text-truncate">
                     <ng-container
                             *ngIf="objects != null && objects.multipleSelection; else singleSelectionSelectAll">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="{{ id }}-select-all"
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="{{ id }}-select-all"
                                    [checked]="objects.isAllSelected()"
                                    (change)="objects.toggleAll()">
-                            <label class="custom-control-label" for="{{ id }}-select-all">Name</label>
+                            <label class="form-check-label" for="{{ id }}-select-all">Name</label>
                         </div>
                     </ng-container>
                     <ng-template #singleSelectionSelectAll>
@@ -59,9 +59,9 @@
                 <td class="align-middle text-nowrap text-truncate">
                     <span class="placeholder-box">Loading loading</span>
                 </td>
-                <td>
-                    <div class="d-flex align-items-end">
-                        <div ngbDropdown class="d-inline-block ml-auto">
+                <td class="align-middle">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div ngbDropdown class="d-inline-block ms-auto">
                             <button class="btn btn-sm" ngbDropdownToggle>
                                 <span class="placeholder-box"><i class="fas fa-cog fa-fw"></i></span>
                             </button>
@@ -79,9 +79,9 @@
                 <td class="align-middle text-nowrap text-truncate">
                     <span class="placeholder-box">Loading loading</span>
                 </td>
-                <td>
-                    <div class="d-flex align-items-end">
-                        <div ngbDropdown class="d-inline-block ml-auto">
+                <td class="align-middle">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <div ngbDropdown class="d-inline-block ms-auto">
                             <button class="btn btn-sm" ngbDropdownToggle>
                                 <span class="placeholder-box"><i class="fas fa-cog fa-fw"></i></span>
                             </button>
@@ -103,20 +103,20 @@
                 <td class="align-middle text-nowrap overflow-hidden"
                     [style.width]="'fit-content'"
                     (click)="objects.toggle(object)">
-                    <div class="custom-control custom-checkbox overflow-hidden"
+                    <div class="form-check overflow-hidden"
                          (click)="$event.preventDefault()">
-                        <input type="checkbox" class="custom-control-input"
+                        <input type="checkbox" class="form-check-input"
                                id="{{ id }}-object-{{ objectIndex }}"
                                (change)="objects.toggle(object); $event.preventDefault()"
                                [checked]="objects.isSelected(object)">
-                        <label class="custom-control-label d-block" for="{{ id }}-object-{{ objectIndex }}">
+                        <label class="form-check-label d-block" for="{{ id }}-object-{{ objectIndex }}">
                             <div class="d-flex align-items-center"
                                  popoverTitle="Description" container="body" triggers="mouseenter:mouseleave"
                                  placement="right"
                                  [popoverClass]="'tooltip-newlines'"
                                  [ngbPopover]="object.description  | truncate: MAX_TOOLTIP_LENGTH"
                                  [disablePopover]="object.description == null || object.description.length === 0">
-                                <div class="d-inline-block mr-1">
+                                <div class="d-inline-block me-1">
                                     <i [class]="'fa-fw text-icon ' + object.fontAwesomeIcon"></i>
                                 </div>
 
@@ -132,20 +132,20 @@
                                     </a>
                                 </div>
 
-                                <div class="d-inline-block ml-1" *ngIf="object.public"
+                                <div class="d-inline-block ms-1" *ngIf="object.public"
                                      ngbTooltip="This item is public and can be viewed by any logged-in user."
                                      container="body">
                                     <i class="fa fa-fw text-icon fa-globe"></i>
                                 </div>
 
-                                <div class="d-inline-block ml-1"
+                                <div class="d-inline-block ms-1"
                                      *ngIf="!object.privileges.writable && !object.privileges.commentable"
                                      ngbTooltip="You do not have permission to edit this item."
                                      container="body">
                                     <i class="fa fa-fw text-icon fa-lock"></i>
                                 </div>
 
-                                <div class="d-inline-block ml-1"
+                                <div class="d-inline-block ms-1"
                                      *ngIf="!object.privileges.writable && object.privileges.commentable"
                                      ngbTooltip="You can make comments on this item, but you cannot edit it."
                                      container="body">
@@ -165,7 +165,7 @@
                          *ngIf="object.isAnnotatable">
                         <ng-container
                                 *ngIf="object.annotationsTooltipContent && object.annotationsTooltipContent.length">
-                            <i class="fas fa-exclamation-triangle fa-fw mr-1"></i>
+                            <i class="fas fa-exclamation-triangle fa-fw me-1"></i>
                         </ng-container>
                         {{ (object.annotationsDate | date: 'short') || 'No annotations'}}
                     </div>
@@ -179,8 +179,8 @@
                     <app-user [user]="object.user"></app-user>
                 </td>
 
-                <td>
-                    <div class="d-flex align-items-end" *ngIf="objectControls">
+                <td class="align-middle">
+                    <div class="d-flex align-items-center justify-content-end" *ngIf="objectControls">
                         <button class="btn btn-sm" [matMenuTriggerFor]="fileObjectMenu">
                             <i class="fas fa-cog fa-fw"></i>
                             <i class="fas fa-caret-down fa-fw"></i>

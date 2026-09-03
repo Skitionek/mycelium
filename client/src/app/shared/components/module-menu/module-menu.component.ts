@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnChanges, } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { get } from 'lodash-es';
@@ -25,7 +25,7 @@ import { ModuleAwareComponent } from '../../modules';
 })
 export class ModuleMenuComponent extends ObjectMenuComponent implements AfterViewInit, OnChanges {
   constructor(readonly router: Router,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly errorHandler: ErrorHandler,
               protected readonly route: ActivatedRoute,

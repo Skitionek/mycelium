@@ -1,13 +1,13 @@
-<label class="w-100 text-left m-0 checkpoint" ngbButtonLabel>
+<label class="w-100 text-start m-0 checkpoint" ngbButtonLabel>
     <input [(ngModel)]="state.normalizeLinks" (ngModelChange)="update()"
            ngbButton
            type="checkbox">
     Normalize links
 </label>
 <div class="dropdown-divider"></div>
-<label class="w-100 text-left m-0 scrollbar-with-value" ngbButtonLabel>
+<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
     <div class="d-flex align-items-center mx-0">
-        <label for="font-size" class="my-0 mr-2" ngbTooltip="Font size" container="body">
+        <label for="font-size" class="my-0 me-2" ngbTooltip="Font size" container="body">
             Font Size
         </label>
         <app-percent-input [(value)]="state.fontSizeScale"
@@ -21,7 +21,7 @@
         %
     </div>
 </label>
-<label class="w-100 text-left m-0 scrollbar-with-value" ngbButtonLabel>
+<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
     <input [(ngModel)]="state.nodeHeight.min.enabled" (ngModelChange)="update()"
            ngbButton
            type="checkbox">
@@ -33,7 +33,7 @@
            type="range">
     {{state.nodeHeight.min.value}}
 </label>
-<label class="w-100 text-left m-0 scrollbar-with-value" ngbButtonLabel>
+<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
     <input [(ngModel)]="state.nodeHeight.max.enabled" (ngModelChange)="update()"
            ngbButton
            type="checkbox">
@@ -45,7 +45,7 @@
            type="range">
     {{state.nodeHeight.max.ratio}}
 </label>
-<label class="w-100 text-left m-0 scrollbar-with-value" ngbButtonLabel>
+<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
     <input [(ngModel)]="state.labelEllipsis.enabled" (ngModelChange)="update()"
            ngbButton
            type="checkbox">
@@ -58,7 +58,7 @@
     {{state.labelEllipsis.value}}
 </label>
 <div class="dropdown-divider"></div>
-<div class="w-100 text-left m-0" ngbButtonLabel ngbRadioGroup [name]="'link' + uuid"
+<div class="w-100 text-start m-0" ngbButtonLabel ngbRadioGroup [name]="'link' + uuid"
      [(ngModel)]="state.linkValueAccessorId" (ngModelChange)="customSizingUpdate()" title="Link size">
     <div class="mb-1">Link Value Accessor:</div>
     <label ngbButtonLabel class="mb-0"

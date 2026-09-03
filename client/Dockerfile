@@ -23,10 +23,10 @@ FROM angular-deps as angular-build
 COPY src ./src
 COPY tslint ./tslint
 COPY e2e ./e2e
-COPY *.json webpack.config.js browserslist ./
+COPY *.json proxy.conf.js webpack.config.js browserslist ./
 
 ARG ANGULAR_CONFIG=production
-ENV NODE_OPTIONS="--max-old-space-size=4096 --openssl-legacy-provider"
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN yarn build --configuration=$ANGULAR_CONFIG --output-path=dist
 
 # When targeting this image stage, run angulat dev server

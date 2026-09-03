@@ -1,7 +1,7 @@
 <div [class.drop-target]="dropTargeted" [class.drop-target-outset]="dropTargeted">
   <div class="d-flex align-items-start mb-2" *ngIf="showHeader">
-    <label class="m-0 mr-4">{{ title }}:</label>
-    <button type="button" *ngIf="editable" class="btn btn-primary btn-xs ml-auto"
+    <label class="m-0 me-4">{{ title }}:</label>
+    <button type="button" *ngIf="editable" class="btn btn-primary btn-xs ms-auto"
             (click)="openCreateDialog()" [disabled]="limit !== null && value?.length > limit - 1"><i
       class="fa fa-plus"></i></button>
   </div>
@@ -25,7 +25,7 @@
       </ng-template>
 
       <div class="d-flex align-items-center">
-        <div class="text-truncate mr-2" placement="top" container="body"
+        <div class="text-truncate me-2" placement="top" container="body"
              [ngbTooltip]="link.url">
           <a [href]="toValidUrl(link.url)" target="_blank" class="text-muted"
              (click)="linkClick($event, link)">
@@ -33,12 +33,12 @@
           </a>
         </div>
 
-        <div *ngIf="editable" class="mt-1 ml-auto link-item-controls text-nowrap">
-          <button type="button" class="btn btn-xs btn-secondary ml-auto"
+        <div *ngIf="editable" class="mt-1 ms-auto link-item-controls text-nowrap">
+          <button type="button" class="btn btn-xs btn-secondary ms-auto"
                   (click)="openEditDialog(link); $event.stopPropagation()">
             <i class="fa fa-pencil"></i>
           </button>
-          <button type="button" class="btn btn-xs btn-outline-danger ml-1"
+          <button type="button" class="btn btn-xs btn-outline-danger ms-1"
                   (click)="delete(index); $event.stopPropagation()">
             <i class="fa fa-trash"></i>
           </button>

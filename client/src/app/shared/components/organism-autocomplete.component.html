@@ -8,15 +8,11 @@
     [editable]='false' [inputFormatter]="formatter" [ngbTypeahead]="searcher" [resultTemplate]="rt"
     (selectItem)="notifySelection($event)"
   >
-  <div *ngIf="organism" class="input-group-append">
-    <button type="button"
-            class="form-control border-0"
-            (click)="clear()">
-      <i class="fa fa-times"></i>
-    </button>
-  </div>
-  <div *ngIf="isFetching" class="input-group-append">
-    <span class="input-group-text">Searching...</span>
-  </div>
+  <button *ngIf="organism" type="button"
+          class="btn border-0"
+          (click)="clear()">
+    <i class="fa fa-times"></i>
+  </button>
+  <span *ngIf="isFetching" class="input-group-text">Searching...</span>
   <div class="invalid-feedback" *ngIf="fetchFailed">Sorry, suggestions could not be loaded.</div>
 </div>

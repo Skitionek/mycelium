@@ -5,7 +5,7 @@
 
   <div class="module-section-body">
     <div class="mb-3 d-flex align-items-center">
-      <div class="mr-2">
+      <div class="me-2">
         <button class="btn btn-primary" (click)="openCreateDialog()">
           <i class="fa fa-fw fa-plus-circle"></i>
           New Project
@@ -41,7 +41,7 @@
             <div *ngFor="let p of projectList.value.results.view" class="tile d-flex flex-column"
                  draggable="true" (dragstart)="projectDragStart($event, p)">
               <div class="d-flex tile-toolbar">
-                <div ngbDropdown class="d-inline-block ml-auto" container="body">
+                <div ngbDropdown class="d-inline-block ms-auto" container="body">
                   <button class="btn btn-sm" ngbDropdownToggle>
                     <i class="fas fa-cog fa-fw"></i>
                   </button>

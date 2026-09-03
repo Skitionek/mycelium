@@ -1,7 +1,7 @@
 <div #dropdown ngbDropdown [placement]="placement">
   <button type="button" class="d-flex align-items-center form-control w-100 text-truncate"
           tabindex="0" ngbDropdownToggle [id]="formId">
-    <span class="d-block text-left w-100 text-truncate mr-2">
+    <span class="d-block text-start w-100 text-truncate me-2">
       <ng-container *ngIf="selection.size === 0 else choicesList">
         <span class="text-muted">
           {{ emptyLabel }}
@@ -34,13 +34,13 @@
     </div>
 
     <div *ngFor="let choice of choices; index as i" class="text-nowrap">
-      <div class="custom-control custom-checkbox"
+      <div class="form-check"
            (click)="changeChoiceSelection(choice, !selection.has(choice)); $event.preventDefault()">
-        <input class="custom-control-input" type="checkbox" [id]="componentId + '-choice-' + i"
+        <input class="form-check-input" type="checkbox" [id]="componentId + '-choice-' + i"
                value="1"
                [checked]="selection.has(choice)"
                (change)="changeChoiceSelection(choice, $event.target.checked)">
-        <label class="custom-control-label" [for]="componentId + '-choice-' + i">
+        <label class="form-check-label" [for]="componentId + '-choice-' + i">
           {{ choiceLabel(choice) }}
         </label>
       </div>

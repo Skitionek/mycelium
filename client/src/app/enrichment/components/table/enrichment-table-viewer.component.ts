@@ -11,7 +11,7 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -75,7 +75,7 @@ export class EnrichmentTableViewerComponent implements OnInit, OnDestroy, AfterV
 
   constructor(protected readonly route: ActivatedRoute,
               protected readonly worksheetViewerService: EnrichmentTableService,
-              protected readonly snackBar: MatSnackBar,
+              protected readonly snackBar: MatLegacySnackBar,
               protected readonly modalService: NgbModal,
               protected readonly errorHandler: ErrorHandler,
               protected readonly enrichmentService: EnrichmentService,

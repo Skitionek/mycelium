@@ -372,7 +372,7 @@ export class WorkspaceManager {
     if (outletParts.length === 0) {
       return this.workspaceUrl;
     }
-    return `${this.workspaceUrl}(${outletParts.join('//')})`;
+    return `${this.workspaceUrl}/(${outletParts.join('//')})`;
   }
 
   /**

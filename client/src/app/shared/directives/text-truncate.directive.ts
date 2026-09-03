@@ -48,24 +48,23 @@ class NgbRTLCompat {
 export class TextTruncateDirective extends NgbTooltip implements OnInit, OnDestroy, AfterContentChecked {
   constructor(
     protected _elementRef: ElementRef<HTMLElement>,
-    protected _rtl: NgbRTLCompat,
     protected _renderer: Renderer2,
     protected injector: Injector,
     protected viewContainerRef: ViewContainerRef,
     protected config: NgbTooltipConfig,
     protected _ngZone: NgZone,
+    @Inject(DOCUMENT) protected _document: Document,
     protected _changeDetector: ChangeDetectorRef,
     protected applicationRef: ApplicationRef
   ) {
     super(
       _elementRef,
-      _rtl as any, // NgbRTL is not in ng-bootstrap v13 public API; NgbRTLCompat satisfies the same interface
       _renderer,
       injector,
       viewContainerRef,
       config,
       _ngZone,
-      document,
+      _document,
       _changeDetector,
       applicationRef
     );

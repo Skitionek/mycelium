@@ -1,4 +1,4 @@
-@import '~bootstrap/scss/functions';
+@import 'bootstrap/scss/functions';
 
 // ============================================================
 // Bootstrap 4 → Bootstrap 5 color compatibility overrides
@@ -9,20 +9,12 @@ $pink:  #e83e8c;   // Bootstrap 5 default: #d63384
 $green: #28a745;   // Bootstrap 5 default: #198754
 $cyan:  #17a2b8;   // Bootstrap 5 default: #0dcaf0
 
-// Gray-scale forward declarations needed before the Bootstrap import
-// (values are identical to Bootstrap 5 defaults)
-$gray-300: #dee2e6;
-$gray-400: #ced4da;
-$gray-800: #343a40;
-
 // ============================================================
 // Brand & semantic color overrides
 // ============================================================
 $primary:   #004B49;
-$secondary: $gray-300;
-$success:   $green;
-$info:      $cyan;
-$dark:      $gray-800;
+$secondary: #dee2e6;  // gray-300
+$dark:      #343a40;  // gray-800
 $highlight: #D4FF00;
 
 // ============================================================
@@ -71,7 +63,7 @@ $displays: none, inline, inline-block, block, table, table-row, table-cell, flex
 // Import Bootstrap default variables
 // Any variable not yet set receives its Bootstrap 5 default
 // ============================================================
-@import '~bootstrap/scss/variables';
+@import 'bootstrap/scss/variables';
 
 // Add custom "button" theme color (must come after Bootstrap defines $theme-colors)
 $theme-colors: map-merge($theme-colors, ("button": $gray-400));
@@ -134,13 +126,24 @@ $toolbar-bg:                             $white;
 $toolbar-box-shadow:                     none;
 $toolbar-font-size:                      $font-size-base;
 
-$floating-toolbar-padding:               $spacer / 2;
+$floating-toolbar-padding:               calc($spacer / 2);
 $floating-toolbar-border-color:          $gray-400;
 $floating-toolbar-bg:                    $gray-400;
 $floating-toolbar-border-radius:         $border-radius;
 
 $dropdown-menu-box-shadow:               0 1px 0 #e2e8f0;
 $popover-box-shadow:                     0 1px 0 #e2e8f0;
+
+// Modal: borderless with custom padding and shadow
+$modal-content-border-width:             0;
+$modal-content-box-shadow-xs:            0 0 10px rgba(0, 0, 0, 0.2);
+$modal-content-box-shadow-sm-up:         0 0 10px rgba(0, 0, 0, 0.2);
+$modal-header-border-width:              0;
+$modal-header-padding-y:                 1.5rem;
+$modal-header-padding-x:                 1.5rem;
+$modal-inner-padding:                    1.5rem;
+$modal-footer-border-width:              0;
+$modal-footer-margin-between:            0;
 
 $btn-border-radius-xs: $border-radius-sm;
 $btn-padding-y-xs:     0.1rem;
