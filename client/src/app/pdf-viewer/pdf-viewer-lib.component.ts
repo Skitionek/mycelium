@@ -29,7 +29,7 @@ import { openModal } from 'app/shared/utils/modals';
 import { IS_MAC } from 'app/shared/utils/platform';
 import { InternalSearchService } from 'app/shared/services/internal-search.service';
 
-import { PageViewport } from 'pdfjs-dist/types/src/display/display_utils';
+import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { AddedAnnotationExclusion, Annotation, Location, Meta, Rect, RemovedAnnotationExclusion, } from './annotation-type';
 import { AnnotationEditDialogComponent } from './components/annotation-edit-dialog.component';
@@ -38,6 +38,7 @@ import { PdfViewerComponent } from './pdf-viewer/pdf-viewer.component';
 import { FindState, RenderTextMode } from './utils/constants';
 import { PDFSource, PDFProgressData, PDFPageRenderEvent, PDFPageView, TextLayerBuilder, ScrollDestination } from './pdf-viewer/interfaces';
 import { AnnotationToolbarComponent } from './components/annotation-toolbar.component';
+import { convertToViewportRectangle } from './utils/viewport-utils';
 
 declare var bootstrap: any;
 
@@ -329,7 +330,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       this.annotationHighlightElementMap.set(annotation, elementRefs);
 
       for (const rect of annotation.rects) {
-        const bounds = viewPort.convertToViewportRectangle(rect);
+        const bounds = convertToViewportRectangle(viewPort, rect);
         const left = Math.min(bounds[0], bounds[2]);
         let top = Math.min(bounds[1], bounds[3]);
         const width = Math.abs(bounds[0] - bounds[2]);
@@ -1168,7 +1169,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       return;
     }
     const viewPort: PageViewport = pdfPageView.viewport;
-    const bounds = viewPort.convertToViewportRectangle(highlightRect);
+    const bounds = convertToViewportRectangle(viewPort, highlightRect);
     const left = Math.min(bounds[0], bounds[2]);
     const top = Math.min(bounds[1], bounds[3]);
     const width = Math.abs(bounds[0] - bounds[2]);
