@@ -119,6 +119,33 @@ export const LIBREOFFICE_CONVERTIBLE_MIME_TYPES: ReadonlySet<string> = new Set([
   'text/csv',
 ]);
 
+export const DOCX_VIEWER_MIME_TYPES: ReadonlySet<string> = new Set([
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
+export const XLSX_VIEWER_MIME_TYPES: ReadonlySet<string> = new Set([
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+]);
+
+export const PPTX_VIEWER_MIME_TYPES: ReadonlySet<string> = new Set([
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+]);
+
+export function isDocxViewerMimeType(mimeType: string): boolean {
+  return DOCX_VIEWER_MIME_TYPES.has((mimeType || '').toLowerCase());
+}
+
+export function isXlsxViewerMimeType(mimeType: string): boolean {
+  return XLSX_VIEWER_MIME_TYPES.has((mimeType || '').toLowerCase());
+}
+
+export function isPptxViewerMimeType(mimeType: string): boolean {
+  return PPTX_VIEWER_MIME_TYPES.has((mimeType || '').toLowerCase());
+}
+
 /**
  * MIME types handled by the CodeMirror viewer.
  * Files with these MIME types should open in the read-only code/text viewer.

@@ -18,6 +18,9 @@ import {
   Unicodes,
   FAClass,
   CustomIconColors,
+  isDocxViewerMimeType,
+  isPptxViewerMimeType,
+  isXlsxViewerMimeType,
   isCodemirrorHandledMimeType,
   LIBREOFFICE_CONVERTIBLE_MIME_TYPES,
   PROTEIN_STRUCTURE_MIME_TYPES
@@ -189,6 +192,27 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       }
     }
     return false;
+  }
+
+  get isDocxViewerDocument() {
+    const filename = (this.filename || '').toLowerCase();
+    return isDocxViewerMimeType(this.mimeType)
+      || filename.endsWith('.docx')
+      || filename.endsWith('.doc');
+  }
+
+  get isXlsxViewerDocument() {
+    const filename = (this.filename || '').toLowerCase();
+    return isXlsxViewerMimeType(this.mimeType)
+      || filename.endsWith('.xlsx')
+      || filename.endsWith('.xls');
+  }
+
+  get isPptxViewerDocument() {
+    const filename = (this.filename || '').toLowerCase();
+    return isPptxViewerMimeType(this.mimeType)
+      || filename.endsWith('.pptx')
+      || filename.endsWith('.ppt');
   }
 
   get isOpenable() {
@@ -533,6 +557,15 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       case MimeTypes.Graph:
         return ['/projects', projectName, 'sankey', this.hashId];
       default:
+        if (this.isDocxViewerDocument) {
+          return ['/projects', projectName, 'docx', this.hashId];
+        }
+        if (this.isXlsxViewerDocument) {
+          return ['/projects', projectName, 'xlsx', this.hashId];
+        }
+        if (this.isPptxViewerDocument) {
+          return ['/projects', projectName, 'pptx', this.hashId];
+        }
         if (isCodemirrorHandledMimeType(this.mimeType)) {
           return ['/projects', projectName, 'code', this.hashId];
         }

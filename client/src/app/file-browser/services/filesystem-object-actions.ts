@@ -262,6 +262,18 @@ export class FilesystemObjectActions {
       addOption('PDF viewer', ['/projects', projectName, 'files', object.hashId]);
     }
 
+    if (object.isDocxViewerDocument) {
+      addOption('DOCX viewer', ['/projects', projectName, 'docx', object.hashId]);
+    }
+
+    if (object.isXlsxViewerDocument) {
+      addOption('XLSX viewer', ['/projects', projectName, 'xlsx', object.hashId]);
+    }
+
+    if (object.isPptxViewerDocument) {
+      addOption('PowerPoint viewer', ['/projects', projectName, 'pptx', object.hashId]);
+    }
+
     if (isCodemirrorHandledMimeType(object.mimeType)) {
       addOption('Code viewer', ['/projects', projectName, 'code', object.hashId]);
     }

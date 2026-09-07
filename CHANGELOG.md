@@ -16,6 +16,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
+- **Dedicated Office viewer routes**: Word (`/docx`), Excel (`/xlsx`), and PowerPoint (`/pptx`) file URLs now have explicit viewer routes and matching "Open in" options while still using server-side rendering support in the existing document viewer.
 - **Codespaces prebuild-friendly devcontainer flow**: `.devcontainer/devcontainer.json` now runs `.devcontainer/post-create.sh` during container creation, allowing GitHub Codespaces prebuilds to pre-run stack build/start work and reduce first-start latency.
 
 ### Changed

@@ -176,6 +176,36 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
     },
   },
   {
+    path: 'projects/:project_name/docx/:file_id',
+    loadChildren: () =>
+      import('app/pdf-viewer/pdf-viewer-route.module').then((m) => m.PdfViewerRouteModule),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'DOCX Viewer',
+      fontAwesomeIcon: 'fak fa-word-solid',
+    },
+  },
+  {
+    path: 'projects/:project_name/xlsx/:file_id',
+    loadChildren: () =>
+      import('app/pdf-viewer/pdf-viewer-route.module').then((m) => m.PdfViewerRouteModule),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'XLSX Viewer',
+      fontAwesomeIcon: 'fak fa-excel-solid',
+    },
+  },
+  {
+    path: 'projects/:project_name/pptx/:file_id',
+    loadChildren: () =>
+      import('app/pdf-viewer/pdf-viewer-route.module').then((m) => m.PdfViewerRouteModule),
+    canActivate: [AuthGuard],
+    data: {
+      title: 'PowerPoint Viewer',
+      fontAwesomeIcon: 'fak fa-powerpoint-solid',
+    },
+  },
+  {
     path: 'projects/:project_name/bioc/:file_id',
     loadChildren: () =>
       import('app/bioc-viewer/bioc-viewer-route.module').then((m) => m.BiocViewerRouteModule),
