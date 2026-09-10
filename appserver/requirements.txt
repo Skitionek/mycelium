@@ -234,7 +234,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 python-http-client==3.3.7
     # via sendgrid
-python-json-logger==4.0.0
+python-json-logger==4.2.0
     # via mycelium-appserver
 python-magic==0.4.27
     # via mycelium-appserver
