@@ -7680,10 +7680,10 @@ karma-source-map-support@1.4.0:
   dependencies:
     source-map-support "^0.5.5"
 
-karma-spec-reporter@^0.0.36:
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/karma-spec-reporter/-/karma-spec-reporter-0.0.36.tgz#c54dc155dec2ded1f92ea68dbbdd67fcedbef350"
-  integrity sha512-11bvOl1x6ryKZph7kmbmMpbi8vsngEGxGOoeTlIcDaH3ab3j8aPJnZ+r+K/SS0sBSGy5VGkGYO2+hLct7hw/6w==
+karma-spec-reporter@^0.0.37:
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/karma-spec-reporter/-/karma-spec-reporter-0.0.37.tgz#26e827b10fa629b720f451ddf61097912b03b351"
+  integrity sha512-2lGrDzPk3A5n9/Wg3iBApVqiLWqSKHU0xhDrjUiIZWEWjsvHS3XquvN9nT+nPj+G9LJxPSS2nYrrdQehD5wRgg==
   dependencies:
     colors "1.4.0"
 
