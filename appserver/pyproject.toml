@@ -29,7 +29,7 @@ dependencies = [
   "requests==2.34.2",
   "pandas==2.3.3",
   "xlsxwriter==3.2.9",
-  "python-json-logger==4.0.0",
+  "python-json-logger==4.2.0",
   "intervaltree==3.2.1",
   "paramiko==5.0.0",
   "google-cloud-storage==3.12.0",
