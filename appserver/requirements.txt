@@ -273,7 +273,7 @@ sqlalchemy==2.0.51
     #   marshmallow-sqlalchemy
     #   sqlalchemy-searchable
     #   sqlalchemy-utils
-sqlalchemy-searchable==2.2.0
+sqlalchemy-searchable==3.0.0
     # via mycelium-appserver
 sqlalchemy-utils==0.42.1
     # via sqlalchemy-searchable
