@@ -38,7 +38,7 @@
     "@codemirror/lang-xml": "6.1.0",
     "@codemirror/language": "6.12.4",
     "@codemirror/state": "6.7.1",
-    "@codemirror/view": "6.43.10",
+    "@codemirror/view": "6.43.11",
     "@egjs/hammerjs": "^2.0.17",
     "@ng-bootstrap/ng-bootstrap": "~15.1.0",
     "@ngrx/effects": "~16.3.0",
