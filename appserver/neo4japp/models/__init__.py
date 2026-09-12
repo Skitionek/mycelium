@@ -13,3 +13,4 @@ from .annotations import AnnotationStopWords, GlobalList
 from .entity_resources import DomainURLsMap, AnnotationStyle
 from .files import Files, FileContent, FileVersion, FileBackup, \
     file_collaborator_role, FallbackOrganism
+from .dmp import DMP
