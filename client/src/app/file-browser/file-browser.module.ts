@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 
+import { NgxDocViewerModule } from 'ngx-doc-viewer';
+
 import { AbstractObjectTypeProviderHelper } from 'app/file-types/providers/base-object.type-provider';
 import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 import { SharedModule } from 'app/shared/shared.module';
@@ -78,6 +80,7 @@ import { BrowserRecentListComponent } from './components/browser/browser-recent-
   ],
   imports: [
     SharedModule,
+    NgxDocViewerModule,
   ],
   exports: [
     ObjectInfoComponent,

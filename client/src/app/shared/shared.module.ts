@@ -150,7 +150,7 @@ const components = [
     ReactiveFormsModule,
     RouterModule,
     SharedDirectivesModule,
-    AngularSplitModule.forRoot(),
+    AngularSplitModule,
     DragDropModule,
     EffectsModule.forFeature([SharedNgrxEffects]),
     TextFieldModule,

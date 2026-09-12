@@ -1,4 +1,4 @@
-<div class="module" *ngIf="(object$ | addStatus | async) as result">
+<div class="module d-flex flex-column" *ngIf="(object$ | addStatus | async) as result">
     <app-module-error *ngIf="result.error" [error]="result.error">
     </app-module-error>
 
@@ -12,7 +12,32 @@
                                  [showOpen]="false" [showDelete]="false">
                 </app-module-menu>
         </app-module-header>
-        <div class="d-flex my-auto text-center justify-content-center text-truncate p-4">
+
+        <!-- Inline document preview (PDF / Word) rendered from an authenticated blob URL. -->
+        <div *ngIf="(viewerType === 'pdf' || viewerType === 'mammoth') && objectUrl"
+             class="flex-grow-1 overflow-auto object-viewer-doc">
+            <ngx-doc-viewer [url]="objectUrl" [viewer]="viewerType"
+                            style="width: 100%; height: 100%;">
+            </ngx-doc-viewer>
+        </div>
+
+        <!-- Inline spreadsheet preview (XLSX / XLS / ODS), parsed client-side via SheetJS. -->
+        <div *ngIf="viewerType === 'xlsx'" class="flex-grow-1 d-flex flex-column overflow-hidden object-viewer-xlsx">
+            <ul class="nav nav-tabs flex-shrink-0" *ngIf="sheetNames.length > 1">
+                <li class="nav-item" *ngFor="let sheetName of sheetNames; let i = index">
+                    <a class="nav-link" [class.active]="i === activeSheetIndex"
+                       href="javascript:void(0)" (click)="selectSheet(i)">
+                        {{ sheetName }}
+                    </a>
+                </li>
+            </ul>
+            <div class="flex-grow-1 overflow-auto p-2" *ngIf="activeSheetHtml" [innerHTML]="activeSheetHtml">
+            </div>
+        </div>
+
+        <!-- Download fallback for objects without an inline viewer. -->
+        <div *ngIf="!viewerType"
+             class="d-flex my-auto text-center justify-content-center text-truncate p-4">
             <button type="button" class="btn btn-primary text-truncate"
                     (click)="downloadObject(result.value); $event.preventDefault()">
                 Download {{ result.value.filename }}
