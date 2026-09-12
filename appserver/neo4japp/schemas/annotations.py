@@ -1,6 +1,5 @@
 import marshmallow.validate
 from marshmallow import Schema, fields, post_load
-from marshmallow_enum import EnumField
 
 from neo4japp.models import FallbackOrganism
 from neo4japp.models.files import AnnotationChangeCause
@@ -137,7 +136,7 @@ class AnnotationUUIDListSchema(ResultListSchema):
 
 class GlobalAnnotationListItemSchema(CamelCaseSchema):
     global_id = fields.Integer()
-    synonym_id = fields.Integer(required=False, missing=lambda: None)
+    synonym_id = fields.Integer(required=False, load_default=lambda: None)
     file_uuid = fields.String()
     creator = fields.String()
     file_deleted = fields.Boolean()
@@ -173,11 +172,11 @@ class CustomAnnotationSchema(BaseAnnotationSchema):
 
 class CustomAnnotationCreateSchema(CamelCaseSchema):
     annotation = fields.Nested(CustomAnnotationSchema, required=True)
-    annotate_all = fields.Boolean(required=False, missing=lambda: False)
+    annotate_all = fields.Boolean(required=False, load_default=lambda: False)
 
 
 class CustomAnnotationDeleteSchema(CamelCaseSchema):
-    remove_all = fields.Boolean(required=False, missing=lambda: False)
+    remove_all = fields.Boolean(required=False, load_default=lambda: False)
 
 
 # this is used in the admin global annotations table
@@ -271,7 +270,7 @@ class AnnotationExclusionChangeSchema(CamelCaseSchema):
 class FileAnnotationChangeSchema(CamelCaseSchema):
     date = fields.DateTime()
     user = fields.Nested(UserSchema)
-    cause = EnumField(AnnotationChangeCause, by_value=True)
+    cause = fields.Enum(AnnotationChangeCause, by_value=True)
     inclusion_changes = fields.List(fields.Nested(AnnotationInclusionChangeSchema))
     exclusion_changes = fields.List(fields.Nested(AnnotationExclusionChangeSchema))
 

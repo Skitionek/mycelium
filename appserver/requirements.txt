@@ -2,60 +2,59 @@
 #    uv export --no-dev --no-hashes -o requirements.txt
 alembic==1.14.1
     # via flask-migrate
-anyio==4.14.0
-apispec==6.10.0
-    # via flask-apispec
 attrs==26.1.0
     # via
+    #   appserver
     #   jsonlines
-    #   mycelium-appserver
 azure-common==1.1.28
     # via
     #   azure-storage-common
     #   azure-storage-file
-azure-core==1.41.0
+azure-core==1.39.0
     # via azure-storage-blob
 azure-storage-blob==12.28.0
-    # via mycelium-appserver
+    # via appserver
 azure-storage-common==2.1.0
     # via azure-storage-file
 azure-storage-file==2.1.0
-    # via mycelium-appserver
+    # via appserver
+backports-datetime-fromisoformat==2.0.3
+    # via marshmallow
 bcrypt==5.0.0
     # via
-    #   mycelium-appserver
+    #   appserver
     #   paramiko
 bioc==2.1
-    # via mycelium-appserver
+    # via appserver
 blinker==1.9.0
     # via
     #   elastic-apm
     #   flask
     #   sentry-sdk
-cachelib==0.14.0
+cachebox==5.2.3
+    # via deepdiff
+cachelib==0.13.0
     # via flask-caching
-certifi==2026.6.17
+certifi==2026.2.25
     # via
     #   elastic-apm
-    #   elastic-transport
     #   requests
     #   sentry-sdk
-cffi==2.0.0
+cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via
-    #   bcrypt
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.9
+charset-normalizer==3.4.6
     # via
     #   pdfminer-six
     #   requests
-click==8.5.0
+click==8.3.1
     # via flask
 colorama==0.4.6 ; sys_platform == 'win32'
     # via
     #   click
     #   tqdm
-cryptography==50.0.0
+cryptography==46.0.6
     # via
     #   azure-storage-blob
     #   azure-storage-common
@@ -64,85 +63,80 @@ cryptography==50.0.0
     #   pdfminer-six
     #   sendgrid
 deepdiff==9.1.0
-    # via mycelium-appserver
+    # via appserver
 deprecated==1.3.1
     # via redis
 docopt==0.6.2
     # via bioc
 ecs-logging==2.3.0
     # via elastic-apm
-elastic-apm==6.26.2
-    # via mycelium-appserver
+elastic-apm==6.25.0
+    # via appserver
 et-xmlfile==2.0.0
     # via openpyxl
-exceptiongroup==1.3.1
-    # via anyio
 fastjsonschema==2.21.2
-    # via mycelium-appserver
+    # via appserver
 flask==3.1.3
     # via
-    #   flask-apispec
+    #   appserver
     #   flask-caching
     #   flask-cors
     #   flask-httpauth
     #   flask-marshmallow
     #   flask-migrate
     #   flask-sqlalchemy
-    #   mycelium-appserver
     #   sentry-sdk
-flask-apispec==0.11.4
-    # via mycelium-appserver
 flask-caching==2.4.1
-    # via mycelium-appserver
+    # via appserver
 flask-cors==6.0.0
-    # via mycelium-appserver
+    # via appserver
 flask-httpauth==4.8.1
-    # via mycelium-appserver
-flask-marshmallow==1.4.0
-    # via mycelium-appserver
+    # via appserver
+flask-marshmallow==1.5.0
+    # via appserver
 flask-migrate==2.5.3
-    # via mycelium-appserver
-flask-sqlalchemy==3.1.1
+    # via appserver
+flask-sqlalchemy==3.0.5
     # via
+    #   appserver
     #   flask-migrate
-    #   mycelium-appserver
-google-api-core==2.36.0
+google-api-core==2.30.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.55.1
+google-auth==2.49.1
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
-google-cloud-core==2.6.0
+google-cloud-core==2.5.0
     # via google-cloud-storage
 google-cloud-storage==3.12.0
-    # via mycelium-appserver
+    # via appserver
 google-crc32c==1.8.0
     # via
     #   google-cloud-storage
     #   google-resumable-media
-google-resumable-media==2.10.0
+google-resumable-media==2.8.0
     # via google-cloud-storage
-googleapis-common-protos==1.75.0
+googleapis-common-protos==1.73.0
     # via google-api-core
 graphviz==0.21
-    # via mycelium-appserver
-greenlet==3.5.1 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
+    # via appserver
+greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
     # via sqlalchemy
 gunicorn==26.0.0
-    # via mycelium-appserver
-idna==3.18
-    # via
-    #   anyio
-    #   requests
+    # via appserver
+idna==3.11
+    # via requests
 intervaltree==3.2.1
     # via
+    #   appserver
     #   bioc
-    #   mycelium-appserver
+invoke==3.0.3
+    # via paramiko
 ipy==1.1
-    # via mycelium-appserver
+    # via appserver
 isodate==0.7.2
     # via azure-storage-blob
 itsdangerous==2.2.0
@@ -152,82 +146,77 @@ jinja2==3.1.6
 jsonlines==4.0.0
     # via bioc
 lmdb==2.2.1
-    # via mycelium-appserver
-lxml==6.1.1
+    # via appserver
+lxml==6.0.2
     # via bioc
-mako==1.3.12
+mako==1.3.10
     # via alembic
 markupsafe==3.0.3
     # via
+    #   appserver
     #   flask
     #   jinja2
-    #   mycelium-appserver
     #   mako
     #   sentry-sdk
     #   werkzeug
-marshmallow==3.26.2
+marshmallow==4.3.1
     # via
-    #   flask-apispec
+    #   appserver
     #   flask-marshmallow
     #   marshmallow-dataclass
-    #   marshmallow-enum
     #   marshmallow-sqlalchemy
     #   webargs
 marshmallow-dataclass==8.7.1
-    # via mycelium-appserver
-marshmallow-enum==1.5.1
-    # via mycelium-appserver
+    # via appserver
 marshmallow-sqlalchemy==1.5.0
-    # via mycelium-appserver
+    # via appserver
 mypy-extensions==1.1.0
     # via typing-inspect
 neo4j==6.1.0
-    # via mycelium-appserver
+    # via appserver
 numpy==2.2.6
     # via
     #   pandas
     #   scipy
 openpyxl==3.1.5
-    # via mycelium-appserver
+    # via appserver
 orderly-set==5.5.0
     # via deepdiff
-packaging==26.2
+packaging==26.0
     # via
-    #   apispec
     #   gunicorn
-    #   marshmallow
     #   webargs
 pandas==2.3.3
-    # via mycelium-appserver
+    # via appserver
 paramiko==5.0.0
-    # via mycelium-appserver
+    # via appserver
 pdfminer-six==20260107
-    # via mycelium-appserver
+    # via appserver
 pillow==12.3.0
-    # via mycelium-appserver
-proto-plus==1.28.0
+    # via appserver
+proto-plus==1.27.1
     # via google-api-core
-protobuf==7.35.0
+protobuf==6.33.6
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
 psycopg2-binary==2.9.12
-    # via mycelium-appserver
-pyasn1==0.6.4
+    # via appserver
+pyasn1==0.6.3
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
-pycparser==3.0 ; implementation_name != 'PyPy'
+pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
 pyjwt==2.13.0
-    # via mycelium-appserver
+    # via appserver
 pynacl==1.6.2
     # via paramiko
 pyparsing==3.3.2
-    # via mycelium-appserver
+    # via appserver
 pypdf4==1.27.0
-    # via mycelium-appserver
+    # via appserver
 python-dateutil==2.9.0.post0
     # via
     #   azure-storage-common
@@ -235,88 +224,84 @@ python-dateutil==2.9.0.post0
 python-http-client==3.3.7
     # via sendgrid
 python-json-logger==4.2.0
-    # via mycelium-appserver
+    # via appserver
 python-magic==0.4.27
-    # via mycelium-appserver
-pytz==2026.2
+    # via appserver
+pytz==2026.1.post1
     # via
     #   neo4j
     #   pandas
 redis==4.0.2
-    # via mycelium-appserver
+    # via appserver
 requests==2.34.2
     # via
+    #   appserver
     #   azure-core
     #   azure-storage-common
     #   google-api-core
     #   google-cloud-storage
-    #   mycelium-appserver
 scipy==1.15.3
-    # via mycelium-appserver
+    # via appserver
 sendgrid==6.12.5
-    # via mycelium-appserver
+    # via appserver
 sentry-sdk==2.58.0
-    # via mycelium-appserver
+    # via appserver
 six==1.17.0
-    # via
-    #   bcrypt
-    #   python-dateutil
-sniffio==1.3.1
-    # via
+    # via python-dateutil
 sortedcontainers==2.4.0
     # via intervaltree
 sqlalchemy==2.0.51
     # via
     #   alembic
+    #   appserver
     #   flask-sqlalchemy
-    #   mycelium-appserver
     #   marshmallow-sqlalchemy
     #   sqlalchemy-searchable
     #   sqlalchemy-utils
 sqlalchemy-searchable==3.0.0
-    # via mycelium-appserver
-sqlalchemy-utils==0.42.1
+    # via appserver
+sqlalchemy-utils==0.41.2
     # via sqlalchemy-searchable
 svg-stack==0.1.0
-    # via mycelium-appserver
+    # via appserver
 timeflake==0.4.3
-    # via mycelium-appserver
-tqdm==4.68.3
+    # via appserver
+tqdm==4.67.3
     # via bioc
-typeguard==4.5.2
+typeguard==4.5.1
     # via marshmallow-dataclass
-typing-extensions==4.16.0
+typing-extensions==4.15.0
     # via
     #   alembic
-    #   anyio
     #   azure-core
     #   azure-storage-blob
     #   cryptography
-    #   exceptiongroup
+    #   marshmallow
     #   marshmallow-dataclass
     #   pyjwt
+    #   sqlalchemy
     #   typeguard
     #   typing-inspect
 typing-inspect==0.9.0
     # via marshmallow-dataclass
-tzdata==2026.3
+tzdata==2025.3
     # via pandas
-urllib3==2.7.0
+urllib3==2.6.3
     # via
     #   elastic-apm
     #   requests
     #   sentry-sdk
 webargs==8.7.1
-    # via flask-apispec
+    # via appserver
 werkzeug==3.1.6
     # via
+    #   appserver
     #   flask
     #   flask-cors
-    #   mycelium-appserver
     #   sendgrid
-wrapt==2.4.0
+wrapt==2.1.2
     # via
     #   deprecated
     #   elastic-apm
 xlsxwriter==3.2.9
-    # via mycelium-appserver
+    # via appserver
