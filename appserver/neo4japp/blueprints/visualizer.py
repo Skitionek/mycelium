@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_apispec import use_kwargs
+from webargs.flaskparser import use_kwargs
 
 from neo4japp.blueprints.auth import auth
 from neo4japp.constants import ANNOTATION_STYLES_DICT

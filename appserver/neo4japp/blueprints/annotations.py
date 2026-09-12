@@ -344,7 +344,7 @@ class FileAnnotationSortedView(FilesystemBaseView):
 
     @use_args({
         "sort": fields.Str(
-                missing=default_sorted_annotation.id,
+                load_default=default_sorted_annotation.id,
                 validate=validate.OneOf(sorted_annotations_dict)
         ),
         "hash_id": fields.Str()

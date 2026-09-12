@@ -550,7 +550,7 @@ class FileHierarchyView(FilesystemBaseView):
 
         filters = [Files.recycling_date.is_(None)]
 
-        if params['directories_only']:
+        if params.get('directories_only'):
             filters.append(Files.mime_type == DirectoryTypeProvider.MIME_TYPE)
 
         hierarchy = self.get_nondeleted_recycled_files(and_(*filters))

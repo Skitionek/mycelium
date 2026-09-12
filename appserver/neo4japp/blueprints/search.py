@@ -4,8 +4,7 @@ from typing import List, Optional
 
 
 from flask import Blueprint, current_app, jsonify, g
-from flask_apispec import use_kwargs
-from webargs.flaskparser import use_args
+from webargs.flaskparser import use_args, use_kwargs
 
 from neo4japp.blueprints.auth import auth
 from neo4japp.blueprints.projects import ProjectBaseView
