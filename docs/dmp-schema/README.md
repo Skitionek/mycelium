@@ -3,7 +3,7 @@
 This directory vendors the official machine-actionable Data Management Plan
 (maDMP) JSON Schema, version 1.2, from the RDA-DMP-Common-Standard project:
 
-  https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
+  <https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard>
 
 Source file fetched verbatim (unmodified) from:
   examples/JSON/JSON-schema/1.2/maDMP-schema-1.2.json
@@ -64,13 +64,13 @@ e.absolute_path for a list-of-keys per error.
 
 ## Notes for the CRUD/UI follow-up tasks
 
-  - Top-level document is always { "dmp": {...} }; do not flatten the
+- Top-level document is always { "dmp": {...} }; do not flatten the
     wrapper away when persisting/serializing.
-  - Required dmp fields per 1.2: contact, created, dataset, dmp_id,
+- Required dmp fields per 1.2: contact, created, dataset, dmp_id,
     ethical_issues_exist, language, modified, title.
-  - dataset[].personal_data / sensitive_data / dmp.ethical_issues_exist are
+- dataset[].personal_data / sensitive_data / dmp.ethical_issues_exist are
     all a shared "Booleanish" enum: yes | no | unknown (not JSON booleans).
-  - created/modified use full ISO 8601 date-time with timezone (format:
+- created/modified use full ISO 8601 date-time with timezone (format:
     date-time); many sub-objects (e.g. project start/end,
     distribution.available_until) use date-only (format: date).
-  - See docs/field-mapping.md for the complete property table.
+- See docs/field-mapping.md for the complete property table.

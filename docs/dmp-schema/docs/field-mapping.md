@@ -96,6 +96,6 @@ contact, created, dataset, dmp_id, ethical_issues_exist, language, modified, tit
 
 ## References
 
-- Standard repo: https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard
+- Standard repo: <https://github.com/RDA-DMP-Common/RDA-DMP-Common-Standard>
 - Schema source: examples/JSON/JSON-schema/1.2/maDMP-schema-1.2.json
 - Example docs: examples/JSON/ex1..ex10 (mirrored under fixtures/valid/)
