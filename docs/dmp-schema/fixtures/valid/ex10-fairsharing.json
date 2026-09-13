@@ -17,7 +17,7 @@
     },
     "dataset": [
       {
-		"title": "Puerto Rico Long-Term Coral Reef Monitoring Program Database Compilation",
+        "title": "Puerto Rico Long-Term Coral Reef Monitoring Program Database Compilation",
         "dataset_id": {
           "identifier": "10.15468/heuugg",
           "type": "doi"
@@ -26,9 +26,7 @@
           {
             "title": "Puerto Rico Long-Term Coral Reef Monitoring Program Database Compilation",
             "description": "The Puerto Rico Long-Term Coral Reef Monitoring Program (PRCRMP) database compilation includes raw biological data (by transect) from reef locations around the Puerto Rican archipelago. Substrate cover by sessile-benthic categories and fish, and motile megabenthic invertebrate taxonomic composition and densities have been characterized in these stations, with variable sampling event frequencies between 1999 to 2021. At present, 42 permanent stations are surveyed biannually (21 per year). For the benthic characterization, a set of five 10-meter-long permanent transects are surveyed at each station. Sessile-benthic reef communities are characterized by the continuous intercept chain-link method, following the Caribbean Coastal Marine Productivity (CARICOMP) (1994) protocol. Demersal diurnal non-cryptic reef fish populations and motile megabenthic invertebrates are surveyed by sets of five 10 x 3 meters wide (30 m2) belt-transects centered along the reference line of transects used for sessile-benthic characterizations at each reef station. From 2004-2013, a diver completed an Active Search Census (ASEC) survey for 30 minutes annotating sizes and abundances of fish and macroinvertebrate species of interest. From 2015, the ASEC survey methodology was replaced by 20 x 3 meters (60 m2) band transects to identify commercially and ecologically important fish and megabenthic invertebrate species. Upon completion of the 10 meters belt-transect survey, the diver swims along the same depth and physiographic reef zone for an extra 10 meters to complete the 60 m2 transect. For each fish individual within the ASEC survey (2004-2013) and 60m2 band transects (2015-2021), a visual fork length (FL) estimate in centimeters is recorded. Fish length estimations are provided by the median of 5cm interval size classes. The cephalothorax length (measurement from the tip of the rostrum to end of the thorax), also known as carapace length (CL) in centimeters is used to report the size of lobsters (Panulirus spp., Scyllarides spp.) within belt-transects. Queen conch (Lobatus gigas) length is reported as the total (diagonal) shell length in centimeters. With the length-weight relationship information available in FishBase.org, biomass estimates are calculated for a subset of commercially and ecologically important fish species. The PRCRMP database was made possible with support from the National Oceanic and Atmospheric Administrations Coral Reef Conservation Program.",
-            "format": [
-              "text/xml"
-            ],
+            "format": ["text/xml"],
             "byte_size": 12288,
             "data_access": "open",
             "license": [

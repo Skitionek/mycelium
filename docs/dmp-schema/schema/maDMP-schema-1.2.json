@@ -22,15 +22,10 @@
           "type": "string",
           "title": "Name",
           "description": "Name of the affiliation",
-          "examples": [
-            "Some University"
-          ]
+          "examples": ["Some University"]
         }
       },
-      "required": [
-        "affiliation_id",
-        "name"
-      ]
+      "required": ["affiliation_id", "name"]
     },
     "AffiliationID": {
       "type": "object",
@@ -39,23 +34,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "03yrm5c26"
-          ]
+          "examples": ["03yrm5c26"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested Values: ror, grid, isni, other",
-          "examples": [
-            "ror"
-          ]
+          "examples": ["ror"]
         }
       },
-      "required": [
-          "identifier",
-          "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "AlternateIdentifier": {
       "type": "object",
@@ -65,37 +53,23 @@
           "type": "string",
           "title": "Identifier",
           "description": "Alternate identifier value",
-          "examples": [
-            "E-GEOD-34814"
-          ]
+          "examples": ["E-GEOD-34814"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Type of alternate identifier",
-          "examples": [
-            "accession number",
-            "doi"
-          ]
+          "examples": ["accession number", "doi"]
         }
       },
-      "required": [
-          "identifier",
-          "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Booleanish": {
       "type": "string",
-      "enum": [
-        "yes",
-        "no",
-        "unknown"
-      ],
+      "enum": ["yes", "no", "unknown"],
       "title": "Booleanish",
       "description": "To indicate whether there are ethical issues related to data that this DMP describes. Allowed values: yes, no, unknown",
-      "examples": [
-        "yes"
-      ]
+      "examples": ["yes"]
     },
     "Certification": {
       "type": "string",
@@ -111,9 +85,7 @@
       ],
       "title": "Certification",
       "description": "Repository certified to a recognised standard. Allowed values: din31644, dini-zertifikat, dsa, iso16363, iso16919, trac, wds, coretrustseal",
-      "examples": [
-        "coretrustseal"
-      ]
+      "examples": ["coretrustseal"]
     },
     "Contact": {
       "type": "object",
@@ -147,24 +119,16 @@
           "format": "email",
           "title": "Mailbox",
           "description": "Contact Person's E-mail address",
-          "examples": [
-            "cc@example.com"
-          ]
+          "examples": ["cc@example.com"]
         },
         "name": {
           "type": "string",
           "title": "Name",
           "description": "Name of the contact person",
-          "examples": [
-            "Charlie Chaplin"
-          ]
+          "examples": ["Charlie Chaplin"]
         }
       },
-      "required": [
-        "contact_id",
-        "mbox",
-        "name"
-      ]
+      "required": ["contact_id", "mbox", "name"]
     },
     "ContactID": {
       "type": "object",
@@ -173,23 +137,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "0000-0003-0644-4174"
-          ]
+          "examples": ["0000-0003-0644-4174"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: orcid, isni, openid",
-          "examples": [
-            "orcid"
-          ]
+          "examples": ["orcid"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Contributor": {
       "type": "object",
@@ -221,28 +178,20 @@
           "type": "string",
           "title": "Mailbox",
           "description": "E-mail address for a contributor",
-          "examples": [
-            "john@smith.com"
-          ],
+          "examples": ["john@smith.com"],
           "format": "email"
         },
         "name": {
           "type": "string",
           "title": "Name",
           "description": "Name of the contributor",
-          "examples": [
-            "John Smith"
-          ]
+          "examples": ["John Smith"]
         },
         "role": {
           "$ref": "#/$defs/ContributorRoles"
         }
       },
-      "required": [
-        "contributor_id",
-        "name",
-        "role"
-      ]
+      "required": ["contributor_id", "name", "role"]
     },
     "ContributorID": {
       "type": "object",
@@ -251,32 +200,22 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "0000-0003-0644-4174"
-          ]
+          "examples": ["0000-0003-0644-4174"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: orcid, isni, openid",
-          "examples": [
-            "orcid"
-          ]
+          "examples": ["orcid"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "ContributorRole": {
       "type": "string",
       "title": "Contributor Role",
       "description": "Contributors role(s) within the process of data management (incl. planning). It is recommended to use contributor types of DataCite Metadata Schema (https://datacite-metadata-schema.readthedocs.io/en/4.5/appendices/appendix-1/contributorType/).",
-      "examples": [
-        "DataManager",
-        "Researcher"
-      ]
+      "examples": ["DataManager", "Researcher"]
     },
     "ContributorRoles": {
       "type": "array",
@@ -313,22 +252,16 @@
           "type": "string",
           "title": "Title",
           "description": "Title of a cost",
-          "examples": [
-            "Storage and Backup"
-          ]
+          "examples": ["Storage and Backup"]
         },
         "value": {
           "type": "number",
           "title": "Value",
           "description": "Cost value in the specified currency",
-          "examples": [
-            1000
-          ]
+          "examples": [1000]
         }
       },
-      "required": [
-        "title"
-      ]
+      "required": ["title"]
     },
     "Costs": {
       "type": "array",
@@ -367,24 +300,17 @@
           "type": "string",
           "title": "Mailbox",
           "description": "Creator Mail address",
-          "examples": [
-            "john.doe@example.com"
-          ],
+          "examples": ["john.doe@example.com"],
           "format": "email"
         },
         "name": {
           "type": "string",
           "title": "Name",
           "description": "Name of the creator",
-          "examples": [
-            "John Doe"
-          ]
+          "examples": ["John Doe"]
         }
       },
-      "required": [
-          "creator_id",
-          "name"
-      ]
+      "required": ["creator_id", "name"]
     },
     "CreatorID": {
       "type": "object",
@@ -393,23 +319,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "0000-0003-0644-4174"
-          ]
+          "examples": ["0000-0003-0644-4174"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: orcid, isni, openid",
-          "examples": [
-            "orcid"
-          ]
+          "examples": ["orcid"]
         }
       },
-      "required": [
-          "identifier",
-          "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "CurrencyCode": {
       "type": "string",
@@ -579,9 +498,7 @@
       ],
       "title": "Currency Code",
       "description": "Allowed values defined by ISO 4217",
-      "examples": [
-        "EUR"
-      ]
+      "examples": ["EUR"]
     },
     "CountryCode": {
       "type": "string",
@@ -838,22 +755,14 @@
       ],
       "title": "Country Code",
       "description": "Physical location of the data expressed using ISO 3166-1 country code.",
-      "examples": [
-        "AT"
-      ]
+      "examples": ["AT"]
     },
     "DataAccess": {
       "type": "string",
-      "enum": [
-        "open",
-        "shared",
-        "closed"
-      ],
+      "enum": ["open", "shared", "closed"],
       "title": "Data Access",
       "description": "Indicates access mode for data. Allowed values: open, shared, closed",
-      "examples": [
-        "open"
-      ]
+      "examples": ["open"]
     },
     "Dataset": {
       "type": "object",
@@ -907,18 +816,14 @@
           "type": "boolean",
           "title": "The Dataset Is Reused Schema",
           "description": "Indicates if the dataset is reused, i.e., not produced in project(s) covered by this DMP.",
-          "examples": [
-            true
-          ]
+          "examples": [true]
         },
         "issued": {
           "type": "string",
           "format": "date",
           "title": "Issued",
           "description": "To indicate a date when a dataset was published or released. Encoded using the relevant ISO 8601 Date compliant string.",
-          "examples": [
-            "2019-06-30"
-          ]
+          "examples": ["2019-06-30"]
         },
         "keyword": {
           "type": "array",
@@ -926,10 +831,7 @@
           "items": {
             "type": "string",
             "title": "Keyword",
-            "examples": [
-              "keyword 1",
-              "keyword 2"
-            ]
+            "examples": ["keyword 1", "keyword 2"]
           }
         },
         "language": {
@@ -945,16 +847,10 @@
         },
         "personal_data": {
           "type": "string",
-          "enum": [
-            "yes",
-            "no",
-            "unknown"
-          ],
+          "enum": ["yes", "no", "unknown"],
           "title": "Personal Data",
           "description": "To indicate whether a dataset contains personal data. Personal data refers to any data that can identify an individual (e.g. name, birthdate, address, voice recordings, etc.). Allowed values: yes, no, unknown",
-          "examples": [
-            "unknown"
-          ]
+          "examples": ["unknown"]
         },
         "preservation_statement": {
           "type": "string",
@@ -984,16 +880,10 @@
         },
         "sensitive_data": {
           "type": "string",
-          "enum": [
-            "yes",
-            "no",
-            "unknown"
-          ],
+          "enum": ["yes", "no", "unknown"],
           "title": "Sensitive Data",
           "description": "To indicate whether a dataset contains sensitive data. Sensitive data refers to information that could pose risks to individuals or organizations for example  financial information, medical records, passwords and social security numbers. Allowed values: yes, no, unknown",
-          "examples": [
-            "unknown"
-          ]
+          "examples": ["unknown"]
         },
         "technical_resource": {
           "$ref": "#/$defs/TechnicalResources"
@@ -1002,25 +892,16 @@
           "type": "string",
           "title": "Title",
           "description": "Title is a property in both Dataset and Distribution, in compliance with W3C DCAT. In some cases these might be identical, but in most cases the Dataset represents a more abstract concept, while the distribution can point to a specific file.",
-          "examples": [
-            "Fast car images"
-          ]
+          "examples": ["Fast car images"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "If appropriate, type according to: DataCite and/or COAR dictionary. Otherwise use the common name for the type, e.g. raw data, software, survey, etc. https://schema.datacite.org/meta/kernel-4.1/doc/DataCite-MetadataKernel_v4.1.pdf http://vocabularies.coar-repositories.org/pubby/resource_type.html",
-          "examples": [
-            "image"
-          ]
+          "examples": ["image"]
         }
       },
-      "required": [
-        "dataset_id",
-        "personal_data",
-        "sensitive_data",
-        "title"
-      ]
+      "required": ["dataset_id", "personal_data", "sensitive_data", "title"]
     },
     "DatasetID": {
       "type": "object",
@@ -1029,23 +910,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "11353/10.923628"
-          ]
+          "examples": ["11353/10.923628"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Dataset identifier type. Suggested values: handle, doi, ark, url",
-          "examples": [
-            "handle"
-          ]
+          "examples": ["handle"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Datasets": {
       "type": "array",
@@ -1080,9 +954,7 @@
           "format": "date-time",
           "title": "Created",
           "description": "Date and time of the first version of a DMP. Must not be changed in subsequent DMPs. Encoded using the relevant ISO 8601 Date and Time (with timezone) compliant string.",
-          "examples": [
-            "2019-03-13T13:13:00Z"
-          ]
+          "examples": ["2019-03-13T13:13:00Z"]
         },
         "dataset": {
           "$ref": "#/$defs/Datasets"
@@ -1091,9 +963,7 @@
           "type": "string",
           "title": "Description",
           "description": "Any text related to this DMP, optionally describing the project. It can include important information that doesn't fit elsewhere.",
-          "examples": [
-            "This DMP is for our new project"
-          ]
+          "examples": ["This DMP is for our new project"]
         },
         "dmp_id": {
           "$ref": "#/$defs/DMPID"
@@ -1102,9 +972,7 @@
           "type": "string",
           "title": "Ethical Issues Description",
           "description": "To describe considerations that require compliance with laws and regulations (e.g. GDPR, animal welfare) due to the involvement of humans, animals, or sensitive information. This includes ensuring informed consent from participants, protecting privacy and confidentiality, and adhering to applicable legal and ethical standards throughout the research.",
-          "examples": [
-            "There are ethical issues, because..."
-          ]
+          "examples": ["There are ethical issues, because..."]
         },
         "ethical_issues_exist": {
           "$ref": "#/$defs/Booleanish"
@@ -1113,9 +981,7 @@
           "type": "string",
           "title": "Ethical Issues Report",
           "description": "To indicate where a report/document that details all identified ethical issues (might be for example emit from a meeting with an ethical committee), preferably in URL format",
-          "examples": [
-            "http://report.location"
-          ]
+          "examples": ["http://report.location"]
         },
         "language": {
           "$ref": "#/$defs/LanguageCode"
@@ -1125,9 +991,7 @@
           "format": "date-time",
           "title": "Modified",
           "description": "Must be set each time DMP is modified. Indicates a DMP version. Encoded using the relevant ISO 8601 Date and Time (with timezone) compliant string.",
-          "examples": [
-            "2020-03-14T10:53:49Z"
-          ]
+          "examples": ["2020-03-14T10:53:49Z"]
         },
         "project": {
           "type": "array",
@@ -1148,9 +1012,7 @@
           "type": "string",
           "title": "Title",
           "description": "Title of a DMP",
-          "examples": [
-            "DMP for our new project"
-          ]
+          "examples": ["DMP for our new project"]
         }
       },
       "required": [
@@ -1172,23 +1034,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "10.1371/journal.pcbi.1006750"
-          ]
+          "examples": ["10.1371/journal.pcbi.1006750"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "The DMP Identifier Type. Suggested values: handle, doi, ark, url",
-          "examples": [
-            "doi"
-          ]
+          "examples": ["doi"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Distribution": {
       "type": "object",
@@ -1198,26 +1053,20 @@
           "type": "string",
           "title": "Access URL",
           "description": "A URL of the resource that gives access to a distribution of the dataset. e.g. landing page.",
-          "examples": [
-            "http://some.repo"
-          ]
+          "examples": ["http://some.repo"]
         },
         "available_until": {
           "type": "string",
           "format": "date",
           "title": "Available Until",
           "description": "Indicates how long this distribution will be/ should be available. Encoded using the relevant ISO 8601 Date compliant string.",
-          "examples": [
-            "2030-06-30"
-          ]
+          "examples": ["2030-06-30"]
         },
         "byte_size": {
           "type": "integer",
           "title": "Byte Size",
           "description": "Size in bytes.",
-          "examples": [
-            690000
-          ]
+          "examples": [690000]
         },
         "data_access": {
           "$ref": "#/$defs/DataAccess"
@@ -1226,18 +1075,14 @@
           "type": "string",
           "title": "Description",
           "description": "Description is a property in both Dataset and Distribution, in compliance with W3C DCAT. In some cases these might be identical, but in most cases the Dataset represents a more abstract concept, while the distribution can point to a specific file.",
-          "examples": [
-            "Best quality data before resizing"
-          ]
+          "examples": ["Best quality data before resizing"]
         },
         "download_url": {
           "type": "string",
           "format": "url",
           "title": "Download URL",
           "description": "The URL of the downloadable file in a given format. E.g. CSV file or RDF file.",
-          "examples": [
-            "http://some.repo.../download/..."
-          ]
+          "examples": ["http://some.repo.../download/..."]
         },
         "format": {
           "type": "array",
@@ -1255,9 +1100,7 @@
           "format": "date",
           "title": "Issued",
           "description": "To indicate a date when a distribution was published or released. Encoded using the relevant ISO 8601 Date compliant string.",
-          "examples": [
-            "2019-06-30"
-          ]
+          "examples": ["2019-06-30"]
         },
         "license": {
           "$ref": "#/$defs/Licenses"
@@ -1266,15 +1109,10 @@
           "type": "string",
           "title": "Title",
           "description": "Title is a property in both Dataset and Distribution, in compliance with W3C DCAT. In some cases these might be identical, but in most cases the Dataset represents a more abstract concept, while the distribution can point to a specific file.",
-          "examples": [
-            "Full resolution images"
-          ]
+          "examples": ["Full resolution images"]
         }
       },
-      "required": [
-        "data_access",
-        "title"
-      ]
+      "required": ["data_access", "title"]
     },
     "FunderID": {
       "type": "object",
@@ -1285,23 +1123,16 @@
           "type": "string",
           "title": "Identifier",
           "description": "Funder ID, recommended to use CrossRef Funder Registry. See: https://www.crossref.org/services/funder-registry/",
-          "examples": [
-            "501100002428"
-          ]
+          "examples": ["501100002428"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: fundref, url",
-          "examples": [
-            "fundref"
-          ]
+          "examples": ["fundref"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Funding": {
       "type": "object",
@@ -1317,9 +1148,7 @@
           "$ref": "#/$defs/GrantID"
         }
       },
-      "required": [
-        "funder_id"
-      ]
+      "required": ["funder_id"]
     },
     "Fundings": {
       "type": "array",
@@ -1331,17 +1160,10 @@
     },
     "FundingStatus": {
       "type": "string",
-      "enum": [
-        "planned",
-        "applied",
-        "granted",
-        "rejected"
-      ],
+      "enum": ["planned", "applied", "granted", "rejected"],
       "title": "Funding Status",
       "description": "To express different phases of project lifecycle. Allowed values: planned, applied, granted, rejected",
-      "examples": [
-        "granted"
-      ]
+      "examples": ["granted"]
     },
     "GrantID": {
       "type": "object",
@@ -1351,23 +1173,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "http://example.org/grants/776242"
-          ]
+          "examples": ["http://example.org/grants/776242"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: url",
-          "examples": [
-            "url"
-          ]
+          "examples": ["url"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "Host": {
       "type": "object",
@@ -1378,25 +1193,19 @@
           "type": "string",
           "title": "Availability",
           "description": "Availability of a host (preferably as a percentage)",
-          "examples": [
-            "99,5"
-          ]
+          "examples": ["99,5"]
         },
         "backup_frequency": {
           "type": "string",
           "title": "Backup Frequency",
           "description": "Frequency of backups provided by a host",
-          "examples": [
-            "weekly"
-          ]
+          "examples": ["weekly"]
         },
         "backup_type": {
           "type": "string",
           "title": "Backup Type",
           "description": "Location and/or type of the backup provided by a host",
-          "examples": [
-            "tapes"
-          ]
+          "examples": ["tapes"]
         },
         "certified_with": {
           "$ref": "#/$defs/Certification"
@@ -1404,9 +1213,7 @@
         "description": {
           "type": "string",
           "title": "Description",
-          "examples": [
-            "Repository hosted by..."
-          ]
+          "examples": ["Repository hosted by..."]
         },
         "geo_location": {
           "$ref": "#/$defs/CountryCode"
@@ -1425,9 +1232,7 @@
           "type": "string",
           "title": "Storage Type",
           "description": "To indicate whether a host supports versioning of data distributions.",
-          "examples": [
-            "External Hard Drive"
-          ]
+          "examples": ["External Hard Drive"]
         },
         "support_versioning": {
           "$ref": "#/$defs/Booleanish"
@@ -1435,24 +1240,17 @@
         "title": {
           "type": "string",
           "title": "Title",
-          "examples": [
-            "Super Repository"
-          ]
+          "examples": ["Super Repository"]
         },
         "url": {
           "type": "string",
           "format": "url",
           "title": "URL",
           "description": "A URL of an infrastructure hosting a distribution of a dataset",
-          "examples": [
-            "https://zenodo.org"
-          ]
+          "examples": ["https://zenodo.org"]
         }
       },
-      "required": [
-        "title",
-        "url"
-      ]
+      "required": ["title", "url"]
     },
     "HostID": {
       "type": "object",
@@ -1461,30 +1259,21 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "http://example.org/repo"
-          ]
+          "examples": ["http://example.org/repo"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: url",
-          "examples": [
-            "url"
-          ]
+          "examples": ["url"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "MIMEType": {
       "type": "string",
       "title": "Format MIME Type",
-      "examples": [
-        "image/tiff"
-      ]
+      "examples": ["image/tiff"]
     },
     "LanguageCode": {
       "type": "string",
@@ -1677,9 +1466,7 @@
       ],
       "title": "Language",
       "description": "Language of the metadata expressed using ISO 639-3.",
-      "examples": [
-        "eng"
-      ]
+      "examples": ["eng"]
     },
     "License": {
       "type": "object",
@@ -1690,24 +1477,17 @@
           "format": "url",
           "title": "License Reference",
           "description": "Link to license document.",
-          "examples": [
-            "https://creativecommons.org/licenses/by/4.0/"
-          ]
+          "examples": ["https://creativecommons.org/licenses/by/4.0/"]
         },
         "start_date": {
           "type": "string",
           "format": "date",
           "title": "Start Date",
           "description": "If date is set in the future, it indicates embargo period. Encoded using the relevant ISO 8601 Date compliant string.",
-          "examples": [
-            "2019-06-30"
-          ]
+          "examples": ["2019-06-30"]
         }
       },
-      "required": [
-        "license_ref",
-        "start_date"
-      ]
+      "required": ["license_ref", "start_date"]
     },
     "Licenses": {
       "type": "array",
@@ -1747,10 +1527,7 @@
           ]
         }
       },
-      "required": [
-        "language",
-        "metadata_standard_id"
-      ]
+      "required": ["language", "metadata_standard_id"]
     },
     "MetadataStandardID": {
       "type": "object",
@@ -1765,21 +1542,13 @@
         },
         "type": {
           "type": "string",
-          "enum": [
-            "url",
-            "other"
-          ],
+          "enum": ["url", "other"],
           "title": "Type",
           "description": "Identifier type. Suggested values: url",
-          "examples": [
-            "url"
-          ]
+          "examples": ["url"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "PIDSystems": {
       "type": "array",
@@ -1813,9 +1582,7 @@
         "urn",
         "other"
       ],
-      "examples": [
-        "doi"
-      ]
+      "examples": ["doi"]
     },
     "Project": {
       "type": "object",
@@ -1834,9 +1601,7 @@
           "format": "date",
           "title": "End",
           "description": "Project end date. Encoded using the relevant ISO 8601 Date compliant string",
-          "examples": [
-            "2020-03-31"
-          ]
+          "examples": ["2020-03-31"]
         },
         "funding": {
           "$ref": "#/$defs/Fundings"
@@ -1853,22 +1618,16 @@
           "format": "date",
           "title": "Start",
           "description": "Project start date. Encoded using the relevant ISO 8601 Date compliant string",
-          "examples": [
-            "2019-04-01"
-          ]
+          "examples": ["2019-04-01"]
         },
         "title": {
           "type": "string",
           "title": "Title",
           "description": "Project title",
-          "examples": [
-            "Our New Project"
-          ]
+          "examples": ["Our New Project"]
         }
       },
-      "required": [
-        "title"
-      ]
+      "required": ["title"]
     },
     "ProjectID": {
       "type": "object",
@@ -1877,25 +1636,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "https://example.org/project"
-          ]
+          "examples": ["https://example.org/project"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: doi, raid, url",
-          "examples": [
-            "url",
-            "doi",
-            "raid"
-          ]
+          "examples": ["url", "doi", "raid"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "RelatedIdentifier": {
       "type": "object",
@@ -1904,41 +1654,31 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "https://example.com/"
-          ]
+          "examples": ["https://example.com/"]
         },
         "metadata_scheme": {
           "type": "string",
           "title": "Metadata Scheme",
           "description": "Name of the related metadata schema (if applicable)",
-          "examples": [
-            "DDI-L"
-          ]
+          "examples": ["DDI-L"]
         },
         "relation_type": {
           "type": "string",
           "title": "Relation Type",
           "description": "Type of relation between the resource and the related resource, suggested values from DataCite relationType: https://datacite-metadata-schema.readthedocs.io/en/4.5/appendices/appendix-1/relationType/",
-          "examples": [
-            "HasMetadata"
-          ]
+          "examples": ["HasMetadata"]
         },
         "resource_type": {
           "type": "string",
           "title": "Resource Type",
           "description": "Type of the related resource, suggested values from DataCite resourceTypeGeneral: https://datacite-metadata-schema.readthedocs.io/en/4.5/appendices/appendix-1/resourceTypeGeneral/",
-          "examples": [
-            "Model"
-          ]
+          "examples": ["Model"]
         },
         "scheme_type": {
           "type": "string",
           "title": "Scheme Type",
           "description": "Type of the related metadata scheme linked with scheme URI (if applicable)",
-          "examples": [
-            "XSD"
-          ]
+          "examples": ["XSD"]
         },
         "scheme_uri": {
           "type": "string",
@@ -1953,16 +1693,10 @@
           "type": "string",
           "title": "Type",
           "description": "Type of the identifier, suggested values from DataCite relatedIdentifierType: https://datacite-metadata-schema.readthedocs.io/en/4.5/appendices/appendix-1/relatedIdentifierType/",
-          "examples": [
-            "url"
-          ]
+          "examples": ["url"]
         }
       },
-      "required": [
-        "identifier",
-        "type",
-        "relation_type"
-      ]
+      "required": ["identifier", "type", "relation_type"]
     },
     "SecurityAndPrivacyItem": {
       "type": "object",
@@ -1980,14 +1714,10 @@
           "type": "string",
           "title": "Title",
           "description": "Title a measure applied to a dataset",
-          "examples": [
-            "Anonymization of Personally Identifiable Data"
-          ]
+          "examples": ["Anonymization of Personally Identifiable Data"]
         }
       },
-      "required": [
-        "title"
-      ]
+      "required": ["title"]
     },
     "SecurityAndPrivacyItems": {
       "type": "array",
@@ -2013,9 +1743,7 @@
           "type": "string",
           "title": "Name",
           "description": "Name a resource applied to a dataset",
-          "examples": [
-            "Celestron Microscope"
-          ]
+          "examples": ["Celestron Microscope"]
         },
         "technical_resource_id": {
           "type": "array",
@@ -2025,9 +1753,7 @@
           "minItems": 0
         }
       },
-      "required": [
-        "name"
-      ]
+      "required": ["name"]
     },
     "TechnicalResourceID": {
       "type": "object",
@@ -2036,25 +1762,16 @@
         "identifier": {
           "type": "string",
           "title": "Identifier",
-          "examples": [
-            "https://example.org/resource"
-          ]
+          "examples": ["https://example.org/resource"]
         },
         "type": {
           "type": "string",
           "title": "Type",
           "description": "Identifier type. Suggested values: url",
-          "examples": [
-            "url",
-            "doi",
-            "other"
-          ]
+          "examples": ["url", "doi", "other"]
         }
       },
-      "required": [
-        "identifier",
-        "type"
-      ]
+      "required": ["identifier", "type"]
     },
     "TechnicalResources": {
       "type": "array",
