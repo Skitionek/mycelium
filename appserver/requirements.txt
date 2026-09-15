@@ -127,7 +127,7 @@ greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     # via sqlalchemy
 gunicorn==26.0.0
     # via appserver
-idna==3.15
+idna==3.19
     # via requests
 intervaltree==3.2.1
     # via
