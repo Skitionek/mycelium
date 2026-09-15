@@ -51,6 +51,16 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
     },
   },
   {
+    path: 'dmp',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('app/dmp/dmp-route.module').then((m) => m.DMPRouteModule),
+    data: {
+      title: 'Data Management Plans',
+      fontAwesomeIcon: 'clipboard-list',
+    },
+  },
+  {
     path: 'pathway-browser-prototype',
     canActivate: [AuthGuard],
     loadChildren: () =>

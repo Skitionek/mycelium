@@ -1,0 +1,182 @@
+<div class="container py-3" *ngIf="!loading">
+  <div class="d-flex justify-content-between align-items-center">
+    <h2>{{ hashId ? 'Edit' : 'New' }} Data Management Plan</h2>
+    <div>
+      <input #jsonFileInput type="file" accept="application/json" class="d-none" (change)="importJson($event)">
+      <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="jsonFileInput.click()">
+        Import JSON
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary me-2" (click)="exportJson()">
+        Export JSON
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="viewMode === 'form' ? switchToJson() : switchToForm()">
+        {{ viewMode === 'form' ? 'View raw JSON' : 'Back to form' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="alert alert-danger" *ngIf="serverErrors.length">
+    <div *ngFor="let e of serverErrors">{{ e }}</div>
+  </div>
+  <div class="alert alert-danger" *ngIf="jsonError">{{ jsonError }}</div>
+
+  <div *ngIf="viewMode === 'json'">
+    <textarea class="form-control font-monospace" rows="24" [(ngModel)]="jsonText" [ngModelOptions]="{standalone: true}"></textarea>
+    <div class="d-flex justify-content-end mt-3">
+      <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="saving" (click)="submit()">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="viewMode === 'form'">
+    <div class="mb-3">
+      <label class="form-label" for="title">Title</label>
+      <input id="title" type="text" class="form-control" formControlName="title">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="description">Description</label>
+      <textarea id="description" class="form-control" formControlName="description" rows="3"></textarea>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-sm-4">
+        <label class="form-label" for="language">Language (ISO 639-3)</label>
+        <input id="language" type="text" class="form-control" formControlName="language">
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label" for="dmpIdType">DMP ID type</label>
+        <select id="dmpIdType" class="form-select" formControlName="dmpIdType">
+          <option value="handle">handle</option>
+          <option value="doi">doi</option>
+          <option value="ark">ark</option>
+          <option value="url">url</option>
+          <option value="other">other</option>
+        </select>
+      </div>
+      <div class="col-sm-4">
+        <label class="form-label" for="dmpIdIdentifier">DMP ID identifier</label>
+        <input id="dmpIdIdentifier" type="text" class="form-control" formControlName="dmpIdIdentifier">
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-sm-4">
+        <label class="form-label" for="ethicalIssuesExist">Ethical issues exist?</label>
+        <select id="ethicalIssuesExist" class="form-select" formControlName="ethicalIssuesExist">
+          <option value="yes">yes</option>
+          <option value="no">no</option>
+          <option value="unknown">unknown</option>
+        </select>
+      </div>
+      <div class="col-sm-8">
+        <label class="form-label" for="ethicalIssuesDescription">Ethical issues description</label>
+        <input id="ethicalIssuesDescription" type="text" class="form-control" formControlName="ethicalIssuesDescription">
+      </div>
+    </div>
+
+    <h4>Contact</h4>
+    <div class="row mb-3">
+      <div class="col-sm-6">
+        <label class="form-label" for="contactName">Name</label>
+        <input id="contactName" type="text" class="form-control" formControlName="contactName">
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label" for="contactMbox">Email</label>
+        <input id="contactMbox" type="email" class="form-control" formControlName="contactMbox">
+      </div>
+    </div>
+
+    <h4 class="d-flex justify-content-between align-items-center">
+      Contributors
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addContributor()">Add contributor</button>
+    </h4>
+    <div formArrayName="contributors">
+      <div class="row mb-2 align-items-end" *ngFor="let c of contributors.controls; let i = index" [formGroupName]="i">
+        <div class="col-sm-4">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-control" formControlName="name">
+        </div>
+        <div class="col-sm-4">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" formControlName="mbox">
+        </div>
+        <div class="col-sm-3">
+          <label class="form-label">Roles (comma-separated)</label>
+          <input type="text" class="form-control" formControlName="role">
+        </div>
+        <div class="col-sm-1">
+          <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeContributor(i)">&times;</button>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="d-flex justify-content-between align-items-center mt-3">
+      Datasets
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addDataset()">Add dataset</button>
+    </h4>
+    <div formArrayName="datasets">
+      <div class="card mb-3" *ngFor="let d of datasets.controls; let i = index" [formGroupName]="i">
+        <div class="card-body">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <label class="form-label">Title</label>
+              <input type="text" class="form-control" formControlName="title">
+            </div>
+            <div class="col-sm-3">
+              <label class="form-label">Dataset ID type</label>
+              <select class="form-select" formControlName="datasetIdType">
+                <option value="handle">handle</option>
+                <option value="doi">doi</option>
+                <option value="ark">ark</option>
+                <option value="url">url</option>
+                <option value="other">other</option>
+              </select>
+            </div>
+            <div class="col-sm-3">
+              <label class="form-label">Dataset ID identifier</label>
+              <input type="text" class="form-control" formControlName="datasetIdIdentifier">
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-control" formControlName="description">
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              <label class="form-label">Personal data</label>
+              <select class="form-select" formControlName="personalData">
+                <option value="yes">yes</option>
+                <option value="no">no</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Sensitive data</label>
+              <select class="form-select" formControlName="sensitiveData">
+                <option value="yes">yes</option>
+                <option value="no">no</option>
+                <option value="unknown">unknown</option>
+              </select>
+            </div>
+            <div class="col-sm-4 d-flex align-items-end justify-content-end">
+              <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="datasets.length <= 1"
+                      (click)="removeDataset(i)">Remove dataset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3">
+      <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="container py-3" *ngIf="loading">Loading&hellip;</div>
