@@ -1,5 +1,10 @@
 # Dependabot configuration. Documentation for all configuration options:
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+#
+# `groups` below exist to keep tightly-coupled dependencies in a single PR.
+# Packages in the same group are released in lockstep and/or pin each other,
+# so bumping one alone produces a broken build or a peer-dependency conflict.
+# Add a package to an existing group rather than letting it be bumped solo.
 
 version: 2
 updates:
@@ -11,9 +16,15 @@ updates:
     commit-message:
       prefix: actions
     groups:
+      # All three codeql-action entrypoints are pinned to one SHA in codeql.yml.
       codeql-action:
         patterns:
           - github/codeql-action/*
+      # login/metadata/build-push are released together and share the buildx
+      # action protocol; mixing majors breaks the build-and-push jobs.
+      docker-actions:
+        patterns:
+          - docker/*
 
   # Maintain dependencies for Python
   - package-ecosystem: pip
@@ -22,6 +33,70 @@ updates:
       interval: weekly
     commit-message:
       prefix: uv
+    groups:
+      # Flask core + its WSGI/templating stack: werkzeug, jinja2, itsdangerous,
+      # click and blinker are version-pinned by each Flask release.
+      flask:
+        patterns:
+          - flask
+          - flask-caching
+          - flask-cors
+          - flask-httpauth
+          - werkzeug
+          - jinja2
+          - itsdangerous
+          - click
+          - blinker
+      # SQLAlchemy 2.x drives the pinned flask-sqlalchemy / alembic /
+      # flask-migrate / marshmallow-sqlalchemy / sqlalchemy-searchable versions.
+      sqlalchemy:
+        patterns:
+          - sqlalchemy
+          - sqlalchemy-*
+          - flask-sqlalchemy
+          - alembic
+          - flask-migrate
+          - marshmallow-sqlalchemy
+      # marshmallow 4 was a breaking release; webargs, flask-marshmallow,
+      # marshmallow-dataclass and typeguard all track its major.
+      # marshmallow-sqlalchemy is coupled to both majors; it matches the
+      # `sqlalchemy` group above, and first match wins, so it lands there.
+      marshmallow:
+        patterns:
+          - marshmallow
+          - marshmallow-*
+          - flask-marshmallow
+          - webargs
+          - typeguard
+          - typing-inspect
+      # google-cloud-storage pulls api-core/auth/protobuf; protobuf majors are
+      # not cross-compatible with generated proto-plus/googleapis stubs.
+      google-cloud:
+        patterns:
+          - google-*
+          - googleapis-common-protos
+          - proto-plus
+          - protobuf
+      azure:
+        patterns:
+          - azure-*
+      # numpy ABI: pandas/scipy/scikit wheels are built against a numpy major.
+      scientific:
+        patterns:
+          - numpy
+          - scipy
+          - pandas
+      # Stubs must match the runtime package they describe, and mypy must be
+      # able to parse them.
+      typing-stubs:
+        patterns:
+          - types-*
+          - mypy
+          - mypy-extensions
+      # NOTE: neo4j and redis are also declared in /statistical-enrichment and
+      # /cache-invalidator. Dependabot cannot group across ecosystem entries,
+      # so those PRs must be merged together (all services talk to one
+      # Neo4j/Redis deployment).
 
   - package-ecosystem: pip
     directory: /statistical-enrichment
@@ -29,6 +104,26 @@ updates:
       interval: weekly
     commit-message:
       prefix: uv
+    groups:
+      flask:
+        patterns:
+          - flask
+          - flask-caching
+          - flask-marshmallow
+          - webargs
+          - elastic-apm
+      scientific:
+        patterns:
+          - numpy
+          - scipy
+          - pandas
+          - statsmodels
+      # Keep in sync with the same-named deps in /appserver and
+      # /cache-invalidator; see the note there.
+      datastores:
+        patterns:
+          - neo4j
+          - redis
 
   - package-ecosystem: pip
     directory: /cache-invalidator
@@ -36,6 +131,13 @@ updates:
       interval: weekly
     commit-message:
       prefix: uv
+    groups:
+      # Keep in sync with the same-named deps in /appserver and
+      # /statistical-enrichment; see the note there.
+      datastores:
+        patterns:
+          - neo4j
+          - redis
 
   # Maintain dependencies for Node.js
   - package-ecosystem: npm
@@ -44,9 +146,83 @@ updates:
       interval: weekly
     commit-message:
       prefix: npm
+    groups:
+      # The whole Angular toolchain ships as one release train: framework,
+      # CLI, devkit builders and the custom-webpack wrapper must match, and
+      # each Angular major supports exactly one TypeScript and zone.js range.
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+          - "@angular-builders/*"
+          - typescript
+          - zone.js
+      # NgRx majors track the Angular major.
+      ngrx:
+        patterns:
+          - "@ngrx/*"
+          - ngrx-store-localstorage
+      # @codemirror/* packages share a single @codemirror/state instance at
+      # runtime; mismatched versions throw. Also pinned in `resolutions`.
+      codemirror:
+        patterns:
+          - "@codemirror/*"
+          - codemirror
+      # vis-network embeds vis-data/vis-util types and expects matching majors.
+      vis:
+        patterns:
+          - vis-*
+      # d3 is a bundle of d3-* submodules plus its DefinitelyTyped stubs
+      # (@types/d3-array is additionally pinned in `resolutions`).
+      d3:
+        patterns:
+          - d3
+          - d3-*
+          - d3.layout.cloud
+          - "@types/d3*"
+      # ng2-charts wraps a specific chart.js major, as does the datalabels plugin.
+      charts:
+        patterns:
+          - chart.js
+          - chartjs-*
+          - ng2-charts
+      # ng-bootstrap targets one Bootstrap major and needs popper.
+      bootstrap:
+        patterns:
+          - bootstrap
+          - "@ng-bootstrap/*"
+          - "@popperjs/core"
+      # Karma/Jasmine runner, reporters and stubs are only compatible in sets.
+      test-runner:
+        patterns:
+          - karma
+          - karma-*
+          - jasmine-*
+          - "@types/jasmine*"
+          - ng-mocks
+          - ng-bullet
+      # babel-loader majors require a matching @babel/core major.
+      babel:
+        patterns:
+          - "@babel/*"
+          - babel-loader
+      jszip:
+        patterns:
+          - jszip
+          - jszip-utils
+      hammerjs:
+        patterns:
+          - hammerjs
+          - "@egjs/hammerjs"
     ignore:
-      # Fix angular version until refactor is done
+      # Fix angular version until refactor is done. The rest of the `angular`
+      # group is ignored too, otherwise the CLI/devkit/TypeScript halves would
+      # still be bumped on their own and break the build against Angular 16.
       - dependency-name: '@angular/*'
+      - dependency-name: '@angular-devkit/*'
+      - dependency-name: '@angular-builders/*'
+      - dependency-name: 'typescript'
+      - dependency-name: 'zone.js'
 
   # Maintain dependencies for Java
   - package-ecosystem: maven
@@ -55,3 +231,11 @@ updates:
       interval: weekly
     commit-message:
       prefix: maven
+    groups:
+      # slf4j-api and its log4j12 binding must be the same version.
+      slf4j:
+        patterns:
+          - org.slf4j:*
+      log4j:
+        patterns:
+          - org.apache.logging.log4j:*
