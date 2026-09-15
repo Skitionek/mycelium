@@ -10,6 +10,10 @@ updates:
       interval: "daily"
     commit-message:
       prefix: actions
+    groups:
+      codeql-action:
+        patterns:
+          - github/codeql-action/*
 
   # Maintain dependencies for Python
   - package-ecosystem: pip
