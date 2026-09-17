@@ -48,7 +48,7 @@ charset-normalizer==3.4.6
     # via
     #   pdfminer-six
     #   requests
-click==8.3.1
+click==8.5.0
     # via flask
 colorama==0.4.6 ; sys_platform == 'win32'
     # via
@@ -88,7 +88,7 @@ flask==3.1.3
     #   sentry-sdk
 flask-caching==2.4.1
     # via appserver
-flask-cors==6.0.0
+flask-cors==6.0.5
     # via appserver
 flask-httpauth==4.8.1
     # via appserver
@@ -293,7 +293,7 @@ urllib3==2.7.0
     #   sentry-sdk
 webargs==8.7.1
     # via appserver
-werkzeug==3.1.6
+werkzeug==3.1.8
     # via
     #   appserver
     #   flask
