@@ -268,7 +268,7 @@ timeflake==0.4.3
     # via appserver
 tqdm==4.67.3
     # via bioc
-typeguard==4.5.1
+typeguard==4.6.0
     # via marshmallow-dataclass
 typing-extensions==4.15.0
     # via
