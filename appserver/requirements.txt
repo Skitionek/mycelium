@@ -77,13 +77,13 @@ flask==3.1.3
     #   sentry-sdk
 flask-caching==2.4.1
     # via appserver
-flask-cors==6.0.0
+flask-cors==6.0.5
     # via appserver
 flask-httpauth==4.8.1
     # via appserver
 flask-marshmallow==1.5.0
     # via appserver
-flask-migrate==2.5.3
+flask-migrate==4.1.0
     # via appserver
 flask-sqlalchemy==3.0.5
     # via
@@ -100,7 +100,7 @@ google-auth==2.49.1
     #   google-cloud-storage
 google-cloud-core==2.5.0
     # via google-cloud-storage
-google-cloud-storage==3.12.0
+google-cloud-storage==3.14.1
     # via appserver
 google-crc32c==1.8.0
     # via
@@ -116,7 +116,7 @@ greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     # via sqlalchemy
 gunicorn==26.0.0
     # via appserver
-idna==3.11
+idna==3.20
     # via requests
 intervaltree==3.2.1
     # via
@@ -134,9 +134,9 @@ jsonlines==4.0.0
     # via bioc
 lmdb==2.2.1
     # via appserver
-lxml==6.0.2
+lxml==6.1.3
     # via bioc
-mako==1.3.10
+mako==1.4.1
     # via alembic
 markupsafe==3.0.3
     # via
@@ -190,7 +190,7 @@ protobuf==6.33.6
     #   proto-plus
 psycopg2-binary==2.9.12
     # via appserver
-pyasn1==0.6.3
+pyasn1==0.6.4
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
@@ -234,7 +234,7 @@ six==1.17.0
     # via python-dateutil
 sortedcontainers==2.4.0
     # via intervaltree
-sqlalchemy==2.0.51
+sqlalchemy==2.0.52
     # via
     #   alembic
     #   appserver
@@ -258,6 +258,7 @@ typing-extensions==4.15.0
     # via
     #   alembic
     #   cryptography
+    #   flask-cors
     #   marshmallow
     #   marshmallow-dataclass
     #   pyjwt
@@ -268,14 +269,14 @@ typing-inspect==0.9.0
     # via marshmallow-dataclass
 tzdata==2025.3
     # via pandas
-urllib3==2.6.3
+urllib3==2.8.0
     # via
     #   elastic-apm
     #   requests
     #   sentry-sdk
 webargs==8.7.1
     # via appserver
-werkzeug==3.1.6
+werkzeug==3.1.8
     # via
     #   appserver
     #   flask
