@@ -89,7 +89,7 @@
     "@angular/cli": "~16.2.0",
     "@angular/compiler-cli": "~16.2.0",
     "@angular/language-service": "~16.2.0",
-    "@babel/core": "^8.0.5",
+    "@babel/core": "^8.0.6",
     "@compodoc/compodoc": "^2.0.0",
     "@types/color": "^4.2.1",
     "@types/d3": "^7.4.3",
