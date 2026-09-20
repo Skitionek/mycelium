@@ -63,6 +63,12 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
       import('app/enrichment/enrichment-table-route.module').then((m) => m.EnrichmentTableRouteModule),
   },
   {
+    path: 'projects/:project_name/dmp/:file_id',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('app/dmp/dmp-route.module').then((m) => m.DMPRouteModule),
+  },
+  {
     path: 'projects/:project_name/enrichment-visualisation/:file_id',
     canActivate: [AuthGuard],
     loadChildren: () =>

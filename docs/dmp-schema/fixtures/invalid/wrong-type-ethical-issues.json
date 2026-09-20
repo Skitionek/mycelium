@@ -1,0 +1,23 @@
+{
+  "dmp": {
+    "title": "Broken DMP with wrong types",
+    "contact": {
+      "name": "Jane Doe",
+      "mbox": "jane@example.com",
+      "contact_id": { "identifier": "0000-0000-0000-0000", "type": "orcid" }
+    },
+    "created": "2019-03-13T13:13:00Z",
+    "modified": "2020-03-14T10:53:49Z",
+    "dmp_id": { "identifier": "10.0000/00.0.9999", "type": "doi" },
+    "language": "eng",
+    "ethical_issues_exist": "maybe",
+    "dataset": [
+      {
+        "dataset_id": { "identifier": "10.0000/00.0.5678", "type": "doi" },
+        "title": "Placeholder dataset",
+        "personal_data": "unknown",
+        "sensitive_data": "unknown"
+      }
+    ]
+  }
+}

@@ -46,6 +46,7 @@ FILE_MIME_TYPE_BIOC = 'vnd.mycelium.document/bioc'
 FILE_MIME_TYPE_MAP = 'vnd.mycelium.document/map'
 FILE_MIME_TYPE_GRAPH = 'vnd.mycelium.document/graph'
 FILE_MIME_TYPE_ENRICHMENT_TABLE = 'vnd.mycelium.document/enrichment-table'
+FILE_MIME_TYPE_DMP = 'vnd.mycelium.document/dmp'
 
 # MIME types that can be converted to PDF via LibreOffice
 LIBREOFFICE_CONVERTIBLE_MIME_TYPES = frozenset({
