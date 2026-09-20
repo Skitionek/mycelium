@@ -132,14 +132,22 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
             "styles": [
               "src/scss/bootstrap.scss",
               "src/theme.scss",
               "src/styles.scss"
             ],
-            "include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
-            "scripts": ["node_modules/molstar/build/viewer/molstar.js"],
+            "include": [
+              "src/**/*.spec.ts",
+              "src/**/*.d.ts"
+            ],
+            "scripts": [
+              "node_modules/molstar/build/viewer/molstar.js"
+            ],
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             }
@@ -154,7 +162,9 @@
               "e2e/tsconfig.json",
               "tsconfig.worker.json"
             ],
-            "exclude": ["**/node_modules/**"]
+            "exclude": [
+              "**/node_modules/**"
+            ]
           }
         },
         "e2e": {
@@ -176,6 +186,48 @@
             "demo": {
               "devServerTarget": "client:serve:production,demo"
             }
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "client:build",
+            "compodoc": false,
+            "styles": [
+              "node_modules/tachyons/css/tachyons.css",
+              "src/theme.scss",
+              "src/scss/bootstrap.scss",
+              "src/styles.scss",
+              "node_modules/@fortawesome/fontawesome-free/css/all.css",
+              "node_modules/@fortawesome/fontawesome-free/css/v4-shims.css",
+              "node_modules/@fontsource/roboto/index.css",
+              "node_modules/@fontsource/ibm-plex-sans/index.css",
+              "node_modules/@fontsource/inter/index.css"
+            ],
+            "port": 6006,
+            "tsConfig": "tsconfig.storybook.json"
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "client:build",
+            "compodoc": false,
+            "styles": [
+              "node_modules/tachyons/css/tachyons.css",
+              "src/theme.scss",
+              "src/scss/bootstrap.scss",
+              "src/styles.scss",
+              "node_modules/@fortawesome/fontawesome-free/css/all.css",
+              "node_modules/@fortawesome/fontawesome-free/css/v4-shims.css",
+              "node_modules/@fontsource/roboto/index.css",
+              "node_modules/@fontsource/ibm-plex-sans/index.css",
+              "node_modules/@fontsource/inter/index.css"
+            ],
+            "outputDir": "storybook-static",
+            "tsConfig": "tsconfig.storybook.json"
           }
         }
       }

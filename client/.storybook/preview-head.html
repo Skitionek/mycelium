@@ -1,0 +1,23 @@
+<!--
+  Screenshots are the only snapshot these stories produce, so anything that
+  renders differently between two runs has to be pinned down here.
+-->
+<style>
+  /* CSS animations and transitions mid-flight change the captured pixels. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    caret-color: transparent !important;
+  }
+
+  /* Scrollbar width differs per platform and shifts layout; the capture
+     container should never show one. */
+  body {
+    overflow: hidden;
+  }
+</style>

@@ -1,5 +1,13 @@
 {
   "extends": "tslint:recommended",
+  // Storybook requires each story to be a named export in PascalCase, which
+  // `variable-name` rejects; the config files are not application code either.
+  "linterOptions": {
+    "exclude": [
+      "src/**/*.stories.ts",
+      ".storybook/**/*.ts"
+    ]
+  },
   "rules": {
     "array-type": false,
     "arrow-parens": false,
