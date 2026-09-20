@@ -33,6 +33,7 @@ from neo4japp.models import Files
 from neo4japp.schemas.formats.drawing_tool import validate_map
 from neo4japp.schemas.formats.enrichment_tables import validate_enrichment_table
 from neo4japp.schemas.formats.graph import validate_graph
+from neo4japp.services.dmp_validation import validate_dmp_document, get_dmp_title
 from neo4japp.services.file_types.exports import FileExport, ExportFormatError
 from neo4japp.services.file_types.service import BaseFileTypeProvider
 from neo4japp.utils.logger import EventLog
@@ -55,6 +56,7 @@ from neo4japp.constants import (
     FILE_MIME_TYPE_MAP,
     FILE_MIME_TYPE_GRAPH,
     FILE_MIME_TYPE_ENRICHMENT_TABLE,
+    FILE_MIME_TYPE_DMP,
     ICON_SIZE,
     FRONTEND_URL,
     BYTE_ENCODING,
@@ -1312,6 +1314,44 @@ class EnrichmentTableTypeProvider(BaseFileTypeProvider):
     def handle_content_update(self, file: Files):
         file.enrichment_annotations = None
         file.needs_reannotation = True
+
+
+class DmpTypeProvider(BaseFileTypeProvider):
+    """
+    Provider for Data Management Plan documents conforming to the RDA-DMP-Common
+    maDMP JSON Schema 1.2. Like enrichment tables, a DMP is just a JSON file type
+    stored via the generic filesystem API -- there is no dedicated DMP table.
+    """
+
+    MIME_TYPE = FILE_MIME_TYPE_DMP
+    SHORTHAND = 'dmp'
+    mime_types = (MIME_TYPE,)
+
+    def detect_mime_type(self, buffer: BufferedIOBase) -> List[typing.Tuple[float, str]]:
+        try:
+            self.validate_content(buffer)
+            return [(0, self.MIME_TYPE)]
+        except ValueError:
+            return []
+        finally:
+            buffer.seek(0)
+
+    def can_create(self) -> bool:
+        return True
+
+    def validate_content(self, buffer: BufferedIOBase):
+        data = json.loads(buffer.read())
+        validate_dmp_document(data)
+
+    def to_indexable_content(self, buffer: BufferedIOBase):
+        data = json.load(buffer)
+        title = get_dmp_title(data)
+        return typing.cast(
+            BufferedIOBase, io.BytesIO(title.encode(BYTE_ENCODING))
+        )
+
+    def should_highlight_content_text_matches(self) -> bool:
+        return True
 
 
 class AnnotationsFileTypeProvider(BaseFileTypeProvider):

@@ -198,6 +198,7 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       case MimeTypes.EnrichmentTable:
       case MimeTypes.Graph:
       case MimeTypes.BioC:
+      case MimeTypes.Dmp:
       case 'application/pdf':
         return true;
       default:
@@ -246,6 +247,7 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
     // TODO: Move this method to ObjectTypeProvider
     return this.isDirectory || this.mimeType === MimeTypes.Pdf || this.mimeType === MimeTypes.Map
       || this.mimeType === MimeTypes.EnrichmentTable || this.mimeType === MimeTypes.BioC
+      || this.mimeType === MimeTypes.Dmp
       || this.isProteinStructure
       || isCodemirrorHandledMimeType(this.mimeType)
       || this.isLibreOfficeConvertible;
@@ -316,6 +318,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return 'Bioc';
       case MimeTypes.EnrichmentTable:
         return 'Enrichment Table';
+      case MimeTypes.Dmp:
+        return 'Data Management Plan';
       case 'application/pdf':
         return 'Document';
       default:
@@ -346,6 +350,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return FAClass.Graph;
       case MimeTypes.Pdf:
         return FAClass.Pdf;
+      case MimeTypes.Dmp:
+        return FAClass.Dmp;
       default:
         const matchedIcon = getSupportedFileCodes(this.filename);
         if (matchedIcon !== undefined) {
@@ -370,6 +376,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return Unicodes.Graph;
       case MimeTypes.Pdf:
         return Unicodes.Pdf;
+      case MimeTypes.Dmp:
+        return Unicodes.Dmp;
       default:
         const matchedIcon = getSupportedFileCodes(this.filename);
         if (matchedIcon !== undefined) {
@@ -532,6 +540,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return ['/projects', projectName, 'maps', this.hashId];
       case MimeTypes.Graph:
         return ['/projects', projectName, 'sankey', this.hashId];
+      case MimeTypes.Dmp:
+        return ['/projects', projectName, 'dmp', this.hashId];
       default:
         if (isCodemirrorHandledMimeType(this.mimeType)) {
           return ['/projects', projectName, 'code', this.hashId];
