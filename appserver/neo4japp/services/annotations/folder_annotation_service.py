@@ -41,7 +41,7 @@ def _lookup_annotations_config(folder_id: int) -> Optional[dict]:
     from neo4japp.models.files import FileContent
 
     row = (
-        db.session.query(Files.content_id)
+        db.session.query(Files.content_id, Files.hash_id)
         .filter(
             Files.filename == ANNOTATIONS_FILENAME,
             Files.parent_id == folder_id,
@@ -54,11 +54,14 @@ def _lookup_annotations_config(folder_id: int) -> Optional[dict]:
     if row is None:
         return None
 
-    raw = (
-        db.session.query(FileContent.raw_file)
+    fc = (
+        db.session.query(FileContent)
         .filter(FileContent.id == row.content_id)
-        .scalar()
+        .one_or_none()
     )
+    if fc is None:
+        return None
+    raw = fc.get_bytes(path=row.hash_id)
     if not raw:
         return None
 
