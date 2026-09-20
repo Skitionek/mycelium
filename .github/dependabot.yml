@@ -214,6 +214,31 @@ updates:
         patterns:
           - hammerjs
           - "@egjs/hammerjs"
+      # Storybook ships core, framework and addons as one lockstep release;
+      # @storybook/angular also pins the Angular range it supports, so this
+      # group must not be bumped past what the `angular` group allows.
+      storybook:
+        patterns:
+          - storybook
+          - "@storybook/*"
+      # The image-snapshot stack. playwright is pinned to the exact version of
+      # the mcr.microsoft.com/playwright image used by the client-storybook job
+      # in tests.yml, because snapshots are only byte-reproducible against one
+      # browser build. Bumping any of these means updating that image tag and
+      # regenerating every PNG in client/__image_snapshots__/.
+      visual-snapshots:
+        patterns:
+          - playwright
+          - jest-image-snapshot
+          - "@types/jest-image-snapshot"
+      # Fonts and icons are vendored locally so Storybook renders offline and
+      # identically everywhere. Any bump changes glyph shapes and therefore
+      # invalidates every committed image snapshot, so they move together and
+      # the bump PR must include regenerated PNGs.
+      webfonts:
+        patterns:
+          - "@fontsource/*"
+          - "@fortawesome/*"
     ignore:
       # Fix angular version until refactor is done. The rest of the `angular`
       # group is ignored too, otherwise the CLI/devkit/TypeScript halves would
