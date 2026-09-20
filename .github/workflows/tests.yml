@@ -79,6 +79,50 @@ jobs:
         env:
           NODE_OPTIONS: --openssl-legacy-provider
 
+  client-storybook:
+    name: Client Storybook Snapshots
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    # Image snapshots are only byte-reproducible against one browser build, so
+    # this must be the same image (and tag) that `yarn snapshot:docker` uses
+    # locally to regenerate them. Keep it in step with the pinned `playwright`
+    # dependency in client/package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --ipc=host
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        working-directory: client
+        run: yarn install --frozen-lockfile
+
+      - name: Check every in-scope component has a story
+        working-directory: client
+        run: yarn check-story-coverage
+
+      - name: Build Storybook
+        working-directory: client
+        run: yarn build-storybook --quiet
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider --max_old_space_size=4096
+
+      - name: Compare image snapshots
+        working-directory: client
+        run: yarn snapshot
+
+      - name: Upload snapshot diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-snapshot-diffs
+          path: client/__image_snapshots__/__diff_output__/
+          if-no-files-found: ignore
+
   statistical-enrichment-tests:
     name: Statistical Enrichment Tests
     runs-on: ubuntu-latest
