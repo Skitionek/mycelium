@@ -11,6 +11,7 @@ from deepdiff import DeepDiff
 from flask import Blueprint, current_app, g, jsonify, make_response, request
 from flask.views import MethodView
 from marshmallow import EXCLUDE, ValidationError
+from marshmallow.experimental.context import Context
 from sqlalchemy import and_, desc, or_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -473,13 +474,12 @@ class FilesystemBaseView(MethodView):
         # Note: We don't check permissions here, but there are no negate permissions
         return_file.calculated_children = children
 
-        return jsonify(FileResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }, exclude=(
-            'result.children.children',  # We aren't loading sub-children
-        )).dump({
-            'result': return_file,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileResponseSchema(exclude=(
+                'result.children.children',  # We aren't loading sub-children
+            )).dump({
+                'result': return_file,
+            }))
 
     def get_bulk_file_response(
             self,
@@ -507,21 +507,19 @@ class FilesystemBaseView(MethodView):
             if file.calculated_privileges[user.id].readable:
                 returned_files[file.hash_id] = file
 
-        return jsonify(
-            MultipleFileResponseSchema(
-                context={
-                    'user_privilege_filter': user.id,
-                },
-                exclude=(
-                    'mapping.children',
-                )
-            ).dump(
-                dict(
-                    mapping=returned_files,
-                    missing=list(missing_hash_ids) if missing_hash_ids is not None else [],
+        with Context({'user_privilege_filter': user.id}):
+            return jsonify(
+                MultipleFileResponseSchema(
+                    exclude=(
+                        'mapping.children',
+                    )
+                ).dump(
+                    dict(
+                        mapping=returned_files,
+                        missing=list(missing_hash_ids) if missing_hash_ids is not None else [],
+                    )
                 )
             )
-        )
 
     def get_missing_hash_ids(self, expected_hash_ids: Iterable[str], files: Iterable[Files]):
         found_hash_ids = set(file.hash_id for file in files)
@@ -630,11 +628,10 @@ class FileHierarchyView(FilesystemBaseView):
                 event_type=LogEventType.FILESYSTEM.value
             ).to_dict()
         )
-        return jsonify(FileHierarchyResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'results': results,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileHierarchyResponseSchema().dump({
+                'results': results,
+            }))
 
 
 class FileListView(FilesystemBaseView):
@@ -1022,14 +1019,13 @@ class FileSearchView(FilesystemBaseView):
         else:
             raise NotImplementedError()
 
-        return jsonify(FileListSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }, exclude=(
-            'results.children',
-        )).dump({
-            'total': total,
-            'results': files,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileListSchema(exclude=(
+                'results.children',
+            )).dump({
+                'total': total,
+                'results': files,
+            }))
 
 
 class FileDetailView(FilesystemBaseView):
@@ -1347,13 +1343,12 @@ class FileVersionListView(FilesystemBaseView):
             per_page=pagination['limit'],
         )
 
-        return jsonify(FileVersionHistorySchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'object': file,
-            'total': result.total,
-            'results': result.items,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileVersionHistorySchema().dump({
+                'object': file,
+                'total': result.total,
+                'results': result.items,
+            }))
 
 
 class FileVersionContentView(FilesystemBaseView):
@@ -1399,11 +1394,10 @@ class FileLockBaseView(FilesystemBaseView):
 
         results = query.all()
 
-        return jsonify(FileLockListResponse(context={
-            'current_user': current_user,
-        }).dump({
-            'results': results,
-        }))
+        with Context({'current_user': current_user}):
+            return jsonify(FileLockListResponse().dump({
+                'results': results,
+            }))
 
 
 class FileLockListView(FileLockBaseView):

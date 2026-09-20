@@ -4,6 +4,7 @@ from typing import List, Optional
 
 
 from flask import Blueprint, current_app, jsonify, g
+from marshmallow.experimental.context import Context
 from webargs.flaskparser import use_args, use_kwargs
 
 from neo4japp.blueprints.auth import auth
@@ -185,13 +186,12 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
         file_type_service = get_file_type_service()
 
         if content_search_params_are_empty(params):
-            return jsonify(ContentSearchResponseSchema(context={
-                'user_privilege_filter': g.current_user.id,
-            }).dump({
-                'total': 0,
-                'query': ResultQuery(phrases=[]),
-                'results': [],
-            }))
+            with Context({'user_privilege_filter': g.current_user.id}):
+                return jsonify(ContentSearchResponseSchema().dump({
+                    'total': 0,
+                    'query': ResultQuery(phrases=[]),
+                    'results': [],
+                }))
 
         offset = (pagination.page - 1) * pagination.limit
 
@@ -302,14 +302,13 @@ class ContentSearchView(ProjectBaseView, FilesystemBaseView):
                     'rank': document['_score'],
                 })
 
-        return jsonify(ContentSearchResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'total': search_result['total'],
-            'query': ResultQuery(phrases=search_phrases),
-            'results': results,
-            'dropped_folders': dropped_folders
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(ContentSearchResponseSchema().dump({
+                'total': search_result['total'],
+                'query': ResultQuery(phrases=search_phrases),
+                'results': results,
+                'dropped_folders': dropped_folders
+            }))
 
 
 class SynonymSearchView(FilesystemBaseView):
