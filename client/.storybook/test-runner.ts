@@ -18,6 +18,19 @@ const imageSnapshotsDir = path.join(__dirname, '..', '__image_snapshots__');
 interface ImageSnapshotParameters {
   mask?: string[];
   skip?: boolean;
+  /**
+   * A selector that must be present before capturing. Components that lay
+   * themselves out asynchronously - a d3 layout driven by
+   * requestAnimationFrame, say - are otherwise photographed mid-render.
+   */
+  waitFor?: string;
+  /**
+   * Milliseconds of DOM quiet required before capturing. Some components keep
+   * re-laying-out after their first paint (a resize observer reacting to its
+   * own resize, for one), so waiting for an element to appear is not enough -
+   * the capture has to wait for the mutations to stop.
+   */
+  settle?: number;
 }
 
 /**
@@ -63,6 +76,36 @@ const config: TestRunnerConfig = {
     const imageSnapshot = (storyParameters.imageSnapshot ?? {}) as ImageSnapshotParameters;
     if (imageSnapshot.skip) {
       return;
+    }
+
+    if (imageSnapshot.waitFor) {
+      await page.waitForSelector(imageSnapshot.waitFor, { state: 'attached' });
+    }
+
+    if (imageSnapshot.settle) {
+      await page.evaluate(
+        (quietMs) =>
+          new Promise<void>((resolve) => {
+            const root = document.querySelector('#storybook-root') ?? document.body;
+            let timer = setTimeout(done, quietMs);
+            const observer = new MutationObserver(() => {
+              clearTimeout(timer);
+              timer = setTimeout(done, quietMs);
+            });
+            observer.observe(root, {
+              attributes: true,
+              childList: true,
+              subtree: true,
+              characterData: true,
+            });
+
+            function done() {
+              observer.disconnect();
+              resolve();
+            }
+          }),
+        imageSnapshot.settle,
+      );
     }
 
     const maskedLocators = (imageSnapshot.mask ?? []).map((selector) => page.locator(selector));

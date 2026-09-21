@@ -78,7 +78,6 @@
     "src/app/shared/components/table/annotation-config-table.component.ts",
     "src/app/shared/components/vis-js-network/vis-js-network.component.ts",
     "src/app/shared/components/word-cloud-annotation-filter/word-cloud-annotation-filter.component.ts",
-    "src/app/shared/components/word-cloud/word-cloud.component.ts",
     "src/app/trace-viewer/components/trace-details.component.ts",
     "src/app/trace-viewer/components/trace-view.component.ts"
   ]
