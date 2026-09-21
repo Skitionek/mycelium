@@ -3,13 +3,6 @@
   "compilerOptions": {
     "types": []
   },
-  "include": [
-    "src/**/*.ts",
-    ".storybook/preview.ts"
-  ],
-  "exclude": [
-    "src/test.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.worker.ts"
-  ]
+  "include": ["src/**/*.ts", ".storybook/preview.ts"],
+  "exclude": ["src/test.ts", "src/**/*.spec.ts", "src/**/*.worker.ts"]
 }
