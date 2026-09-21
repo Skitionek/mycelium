@@ -61,6 +61,32 @@ docker run --rm -v "$(pwd)":/tmp/lint:rw -w /tmp/lint \
       both build steps and the login step reported `skipped`, while images still built.
       Drive-by: closed an unterminated semver tag pattern (`{{minor` -> `{{minor}}`).
 
+### Storybook image snapshots
+
+- [x] Stand up Storybook 8.6 + `@storybook/test-runner` with committed image
+      snapshots and a CI job — PR #524. Snapshots are compared inside a pinned
+      `mcr.microsoft.com/playwright` image, locally via `yarn snapshot:docker`
+      and in CI via `container:`, because font rasterisation differs between
+      this box and `ubuntu-latest`. Verified green in CI: snapshots generated
+      here matched byte-for-byte on the runner. Diff threshold is 0 pixels.
+- [ ] **Burn down `client/tools/story-coverage-pending.json`** — 79 of 113
+      in-scope components still need a story (PR #528 is the first slice). The
+      list may only shrink; the check fails if an entry on it has gained a
+      story, so a new component always needs a story. Remaining work is mostly
+      Tier 3: `pdf-viewer` (pdf.js), `molstar-viewer` (WebGL), `sankey-viewer`
+      and the many-to-many variant (d3 SVG), `drawing-tool` (canvas),
+      `enrichment` (chart.js), `vis-js-network`.
+      Use `imageSnapshot.waitFor` + `imageSnapshot.settle` for anything that
+      lays out asynchronously, and seed `Math.random` where the layout does.
+      `skip` is only for primitives (a spinner, a single icon).
+- [ ] `WordCloudComponent` never unhooks its `requestAnimationFrame` /
+      `ResizeObserver` loop; the test runner reports a worker that "failed to
+      exit gracefully" on any run including it. Does not fail the run.
+- [ ] `index.html` loads Font Awesome from a self-updating *kit*, three fonts
+      from Google Fonts and an unpinned `plotly-latest.min.js` from a CDN.
+      Storybook vendors pinned local copies and blocks those hosts; the app
+      itself still depends on them at runtime.
+
 ### Branch maintenance
 
 - [ ] **Rebase `chore/angular16-bootstrap5-migration` onto current `main`** — the stack is
