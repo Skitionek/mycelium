@@ -35,7 +35,7 @@ cachebox==5.2.3
     # via deepdiff
 cachelib==0.13.0
     # via flask-caching
-certifi==2026.2.25
+certifi==2026.7.22
     # via
     #   elastic-apm
     #   requests
