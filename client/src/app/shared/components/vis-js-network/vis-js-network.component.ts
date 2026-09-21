@@ -4,7 +4,7 @@ import { AfterViewInit, Component, Input, ContentChild, Output, EventEmitter } f
 import { isNil } from 'lodash-es';
 import { BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { DataSet } from 'vis-data/dist/umd';
+import { DataSet } from 'vis-data';
 import { Color, Edge, Network, Node, Options } from 'vis-network/dist/vis-network';
 
 import { GraphData, VisNetworkDataSet } from 'app/interfaces/vis-js.interface';
