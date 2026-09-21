@@ -3364,10 +3364,10 @@
     "@napi-rs/canvas-win32-arm64-msvc" "1.0.8"
     "@napi-rs/canvas-win32-x64-msvc" "1.0.8"
 
-"@ng-bootstrap/ng-bootstrap@~21.0.0":
-  version "21.0.0"
-  resolved "https://registry.yarnpkg.com/@ng-bootstrap/ng-bootstrap/-/ng-bootstrap-21.0.0.tgz#36746eeef7609e19c1a6b3bf1b5ad3c44b2798f4"
-  integrity sha512-H7lGYGQGERoX5PeU1nf99U8tvPBJwQod6G99NoaJYwhBtKDoA/W0auUJqcbPMOGnO3gHtjtnOCji49tRbUIbPw==
+"@ng-bootstrap/ng-bootstrap@~15.1.0":
+  version "15.1.2"
+  resolved "https://registry.yarnpkg.com/@ng-bootstrap/ng-bootstrap/-/ng-bootstrap-15.1.2.tgz#98467947efb856096115e413c331bdb7ba8809ec"
+  integrity sha512-mM2yiGnt9o7KZLIFp8K1vjfmVfu7HR3d8dhH5SszfArbgn9DvvQ4P5D5TDGygzyBSzeyZe18p7I8rX8vgA6DKw==
   dependencies:
     tslib "^2.3.0"
 
