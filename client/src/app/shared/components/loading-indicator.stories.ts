@@ -5,6 +5,12 @@ import { LoadingIndicatorComponent } from 'app/shared/components/loading-indicat
 const meta: Meta<LoadingIndicatorComponent> = {
   title: 'Shared/Loading Indicator',
   component: LoadingIndicatorComponent,
+
+  // A spinner and a single icon; a PNG would assert nothing the template does
+  // not already say, so these are browsable in Storybook but not snapshotted.
+  parameters: {
+    imageSnapshot: { skip: true },
+  },
 };
 
 export default meta;

@@ -16,6 +16,12 @@ function project(hashId: string): ProjectImpl {
 const meta: Meta<ProjectIconComponent> = {
   title: 'Shared/Project Icon',
   component: ProjectIconComponent,
+
+  // A spinner and a single icon; a PNG would assert nothing the template does
+  // not already say, so these are browsable in Storybook but not snapshotted.
+  parameters: {
+    imageSnapshot: { skip: true },
+  },
   decorators: [
     moduleMetadata({
       imports: [CommonModule],
