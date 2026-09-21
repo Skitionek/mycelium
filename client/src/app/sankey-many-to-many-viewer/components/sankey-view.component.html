@@ -24,9 +24,7 @@
                         <div class="modal-header">
                             <h4 class="modal-title">Logs</h4>
                             <button (click)="modal.dismiss()" aria-label="Close" class="btn-close"
-                                    type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                                    type="button"></button>
                         </div>
                         <div class="modal-body p-0 pb-1">
                             <ng-container
@@ -50,9 +48,7 @@
                         <div class="modal-header">
                             <h4 class="modal-title">Description</h4>
                             <button (click)="modal.dismiss()" aria-label="Close" class="btn-close"
-                                    type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                                    type="button"></button>
                         </div>
                         <div class="modal-body" [style.whiteSpace]="'pre-line'">
                             {{ data.graph.description }}
@@ -68,9 +64,7 @@
                         <div class="modal-header">
                             <h4 class="modal-title">Structure Overview</h4>
                             <button (click)="modal.dismiss()" aria-label="Close" class="btn-close"
-                                    type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                                    type="button"></button>
                         </div>
                         <div class="modal-body">
                             <app-object-explorer [dataSource]="data"></app-object-explorer>
@@ -83,9 +77,7 @@
                         <div class="modal-header">
                             <h4 class="modal-title">Warnings</h4>
                             <button (click)="modal.dismiss()" aria-label="Close" class="btn-close"
-                                    type="button">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                                    type="button"></button>
                         </div>
                         <div class="modal-body">
                             <app-warning-list [showAll]="true" [dismissible]="false"></app-warning-list>
