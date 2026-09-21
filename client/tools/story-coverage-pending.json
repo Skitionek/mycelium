@@ -6,6 +6,7 @@
     "src/app/bioc-viewer/components/bioc-view.component.ts",
     "src/app/bioc-viewer/components/infons/infons.component.ts",
     "src/app/codemirror-viewer/components/codemirror-view.component.ts",
+    "src/app/dmp/components/dmp-editor.component.ts",
     "src/app/drawing-tool/components/info-view-panel.component.ts",
     "src/app/drawing-tool/components/links-panel.component.ts",
     "src/app/drawing-tool/components/map-editor/dialog/link-edit-dialog.component.ts",
