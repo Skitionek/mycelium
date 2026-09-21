@@ -13,12 +13,12 @@ const path = require('path');
 const clientRoot = path.join(__dirname, '..');
 
 // The shared UI kit plus every feature module registered as a file type in
-// src/app/file-types/file-types.module.ts. src/app/dmp is absent from main
-// and must be added here when the DMP editor branch lands.
+// src/app/file-types/file-types.module.ts.
 const IN_SCOPE_DIRECTORIES = [
   'src/app/shared/components',
   'src/app/bioc-viewer',
   'src/app/codemirror-viewer',
+  'src/app/dmp',
   'src/app/drawing-tool',
   'src/app/enrichment',
   'src/app/molstar-viewer',
