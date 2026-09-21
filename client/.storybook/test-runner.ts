@@ -5,12 +5,19 @@ import * as path from 'path';
 const imageSnapshotsDir = path.join(__dirname, '..', '__image_snapshots__');
 
 /**
- * Stories that cannot be captured byte-identically declare
- * `parameters: { imageSnapshot: { mask: ['.selector'] } }` to blank out the
- * offending region. Masking keeps the snapshot; it never opts out of one.
+ * Per-story image-snapshot options, set as
+ * `parameters: { imageSnapshot: { ... } }`.
+ *
+ * `mask` blanks out a region that cannot be captured byte-identically while
+ * still snapshotting the rest.
+ *
+ * `skip` drops the snapshot entirely. It is for primitives whose rendering is
+ * a single icon or a spinner, where a PNG asserts nothing a reader could not
+ * see from the template and only adds a file to re-approve.
  */
 interface ImageSnapshotParameters {
   mask?: string[];
+  skip?: boolean;
 }
 
 /**
@@ -54,6 +61,10 @@ const config: TestRunnerConfig = {
         }).__STORYBOOK_PREVIEW__?.currentRender?.story?.parameters ?? {},
     );
     const imageSnapshot = (storyParameters.imageSnapshot ?? {}) as ImageSnapshotParameters;
+    if (imageSnapshot.skip) {
+      return;
+    }
+
     const maskedLocators = (imageSnapshot.mask ?? []).map((selector) => page.locator(selector));
 
     // Capture the story root rather than the viewport. A full-page shot pads

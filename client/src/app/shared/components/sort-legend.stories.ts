@@ -7,6 +7,12 @@ import { SortLegendComponent } from 'app/shared/components/sort-legend.component
 const meta: Meta<SortLegendComponent> = {
   title: 'Shared/Sort Legend',
   component: SortLegendComponent,
+
+  // A spinner and a single icon; a PNG would assert nothing the template does
+  // not already say, so these are browsable in Storybook but not snapshotted.
+  parameters: {
+    imageSnapshot: { skip: true },
+  },
   decorators: [
     moduleMetadata({
       imports: [CommonModule],
