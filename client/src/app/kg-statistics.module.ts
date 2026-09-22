@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { NgChartsModule } from 'ng2-charts';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { SharedModule } from 'app/shared/shared.module';
 
@@ -12,8 +12,9 @@ import { KgStatisticsComponent } from './kg-statistics.component';
   ],
   imports: [
     SharedModule,
-    NgChartsModule,
+    BaseChartDirective,
   ],
+  providers: [provideCharts(withDefaultRegisterables())],
 })
 export class KgStatisticsModule {
 }

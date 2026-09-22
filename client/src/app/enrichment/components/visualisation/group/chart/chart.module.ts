@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { NgChartsModule, ThemeService } from 'ng2-charts';
+import { BaseChartDirective, ThemeService, provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { SharedModule } from 'app/shared/shared.module';
 
@@ -16,10 +16,10 @@ const components = [
   imports: [
     CommonModule,
     SharedModule,
-    NgChartsModule
+    BaseChartDirective
   ],
   exports: components,
-  providers: [ThemeService]
+  providers: [ThemeService, provideCharts(withDefaultRegisterables())]
 })
 export class ChartModule {
 
