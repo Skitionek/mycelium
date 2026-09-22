@@ -7427,6 +7427,11 @@ es-set-tostringtag@^2.1.0:
     has-tostringtag "^1.0.2"
     hasown "^2.0.2"
 
+es-toolkit@^1.39.7:
+  version "1.52.0"
+  resolved "https://registry.yarnpkg.com/es-toolkit/-/es-toolkit-1.52.0.tgz#71eaf1a8b18834ef77637eccbb885ba4c03cd6dd"
+  integrity sha512-XTNEJQh1tY1ZJVcf6ayP/2n4ZPyaHlW2FWs7xvw5ddPuhUVjLD3olQVQS7kf58JbAB48iL0uL/jerTrjtV3lDA==
+
 es6-error@^4.0.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/es6-error/-/es6-error-4.1.1.tgz#9e3af407459deed47e9a91f9b885a84eb05c561d"
@@ -11319,12 +11324,12 @@ ng-mocks@^14.17.3:
   resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.17.3.tgz#59670b3aab0f5ac494010ee76ab8dc7a6273fef8"
   integrity sha512-IQ6j31VlX9m2vxq08eyJ2A+EXdFvE5QkjgURHXwq0kqW/jpk0QBuaNpiKz4zSXA+rAcl4DtuYQGTGYf5CTC6ug==
 
-ng2-charts@^4.0.0:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/ng2-charts/-/ng2-charts-4.1.1.tgz#699bee539030b093caf54ab6111c6dea9e8e7ed3"
-  integrity sha512-iHwXDbmX86lfeH8VRcsaW2tJATsuAZo4kvvC/Yk2l35zOHjevja1qBvO6BAibiDazi9r9aS6ZRJOqWPsz1pP2w==
+ng2-charts@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/ng2-charts/-/ng2-charts-10.0.0.tgz#ccdc8b2f3cf7f90558d5590ed828d97e4897b626"
+  integrity sha512-mdL75XJrk/0s0YO2ySPQpAHPja85ECDEGNWFlcElJiy/bYliTNGEpeCtctAqZuozTff/E2CwGjyfPFM1ScP2og==
   dependencies:
-    lodash-es "^4.17.15"
+    es-toolkit "^1.39.7"
     tslib "^2.3.0"
 
 ngrx-store-localstorage@~16.0.0:
