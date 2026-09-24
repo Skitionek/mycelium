@@ -44,7 +44,7 @@ cffi==2.0.0 ; platform_python_implementation != 'PyPy'
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.4.6
+charset-normalizer==3.5.1
     # via
     #   pdfminer-six
     #   requests
