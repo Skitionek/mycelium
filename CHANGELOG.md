@@ -30,6 +30,22 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **Google Drive import**: users can now import files directly from their Google Drive into the Lifelike filesystem.
+  - New `POST /api/google-drive/import` backend endpoint downloads the selected file (or exports Google-native documents as PDF) and creates a standard Lifelike file record.
+  - Native Google document types (Docs, Sheets, Slides, Drawings) are automatically exported as PDF.
+  - The file upload dialog gains a **"From Google Drive"** tab (visible only when `googleDriveClientId` is configured) that opens the Google Drive Picker for file selection.
+  - A new `GoogleDrivePickerService` (Angular) lazily loads the Google Identity Services and Google Picker libraries and manages OAuth token acquisition.
+  - The `googleDriveClientId` field was added to the Angular environment files; set it to your Google Cloud OAuth 2.0 client ID to enable the feature.
+- **Google Drive index**: files and folders from Google Drive can now be indexed into the Lifelike filesystem. Google Drive remains the single source of truth — **no file content is downloaded or stored** in Lifelike; only metadata is indexed.
+  - New `POST /api/google-drive/import` backend endpoint indexes a Drive file or folder (recursively) under a Lifelike parent directory. Metadata (name, MIME type, Drive ID, last-modified timestamp) is persisted; `upload_url` is set to the Drive view/folder URL.
+  - New `POST /api/google-drive/sync/<hash_id>` endpoint re-syncs metadata (name, MIME type, modified time) for a Drive-indexed item and all its Drive-indexed descendants.
+  - New DB migration `002_add_google_drive_fields`: adds `google_drive_id` (VARCHAR 200, indexed) and `google_drive_modified_time` (TIMESTAMPTZ) columns to the `files` table.
+  - `FilesystemObject` model gains `googleDriveId`, `googleDriveModifiedTime`, and `isGoogleDriveIndexed` computed property.
+  - `FilesystemObjectActions.syncGoogleDriveIndex()` action triggers a re-sync by acquiring a fresh OAuth token via the Picker service.
+  - The Google Drive Picker now offers two views — **Files** and **Folders** — so users can index either individual files or an entire directory tree in one action.
+  - The file upload dialog's **"From Google Drive"** tab now labels the operation correctly ("metadata indexed, content stays in Drive" / "folder — will be indexed recursively") and shows a folder/file icon next to the selected item name.
+
+### Added
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
