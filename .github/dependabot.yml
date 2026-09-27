@@ -248,6 +248,12 @@ updates:
       - dependency-name: '@angular-builders/*'
       - dependency-name: 'typescript'
       - dependency-name: 'zone.js'
+      # jasmine-core 7.x makes properties zone.js patches (e.g. `describe`)
+      # read-only, breaking zone-testing's monkeypatch. zone.js is pinned to
+      # 0.13.x above until the Angular 16 refactor, so jasmine-core must stay
+      # on 6.x until that unblocks a compatible zone.js.
+      - dependency-name: 'jasmine-core'
+        versions: ['>=7.0.0']
 
   # Maintain dependencies for Java
   - package-ecosystem: maven
