@@ -1,10 +1,15 @@
 import type { StorybookConfig } from '@storybook/angular';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// Storybook 9+ loads this config as ESM, where __dirname is unavailable.
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: ['../src/app/**/*.stories.ts'],
 
-  addons: ['@storybook/addon-essentials'],
+  // Storybook 9+ builds essential addons (controls, actions, viewport, etc.)
+  // into core, so @storybook/addon-essentials is no longer needed here.
 
   // CI runs this non-interactively; the telemetry prompt would block it.
   core: {
@@ -33,7 +38,7 @@ const config: StorybookConfig = {
     webpackConfig.resolve = webpackConfig.resolve ?? {};
     webpackConfig.resolve.modules = [
       ...(webpackConfig.resolve.modules ?? []),
-      path.resolve(__dirname, '../src'),
+      path.resolve(dirname, '../src'),
     ];
 
     return webpackConfig;

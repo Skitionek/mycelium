@@ -1,7 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": [],
+    // @storybook/angular 10 ships only an exports-only package.json (no
+    // "main"/"types" fields), which the app's "node" module resolution
+    // can't follow. Point directly at its type declarations instead of
+    // switching resolution modes, which would also break deep imports
+    // elsewhere (e.g. route-with-dynamic-outlets below, @ng-bootstrap).
+    "paths": {
+      "route-with-dynamic-outlets": [
+        "../node_modules/route-with-dynamic-outlets/lib/src"
+      ],
+      "@storybook/angular": ["../node_modules/@storybook/angular/dist/index.d.ts"]
+    }
   },
   "include": ["src/**/*.ts", ".storybook/preview.ts"],
   "exclude": ["src/test.ts", "src/**/*.spec.ts", "src/**/*.worker.ts"]
