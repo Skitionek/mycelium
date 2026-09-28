@@ -1,7 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": [],
+    "paths": {
+      "route-with-dynamic-outlets": [
+        "../node_modules/route-with-dynamic-outlets/lib/src"
+      ],
+      // Storybook 10's packages declare types only via the package.json
+      // "exports" map, which classic "node" resolution (used by the rest
+      // of this project) does not read.
+      "@storybook/angular": ["../node_modules/@storybook/angular/dist/index"]
+    }
   },
   "include": ["src/**/*.ts", ".storybook/preview.ts"],
   "exclude": ["src/test.ts", "src/**/*.spec.ts", "src/**/*.worker.ts"]
