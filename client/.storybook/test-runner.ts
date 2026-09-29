@@ -2,7 +2,12 @@ import type { TestRunnerConfig } from '@storybook/test-runner';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 import * as path from 'path';
 
-const imageSnapshotsDir = path.join(__dirname, '..', '__image_snapshots__');
+// `__dirname` is undefined when Storybook 10 loads this config as ESM, and
+// `import.meta.url` in turn makes the Jest worker that runs the actual story
+// tests try (and fail) to register this file as an ESM loader. `yarn
+// snapshot` always runs from `client/` (see tests.yml), so anchor on cwd
+// instead of the module's own location.
+const imageSnapshotsDir = path.join(process.cwd(), '__image_snapshots__');
 
 /**
  * Per-story image-snapshot options, set as
