@@ -23,6 +23,9 @@ services:
       - FRONTEND_URL=http://localhost:4200
       # Unset to use the default LMDB data directory
       - LMDB_DATA_DIR=
+      # Auto-logs the frontend in as the seeded admin user so the
+      # dev/demo stack doesn't require a manual login.
+      - DEV_AUTO_LOGIN_EMAIL=admin@example.com
     volumes:
       - type: bind
         source: ${HOST_WORKSPACE_PATH:-..}/appserver

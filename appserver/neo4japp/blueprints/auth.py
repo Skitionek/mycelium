@@ -195,6 +195,53 @@ def refresh():
         }))
 
 
+def _issue_session(user: AppUser):
+    """ Build the JWT/user response returned by both /login and /dev-auto-login """
+    token_service = TokenService(current_app.config['JWT_SECRET'])
+    access_jwt = token_service.get_access_token(user.email)
+    refresh_jwt = token_service.get_refresh_token(user.email)
+    return jsonify(JWTTokenResponse().dump({
+        'access_token': access_jwt,
+        'refresh_token': refresh_jwt,
+        'user': {
+            'hash_id': user.hash_id,
+            'email': user.email,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'id': user.id,
+            'reset_password': user.forced_password_reset,
+            'roles': [u.name for u in user.roles],
+        },
+    }))
+
+
+@bp.route('/dev-auto-login', methods=['POST'])
+def dev_auto_login():
+    """
+    Dev-only convenience endpoint the frontend uses to skip the login
+    screen when running the local/codespace dev stack. Disabled unless
+    DEV_AUTO_LOGIN_EMAIL is configured, which only happens in
+    docker/docker-compose.dev.yml.
+    """
+    email = current_app.config.get('DEV_AUTO_LOGIN_EMAIL')
+    if not email:
+        raise ServerException(
+            title='Not Found',
+            message='This endpoint is not available.',
+            code=404)
+
+    try:
+        user = AppUser.query.filter_by(email=email).one()
+    except NoResultFound:
+        raise ServerException(
+            title='Failed to Authenticate',
+            message='There was a problem authenticating, please try again.',
+            code=404)
+    else:
+        return _issue_session(user)
+
+
 @bp.route('/login', methods=['POST'])
 def login():
     """
@@ -223,24 +270,8 @@ def login():
                 UserEventLog(
                     username=user.username,
                     event_type=LogEventType.AUTHENTICATION.value).to_dict())
-            token_service = TokenService(current_app.config['JWT_SECRET'])
-            access_jwt = token_service.get_access_token(user.email)
-            refresh_jwt = token_service.get_refresh_token(user.email)
             user.failed_login_count = 0
-            return jsonify(JWTTokenResponse().dump({
-                'access_token': access_jwt,
-                'refresh_token': refresh_jwt,
-                'user': {
-                    'hash_id': user.hash_id,
-                    'email': user.email,
-                    'username': user.username,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'id': user.id,
-                    'reset_password': user.forced_password_reset,
-                    'roles': [u.name for u in user.roles],
-                },
-            }))
+            return _issue_session(user)
         else:
             user.failed_login_count += 1
             try:
