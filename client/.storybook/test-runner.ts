@@ -1,8 +1,11 @@
 import type { TestRunnerConfig } from '@storybook/test-runner';
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 
-const imageSnapshotsDir = path.join(__dirname, '..', '__image_snapshots__');
+// Storybook 10 loads this config as ESM, so __dirname is unavailable.
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const imageSnapshotsDir = path.join(dirname, '..', '__image_snapshots__');
 
 /**
  * Per-story image-snapshot options, set as

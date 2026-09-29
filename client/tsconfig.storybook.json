@@ -1,7 +1,19 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": []
+    "types": [],
+    "paths": {
+      // tsconfig.json's "paths" isn't merged in when a child config (this
+      // one) also declares "paths", so its mapping is repeated here.
+      "route-with-dynamic-outlets": ["../node_modules/route-with-dynamic-outlets/lib/src"],
+      // @storybook/angular has no root index.js/index.d.ts, only an
+      // "exports" map, which the inherited classic "node" moduleResolution
+      // can't see. This must point at the .js (not the .d.ts): Angular's
+      // webpack build resolves modules through these same tsconfig paths,
+      // so pointing at the type declarations would ship an empty runtime
+      // module. TypeScript still picks up the sibling index.d.ts for types.
+      "@storybook/angular": ["../node_modules/@storybook/angular/dist/index.js"]
+    }
   },
   "include": ["src/**/*.ts", ".storybook/preview.ts"],
   "exclude": ["src/test.ts", "src/**/*.spec.ts", "src/**/*.worker.ts"]

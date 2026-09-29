@@ -1,10 +1,12 @@
 import type { StorybookConfig } from '@storybook/angular';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// Storybook 10 loads this config as ESM, so __dirname is unavailable.
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: ['../src/app/**/*.stories.ts'],
-
-  addons: ['@storybook/addon-essentials'],
 
   // CI runs this non-interactively; the telemetry prompt would block it.
   core: {
@@ -33,7 +35,7 @@ const config: StorybookConfig = {
     webpackConfig.resolve = webpackConfig.resolve ?? {};
     webpackConfig.resolve.modules = [
       ...(webpackConfig.resolve.modules ?? []),
-      path.resolve(__dirname, '../src'),
+      path.resolve(dirname, '../src'),
     ];
 
     return webpackConfig;
