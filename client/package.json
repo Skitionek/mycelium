@@ -131,7 +131,7 @@
     "karma-viewport": "^1.0.9",
     "lint-staged": "^17.5.1",
     "ng-bullet": "^1.0.3",
-    "ng-mocks": "^14.17.3",
+    "ng-mocks": "^14.18.1",
     "playwright": "1.63.0",
     "protractor": "~7.0.0",
     "storybook": "10.6.0",
@@ -143,6 +143,10 @@
   "resolutions": {
     "@types/d3-array": "2.12.3",
     "codemirror/@codemirror/state": "6.5.2",
-    "@codemirror/state": "6.5.2"
+    "@codemirror/state": "6.5.2",
+    "jest": "30.4.2",
+    "jest-circus": "30.4.2",
+    "jest-runner": "30.4.2",
+    "jest-environment-node": "30.4.1"
   }
 }
