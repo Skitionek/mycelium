@@ -96,26 +96,26 @@ flask-sqlalchemy==3.1.1
     # via
     #   appserver
     #   flask-migrate
-google-api-core==2.38.0
+google-api-core==2.39.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.58.0
+google-auth==2.58.1
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
 google-cloud-core==2.7.0
     # via google-cloud-storage
-google-cloud-storage==3.14.1
+google-cloud-storage==3.15.0
     # via appserver
-google-crc32c==1.8.0
+google-crc32c==1.9.0
     # via
     #   google-cloud-storage
     #   google-resumable-media
 google-resumable-media==2.10.2
     # via google-cloud-storage
-googleapis-common-protos==1.75.3
+googleapis-common-protos==1.75.4
     # via google-api-core
 graphviz==0.21
     # via appserver
