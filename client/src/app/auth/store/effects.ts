@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 
 import { select, Store } from '@ngrx/store';
-import { from } from 'rxjs';
+import { EMPTY, from } from 'rxjs';
 import {
   catchError,
   exhaustMap,
@@ -171,10 +171,22 @@ export class AuthEffects {
     tap(([_, url]) => this.router.navigate([url])),
   ), {dispatch: false});
 
+  /**
+   * Before sending an unauthenticated user to the login page, try the
+   * dev-only auto-login endpoint. It only succeeds when the backend has
+   * DEV_AUTO_LOGIN_EMAIL configured (local/codespace dev stack); it 404s
+   * everywhere else, in which case we fall back to the normal login page.
+   */
   loginRedirect$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.loginRedirect),
-    tap(_ => this.router.navigate(['/login'])),
-  ), {dispatch: false});
+    exhaustMap(() => this.authService.devAutoLogin().pipe(
+      map(({user}) => AuthActions.loginSuccess({user})),
+      catchError(() => {
+        this.router.navigate(['/login']);
+        return EMPTY;
+      }),
+    )),
+  ));
 
   logout$ = createEffect(() => this.actions$.pipe(
     ofType(AuthActions.logout),
