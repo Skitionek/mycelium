@@ -143,6 +143,10 @@
   "resolutions": {
     "@types/d3-array": "2.12.3",
     "codemirror/@codemirror/state": "6.5.2",
-    "@codemirror/state": "6.5.2"
+    "@codemirror/state": "6.5.2",
+    "jest": "30.4.2",
+    "jest-circus": "30.4.2",
+    "jest-runner": "30.4.2",
+    "jest-environment-node": "30.4.1"
   }
 }
