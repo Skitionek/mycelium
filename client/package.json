@@ -78,7 +78,7 @@
     "lodash": "^4.18.1",
     "lodash-es": "^4.17.15",
     "molstar": "5.11.0",
-    "moment": "^2.30.1",
+    "moment": "^2.31.0",
     "ng2-charts": "^10.0.0",
     "ngrx-store-localstorage": "~16.0.0",
     "pdfjs-dist": "6.3.289",
