@@ -203,7 +203,7 @@ pyasn1-modules==0.4.2
     # via google-auth
 pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
-pyjwt==2.14.0
+pyjwt==2.15.0
     # via appserver
 pynacl==1.6.2
     # via paramiko
