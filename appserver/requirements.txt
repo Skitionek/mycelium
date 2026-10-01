@@ -260,7 +260,7 @@ svg-stack==0.1.0
     # via appserver
 timeflake==0.4.3
     # via appserver
-tqdm==4.67.3
+tqdm==4.70.1
     # via bioc
 typeguard==4.6.0
     # via marshmallow-dataclass
