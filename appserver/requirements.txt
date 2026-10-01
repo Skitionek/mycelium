@@ -293,7 +293,7 @@ werkzeug==3.1.9
     #   flask
     #   flask-cors
     #   sendgrid
-wrapt==2.1.2
+wrapt==2.5.0
     # via
     #   deprecated
     #   elastic-apm
