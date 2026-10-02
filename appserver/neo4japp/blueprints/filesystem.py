@@ -7,7 +7,6 @@ import urllib.request
 import zipfile
 from collections import defaultdict
 from datetime import datetime, timedelta
-from deepdiff import DeepDiff
 from flask import Blueprint, current_app, g, jsonify, make_response, request
 from flask.views import MethodView
 from marshmallow import EXCLUDE, ValidationError
@@ -1527,11 +1526,15 @@ class FileAnnotationHistoryView(FilesystemBaseView):
             for annotation in older:
                 self._add_change(changes, 'removed', annotation, type)
         elif older is not None and newer is not None:
-            ddiff = DeepDiff(older, newer, ignore_order=True)
-            for action in ('added', 'removed'):
-                for key, annotation in ddiff.get(f'iterable_item_{action}', {}).items():
-                    if key.startswith('root['):  # Only care about root changes right now
-                        self._add_change(changes, action, annotation, type)
+            older_keys = {json.dumps(annotation, sort_keys=True) for annotation in older}
+            newer_keys = {json.dumps(annotation, sort_keys=True) for annotation in newer}
+
+            for annotation in newer:
+                if json.dumps(annotation, sort_keys=True) not in older_keys:
+                    self._add_change(changes, 'added', annotation, type)
+            for annotation in older:
+                if json.dumps(annotation, sort_keys=True) not in newer_keys:
+                    self._add_change(changes, 'removed', annotation, type)
 
         return changes.values()
 

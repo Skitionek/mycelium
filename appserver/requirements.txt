@@ -12,7 +12,7 @@ azure-common==1.1.28
     #   azure-storage-file
 azure-core==1.41.0
     # via azure-storage-blob
-azure-storage-blob==12.30.2
+azure-storage-blob==12.30.3
     # via appserver
 azure-storage-common==2.1.0
     # via azure-storage-file
@@ -31,8 +31,6 @@ blinker==1.9.0
     #   elastic-apm
     #   flask
     #   sentry-sdk
-cachebox==6.2.7
-    # via deepdiff
 cachelib==0.14.0
     # via flask-caching
 certifi==2026.7.22
@@ -40,7 +38,7 @@ certifi==2026.7.22
     #   elastic-apm
     #   requests
     #   sentry-sdk
-cffi==2.0.0 ; platform_python_implementation != 'PyPy'
+cffi==2.1.1 ; platform_python_implementation != 'PyPy'
     # via
     #   cryptography
     #   pynacl
@@ -62,8 +60,6 @@ cryptography==50.0.1
     #   paramiko
     #   pdfminer-six
     #   sendgrid
-deepdiff==9.1.0
-    # via appserver
 deprecated==1.3.1
     # via redis
 docopt==0.6.2
@@ -100,26 +96,26 @@ flask-sqlalchemy==3.1.1
     # via
     #   appserver
     #   flask-migrate
-google-api-core==2.38.0
+google-api-core==2.39.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.58.0
+google-auth==2.58.1
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
 google-cloud-core==2.7.0
     # via google-cloud-storage
-google-cloud-storage==3.14.1
+google-cloud-storage==3.15.0
     # via appserver
-google-crc32c==1.8.0
+google-crc32c==1.9.0
     # via
     #   google-cloud-storage
     #   google-resumable-media
 google-resumable-media==2.10.2
     # via google-cloud-storage
-googleapis-common-protos==1.75.3
+googleapis-common-protos==1.75.4
     # via google-api-core
 graphviz==0.21
     # via appserver
@@ -127,7 +123,7 @@ greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or 
     # via sqlalchemy
 gunicorn==26.0.0
     # via appserver
-idna==3.19
+idna==3.20
     # via requests
 intervaltree==3.2.1
     # via
@@ -147,9 +143,9 @@ jsonlines==4.0.0
     # via bioc
 lmdb==2.2.1
     # via appserver
-lxml==6.1.0
+lxml==6.1.3
     # via bioc
-mako==1.3.12
+mako==1.4.3
     # via alembic
 markupsafe==3.0.3
     # via
@@ -180,8 +176,6 @@ numpy==2.2.6
     #   scipy
 openpyxl==3.1.5
     # via appserver
-orderly-set==5.5.0
-    # via deepdiff
 packaging==26.0
     # via
     #   gunicorn
@@ -209,7 +203,7 @@ pyasn1-modules==0.4.2
     # via google-auth
 pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
     # via cffi
-pyjwt==2.13.0
+pyjwt==2.15.0
     # via appserver
 pynacl==1.6.2
     # via paramiko
@@ -227,7 +221,7 @@ python-json-logger==4.2.0
     # via appserver
 python-magic==0.4.27
     # via appserver
-pytz==2026.1.post1
+pytz==2026.4
     # via
     #   neo4j
     #   pandas
@@ -266,7 +260,7 @@ svg-stack==0.1.0
     # via appserver
 timeflake==0.4.3
     # via appserver
-tqdm==4.67.3
+tqdm==4.70.1
     # via bioc
 typeguard==4.6.0
     # via marshmallow-dataclass
@@ -286,20 +280,20 @@ typing-inspect==0.9.0
     # via marshmallow-dataclass
 tzdata==2025.3
     # via pandas
-urllib3==2.7.0
+urllib3==2.8.0
     # via
     #   elastic-apm
     #   requests
     #   sentry-sdk
 webargs==8.7.1
     # via appserver
-werkzeug==3.1.8
+werkzeug==3.1.9
     # via
     #   appserver
     #   flask
     #   flask-cors
     #   sendgrid
-wrapt==2.1.2
+wrapt==2.5.0
     # via
     #   deprecated
     #   elastic-apm

@@ -47,6 +47,12 @@ class Config():
     WTF_CSRF_ENABLED = False
     SUPPORTED_LOCALES = ['en']
 
+    # Dev-only auto-login: when set, POST /auth/dev-auto-login issues a
+    # session for this user without credentials. Only set in
+    # docker/docker-compose.dev.yml - must stay unset in production,
+    # staging, qa and demo deployments.
+    DEV_AUTO_LOGIN_EMAIL = os.environ.get('DEV_AUTO_LOGIN_EMAIL')
+
 
 class Testing(Config):
     """Functional test configuration"""

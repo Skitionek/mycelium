@@ -45,8 +45,8 @@
     "@codemirror/lang-python": "6.2.1",
     "@codemirror/lang-xml": "6.1.0",
     "@codemirror/language": "6.12.4",
-    "@codemirror/state": "6.7.5",
-    "@codemirror/view": "6.43.12",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
     "@egjs/hammerjs": "^2.0.17",
     "@ng-bootstrap/ng-bootstrap": "~15.1.0",
     "@ngrx/effects": "~16.3.0",
@@ -100,11 +100,10 @@
     "@angular/language-service": "~16.2.0",
     "@babel/core": "^8.0.6",
     "@compodoc/compodoc": "^2.0.0",
-    "@fontsource/ibm-plex-sans": "5.1.1",
-    "@fontsource/inter": "5.1.1",
-    "@fontsource/roboto": "5.1.1",
-    "@fortawesome/fontawesome-free": "6.7.2",
-    "@storybook/addon-essentials": "8.6.18",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/roboto": "5.3.0",
+    "@fortawesome/fontawesome-free": "7.3.1",
     "@storybook/angular": "10.6.0",
     "@storybook/test-runner": "0.24.5",
     "@types/color": "^4.2.1",
@@ -132,7 +131,7 @@
     "karma-viewport": "^1.0.9",
     "lint-staged": "^17.5.1",
     "ng-bullet": "^1.0.3",
-    "ng-mocks": "^14.17.3",
+    "ng-mocks": "^14.18.1",
     "playwright": "1.63.0",
     "protractor": "~7.0.0",
     "storybook": "10.6.0",
@@ -144,6 +143,10 @@
   "resolutions": {
     "@types/d3-array": "2.12.3",
     "codemirror/@codemirror/state": "6.5.2",
-    "@codemirror/state": "6.5.2"
+    "@codemirror/state": "6.5.2",
+    "jest": "30.4.2",
+    "jest-circus": "30.4.2",
+    "jest-runner": "30.4.2",
+    "jest-environment-node": "30.4.1"
   }
 }
