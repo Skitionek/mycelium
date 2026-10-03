@@ -81,9 +81,10 @@ This will take a few minutes to complete, after which you can start using Myceli
 You can log in using the default admin user `admin@example.com` and password `password`.
 
 `dev-db-setup` is destructive — it drops every table and enum in the `public`
-schema before migrating. It covers PostgreSQL and Elasticsearch only; Neo4j
-runs as a separate stack, started and migrated with
-`make -C graph-db dev-up migrate`.
+schema before migrating. It covers PostgreSQL and Elasticsearch only. Neo4j
+comes up with the same stack, but this script does not touch it: its
+constraints and indexes come from the Liquibase migrator under `graph-db/`,
+which is not currently wired into the main compose project.
 
 ## Speed up Codespaces startup with prebuilds
 
