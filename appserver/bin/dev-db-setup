@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
+#
+# Reset and migrate the development PostgreSQL database, then rebuild the
+# Elasticsearch search index. Run this inside the appserver container.
+#
+# Destructive: `flask drop_tables` drops every table and enum in the public
+# schema without prompting.
+#
+# This covers PostgreSQL and Elasticsearch only. Neo4j runs in the same
+# compose stack but this script does not touch it: its constraints and
+# indexes come from the Liquibase migrator under `graph-db/`, which is not
+# wired into the main compose project.
 
-echo "Cleaning database"
+set -euo pipefail
+
+echo "Dropping all tables and enums"
 flask drop_tables
-echo "Upgrading PostgreSQL"
+
+echo "Running PostgreSQL migrations"
 flask db upgrade --x-arg data_migrate="True"
-# echo "Seeding PostgreSQL"
-echo "Seed appserver using docker-compose exec appserver flask seed"
-echo "Setting up neo4j indexes"
-# Sets up the indexes for neo4j
-echo "Set up the indexes manually by running"
-# Sets up the search index
-echo "Configuring search index"
+
+echo "Rebuilding the Elasticsearch search index"
 flask reset-search-index
+
+echo
+echo "Done. Load the fixture data, including the default admin user, with:"
+echo "  flask seed"
