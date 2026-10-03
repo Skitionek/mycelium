@@ -16,7 +16,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from webargs.flaskparser import parser
-from werkzeug.exceptions import UnprocessableEntity
+from werkzeug.exceptions import HTTPException, UnprocessableEntity
 from werkzeug.utils import find_modules, import_string
 
 from .constants import LogEventType
@@ -184,12 +184,7 @@ def create_app(name='neo4japp', config='config.Config'):
     app.json_provider_class = CustomJSONProvider
     app.json = CustomJSONProvider(app)
 
-    app.register_error_handler(ValidationError, partial(handle_validation_error, 400))
-    app.register_error_handler(UnprocessableEntity, partial(handle_webargs_error, 400))
-    app.register_error_handler(ServerException, handle_error)
-    app.register_error_handler(BrokenPipeError, handle_error)
-    app.register_error_handler(ServiceUnavailable, handle_error)
-    app.register_error_handler(Exception, partial(handle_generic_error, 500))
+    register_error_handlers(app)
 
     # Initialize Elastic APM if configured
     if os.getenv('ELASTIC_APM_SERVER_URL'):
@@ -236,6 +231,61 @@ def handle_error(ex):
         )
 
     return jsonify(ErrorResponseSchema().dump(ex)), ex.code
+
+
+def register_error_handlers(app):
+    """
+    Map exception types to the API's error responses.
+
+    Order of registration does not matter -- Flask picks a handler by walking
+    the raised exception's MRO and taking the nearest match. That is why the
+    HTTPException entry is load-bearing: without it, every werkzeug error (an
+    unmatched URL, a method the route does not allow, an oversized body) walks
+    past HTTPException to the Exception catch-all and gets relabelled 500.
+    """
+    app.register_error_handler(ValidationError, partial(handle_validation_error, 400))
+    app.register_error_handler(UnprocessableEntity, partial(handle_webargs_error, 400))
+    app.register_error_handler(ServerException, handle_error)
+    app.register_error_handler(BrokenPipeError, handle_error)
+    app.register_error_handler(ServiceUnavailable, handle_error)
+    app.register_error_handler(HTTPException, handle_http_error)
+    app.register_error_handler(Exception, partial(handle_generic_error, 500))
+
+
+def handle_http_error(ex: HTTPException):
+    """
+    Report a werkzeug HTTP error under its own status code.
+
+    These are the errors Flask raises before any view runs -- an unmatched
+    URL, a method the route does not allow, a body over the size limit. They
+    already carry the correct status and a safe description, so the only work
+    here is to render them in the API's error shape instead of letting the
+    Exception catch-all relabel them 500.
+    """
+    current_user = g.current_user.username if g.get('current_user') else 'anonymous'
+    transaction_id = request.headers.get('X-Transaction-Id') or ''
+    current_app.logger.info(
+        f'Request caused an HTTP exception <{type(ex)}>',
+        extra={
+            **{'to_sentry': False},
+            **ErrorLog(
+                error_name=f'{type(ex)}',
+                expected=True,
+                event_type=LogEventType.SENTRY_HANDLED.value,
+                transaction_id=transaction_id,
+                username=current_user,
+            ).to_dict(),
+        },
+    )
+
+    newex = ServerException(
+        title=ex.name,
+        message=ex.description,
+        code=ex.code or 500)
+    newex.version = GITHUB_HASH
+    newex.transaction_id = transaction_id
+
+    return jsonify(ErrorResponseSchema().dump(newex)), newex.code
 
 
 def handle_generic_error(code: int, ex: Exception):

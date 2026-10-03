@@ -254,10 +254,13 @@ def login():
     try:
         user = AppUser.query.filter_by(email=data.get('email')).one()
     except NoResultFound:
+        # Deliberately identical to the wrong-password response below, so the
+        # two cases stay indistinguishable and the endpoint cannot be used to
+        # enumerate registered accounts.
         raise ServerException(
             title='Failed to Authenticate',
             message='There was a problem authenticating, please try again.',
-            code=404)
+            code=401)
     else:
         if user.failed_login_count >= MAX_ALLOWED_LOGIN_FAILURES:
             raise ServerException(
@@ -284,4 +287,4 @@ def login():
             raise ServerException(
                 title='Failed to Authenticate',
                 message='There was a problem authenticating, please try again.',
-                code=404)
+                code=401)

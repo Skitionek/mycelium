@@ -258,7 +258,8 @@ def reset_password(email: str):
         )
         raise ServerException(
             title='Failed to authenticate',
-            message=f'A problem occurred validating email {email} for password reset.'
+            message=f'A problem occurred validating email {email} for password reset.',
+            code=404
         )
 
     current_app.logger.info(
