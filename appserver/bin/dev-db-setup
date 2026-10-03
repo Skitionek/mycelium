@@ -6,9 +6,10 @@
 # Destructive: `flask drop_tables` drops every table and enum in the public
 # schema without prompting.
 #
-# This covers PostgreSQL and Elasticsearch only. Neo4j runs as a separate
-# stack and its constraints and indexes are created by the Liquibase
-# migrator — see `graph-db/Makefile` (`make -C graph-db dev-up migrate`).
+# This covers PostgreSQL and Elasticsearch only. Neo4j runs in the same
+# compose stack but this script does not touch it: its constraints and
+# indexes come from the Liquibase migrator under `graph-db/`, which is not
+# wired into the main compose project.
 
 set -euo pipefail
 
