@@ -1,9 +1,11 @@
 # ![Mycelium](./client/src/assets/icons/mycelium-logo.svg) Mycelium
+
 *Mycelium* is a high-performance knowledge discovery platform designed to map the intricate networks of biological data. Just as mycelium forms the underlying nervous system of the natural world, this platform unifies disparate datasets into a cohesive, navigable graph architecture—empowering researchers to uncover hidden relationships and accelerate the pace of scientific insight.
 
 [![Open in Codespaces (Demo)](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/Skitionek/mycelium?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 
 Roadmap:
+
 + [x] Zero-configuration to start developing
 + [x] Provide alternative tab/panel implementation
 + [ ] Correct sqlachemy models
@@ -64,15 +66,24 @@ cd Mycelium
 
 make up
 ```
-Shell into appserver and run:
+
+Then set up the development database from inside the appserver container. The
+first script resets PostgreSQL and rebuilds the Elasticsearch index; the second
+loads the fixture data, including the default admin user:
+
 ```shell
-./bin/dev-db-setup
-flask seed
+make exec c=appserver cmd="./bin/dev-db-setup"
+make exec c=appserver cmd="flask seed"
 ```
 
 This will take a few minutes to complete, after which you can start using Mycelium by pointing your browser to [http://localhost:8080](http://localhost:8080).
 
 You can log in using the default admin user `admin@example.com` and password `password`.
+
+`dev-db-setup` is destructive — it drops every table and enum in the `public`
+schema before migrating. It covers PostgreSQL and Elasticsearch only; Neo4j
+runs as a separate stack, started and migrated with
+`make -C graph-db dev-up migrate`.
 
 ## Speed up Codespaces startup with prebuilds
 
