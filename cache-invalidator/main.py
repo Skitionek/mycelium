@@ -84,7 +84,7 @@ def get_kg_statistics():
     graph = neo4j_driver.session()
 
     logger.debug('Kg Statistics Query start...')
-    results = graph.read_transaction(lambda tx: tx.run('CALL db.labels()').data())
+    results = graph.execute_read(lambda tx: tx.run('CALL db.labels()').data())
     logger.debug('Kg Statistics Query finished')
 
     domain_labels = []
@@ -101,7 +101,7 @@ def get_kg_statistics():
         for entity in entity_labels:
             query = f'MATCH (:`{domain}`:`{entity}`) RETURN count(*) AS count'
             logger.debug(f'Neo4j query: {query}')
-            result = graph.read_transaction(lambda tx: tx.run(query).data())
+            result = graph.execute_read(lambda tx: tx.run(query).data())
             count = result[0]['count']
             if count != 0:
                 statistics[domain.replace('db_', '', 1)][entity] = count
@@ -128,7 +128,7 @@ def precalculateGO():
             id=organism['id'],
         ).data()
 
-    organisms = graph.read_transaction(
+    organisms = graph.execute_read(
         lambda tx: tx.run(
             '''
             MATCH (t:Taxonomy)-[:HAS_TAXONOMY]-(:Gene)-[:GO_LINK]-(go:db_GO)
@@ -145,7 +145,7 @@ def precalculateGO():
         logger.debug(f'Caching data for organism: {organism}')
         cache_data(
             f'GO_for_{organism["id"]}',
-            graph.read_transaction(fetch_organism_go_query, organism),
+            graph.execute_read(fetch_organism_go_query, organism),
         )
     graph.close()
 
