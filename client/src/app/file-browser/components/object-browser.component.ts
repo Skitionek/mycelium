@@ -201,7 +201,7 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
     }
 
     return this.actions.openDeleteDialog(targets).then(() => {
-      this.snackBar.open(`Deletion successful.`, 'Close', {
+      this.snackBar.open('Deletion successful.', 'Close', {
         duration: 5000,
       });
       this.load(this.hashId);

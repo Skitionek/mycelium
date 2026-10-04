@@ -200,23 +200,23 @@ export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
   }
 
   journal(doc) {
-    const journal = doc.passages.find(p => p.infons[`journal`]);
+    const journal = doc.passages.find(p => p.infons['journal']);
     if (journal) {
-      return journal.infons[`journal`];
+      return journal.infons['journal'];
     }
   }
 
   authors(doc) {
-    const authors = doc.passages.find(p => p.infons[`authors`]);
+    const authors = doc.passages.find(p => p.infons['authors']);
     if (authors) {
-      return authors.infons[`authors`];
+      return authors.infons['authors'];
     }
   }
 
   year(doc) {
-    const year = doc.passages.find(p => p.infons[`year`]);
+    const year = doc.passages.find(p => p.infons['year']);
     if (year) {
-      return year.infons[`year`];
+      return year.infons['year'];
     }
   }
 
@@ -568,13 +568,13 @@ export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
       } as Partial<UniversalGraphNode>));
       return;
     }
-    const id = ((event.target as any).attributes[`identifier`] || {}).nodeValue;
-    const annType = ((event.target as any).attributes[`annType`] || {}).nodeValue;
+    const id = ((event.target as any).attributes['identifier'] || {}).nodeValue;
+    const annType = ((event.target as any).attributes['annType'] || {}).nodeValue;
     const src = this.getSource({
       identifier: id,
       type: annType
     });
-    const offset = ((event.target as any).attributes[`offset`] || {}).nodeValue;
+    const offset = ((event.target as any).attributes['offset'] || {}).nodeValue;
     const search = [];
     const hyperlinks = [];
     const url = src;

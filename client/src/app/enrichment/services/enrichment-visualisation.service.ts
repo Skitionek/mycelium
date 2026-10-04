@@ -91,7 +91,7 @@ export class EnrichmentVisualisationService {
       return o;
     }, []);
     return this.http.post<{ result: [] }>(
-      `/api/enrichment-visualisation/enrich-with-go-terms`,
+      '/api/enrichment-visualisation/enrich-with-go-terms',
       {geneNames, organism: `${taxID}/${organism}`, analysis},
       this.apiService.getHttpOptions(true),
     ).pipe(

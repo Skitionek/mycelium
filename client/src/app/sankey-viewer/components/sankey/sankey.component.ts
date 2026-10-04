@@ -352,7 +352,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.linkClicked.emit(data);
     this.clipboard.writeToClipboard(data.path).then(_ =>
         this.snackBar.open(
-          `Path copied to clipboard`,
+          'Path copied to clipboard',
           undefined,
           {duration: 500},
         ),

@@ -19,7 +19,7 @@ export class AccountsService {
 
   search(options: AccountSearchRequest): Observable<ModelList<AppUser>> {
     return this.http.post<ResultList<AppUser>>(
-      `/api/accounts/search`,
+      '/api/accounts/search',
       options,
       this.apiService.getHttpOptions(true),
     ).pipe(
