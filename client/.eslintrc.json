@@ -55,21 +55,32 @@
           "error",
           { "ignoreParameters": true }
         ],
-        "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true }],
+        "@typescript-eslint/quotes": [
+          "error",
+          "single",
+          { "avoidEscape": true }
+        ],
         "import/no-duplicates": "error",
         "import/order": [
           "error",
           {
             "groups": ["builtin", "external", "internal"],
             "pathGroups": [
-              { "pattern": "@angular/**", "group": "external", "position": "before" },
+              {
+                "pattern": "@angular/**",
+                "group": "external",
+                "position": "before"
+              },
               { "pattern": "app/**", "group": "internal" }
             ],
             "pathGroupsExcludedImportTypes": ["@angular/**"],
             "newlines-between": "always"
           }
         ],
-        "no-console": ["error", { "allow": ["log", "warn", "error", "dir", "assert"] }],
+        "no-console": [
+          "error",
+          { "allow": ["log", "warn", "error", "dir", "assert"] }
+        ],
         "no-restricted-imports": ["error", { "paths": ["rxjs/Rx"] }],
         "quote-props": ["error", "as-needed"],
 
