@@ -48,7 +48,7 @@ export class AnnotationsService {
   generateAnnotations(hashIds: string[], request: PDFAnnotationGenerationRequest = {}):
     Observable<ResultMapping<AnnotationGenerationResultData>> {
     return this.http.post<ResultMapping<AnnotationGenerationResultData>>(
-      `/api/filesystem/annotations/generate`, {
+      '/api/filesystem/annotations/generate', {
         hashIds,
         ...request,
       },

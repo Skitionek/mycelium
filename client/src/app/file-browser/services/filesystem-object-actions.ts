@@ -17,6 +17,7 @@ import { openDownloadForBlob } from 'app/shared/utils/files';
 import { ResultMapping } from 'app/shared/schemas/common';
 import { Progress } from 'app/interfaces/common-dialog.interface';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
+import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 
 import { ObjectDeleteDialogComponent } from '../components/dialog/object-delete-dialog.component';
 import { FilesystemObject } from '../models/filesystem-object';
@@ -34,7 +35,6 @@ import { AnnotationsService } from './annotations.service';
 import { ObjectCreationService } from './object-creation.service';
 import { AnnotationGenerationResultData } from '../schema';
 import { ObjectReannotateResultsDialogComponent } from '../components/dialog/object-reannotate-results-dialog.component';
-import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 
 export interface OpenInOption {
   label: string;

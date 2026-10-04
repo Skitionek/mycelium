@@ -20,6 +20,8 @@ import { ComponentPortal, DomPortalOutlet } from '@angular/cdk/portal';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { escape, isNil, uniqueId, defer, forEach } from 'lodash-es';
 import { Observable, Subject, Subscription } from 'rxjs';
+import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 
 import { DatabaseLink, EntityType, ENTITY_TYPE_MAP } from 'app/shared/annotation-types';
 import { SEARCH_LINKS } from 'app/shared/links';
@@ -29,8 +31,7 @@ import { openModal } from 'app/shared/utils/modals';
 import { IS_MAC } from 'app/shared/utils/platform';
 import { InternalSearchService } from 'app/shared/services/internal-search.service';
 
-import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
+
 import { AddedAnnotationExclusion, Annotation, Location, Meta, Rect, RemovedAnnotationExclusion, } from './annotation-type';
 import { AnnotationEditDialogComponent } from './components/annotation-edit-dialog.component';
 import { AnnotationExcludeDialogComponent } from './components/annotation-exclude-dialog.component';
@@ -40,7 +41,7 @@ import { PDFSource, PDFProgressData, PDFPageRenderEvent, PDFPageView, TextLayerB
 import { AnnotationToolbarComponent } from './components/annotation-toolbar.component';
 import { convertToViewportRectangle } from './utils/viewport-utils';
 
-declare var bootstrap: any;
+declare let bootstrap: any;
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -431,7 +432,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     base.push(an.meta.idType && an.meta.idType !== '' ? `Data Source: ${escape(an.meta.idType)}` : 'Data Source: None');
 
     if (an.meta.isCustom) {
-      base.push(`User generated annotation`);
+      base.push('User generated annotation');
     }
 
     let htmlLinks = '<div>';
@@ -448,7 +449,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         htmlLinks += `<a target="_blank" href="${escape(toValidLink(url))}">${escape(label)}</a><br>`;
       }
 
-      htmlLinks += `</div></div>`;
+      htmlLinks += '</div></div>';
     }
 
     // search links
@@ -470,7 +471,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       const link = an.meta.links[domain.toLowerCase()] || url.replace(/%s/, encodeURIComponent(an.meta.allText));
       htmlLinks += `<a target="_blank" href="${escape(link)}">${escape(domain.replace('_', ' '))}</a><br>`;
     }
-    htmlLinks += `</div></div>`;
+    htmlLinks += '</div></div>';
 
     // search internal links
     const searchInternalLinkCollapseTargetId = uniqueId('pdf-tooltip-internal-collapse-target');
@@ -492,7 +493,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     htmlLinks += `<a target="_blank" href="${contLink}">File Content</a><br>`;
     const mapLink = this.internalSearch.getFileContentLink(an.meta.allText, {types: ['map']});
     htmlLinks += `<a target="_blank" href="${mapLink}">Map Content</a><br>`;
-    htmlLinks += `</div></div>`;
+    htmlLinks += '</div></div>';
 
     base.push(htmlLinks);
     base = [base.join('<br>')];
@@ -586,16 +587,16 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       }
       this._focusedTextLayer = undefined;
     }
-  };
+  }
 
   private get focusedTextLayer() {
     return this._focusedTextLayer;
-  };
+  }
 
   @HostListener('window:mousedown', ['$event'])
   mouseDown(event: MouseEvent) {
-    let target = event.target as any;
-    let parent = this.getClosestTextLayer(target);
+    const target = event.target as any;
+    const parent = this.getClosestTextLayer(target);
     if (parent) {
       this.focusedTextLayer = parent;
       // coming from pdf-viewer
@@ -645,7 +646,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     this.selection = null;
     this.firstAnnotationRange = null;
     // taking parent as to not start with Text node which does not have 'closest' method
-    let pageNumber = this.getClosestPageNumber(event.target as Node);
+    const pageNumber = this.getClosestPageNumber(event.target as Node);
     // not selecting outside pdf viewer
     if (pageNumber > -1) {
       this.selecting = true;
@@ -699,7 +700,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
    */
   cloneRangeContents(range: Range) {
     const {startOffset, endOffset} = range;
-    let rangeDocumentFragment = range.cloneContents();
+    const rangeDocumentFragment = range.cloneContents();
     // if selection is within singular span and not empty
     if (!rangeDocumentFragment.children.length && !range.collapsed) {
       const clonedElement = range.commonAncestorContainer.parentElement.cloneNode(true) as HTMLElement;
@@ -759,7 +760,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
    * @param event - event to decorate
    */
   setDragImage(node, event) {
-    let draggedElementRef = IS_MAC ? this.selectionDragContainer :
+    const draggedElementRef = IS_MAC ? this.selectionDragContainer :
       this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
 
     draggedElementRef.classList.add('dragged');
@@ -792,7 +793,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   @HostListener('dragend', ['$event'])
   dragEnd(event: DragEvent) {
-    let page = this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
+    const page = this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
     page.classList.remove('dragged');
   }
 
@@ -1127,7 +1128,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
         this.addHighlightItem(firstPageNumber, firstAnnotation.rects[0]);
       } else {
-        this.snackBar.open(`The annotation could not be found in the document.`,
+        this.snackBar.open('The annotation could not be found in the document.',
           'Close', {duration: 5000});
       }
     }
@@ -1176,7 +1177,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     const height = Math.abs(bounds[1] - bounds[3]);
     const overlayContainer = pdfPageView.div;
     const overlayDiv = document.createElement('div');
-    overlayDiv.setAttribute('style', `border: 2px solid red; position:absolute;` +
+    overlayDiv.setAttribute('style', 'border: 2px solid red; position:absolute;' +
       'left:' + (left - 4) + 'px;top:' + (top - 4) + 'px;width:' + (width + 8) + 'px;height:' + (height + 8) + 'px;');
     overlayContainer.appendChild(overlayDiv);
     overlayDiv.scrollIntoView({block: 'center'});
@@ -1237,8 +1238,8 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   @HostListener('keydown.control.c')
   @HostListener('keydown.meta.c')
   copySelectedText() {
-    let listener = (e: ClipboardEvent) => {
-      let clipboard = e.clipboardData || window['clipboardData'];
+    const listener = (e: ClipboardEvent) => {
+      const clipboard = e.clipboardData || window['clipboardData'];
       clipboard.setData('text', this.allText);
       e.preventDefault();
     };

@@ -80,7 +80,7 @@ export class RecentFileHashesService implements OnDestroy {
         if (Array.isArray(value)) {
           return value.filter(v => typeof v === 'string' || v instanceof String);
         } else {
-          this.errorHandler.logError(new Error(`Recent files list has been corrupted - refreshing`));
+          this.errorHandler.logError(new Error('Recent files list has been corrupted - refreshing'));
         }
       }
     } catch (e) {

@@ -17,6 +17,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+
 import { PDFProgressData, PDFViewerParams, PDFSource } from './interfaces';
 import { createEventBus } from '../utils/event-bus-utils';
 import { FindState, RenderTextMode } from '../utils/constants';
@@ -59,7 +60,7 @@ export class PdfViewerComponent
     this.internalCMapsUrl = cMapsUrl;
   }
 
-  @Input('page')
+  @Input()
   set page(page) {
     page = parseInt(page, 10) || 1;
     const orginalPage = page;
@@ -101,7 +102,7 @@ export class PdfViewerComponent
     this.internalStickToPage = value;
   }
 
-  @Input('zoom')
+  @Input()
   set zoom(value: number) {
     if (value <= 0) {
       return;
@@ -114,7 +115,7 @@ export class PdfViewerComponent
     return this.internalZoom;
   }
 
-  @Input('rotation')
+  @Input()
   set rotation(value: number) {
     if (!(typeof value === 'number' && value % 90 === 0)) {
       console.warn('Invalid pages rotation angle.');
@@ -129,7 +130,7 @@ export class PdfViewerComponent
     this.internalExternalLinkTarget = value;
   }
 
-  @Input('autoresize')
+  @Input()
   set autoresize(value: boolean) {
     this.internalCanAutoResize = Boolean(value);
   }
