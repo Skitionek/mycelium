@@ -64,7 +64,7 @@ export class AnnotationsService {
         + 'on the folder to annotate them again.'));
     }
     return this.http.post<ResultMapping<AnnotationGenerationResultData>>(
-      `/api/filesystem/annotations/generate`, {
+      '/api/filesystem/annotations/generate', {
         hashIds,
         ...request,
       },

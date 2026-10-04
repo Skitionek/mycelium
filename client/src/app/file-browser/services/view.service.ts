@@ -29,7 +29,7 @@ export class ViewService {
    */
   create(params: object): Observable<string> {
     return this.http.post(
-      `/api/view/`, params,
+      '/api/view/', params,
       {
         ...this.apiService.getHttpOptions(true),
         responseType: 'text' as const

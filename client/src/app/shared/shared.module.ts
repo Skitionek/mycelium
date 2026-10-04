@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 
 import { EffectsModule } from '@ngrx/effects';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { AngularSplitModule } from 'angular-split';
 
 import { AngularSplitModule } from 'angular-split';
 import { LinksPanelComponent } from 'app/drawing-tool/components/links-panel.component';

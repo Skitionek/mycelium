@@ -7,10 +7,10 @@ export class HighlightTagHandler extends TagHandler {
   tagName = 'highlight';
 
   start(element: Element): string {
-    return `<span class="highlight-term">`;
+    return '<span class="highlight-term">';
   }
 
   end(element: Element): string {
-    return `</span>`;
+    return '</span>';
   }
 }

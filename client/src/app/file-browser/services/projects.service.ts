@@ -1,3 +1,5 @@
+import { encode } from 'punycode';
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
@@ -36,7 +38,7 @@ export class ProjectsService {
 
   list(options?: PaginatedRequestOptions): Observable<ProjectList> {
     return this.http.get<ResultList<ProjectData>>(
-      `/api/projects/projects`, {
+      '/api/projects/projects', {
         ...this.apiService.getHttpOptions(true),
         params: serializePaginatedParams(options, false),
       },
@@ -53,7 +55,7 @@ export class ProjectsService {
 
   search(options: ProjectSearchRequest): Observable<ProjectList> {
     return this.http.post<ResultList<ProjectData>>(
-      `/api/projects/search`,
+      '/api/projects/search',
       options,
       this.apiService.getHttpOptions(true),
     ).pipe(
@@ -69,7 +71,7 @@ export class ProjectsService {
 
   create(request: ProjectCreateRequest) {
     return this.http.post<SingleResult<ProjectData>>(
-      `/api/projects/projects`,
+      '/api/projects/projects',
       request,
       this.apiService.getHttpOptions(true),
     ).pipe(
@@ -90,7 +92,7 @@ export class ProjectsService {
        updateWithLatest?: { [hashId: string]: ProjectImpl }):
     Observable<{ [hashId: string]: ProjectImpl }> {
     return this.http.patch<ResultMapping<ProjectData>>(
-      `/api/projects/projects`, {
+      '/api/projects/projects', {
         ...changes,
         hashIds,
       }, this.apiService.getHttpOptions(true),

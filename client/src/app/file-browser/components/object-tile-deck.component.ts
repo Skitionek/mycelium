@@ -3,6 +3,7 @@ import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { element } from 'protractor';
 
 import { WorkspaceManager } from 'app/shared/workspace-manager';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';

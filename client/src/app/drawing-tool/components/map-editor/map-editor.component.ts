@@ -144,7 +144,7 @@ export class MapEditorComponent extends MapViewComponent<UniversalGraph | undefi
         container: this.modalContainer.nativeElement,
       }).result.then(() => {
         this.graphCanvas.execute(new KnowledgeMapRestore(
-          `Restore map to backup`,
+          'Restore map to backup',
           this.graphCanvas,
           backup,
           cloneDeep(this.graphCanvas.getGraph()),

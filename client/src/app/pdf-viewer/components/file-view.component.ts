@@ -276,7 +276,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     dialogRef.componentInstance.message = 'Do you want to annotate the rest of the document with this term as well?';
     dialogRef.result.then((annotateAll: boolean) => {
       const progressDialogRef = this.progressDialog.display({
-        title: `Adding Annotations`,
+        title: 'Adding Annotations',
         progressObservable: new BehaviorSubject<Progress>(new Progress({
           status: 'Adding annotations to the file...',
         })),
@@ -325,7 +325,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
             this.snackBar.open('Removal completed', 'Close', {duration: 10000});
           },
           err => {
-            this.snackBar.open(`Error: removal failed`, 'Close', {duration: 10000});
+            this.snackBar.open('Error: removal failed', 'Close', {duration: 10000});
           },
         );
     }, () => {

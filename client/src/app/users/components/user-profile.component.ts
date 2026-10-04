@@ -76,7 +76,7 @@ export class UserProfileComponent implements OnInit  {
 
   submit() {
     const progressDialogRef = this.progressDialog.display({
-            title: `Updating User`,
+            title: 'Updating User',
             progressObservable: new BehaviorSubject<Progress>(new Progress({
               status: 'Updating user...',
             })),
@@ -86,7 +86,7 @@ export class UserProfileComponent implements OnInit  {
     if (Object.keys(updatedUser).length === 1) {
       progressDialogRef.close();
       this.snackBar.open(
-            `Provided data is either empty of unmodified!`,
+            'Provided data is either empty of unmodified!',
             'close',
             {duration: 5000},
       );
@@ -101,7 +101,7 @@ export class UserProfileComponent implements OnInit  {
             {user: this.user},
           ));
         this.snackBar.open(
-          `You data has been updated successfully!`,
+          'You data has been updated successfully!',
           'close',
           {duration: 5000},
         );
