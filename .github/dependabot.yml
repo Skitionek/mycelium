@@ -239,6 +239,16 @@ updates:
         patterns:
           - "@fontsource/*"
           - "@fortawesome/*"
+      # @angular-eslint majors track the Angular major and pin the
+      # @typescript-eslint range they support, which in turn pins the eslint
+      # major. Bumping any of these alone produces a peer-dependency conflict
+      # or silently stops loading the Angular rules.
+      eslint:
+        patterns:
+          - eslint
+          - "@angular-eslint/*"
+          - "@typescript-eslint/*"
+          - eslint-plugin-import
     ignore:
       # Fix angular version until refactor is done. The rest of the `angular`
       # group is ignored too, otherwise the CLI/devkit/TypeScript halves would
