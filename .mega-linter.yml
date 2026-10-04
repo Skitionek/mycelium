@@ -6,9 +6,12 @@ APPLY_FIXES: all
 APPLY_FIXES_EVENT: pull_request
 APPLY_FIXES_MODE: pull_request
 
-# Linters to enable (subset relevant to this repo: Python + TypeScript/JavaScript + misc)
-# TYPESCRIPT_ES / JAVASCRIPT_ES are disabled: project uses tslint (via fast-lint); eslint
-# was misconfigured here with a tslint.json which is not a valid eslint config.
+# Linters to enable (subset relevant to this repo: Python + misc)
+# TYPESCRIPT_ES / JAVASCRIPT_ES stay disabled, but no longer because the config is
+# broken: client/ is linted by eslint in the `Client Lint` job of tests.yml instead.
+# That has to run there rather than here, because the config loads @angular-eslint
+# plugins and a type-aware parser pointed at client/tsconfig.json, none of which
+# MegaLinter's container can resolve without the project's own node_modules.
 # PYTHON_MYPY is disabled: cross-package duplicate-module-name issue when scanning
 # appserver/ and statistical-enrichment/ together. Type checking runs via appserver/setup.cfg.
 ENABLE_LINTERS:
