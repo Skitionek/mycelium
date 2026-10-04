@@ -54,6 +54,110 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
 
+  appserver-database-tests:
+    name: Appserver Database Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      neo4j:
+        image: neo4j:4.4-community
+        env:
+          NEO4J_AUTH: neo4j/password
+        options: >-
+          --health-cmd "wget -q -O - http://localhost:7474 || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+        ports:
+          - 7687:7687
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.10'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        working-directory: appserver
+        run: uv pip install --system -r requirements.txt -r requirements-dev.txt
+
+      # Solr cannot be a `services:` container: the `file` core is created by
+      # the image's `solr-precreate` command, and service containers cannot
+      # override the command. Without that core the suite fails immediately
+      # with 87 connection errors against /solr/file/update.
+      - name: Start Solr with the file core
+        run: |
+          docker run -d --name solr -p 8983:8983 solr:9 solr-precreate file
+          for _ in $(seq 1 30); do
+            if curl -sf "http://localhost:8983/solr/admin/cores?action=STATUS" >/dev/null; then
+              echo "solr ready"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "solr did not become ready" >&2
+          exit 1
+
+      # The suite expects the schema to exist; nothing in the fixtures creates
+      # it.
+      - name: Create the schema
+        working-directory: appserver
+        run: flask db upgrade
+        env:
+          FLASK_APP: app.py
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+
+      # Three files are excluded whole rather than test by test. They are not
+      # flaky and not newly broken: the `session` fixture's rollback does not
+      # hold, so after the first test in a file commits, every later test in it
+      # collides with the leaked rows (#619). Which individual tests fail is
+      # therefore an artefact of collection order, and pinning those names here
+      # would encode that ordering. Excluding the files keeps this honest and
+      # stable; drop these three lines when #619 is fixed.
+      #
+      # tests/api is not run here at all -- it hangs indefinitely (#620).
+      - name: Run database tests
+        working-directory: appserver
+        run: |
+          pytest tests/database -v \
+            --ignore tests/database/services/annotations/manual_annotations \
+            --ignore tests/database/services/auth_test.py \
+            --ignore tests/database/services/projects_test.py
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+          NEO4J_HOST: localhost
+          NEO4J_PORT: 7687
+          NEO4J_AUTH: neo4j/password
+          SOLR_URL: http://localhost:8983/solr
+
   client-tests:
     name: Client Tests
     runs-on: ubuntu-latest
