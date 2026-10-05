@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 import jwt
 import sentry_sdk
 
@@ -11,7 +14,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from typing_extensions import TypedDict
 
 from neo4japp.database import db
-from neo4japp.constants import LogEventType, MAX_ALLOWED_LOGIN_FAILURES
+from neo4japp.constants import (
+    LogEventType,
+    MAX_ALLOWED_LOGIN_FAILURES,
+    PASSWORD_RESET_TOKEN_TTL_MINUTES,
+)
 from neo4japp.exceptions import (
     JWTTokenException,
     JWTAuthTokenException,
@@ -32,6 +39,79 @@ JWTToken = TypedDict(
 
 JWTResp = TypedDict(
     'JWTResp', {'sub': str, 'iat': str, 'exp': int, 'type': str})
+
+
+class PasswordResetTokenService:
+    """
+    Issues and verifies single-use password reset tokens.
+
+    The token carries a digest of the account's password hash at the time it
+    was issued. Redeeming a token replaces that password, so the digest no
+    longer matches and every outstanding token for the account stops
+    verifying. That buys single use, and invalidation on password change,
+    without a table to store and expire.
+    """
+
+    token_type = 'password-reset'
+
+    def __init__(self, app_secret: str, algorithm: str = 'HS256'):
+        self.app_secret = app_secret
+        self.algorithm = algorithm
+
+    @staticmethod
+    def _credential_digest(user: AppUser) -> str:
+        return hashlib.sha256(user.password_hash.encode('utf-8')).hexdigest()
+
+    def issue(self, user: AppUser) -> str:
+        time_now = datetime.now(timezone.utc)
+        return jwt.encode(
+            {
+                'iat': time_now,
+                'exp': time_now + timedelta(minutes=PASSWORD_RESET_TOKEN_TTL_MINUTES),
+                'sub': user.email,
+                'type': self.token_type,
+                'cred': self._credential_digest(user),
+            },
+            self.app_secret,
+            algorithm=self.algorithm,
+        )
+
+    def verify(self, token: str) -> AppUser:
+        """
+        Return the account a reset token was issued for.
+
+        Every rejection raises the same error. A caller must not be able to
+        tell an expired token from a forged one, or from one naming an
+        address that has no account.
+        """
+        rejected = ServerException(
+            title='Failed to Reset Password',
+            message='This password reset link is invalid or has expired. '
+                    'Please request a new one.',
+            code=400,
+        )
+
+        try:
+            payload = jwt.decode(token, self.app_secret, algorithms=[self.algorithm])
+        except InvalidTokenError:
+            # ExpiredSignatureError is a subclass, so this covers expiry too.
+            raise rejected
+
+        if payload.get('type') != self.token_type:
+            # An access or refresh token must not be spendable as a reset.
+            raise rejected
+
+        try:
+            user = AppUser.query_by_email(payload.get('sub', '')).one()
+        except NoResultFound:
+            raise rejected
+
+        if not secrets.compare_digest(
+            payload.get('cred', ''), self._credential_digest(user)
+        ):
+            raise rejected
+
+        return user
 
 
 class TokenService:
