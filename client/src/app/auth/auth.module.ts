@@ -12,10 +12,12 @@ import { AuthEffects } from './store/effects';
 import { AuthGuard } from './guards/auth-guard.service';
 import { LoginGuard } from './guards/login-guard.service';
 import { ResetPasswordDialogComponent } from './components/reset-password-dialog.component';
+import { ResetPasswordComponent } from './components/reset-password.component';
 
 const components = [
     LoginComponent,
-    ResetPasswordDialogComponent
+    ResetPasswordDialogComponent,
+    ResetPasswordComponent
 ];
 
 @NgModule({

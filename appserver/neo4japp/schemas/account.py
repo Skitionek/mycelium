@@ -1,6 +1,7 @@
 import marshmallow.validate
 from marshmallow import fields
 
+from neo4japp.constants import MIN_PASSWORD_LENGTH
 from neo4japp.schemas.base import CamelCaseSchema
 from neo4japp.schemas.common import ResultListSchema
 
@@ -22,6 +23,15 @@ class UserCreateSchema(CamelCaseSchema):
 class UserChangePasswordSchema(CamelCaseSchema):
     password = fields.String()
     new_password = fields.String()
+
+
+class UserResetPasswordSchema(CamelCaseSchema):
+    """Redeems a password reset link emailed to the account holder."""
+    token = fields.String(required=True)
+    new_password = fields.String(
+        required=True,
+        validate=[marshmallow.validate.Length(min=MIN_PASSWORD_LENGTH)],
+    )
 
 
 class UserUpdateSchema(CamelCaseSchema):
