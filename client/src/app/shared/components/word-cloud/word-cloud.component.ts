@@ -9,21 +9,32 @@ import { WordCloudAnnotationFilterEntityWithLayout } from 'app/word-cloud/interf
 /**
  * Throttles calling `fn` once per animation frame
  * Latest arguments are used on the actual call
+ * The returned function carries a `cancel` method that drops an already
+ * requested frame, so a caller being torn down leaves no pending work.
  * @param fn - function which calls should be throttled
  */
 export function throttled(fn: (...r: any[]) => void) {
-  let ticking = false;
+  let frameHandle: number | null = null;
   let args = [];
-  return (...rest) => {
+
+  const throttledFn = (...rest) => {
     args = Array.prototype.slice.call(rest);
-    if (!ticking) {
-      ticking = true;
-      window.requestAnimationFrame(() => {
-        ticking = false;
+    if (frameHandle === null) {
+      frameHandle = window.requestAnimationFrame(() => {
+        frameHandle = null;
         fn.apply(window, args);
       });
     }
   };
+
+  throttledFn.cancel = () => {
+    if (frameHandle !== null) {
+      window.cancelAnimationFrame(frameHandle);
+      frameHandle = null;
+    }
+  };
+
+  return throttledFn;
 }
 
 export interface WordCloudNode {
@@ -77,7 +88,13 @@ const createResizeObserver = (callback, container) => {
   });
   // todo
   observer.observe(container);
-  return observer;
+
+  // Both the observer and any frame it already requested have to go, or the
+  // callback still runs once against a view that is being destroyed.
+  return () => {
+    observer.disconnect();
+    resize.cancel();
+  };
 };
 
 @Component({
@@ -108,7 +125,7 @@ export class WordCloudComponent implements AfterViewInit, OnDestroy {
   MAX_FONT = 48;
 
   private layout: any;
-  resizeObserver: any;
+  private stopObservingResize?: () => void;
 
   private _timeInterval = Infinity;
   @Input() set timeInterval(ti) {
@@ -154,12 +171,16 @@ export class WordCloudComponent implements AfterViewInit, OnDestroy {
     const {width, height} = this.getCloudSvgDimensions();
     this.layout.canvas(this.hiddenTextAreaWrapper.nativeElement);
     this.onResize(width, height).then();
-    this.resizeObserver = createResizeObserver(this.onResize.bind(this), this.cloudWrapper.nativeElement);
+    this.stopObservingResize = createResizeObserver(this.onResize.bind(this), this.cloudWrapper.nativeElement);
   }
 
   ngOnDestroy() {
-    this.resizeObserver.disconnect();
-    delete this.resizeObserver;
+    // Guarded because a component destroyed before its view initialises
+    // never got as far as observing anything.
+    if (this.stopObservingResize) {
+      this.stopObservingResize();
+      this.stopObservingResize = undefined;
+    }
   }
 
   onResize(width, height) {
