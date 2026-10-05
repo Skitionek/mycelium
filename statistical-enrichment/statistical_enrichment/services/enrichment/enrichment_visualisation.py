@@ -25,7 +25,7 @@ class EnrichmentVisualisationService:
         raise NotImplementedError
 
     def query_go_term(self, organism_id, gene_names):
-        r = self.graph.read_transaction(
+        r = self.graph.execute_read(
             lambda tx: list(
                 tx.run(
                     """
@@ -62,7 +62,7 @@ class EnrichmentVisualisationService:
         )
 
     def query_go_term_count(self, organism_id):
-        r = self.graph.read_transaction(
+        r = self.graph.execute_read(
             lambda tx: list(
                 tx.run(
                     """
