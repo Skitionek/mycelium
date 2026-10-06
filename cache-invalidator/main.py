@@ -15,6 +15,8 @@ NEO4J_AUTH = os.getenv('NEO4J_AUTH', 'neo4j/password')
 NEO4J_SCHEME = os.getenv('NEO4J_SCHEME', 'bolt')
 NEO4J_DATABASE = os.getenv('NEO4J_DATABASE', 'neo4j')
 
+MOZG_URL = os.getenv('MOZG_URL', '')
+
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = os.getenv('REDIS_PORT', '6379')
 REDIS_PASSWORD = os.getenv('REDIS_PASSWORD', '')
@@ -38,7 +40,7 @@ redis_server = redis.Redis(
     connection_pool=redis.BlockingConnectionPool.from_url(redis_url)
 )
 
-# Neo4j connection
+# Neo4j connection (used when MOZG_URL is not set)
 neo4j_url = f'{NEO4J_SCHEME}://{NEO4J_HOST}:{NEO4J_PORT}/{NEO4J_DATABASE}'
 neo4j_auth = basic_auth(*NEO4J_AUTH.split('/', 1))
 neo4j_driver = GraphDatabase.driver(neo4j_url, auth=neo4j_auth)
@@ -49,6 +51,9 @@ def main():
     next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
     while True:
         try:
+            # Still counts Neo4j labels with Mozg in use: the statistics
+            # describe what the graph holds, and /kg-statistics would answer
+            # 503 forever if nothing wrote the key.
             cache_data('kg_statistics', get_kg_statistics())
             next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
             logger.debug(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
@@ -63,7 +68,10 @@ def main():
             )
         finally:
             try:
-                precalculateGO()
+                if not MOZG_URL:
+                    # Nothing to pre-compute when Mozg is the knowledge-graph
+                    # layer; see precalculateGO's docstring.
+                    precalculateGO()
                 next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
                 logger.info(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
             except Exception as err:
@@ -110,7 +118,16 @@ def get_kg_statistics():
 
 
 def precalculateGO():
-    logger.debug('Precalculating GO...')
+    """Pre-compute GO term data from Neo4j and cache in Redis.
+
+    Only runs when Neo4j is the knowledge-graph layer. There is no Mozg
+    equivalent: the cache holds every GO term of an organism together with
+    every gene annotated to it, and the upstream GO API answers at most 2 500
+    annotations per query against the ~1.5 million a single organism has. With
+    MOZG_URL set, statistical-enrichment queries EBI QuickGO per request
+    instead and caches that itself.
+    """
+    logger.debug('Precalculating GO from Neo4j...')
     graph = neo4j_driver.session()
 
     def fetch_organism_go_query(tx, organism):
