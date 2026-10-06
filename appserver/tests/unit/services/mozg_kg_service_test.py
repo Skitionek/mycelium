@@ -683,8 +683,10 @@ def test_raises_when_mozg_reports_errors(monkeypatch):
         mozg_client.run_query(mozg_client.UNIPROT_CONNECTION, '/uniprotkb/search')
 
     # Then the failure names the entity and the upstream that was queried
-    assert '/uniprotkb/search' in str(error.value)
-    assert 'rest.uniprot.org' in str(error.value)
+    assert str(error.value).startswith(
+        'Mozg could not answer /uniprotkb/search on '
+        f"{mozg_client.UNIPROT_CONNECTION['database']}"
+    )
 
 
 def test_reads_the_endpoint_at_call_time(monkeypatch):
@@ -729,10 +731,10 @@ def test_every_connection_names_a_driver_and_a_database():
 
 def test_connections_are_json_serialisable():
     # Given the descriptors are sent as GraphQL variables
-    # When they are serialised
-    encoded = json.dumps(
-        [mozg_client.UNIPROT_CONNECTION, mozg_client.KEGG_CONNECTION]
-    )
+    connections = [mozg_client.UNIPROT_CONNECTION, mozg_client.KEGG_CONNECTION]
 
-    # Then nothing in them needs a custom encoder
-    assert 'rest.uniprot.org' in encoded
+    # When they are serialised and read back
+    decoded = json.loads(json.dumps(connections))
+
+    # Then nothing in them needed a custom encoder or lost a field
+    assert decoded == connections
