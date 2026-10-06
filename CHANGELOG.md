@@ -49,6 +49,13 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   gene list in a handful of batched queries rather than one request per gene.
   `geneNeo4jId` and `synonymNeo4jId` now carry the NCBI Gene UID; both are
   integers and are only ever echoed back as lookup keys.
+- **`statistical-enrichment/.../services/mozg_client.py`** and
+  **`.../services/enrichment/mozg_go.py`**: GO term lookups from EBI QuickGO
+  through Mozg, used when `MOZG_URL` is set.
+- `requests` added to the `statistical-enrichment` dependencies, which the
+  Mozg client needs.
+- Unit tests for both Mozg-backed services, driven by a fake Mozg transport
+  over response shapes captured from the live upstreams.
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
@@ -71,6 +78,12 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   and `regulondb.ccg.unam.mx` serves an incomplete TLS certificate chain that
   Mozg's HTTP client rejects. Both domains are reported as missing rather than
   failing the enrichment table.
+- **GO enrichment statistics are approximate under Mozg.** Fisher's exact test
+  derives a term's gene count and the background gene universe from the gene
+  list it is given; QuickGO can only supply a truncated one, and only for the
+  200 most widely shared terms. p-values and q-values are therefore indicative
+  of ranking, not of significance, and are not comparable to the Neo4j-backed
+  ones. Leave `MOZG_URL` unset to keep reading GO from Neo4j.
 
 ### Deprecated
 - **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
