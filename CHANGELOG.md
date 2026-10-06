@@ -38,6 +38,17 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   canonical upstream REST APIs at request time instead of from a pre-loaded
   Neo4j instance. The image clones a pinned Mozg revision
   (`MOZG_REVISION` in `mozg/Dockerfile`) rather than tracking `main`.
+- **`appserver/neo4japp/services/mozg_client.py`**: HTTP client for the Mozg
+  `/graphql` endpoint, with connection descriptors for NCBI E-utilities,
+  UniProt, STRING, KEGG and EBI QuickGO that mirror Mozg's own catalog
+  entries.
+- **`appserver/neo4japp/services/mozg_kg_service.py`**: `MozgKgService` and
+  `MozgEnrichmentTableService` — drop-in replacements for `KgService` /
+  `EnrichmentTableService`. Selected automatically when `MOZG_URL` is
+  present; fall back to Neo4j when it is not. Each domain resolves a whole
+  gene list in a handful of batched queries rather than one request per gene.
+  `geneNeo4jId` and `synonymNeo4jId` now carry the NCBI Gene UID; both are
+  integers and are only ever echoed back as lookup keys.
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
@@ -53,6 +64,13 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   `statistical-enrichment` gain `MOZG_URL` and `mozg` in their `depends_on`.
   `cache-invalidator` reads `MOZG_URL` but never queries Mozg, so it does not
   depend on it.
+
+### Known limitations
+- **BioCyc and RegulonDB return no data under Mozg.** `websvc.biocyc.org`
+  answers programmatic requests with a captcha page without a subscription,
+  and `regulondb.ccg.unam.mx` serves an incomplete TLS certificate chain that
+  Mozg's HTTP client rejects. Both domains are reported as missing rather than
+  failing the enrichment table.
 
 ### Deprecated
 - **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
