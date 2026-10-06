@@ -30,6 +30,14 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **Mozg knowledge-graph layer** (`mozg/`): new Docker service based on
+  [Mozg](https://github.com/Skitionek/Mozg), a cross-database GraphQL query
+  layer. Mozg replaces the local Neo4j knowledge graph (`graph-db/`) for
+  enrichment-data queries. When `MOZG_URL` is set, NCBI gene matching and the
+  UniProt, STRING, KEGG and GO enrichment domains are answered from the
+  canonical upstream REST APIs at request time instead of from a pre-loaded
+  Neo4j instance. The image clones a pinned Mozg revision
+  (`MOZG_REVISION` in `mozg/Dockerfile`) rather than tracking `main`.
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
@@ -39,6 +47,18 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Database migration** `001_add_folder_annotation_config`: adds the `file_effective_annotation_config` table precomputing the fully-merged annotation config for every file (recursive CTE over the ancestor folder chain, reads `files_content.raw_file::jsonb` directly) and the `jsonb_merge_annotation_configs` PostgreSQL function/aggregate for deep-merging `annotation_configs` objects. No new column is added to the `files` table.
 - Unit tests for `FolderAnnotationService` covering: no config files, single folder config, nested config merging, `inherit: false` reset, per-file overrides, partial configs.
 - API test for the `effective-annotations-config` endpoint.
+
+### Changed
+- `docker/docker-compose.services.yml`: Mozg service added; `appserver` and
+  `statistical-enrichment` gain `MOZG_URL` and `mozg` in their `depends_on`.
+  `cache-invalidator` reads `MOZG_URL` but never queries Mozg, so it does not
+  depend on it.
+
+### Deprecated
+- **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
+  New biological-database pipelines should not be added there; use Mozg
+  instead. The Neo4j instance is retained for the graph visualiser, full-text
+  synonym search, the BioCyc and RegulonDB domains, and sound GO statistics.
 
 ### Security
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
