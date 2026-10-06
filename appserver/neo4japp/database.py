@@ -125,7 +125,6 @@ not apply to the AnnotationServices (except manual and sorted).
 
 def get_kg_service():
     if 'kg_service' not in g:
-        import os
         if os.getenv('MOZG_URL'):
             from neo4japp.services.mozg_kg_service import MozgKgService
             g.kg_service = MozgKgService(session=db.session)
@@ -179,7 +178,6 @@ def get_file_type_service():
 
 def get_enrichment_table_service():
     if 'enrichment_table_service' not in g:
-        import os
         if os.getenv('MOZG_URL'):
             from neo4japp.services.mozg_kg_service import MozgEnrichmentTableService
             g.enrichment_table_service = MozgEnrichmentTableService(
