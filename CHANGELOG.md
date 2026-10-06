@@ -71,6 +71,10 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
   `statistical-enrichment` gain `MOZG_URL` and `mozg` in their `depends_on`.
   `cache-invalidator` reads `MOZG_URL` but never queries Mozg, so it does not
   depend on it.
+- `cache-invalidator` skips `precalculateGO()` when `MOZG_URL` is set. There
+  is no Mozg equivalent: the cache holds every GO term of an organism with
+  every gene annotated to it, and QuickGO answers at most 2 500 annotations
+  per query against the ~1.5 million a single organism has.
 
 ### Known limitations
 - **BioCyc and RegulonDB return no data under Mozg.** `websvc.biocyc.org`
