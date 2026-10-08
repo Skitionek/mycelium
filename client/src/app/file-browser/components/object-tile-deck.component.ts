@@ -3,6 +3,7 @@ import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { element } from 'protractor';
 
 import { WorkspaceManager } from 'app/shared/workspace-manager';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
@@ -11,7 +12,6 @@ import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
 import { ObjectListComponent } from './object-list.component';
 import { FilesystemObjectActions } from '../services/filesystem-object-actions';
 import { FilesystemService } from '../services/filesystem.service';
-import { element } from 'protractor';
 import { FilesystemObject, ProjectImpl } from '../models/filesystem-object';
 
 @Component({

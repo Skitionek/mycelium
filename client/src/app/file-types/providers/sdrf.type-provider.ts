@@ -9,7 +9,6 @@ import { ObjectCreationService } from 'app/file-browser/services/object-creation
 import { MimeTypes } from 'app/shared/constants';
 import { RankedItem } from 'app/shared/schemas/common';
 import { SearchType } from 'app/search/shared';
-
 import {
   AbstractObjectTypeProvider,
   AbstractObjectTypeProviderHelper,

@@ -158,7 +158,7 @@ export class AnnotationTableComponent implements OnInit, OnDestroy {
             status: 'Preparing file for download...'
         }));
         const progressDialogRef = this.progressDialog.display({
-            title: `Exporting global exclusions`,
+            title: 'Exporting global exclusions',
             progressObservable,
         });
 
@@ -192,7 +192,7 @@ export class AnnotationTableComponent implements OnInit, OnDestroy {
             status: 'Preparing file for download...'
         }));
         const progressDialogRef = this.progressDialog.display({
-            title: `Exporting global inclusions`,
+            title: 'Exporting global inclusions',
             progressObservable,
         });
 

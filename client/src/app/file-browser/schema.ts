@@ -158,8 +158,7 @@ export interface BulkObjectUpdateRequest extends Partial<ContentValue> {
  */
 
 // tslint:disable-next-line:no-empty-interface
-export interface ObjectUpdateRequest extends BulkObjectUpdateRequest {
-}
+export type ObjectUpdateRequest = BulkObjectUpdateRequest
 
 // We need to require the filename and parentHashId fields
 type RequiredObjectCreateRequestFields = 'filename' | 'parentHashId';
@@ -257,9 +256,7 @@ export interface PDFAnnotationGenerationRequest {
 }
 
 /* tslint:disable-next-line */
-export interface TextAnnotationGenerationRequest extends PDFAnnotationGenerationRequest {
-  //
-}
+export type TextAnnotationGenerationRequest = PDFAnnotationGenerationRequest
 
 // ========================================
 // Custom Annotations
@@ -317,5 +314,4 @@ export interface FileAnnotationChangeData {
   exclusionChanges: AnnotationExclusionChangeData[];
 }
 
-export interface FileAnnotationHistoryResponse extends ResultList<FileAnnotationChangeData> {
-}
+export type FileAnnotationHistoryResponse = ResultList<FileAnnotationChangeData>

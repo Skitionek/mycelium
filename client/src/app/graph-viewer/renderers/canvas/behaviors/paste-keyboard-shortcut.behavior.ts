@@ -59,7 +59,7 @@ export class PasteKeyboardShortcutBehavior extends AbstractCanvasBehavior {
           if (entry.type === GraphEntityType.Node) {
             const node = entry.entity as UniversalGraphNode;
             actions.push(new NodeCreation(
-              `Paste content from clipboard`, {
+              'Paste content from clipboard', {
                 ...node,
                 hash: uuidv4(),
                 data: {
@@ -80,7 +80,7 @@ export class PasteKeyboardShortcutBehavior extends AbstractCanvasBehavior {
     }
 
     return new NodeCreation(
-      `Paste content from clipboard`, {
+      'Paste content from clipboard', {
         display_name: 'Note',
         hash: uuidv4(),
         label: 'note',

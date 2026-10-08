@@ -109,7 +109,7 @@ export class ImageUploadBehavior extends AbstractCanvasBehavior {
         // Scale smaller side up to 300 px
         const ratio = this.pasteSize / Math.min(dimensions.width, dimensions.height);
         this.graphView.execute(new NodeCreation(
-        `Insert image`, {
+        'Insert image', {
           hash: uuidv4(),
           image_id: imageId,
           display_name: '',

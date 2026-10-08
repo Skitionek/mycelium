@@ -246,7 +246,7 @@ export class CustomisedSankeyLayoutService extends SankeyLayoutService {
       `C${sourceBezierX} ${sourceY0},${targetBezierX} ${targetY0},${targetX} ${targetY0}` +
       `L${targetX} ${targetY1}` +
       `C${targetBezierX} ${targetY1},${sourceBezierX} ${sourceY1},${sourceX} ${sourceY1}` +
-      `Z`
+      'Z'
     );
   }
 

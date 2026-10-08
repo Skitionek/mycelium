@@ -133,7 +133,7 @@ export class WordCloudComponent implements AfterViewInit, OnDestroy {
       .rotate(_ => 0);
   }
 
-  @Input('data') set data(data) {
+  @Input() set data(data) {
     const count: any = {};
     if (Array.isArray(data) && data.every(d => typeof d === 'string' && (count[d] = (count[d] || 0) + 1))) {
       this._data = Object.entries(count).map(([text, frequency]) => ({text, frequency}));

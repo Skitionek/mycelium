@@ -37,7 +37,7 @@ export class EnrichmentTableService {
    */
   getNCBIEnrichmentDomains(nodeIds, taxID: string, domains: string[]): Observable<EnrichmentWrapper> {
     return this.http.post<{result: EnrichmentWrapper}>(
-      `/api/knowledge-graph/get-ncbi-nodes/enrichment-domains`,
+      '/api/knowledge-graph/get-ncbi-nodes/enrichment-domains',
       {nodeIds, taxID, domains},
       this.apiService.getHttpOptions(true),
     ).pipe(
@@ -47,7 +47,7 @@ export class EnrichmentTableService {
 
   annotateEnrichment(hashIds: string[], request: TextAnnotationGenerationRequest): Observable<any> {
     return this.http.post(
-      `/api/filesystem/annotations/generate`,
+      '/api/filesystem/annotations/generate',
       {hashIds, ...request},
       this.apiService.getHttpOptions(true)
     ).pipe(
@@ -57,7 +57,7 @@ export class EnrichmentTableService {
 
   refreshEnrichmentAnnotations(hashIds: string[]): Observable<any> {
     return this.http.post(
-      `/api/filesystem/annotations/refresh`,
+      '/api/filesystem/annotations/refresh',
       {hashIds},
       this.apiService.getHttpOptions(true)
     ).pipe(

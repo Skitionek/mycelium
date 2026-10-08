@@ -199,7 +199,7 @@ export class EnrichmentTableViewerComponent implements OnInit, OnDestroy, AfterV
         mergeMap(() => new EnrichmentTable().load(document)),
         tap(newTable => {
           this.snackBar.open(
-            `Data refreshed.`,
+            'Data refreshed.',
             'Close',
             {duration: 5000},
           );
@@ -245,7 +245,7 @@ export class EnrichmentTableViewerComponent implements OnInit, OnDestroy, AfterV
 
     observable.subscribe(() => {
       this.snackBar.open(
-        `Enrichment table saved.`,
+        'Enrichment table saved.',
         'Close',
         {duration: 5000},
       );

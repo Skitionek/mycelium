@@ -36,7 +36,7 @@ export function extractGraphEntityActions(items: DataTransferData<any>[], origin
     } else if (entity.type === GraphEntityType.Edge) {
       const edge = entity.entity as UniversalGraphEdge;
       actions.push(new EdgeCreation(
-        `Create edge`, edge, true,
+        'Create edge', edge, true,
       ));
     }
   }

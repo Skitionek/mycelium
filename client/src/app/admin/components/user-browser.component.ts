@@ -107,7 +107,7 @@ export class UserBrowserComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(UserCreateDialogComponent);
     modalRef.result.then(newUser => {
       const progressDialogRef = this.progressDialog.display({
-        title: `Creating User`,
+        title: 'Creating User',
         progressObservable: new BehaviorSubject<Progress>(new Progress({
           status: 'Creating user...',
         })),
@@ -140,7 +140,7 @@ export class UserBrowserComponent implements OnInit, OnDestroy {
         modalRef.componentInstance.setUser(selectedUser);
         modalRef.result.then(updatedUser => {
           const progressDialogRef = this.progressDialog.display({
-            title: `Updating User`,
+            title: 'Updating User',
             progressObservable: new BehaviorSubject<Progress>(new Progress({
               status: 'Updating user...',
             })),
@@ -175,7 +175,7 @@ export class UserBrowserComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (confirm('Unlock user ' + user.username + '?')) {
       const progressDialogRef = this.progressDialog.display({
-        title: `Unlocking User`,
+        title: 'Unlocking User',
         progressObservable: new BehaviorSubject<Progress>(new Progress({
           status: 'Unlocking user...',
         })),
@@ -185,7 +185,7 @@ export class UserBrowserComponent implements OnInit, OnDestroy {
         .subscribe(() => {
           progressDialogRef.close();
           this.snackBar.open(
-            `User unlocked!!`,
+            'User unlocked!!',
             'close',
             {duration: 5000},
           );

@@ -63,14 +63,14 @@ export class FilesystemService {
   private getLMDBsDates(): Observable<object> {
     // TODO: Type this method
     return this.http.get<object>(
-      `/api/files/lmdbs_dates`,
+      '/api/files/lmdbs_dates',
       this.apiService.getHttpOptions(true),
     );
   }
 
   search(options: ObjectSearchRequest): Observable<FilesystemObjectList> {
     return this.http.post<ResultList<FilesystemObjectData>>(
-      `/api/filesystem/search`,
+      '/api/filesystem/search',
       options,
       this.apiService.getHttpOptions(true),
     ).pipe(
@@ -86,7 +86,7 @@ export class FilesystemService {
     bodyValue?: FilesystemObject,
   }> {
     return this.http.post(
-      `/api/filesystem/objects`,
+      '/api/filesystem/objects',
       objectToMixedFormData(request), {
         ...this.apiService.getHttpOptions(true),
         observe: 'events',
@@ -157,7 +157,7 @@ export class FilesystemService {
   // TODO: Deprecate after LL-3006
   getAllEnrichmentTables() {
     return this.http.get<{result: string[]}>(
-      `/api/filesystem/enrichment-tables`, {
+      '/api/filesystem/enrichment-tables', {
         ...this.apiService.getHttpOptions(true),
         responseType: 'json',
       }
@@ -180,7 +180,7 @@ export class FilesystemService {
        updateWithLatest?: { [hashId: string]: FilesystemObject }):
     Observable<{ [hashId: string]: FilesystemObject }> {
     return this.http.patch<ResultMapping<FilesystemObjectData>>(
-      `/api/filesystem/objects`, objectToMixedFormData({
+      '/api/filesystem/objects', objectToMixedFormData({
         ...changes,
         hashIds,
       }), this.apiService.getHttpOptions(true),
@@ -204,7 +204,7 @@ export class FilesystemService {
     Observable<{ [hashId: string]: FilesystemObject }> {
     return this.http.request<ResultMapping<FilesystemObjectData>>(
       'DELETE',
-      `/api/filesystem/objects`, {
+      '/api/filesystem/objects', {
         ...this.apiService.getHttpOptions(true, {
           contentType: 'application/json',
         }),
@@ -409,7 +409,7 @@ export class FilesystemService {
 
   getHierarchy(directoriesOnly: boolean = false): Observable<FileHierarchyResponse> {
     return this.http.get<FileHierarchyResponse>(
-      `/api/filesystem/objects/hierarchy`, {
+      '/api/filesystem/objects/hierarchy', {
         ...this.apiService.getHttpOptions(true),
         params: {
           directoriesOnly: String(directoriesOnly)
