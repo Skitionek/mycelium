@@ -9,11 +9,14 @@ name: Dependabot train
 #   1. BEHIND -- the `main` ruleset requires branches to be up to date, and
 #      GitHub does not update an auto-merge PR when the base moves (a merge
 #      queue is the feature that does). Dependabot rebases on conflict, not on
-#      staleness, so the PR just waits. Our open bumps sit 14-28 commits back.
-#   2. DIRTY -- every bump in an ecosystem edits the same lockfile
-#      (client/yarn.lock, appserver/requirements.txt, ...), so the first one to
-#      land conflicts all the rest. Dependabot does re-resolve those, but only
-#      on its next scheduled run, which is weekly for most ecosystems here.
+#      staleness, so the PR just waits. This is the common case by far: of the
+#      seven stale PRs open when this was written, six merged into main
+#      cleanly and were blocked on nothing but being 3-30 commits behind.
+#   2. DIRTY -- bumps in one ecosystem edit the same lockfile
+#      (client/yarn.lock, appserver/requirements.txt, ...), so one landing can
+#      conflict the rest; the seventh PR above was in that state. Dependabot
+#      does re-resolve those, but only on its next scheduled run, which is
+#      weekly for most ecosystems here.
 #
 # This workflow brings exactly one Dependabot PR up to date and lets auto-merge
 # land it. Landing it pushes `main`, which triggers this workflow again, which
@@ -70,12 +73,16 @@ jobs:
       # than by Dependabot, it is NOT a Dependabot-triggered run, so it reads
       # ordinary Actions secrets and gets a writable token. A workflow that runs
       # on the Dependabot PR event itself could not do either.
+      # The app id is not sensitive, so a repository variable is the natural
+      # home for it -- but accept a secret of the same name too, since putting
+      # it there is an easy and otherwise silent mistake: the step would skip
+      # and the job would fail claiming no credential was configured.
       - name: Mint a GitHub App token
         id: app-token
-        if: ${{ vars.DEPENDABOT_TRAIN_APP_ID != '' }}
+        if: ${{ vars.DEPENDABOT_TRAIN_APP_ID != '' || secrets.DEPENDABOT_TRAIN_APP_ID != '' }}
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.DEPENDABOT_TRAIN_APP_ID }}
+          app-id: ${{ vars.DEPENDABOT_TRAIN_APP_ID || secrets.DEPENDABOT_TRAIN_APP_ID }}
           private-key: ${{ secrets.DEPENDABOT_TRAIN_APP_PRIVATE_KEY }}
 
       - name: Pick and advance one PR
