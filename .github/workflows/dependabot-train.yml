@@ -85,9 +85,13 @@ jobs:
       # home for it -- but accept a secret of the same name too, since putting
       # it there is an easy and otherwise silent mistake: the step would skip
       # and the job would fail claiming no credential was configured.
+      # continue-on-error so a failed mint does not skip the step below: the
+      # action reports a token failure as a raw API stack trace, and the next
+      # step is the only thing that can say what to do about it.
       - name: Mint a GitHub App token
         id: app-token
         if: ${{ env.APP_ID != '' }}
+        continue-on-error: true
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ env.APP_ID }}
@@ -101,6 +105,24 @@ jobs:
           REPO: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ] && [ -n "${APP_ID:-}" ]; then
+            # The app is configured but minting failed. Authenticating as the
+            # app happens before any repository lookup, so reaching this point
+            # means the id and private key are almost certainly fine and the
+            # app's installation on this repository is what is missing.
+            echo "::error::App $APP_ID is configured, but no token was minted."
+            echo "Check, in order:"
+            echo "  1. the app is installed at all --"
+            echo "     https://github.com/settings/installations"
+            echo "  2. its Repository access covers THIS repository; an app"
+            echo "     installed with 'Only select repositories' and this repo"
+            echo "     left unticked fails exactly like this (404 on"
+            echo "     /repos/OWNER/REPO/installation)"
+            echo "  3. the app is installed on the account that owns this repo"
+            echo "The 'Mint a GitHub App token' step above has the API error."
+            exit 1
+          fi
 
           if [ -z "${GH_TOKEN:-}" ]; then
             echo "::error::No credential for the Dependabot train."
