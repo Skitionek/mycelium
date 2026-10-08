@@ -144,7 +144,7 @@ jobs:
             # shellcheck disable=SC2016  # $owner/$name are GraphQL variables and
             # the jq programs below use jq's own $pr -- neither is a shell
             # expansion, so both must stay in single quotes.
-            prs=$(gh api graphql \
+            raw=$(gh api graphql \
               -f owner="$OWNER" -f name="$REPO" \
               -f query='
                 query($owner: String!, $name: String!) {
@@ -172,22 +172,29 @@ jobs:
                       }
                     }
                   }
-                }' \
-              --jq '
-                [ .data.repository.pullRequests.nodes[]
-                  | select(.author.login == "dependabot[bot]" and .isDraft == false)
-                  | {
-                      number,
-                      state: .mergeStateStatus,
-                      automerge: (.autoMergeRequest != null),
-                      checks: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
-                      head: .commits.nodes[0].commit.oid,
-                      head_date: .commits.nodes[0].commit.committedDate,
-                      nudges: [ .comments.nodes[]
-                                | select(.body | startswith("@dependabot rebase"))
-                                | .createdAt ]
-                    }
-                ]')
+                }')
+
+            # Match both spellings of the author: GraphQL reports a bot's login
+            # without the "[bot]" suffix that REST appends, so matching only
+            # "dependabot[bot]" here selected nothing at all and the job went
+            # green having skipped every PR.
+            prs=$(jq '
+              [ .data.repository.pullRequests.nodes[]
+                | select((.author.login == "dependabot"
+                          or .author.login == "dependabot[bot]")
+                         and .isDraft == false)
+                | {
+                    number,
+                    state: .mergeStateStatus,
+                    automerge: (.autoMergeRequest != null),
+                    checks: (.commits.nodes[0].commit.statusCheckRollup.state // "NONE"),
+                    head: .commits.nodes[0].commit.oid,
+                    head_date: .commits.nodes[0].commit.committedDate,
+                    nudges: [ .comments.nodes[]
+                              | select(.body | startswith("@dependabot rebase"))
+                              | .createdAt ]
+                  }
+              ]' <<<"$raw")
 
             if [ "$(jq 'map(select(.state == "UNKNOWN")) | length' <<<"$prs")" = 0 ]; then
               break
@@ -201,6 +208,15 @@ jobs:
 
           if [ "$(jq 'length' <<<"$prs")" = 0 ]; then
             echo "No open Dependabot PRs; nothing to do."
+            # An empty match and an empty backlog look identical in the log,
+            # which is how a mismatched author filter passed for a whole
+            # afternoon. Name the authors actually seen so the next such
+            # mismatch is visible in the run that suffers it.
+            echo "Authors of the open PRs considered:"
+            jq -r '[.data.repository.pullRequests.nodes[].author.login]
+                   | unique
+                   | if length == 0 then "  (no open PRs at all)"
+                     else "  " + join(", ") end' <<<"$raw"
             exit 0
           fi
 
