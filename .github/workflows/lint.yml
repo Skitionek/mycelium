@@ -26,6 +26,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # ── Upload SARIF for PR annotations ───────────────────────────────────
+      # The action above turns MegaLinter's SARIF reporter on but does not
+      # publish the file, so uploading it is the one thing left to do here.
+      # Everything else that used to live in this job -- deciding whether to
+      # open a fix PR, opening it, commenting on it, failing the build when it
+      # exists -- now happens inside that action, which carries its own
+      # fix_check/cpr steps.
       - name: Upload SARIF report
         if: >
           (github.event_name == 'pull_request' || github.event_name == 'push') &&
@@ -37,26 +43,3 @@ jobs:
         with:
           sarif_file: megalinter-reports/megalinter-report.sarif
           category: megalinter
-          labels: bot
-          branch: megalinter-fixes-pr-${{ github.event.pull_request.number }}
-          body: |
-            MegaLinter has automatically applied linters fixes on this PR.
-            Please review the changes and merge if they are correct.
-          base: ${{ github.head_ref }}
-
-      - name: Post PR Comment
-        if: steps.fix_check.outputs.enabled == 'true'
-        uses: marocchino/sticky-pull-request-comment@v3
-        with:
-          message: |
-            MegaLinter has automatically applied linters fixes on this PR.
-            Please review the changes and merge if they are correct.
-            PR: ${{ steps.cpr.outputs.pull-request-url }}
-          hide_and_recreate: true
-
-      - name: Fail if PR Created
-        if: steps.fix_check.outputs.enabled == 'true' && steps.cpr.outputs.pull-request-url != ''
-        run: |
-          echo "A PR with formatting fixes has been created. Please merge it before proceeding."
-          echo "PR: ${{ steps.cpr.outputs.pull-request-url }}"
-          exit 1
