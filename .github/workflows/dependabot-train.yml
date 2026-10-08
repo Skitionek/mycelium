@@ -140,8 +140,13 @@ jobs:
           fi
 
           if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::error::No credential for the Dependabot train."
-            echo "Set up ONE of the following, then re-run:"
+            # Nothing configured at all. On a repo where this has just been
+            # rolled out that is the expected state, not a fault, and failing
+            # would leave a red scheduled run every few hours until someone
+            # finishes the setup. Say what is missing and stop. A configured
+            # app whose token will not mint is the error case, handled above.
+            echo "::notice::The Dependabot train is not configured here; doing nothing."
+            echo "To switch it on, set up ONE of the following:"
             echo "  * a GitHub App with pull-request write + contents write on"
             echo "    this repo -- store its id in the DEPENDABOT_TRAIN_APP_ID"
             echo "    variable and its key in the"
@@ -151,7 +156,9 @@ jobs:
             echo "secrets.GITHUB_TOKEN cannot do this job: its branch pushes"
             echo "and merges trigger no workflows, and Dependabot refuses its"
             echo "commands."
-            exit 1
+            echo "The app must also have this repository in its access list,"
+            echo "and the repository must allow auto-merge."
+            exit 0
           fi
 
           # mergeStateStatus is computed lazily: GitHub answers UNKNOWN while
