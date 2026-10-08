@@ -1,5 +1,9 @@
 name: Dependabot auto-merge
 
+# Auto-merge only lands a PR that is already mergeable. Keeping these PRs
+# mergeable -- up to date with main, and rebased past lockfile conflicts -- is
+# `dependabot-train.yml`, which explains why that cannot happen here.
+
 on: pull_request
 
 permissions:
