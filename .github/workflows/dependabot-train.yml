@@ -14,7 +14,16 @@ name: Dependabot train
 #   * BEHIND -- the main ruleset requires branches to be up to date, and
 #     GitHub does not update an auto-merge PR when the base moves (a merge
 #     queue is the feature that does). Dependabot rebases on conflict, not on
-#     staleness, so the PR waits indefinitely.
+#     staleness, so the PR waits indefinitely until asked.
+#
+# Both stale states are handled by asking Dependabot to rebase, rather than by
+# merging main in through the update-branch API. Updating the branch is
+# quicker and needs nothing from Dependabot, but it leaves a merge commit
+# authored by this app inside the PR, and the squash folds that into main as a
+# `Co-authored-by: <app>[bot]` trailer on the bump. A Dependabot rebase leaves
+# the PR holding only Dependabot's own commit, so main stays clean. The cost
+# is latency -- Dependabot answers in its own time -- and a dependency on it
+# honouring a command from this app.
 #   * DIRTY -- bumps in one ecosystem edit the same lockfile
 #     (client/yarn.lock, appserver/requirements.txt, ...), so one landing can
 #     conflict the rest. Dependabot re-resolves those, but only on its next
@@ -312,16 +321,15 @@ jobs:
           # must not sit at the head of the queue holding up the ones that can
           # actually merge.
           #
-          # Skip a conflicted PR already nudged since its last commit --
-          # Dependabot has not acted on that nudge yet, and asking twice only
-          # spams the thread, so move on to one we can still help.
+          # Skip any PR already nudged since its last commit -- Dependabot has
+          # not acted on that nudge yet, and asking twice only spams the
+          # thread, so move on to one we can still help.
           target=$(jq -r '
             [ .[]
               | select(.state == "BEHIND" or .state == "DIRTY")
-              | select(.state == "BEHIND"
-                       or (. as $pr
-                           | [ $pr.nudges[] | select(. > $pr.head_date) ]
-                           | length) == 0)
+              | select(. as $pr
+                       | [ $pr.nudges[] | select(. > $pr.head_date) ]
+                       | length == 0)
             ]
             | sort_by([
                 (if .checks == "FAILURE" or .checks == "ERROR" then 1 else 0 end),
@@ -336,32 +344,22 @@ jobs:
 
           number=$(jq -r '.number' <<<"$target")
           state=$(jq -r '.state' <<<"$target")
-          head=$(jq -r '.head' <<<"$target")
 
+          # Behind or conflicting, the answer is the same: Dependabot rebases
+          # the branch onto main. It re-resolves its own lockfiles, and the PR
+          # keeps a single commit of its own, so nothing of this app's ends up
+          # in main through the squash. The body is the bare command; trailing
+          # prose can stop Dependabot from recognising one.
           case "$state" in
             BEHIND)
-              # Stale but conflict-free: merge main in directly, which is
-              # immediate and needs nothing from Dependabot. expected_head_sha
-              # makes it a no-op if the PR moved since the query above.
-              echo "#$number is behind main; updating its branch."
-              if ! gh api --method PUT \
-                  "repos/$OWNER/$REPO/pulls/$number/update-branch" \
-                  --field expected_head_sha="$head" 2>err.log; then
-                cat err.log
-                # 422 means the head moved or the branch cannot be updated --
-                # a race with Dependabot, not a fault. The next run retries.
-                grep -q 422 err.log || exit 1
-                echo "#$number moved while we looked at it; leaving it for the next run."
-              fi
+              echo "#$number is behind main; asking Dependabot to rebase."
               ;;
             DIRTY)
-              # Conflicting lockfile: only Dependabot can re-resolve it against
-              # its own metadata, so ask it to. The body is the bare command;
-              # trailing prose can stop Dependabot from recognising one.
               echo "#$number conflicts with main; asking Dependabot to rebase."
-              gh pr comment "$number" --repo "$OWNER/$REPO" --body "@dependabot rebase"
               ;;
             *)
               echo "#$number is $state; nothing to do for that state."
+              exit 0
               ;;
           esac
+          gh pr comment "$number" --repo "$OWNER/$REPO" --body "@dependabot rebase"
