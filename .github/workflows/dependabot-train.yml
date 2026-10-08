@@ -50,6 +50,14 @@ jobs:
       contents: write
       pull-requests: write
 
+    # The app id is resolved here rather than in the step's `if`, because the
+    # `secrets` context is not available to an `if` expression -- a workflow
+    # that references it there fails to parse, producing a run with no jobs at
+    # all. `env` may read secrets, and `if` may read `env`, so this goes
+    # through env.
+    env:
+      APP_ID: ${{ vars.DEPENDABOT_TRAIN_APP_ID || secrets.DEPENDABOT_TRAIN_APP_ID }}
+
     steps:
       # Why not secrets.GITHUB_TOKEN
       # ----------------------------
@@ -79,10 +87,10 @@ jobs:
       # and the job would fail claiming no credential was configured.
       - name: Mint a GitHub App token
         id: app-token
-        if: ${{ vars.DEPENDABOT_TRAIN_APP_ID != '' || secrets.DEPENDABOT_TRAIN_APP_ID != '' }}
+        if: ${{ env.APP_ID != '' }}
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ vars.DEPENDABOT_TRAIN_APP_ID || secrets.DEPENDABOT_TRAIN_APP_ID }}
+          app-id: ${{ env.APP_ID }}
           private-key: ${{ secrets.DEPENDABOT_TRAIN_APP_PRIVATE_KEY }}
 
       - name: Pick and advance one PR
