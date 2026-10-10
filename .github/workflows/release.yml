@@ -22,8 +22,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
-      (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'master') &&
-      !startsWith(github.event.workflow_run.head_commit.message, 'chore(release):')
+      (github.event.workflow_run.head_branch == 'main' || github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -103,86 +102,60 @@ jobs:
 
             core.setOutput('ready', 'true');
             core.setOutput('sha', sha);
-            core.setOutput('branch', branch);
 
       - name: Checkout repository
         if: steps.gate.outputs.ready == 'true'
         uses: actions/checkout@v7
         with:
+          # Pin the commit the gate validated. For a workflow_run event
+          # checkout would otherwise take the default branch's current head,
+          # so the release notes could describe a commit that is not the one
+          # being tagged.
+          ref: ${{ steps.gate.outputs.sha }}
           fetch-depth: 0
 
-      - name: Checkout validated release branch head
-        if: steps.gate.outputs.ready == 'true'
-        run: |
-          git fetch origin "${{ steps.gate.outputs.branch }}"
-          git checkout -B "${{ steps.gate.outputs.branch }}" "origin/${{ steps.gate.outputs.branch }}"
-          CURRENT_SHA="$(git rev-parse HEAD)"
-          if [ "$CURRENT_SHA" != "${{ steps.gate.outputs.sha }}" ]; then
-            echo "Branch advanced from validated commit; skipping release."
-            exit 1
-          fi
+      # The release used to roll `## [Unreleased]` over into a dated section,
+      # commit that, and push the commit to main. That push can never succeed:
+      # the "QA" ruleset on main requires five status checks with a strict
+      # up-to-date policy, github-actions[bot] is not a bypass actor, and a
+      # commit arriving by direct push has no checks against it. Every attempt
+      # that got this far died on
+      #   remote: error: GH013: Repository rule violations found for
+      #   refs/heads/main
+      # so no tag was ever created (#613).
+      #
+      # Nothing is pushed to main any more. The tag is the release, and the
+      # Unreleased notes go in the release body instead of a commit. Tags are
+      # not covered by that ruleset, which targets branches.
 
-      - name: Update CHANGELOG with release date
+      - name: Read release notes from CHANGELOG
         if: steps.gate.outputs.ready == 'true'
+        id: notes
         run: |
           python - <<'PY'
           import os
           import re
-          from datetime import datetime, timezone
           from pathlib import Path
 
-          changelog_path = Path("CHANGELOG.md")
-          text = changelog_path.read_text(encoding="utf-8")
           marker = "## [Unreleased]"
+          text = Path("CHANGELOG.md").read_text(encoding="utf-8")
           if marker not in text:
               raise RuntimeError("CHANGELOG.md is missing '## [Unreleased]' section")
 
-          release_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-          before, after = text.split(marker, 1)
-          next_section_match = re.search(r"(?m)^## \[", after)
-          if next_section_match:
-              unreleased_body = after[:next_section_match.start()]
-              tail = after[next_section_match.start():]
-          else:
-              unreleased_body = after
-              tail = ""
+          after = text.split(marker, 1)[1]
+          next_section = re.search(r"(?m)^## \[", after)
+          body = (after[: next_section.start()] if next_section else after).strip("\n")
 
-          normalized_body = unreleased_body.strip("\n")
-          if not re.search(r"(?m)^\s*-\s+", normalized_body):
-              normalized_body = "### Changed\n- Automated release with no documented changelog entries."
+          if not re.search(r"(?m)^\s*-\s+", body):
+              body = "No documented changelog entries for this release."
 
-          date_heading = f"## [{release_date}]"
-          if tail.startswith(date_heading):
-              merged = (
-                  f"{before}{marker}\n\n"
-                  f"{date_heading}\n\n"
-                  f"{normalized_body}\n\n"
-                  f"{tail[len(date_heading):].lstrip()}"
-              )
-          else:
-              merged = (
-                  f"{before}{marker}\n\n"
-                  f"{date_heading}\n\n"
-                  f"{normalized_body}\n\n"
-                  f"{tail.lstrip()}"
-              )
-
-          changelog_path.write_text(merged.rstrip() + "\n", encoding="utf-8")
+          # A heredoc delimiter keeps multi-line markdown intact in the step
+          # output. The delimiter must not occur in the body itself.
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"body<<CHANGELOG_EOF\n{body}\nCHANGELOG_EOF\n")
           PY
 
-      - name: Commit changelog update
-        if: steps.gate.outputs.ready == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          if git diff --cached --quiet; then
-            echo "No changelog updates to commit."
-            exit 0
-          fi
-          git commit -m "chore(release): $(date -u +%Y-%m-%d)"
-
-      - name: Create release tag
+      - name: Create and push the release tag
         if: steps.gate.outputs.ready == 'true'
         id: tag
         run: |
@@ -194,22 +167,24 @@ jobs:
             TAG="${TAG_BASE}.${INDEX}"
             INDEX=$((INDEX + 1))
           done
-          git tag -a "$TAG" -m "Release $TAG"
+
+          # Tag the exact commit the gate validated rather than whatever main
+          # points at now. main moving on in the meantime is normal on an
+          # active branch and no longer has any bearing on the release, which
+          # is what the old "branch advanced from validated commit" check used
+          # to fail the whole run over.
+          git tag -a "$TAG" -m "Release $TAG" "${{ steps.gate.outputs.sha }}"
+          git push origin "refs/tags/$TAG"
+
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "release_date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
-          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Push release commit and tag
-        if: steps.gate.outputs.ready == 'true'
-        run: |
-          git push origin "HEAD:${{ steps.gate.outputs.branch }}"
-          git push origin "refs/tags/${{ steps.tag.outputs.tag }}"
 
       - name: Create GitHub release
         if: steps.gate.outputs.ready == 'true'
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          target_commitish: ${{ steps.tag.outputs.commit_sha }}
+          target_commitish: ${{ steps.gate.outputs.sha }}
           name: Release ${{ steps.tag.outputs.tag }} (${{ steps.tag.outputs.release_date }})
+          body: ${{ steps.notes.outputs.body }}
           generate_release_notes: true
