@@ -45,6 +45,13 @@ export class AccountService implements OnDestroy {
         return this.http.get(`${this.accountApi}/${email}/reset-password`);
     }
 
+    /**
+     * Redeems the token from a password reset email and sets the new password.
+     */
+    completePasswordReset(token: string, newPassword: string) {
+        return this.http.post(`${this.accountApi}/reset-password`, {token, newPassword});
+    }
+
     unlockUser(hashId: string) {
         return this.http.get(`${this.accountApi}/${hashId}/unlock-user`);
     }
