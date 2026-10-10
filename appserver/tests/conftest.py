@@ -53,10 +53,48 @@ def app(request):
 
 @pytest.fixture(scope='function')
 def session(app, request):
-    """ Creates a new database session """
+    """
+    A database session whose writes are undone when the test ends.
+
+    Opens one connection, begins a transaction on it, and rolls that
+    transaction back on teardown.
+
+    Passing ``bind`` is not enough to keep the session on that connection.
+    Flask-SQLAlchemy's Session overrides ``get_bind`` to resolve a bind key
+    against ``db.engines`` and returns the default *engine* before it ever
+    consults the session's own bind:
+
+        if None in engines:
+            return engines[None]
+
+    So every flush checked out a second connection from the pool and
+    committed there, where the rollback below could never reach it -- which
+    is why tests whose service layer calls ``commit`` itself leaked rows into
+    the next test. It is also why setting ``join_transaction_mode`` alone
+    changed nothing: the session was not using this connection at all.
+
+    Subclassing the configured session class to pin ``get_bind`` is the
+    documented way to customise this ("To customize the session class,
+    subclass Session and pass it as the ``class_`` key").
+    """
     connection = db.engine.connect()
     transaction = connection.begin()
-    options = {'bind': connection, 'binds': {}}
+
+    class ConnectionBoundSession(db.session.session_factory.class_):
+        """Keeps every operation on the connection this fixture rolls back."""
+
+        def get_bind(self, *args, **kwargs):
+            return connection
+
+    options = {
+        'bind': connection,
+        'binds': {},
+        'class_': ConnectionBoundSession,
+        # Make the session's own commits SAVEPOINTs inside the enclosing
+        # transaction, so a service that commits does not end the transaction
+        # this fixture is going to roll back.
+        'join_transaction_mode': 'create_savepoint',
+    }
     if hasattr(db, 'create_scoped_session'):
         session = db.create_scoped_session(options=options)
     else:

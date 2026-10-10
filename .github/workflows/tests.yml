@@ -131,22 +131,14 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
 
-      # Three files are excluded whole rather than test by test. They are not
-      # flaky and not newly broken: the `session` fixture's rollback does not
-      # hold, so after the first test in a file commits, every later test in it
-      # collides with the leaked rows (#619). Which individual tests fail is
-      # therefore an artefact of collection order, and pinning those names here
-      # would encode that ordering. Excluding the files keeps this honest and
-      # stable; drop these three lines when #619 is fixed.
+      # The three files that used to be excluded here now run: #619 fixed the
+      # `session` fixture, so a test whose service layer commits no longer
+      # leaks rows into the next one.
       #
       # tests/api is not run here at all -- it hangs indefinitely (#620).
       - name: Run database tests
         working-directory: appserver
-        run: |
-          pytest tests/database -v \
-            --ignore tests/database/services/annotations/manual_annotations \
-            --ignore tests/database/services/auth_test.py \
-            --ignore tests/database/services/projects_test.py
+        run: pytest tests/database -v
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
