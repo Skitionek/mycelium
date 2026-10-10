@@ -1,7 +1,4 @@
-import random
 import re
-import secrets
-import string
 
 from flask import Blueprint, g, jsonify, current_app
 from flask.views import MethodView
@@ -13,18 +10,16 @@ from sqlalchemy.sql import select
 from sqlalchemy.dialects.postgresql import aggregate_order_by
 from webargs.flaskparser import use_args
 
-from neo4japp.blueprints.auth import auth
+from neo4japp.blueprints.auth import auth, PasswordResetTokenService
 from neo4japp.database import db, get_authorization_service
 from neo4japp.exceptions import ServerException, NotAuthorized
 from neo4japp.models import AppUser, AppRole
 from neo4japp.constants import (
     MAX_ALLOWED_LOGIN_FAILURES,
-    MIN_TEMP_PASS_LENGTH,
-    MAX_TEMP_PASS_LENGTH,
-    RESET_PASSWORD_SYMBOLS,
-    RESET_PASSWORD_ALPHABET,
+    PASSWORD_RESET_TOKEN_TTL_MINUTES,
     RESET_PASSWORD_EMAIL_SUBJECT,
     RESET_PASSWORD_EMAIL_BODY,
+    FRONTEND_URL,
     FROM_EMAIL,
     SENDGRID_API_CLIENT,
     LogEventType
@@ -36,7 +31,8 @@ from neo4japp.schemas.account import (
     UserProfileListSchema,
     UserCreateSchema,
     UserUpdateSchema,
-    UserChangePasswordSchema
+    UserChangePasswordSchema,
+    UserResetPasswordSchema
 )
 from neo4japp.schemas.common import PaginatedRequestSchema
 from neo4japp.utils.request import Pagination
@@ -248,57 +244,93 @@ bp.add_url_rule('/<string:email>', view_func=account_view, methods=['GET'])
 
 @bp.route('/<string:email>/reset-password', methods=['GET'])
 def reset_password(email: str):
+    """
+    Start a self-service password reset.
+
+    Always answers 204 with the same empty body. Any difference between a
+    registered and an unregistered address — status, message, or error —
+    turns this into an oracle answering "is this address registered?" for
+    anyone who asks, and the route is deliberately unauthenticated so that
+    the login page's forgot-password flow works.
+
+    Nothing about the account changes here. The emailed link is what grants
+    the reset, so an anonymous request can no longer overwrite somebody's
+    password and lock them out.
+    """
+    no_content = (jsonify(dict(result='')), 204)
+
     try:
-        target = AppUser.query.filter_by(email=email).one()
+        target = AppUser.query_by_email(email).one()
     except NoResultFound:
-        current_app.logger.error(
-            f'Invalid email: {email} provided in password reset request.',
+        # Deliberately not logging the address: it is unauthenticated,
+        # attacker-controlled input, and of no use once we know the lookup
+        # found nothing.
+        current_app.logger.info(
+            'Password reset requested for an address with no account.',
             extra=EventLog(
                 event_type=LogEventType.RESET_PASSWORD.value).to_dict()
         )
-        raise ServerException(
-            title='Failed to authenticate',
-            message=f'A problem occurred validating email {email} for password reset.',
-            code=404
-        )
+        return no_content
 
     current_app.logger.info(
-        f'User: {target.username} password reset.',
+        f'User: {target.username} requested a password reset.',
         extra=UserEventLog(
             username=target.username,
             event_type=LogEventType.RESET_PASSWORD.value).to_dict()
     )
-    random.seed(secrets.randbits(MAX_TEMP_PASS_LENGTH))
 
-    new_length = secrets.randbits(MAX_TEMP_PASS_LENGTH) % \
-        (MAX_TEMP_PASS_LENGTH - MIN_TEMP_PASS_LENGTH) + MIN_TEMP_PASS_LENGTH
-    new_password = ''.join(random.sample([secrets.choice(RESET_PASSWORD_SYMBOLS)] +
-                                         [secrets.choice(string.ascii_uppercase)] +
-                                         [secrets.choice(string.digits)] +
-                                         [secrets.choice(RESET_PASSWORD_ALPHABET) for i in range(
-                                             new_length - 3)],
-                                         new_length))
+    token_service = PasswordResetTokenService(current_app.config['JWT_SECRET'])
+    reset_link = f'{FRONTEND_URL}/reset-password/{token_service.issue(target)}'
 
     message = Mail(
         from_email=FROM_EMAIL,
         to_emails=email,
         subject=RESET_PASSWORD_EMAIL_SUBJECT,
-        html_content=RESET_PASSWORD_EMAIL_BODY.format(name=target.first_name,
-                                                    lastname=target.last_name,
-                                                    password=new_password))
+        html_content=RESET_PASSWORD_EMAIL_BODY.format(
+            name=target.first_name,
+            lastname=target.last_name,
+            link=reset_link,
+            ttl_minutes=PASSWORD_RESET_TOKEN_TTL_MINUTES))
     try:
         SENDGRID_API_CLIENT.send(message)
     except Exception:
-        raise
+        # Swallowed on purpose. Letting a send failure surface as a 500 would
+        # reinstate the disclosure this endpoint exists to avoid: errors only
+        # ever reachable for an address that does have an account.
+        current_app.logger.exception(
+            f'Could not send the password reset email for user: {target.username}.',
+            extra=UserEventLog(
+                username=target.username,
+                event_type=LogEventType.RESET_PASSWORD.value).to_dict()
+        )
 
-    target.set_password(new_password)
-    target.forced_password_reset = True
+    return no_content
+
+
+@bp.route('/reset-password', methods=['POST'])
+@use_args(UserResetPasswordSchema)
+def complete_password_reset(params: dict):
+    """Redeem a password reset link and set the new password."""
+    token_service = PasswordResetTokenService(current_app.config['JWT_SECRET'])
+    target = token_service.verify(params['token'])
+
+    target.set_password(params['new_password'])
+    # The holder chose this password themselves, so there is nothing to force.
+    target.forced_password_reset = False
+
     try:
         db.session.add(target)
         db.session.commit()
     except SQLAlchemyError:
         db.session.rollback()
         raise
+
+    current_app.logger.info(
+        f'User: {target.username} completed a password reset.',
+        extra=UserEventLog(
+            username=target.username,
+            event_type=LogEventType.RESET_PASSWORD.value).to_dict()
+    )
     return jsonify(dict(result='')), 204
 
 
