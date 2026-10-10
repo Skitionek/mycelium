@@ -13,12 +13,14 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [Unreleased]
 
 ### Added
+
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
 - **Codespaces prebuild-friendly devcontainer flow**: `.devcontainer/devcontainer.json` now runs `.devcontainer/post-create.sh` during container creation, allowing GitHub Codespaces prebuilds to pre-run stack build/start work and reduce first-start latency.
 
 ### Changed
+
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
 - **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback); Inter loaded from Google Fonts ([#245]).
 - **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
@@ -29,7 +31,34 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **DB constraint/index names**: `constraint_lifelike_name` → `constraint_mycelium_name` and `index_lifelike_id` → `index_mycelium_id` in `changelog-0030.xml` to match the `db_Mycelium` node label they target ([#254]).
 
 ### Added
+
 - **Protein structure viewer (Mol\*)**: `.pdb`, `.cif`, and `.mmcif` files now open in a dedicated Mol\*-powered 3D viewer route (`projects/:project_name/structure/:file_id`), including in-app preview support and upload-time MIME mapping for protein structure extensions (`([#244])`).
+- **Mozg knowledge-graph layer** (`mozg/`): new Docker service based on
+  [Mozg](https://github.com/Skitionek/Mozg), a cross-database GraphQL query
+  layer. Mozg replaces the local Neo4j knowledge graph (`graph-db/`) for
+  enrichment-data queries. When `MOZG_URL` is set, NCBI gene matching and the
+  UniProt, STRING, KEGG and GO enrichment domains are answered from the
+  canonical upstream REST APIs at request time instead of from a pre-loaded
+  Neo4j instance. The image clones a pinned Mozg revision
+  (`MOZG_REVISION` in `mozg/Dockerfile`) rather than tracking `main`.
+- **`appserver/neo4japp/services/mozg_client.py`**: HTTP client for the Mozg
+  `/graphql` endpoint, with connection descriptors for NCBI E-utilities,
+  UniProt, STRING, KEGG and EBI QuickGO that mirror Mozg's own catalog
+  entries.
+- **`appserver/neo4japp/services/mozg_kg_service.py`**: `MozgKgService` and
+  `MozgEnrichmentTableService` — drop-in replacements for `KgService` /
+  `EnrichmentTableService`. Selected automatically when `MOZG_URL` is
+  present; fall back to Neo4j when it is not. Each domain resolves a whole
+  gene list in a handful of batched queries rather than one request per gene.
+  `geneNeo4jId` and `synonymNeo4jId` now carry the NCBI Gene UID; both are
+  integers and are only ever echoed back as lookup keys.
+- **`statistical-enrichment/.../services/mozg_client.py`** and
+  **`.../services/enrichment/mozg_go.py`**: GO term lookups from EBI QuickGO
+  through Mozg, used when `MOZG_URL` is set.
+- `requests` added to the `statistical-enrichment` dependencies, which the
+  Mozg client needs.
+- Unit tests for both Mozg-backed services, driven by a fake Mozg transport
+  over response shapes captured from the live upstreams.
 - **Folder-level `.annotations` JSON config files**: directories can now contain a `.annotations` file (MIME type `vnd.lifelike.filesystem/annotations`) that defines annotation scope — analogous to `.gitignore`. Content is a **JSON object** validated against `annotations_v1.json` (JSON Schema draft-07). Supports `inherit`, `fallback_organism`, `annotation_configs`, `include`, and `exclude` fields. Managed through the standard file API; nested folders can extend or override parent scope; `inherit: false` resets the accumulated config from outer scopes.
 - **`neo4japp/schemas/formats/annotations_v1.json`**: JSON Schema (draft-07) for `.annotations` config files, compiled at import time via `fastjsonschema`.
 - **`AnnotationsFileTypeProvider`**: registered file-type provider for `.annotations` MIME type. Validates uploaded JSON against the schema; triggers a synchronous refresh of the `file_effective_annotation_config` table via an `after_commit` hook that executes a SQL function.
@@ -40,11 +69,45 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - Unit tests for `FolderAnnotationService` covering: no config files, single folder config, nested config merging, `inherit: false` reset, per-file overrides, partial configs.
 - API test for the `effective-annotations-config` endpoint.
 
+### Changed
+
+- `docker/docker-compose.services.yml`: Mozg service added; `appserver` and
+  `statistical-enrichment` gain `MOZG_URL` and `mozg` in their `depends_on`.
+  `cache-invalidator` reads `MOZG_URL` but never queries Mozg, so it does not
+  depend on it.
+- `cache-invalidator` skips `precalculateGO()` when `MOZG_URL` is set. There
+  is no Mozg equivalent: the cache holds every GO term of an organism with
+  every gene annotated to it, and QuickGO answers at most 2 500 annotations
+  per query against the ~1.5 million a single organism has.
+
+### Known limitations
+
+- **BioCyc and RegulonDB return no data under Mozg.** `websvc.biocyc.org`
+  answers programmatic requests with a captcha page without a subscription,
+  and `regulondb.ccg.unam.mx` serves an incomplete TLS certificate chain that
+  Mozg's HTTP client rejects. Both domains are reported as missing rather than
+  failing the enrichment table.
+- **GO enrichment statistics are approximate under Mozg.** Fisher's exact test
+  derives a term's gene count and the background gene universe from the gene
+  list it is given; QuickGO can only supply a truncated one, and only for the
+  200 most widely shared terms. p-values and q-values are therefore indicative
+  of ranking, not of significance, and are not comparable to the Neo4j-backed
+  ones. Leave `MOZG_URL` unset to keep reading GO from Neo4j.
+
+### Deprecated
+
+- **`graph-db/`**: the Neo4j extractor + migrator pipeline is deprecated.
+  New biological-database pipelines should not be added there; use Mozg
+  instead. The Neo4j instance is retained for the graph visualiser, full-text
+  synonym search, the BioCyc and RegulonDB domains, and sound GO statistics.
+
 ### Security
+
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
 ### Fixed
+
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
 - **Client production bundle budget failure**: reenabled Angular production optimization and build optimizer in `client/angular.json`, reducing the initial bundle size.
 - **VS Code client debug task**: added a background readiness matcher for `client: dev-start` and a full-stack debug compound so the browser can attach once the Angular dev server is ready.
@@ -63,10 +126,12 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **CI linting**: upgraded `peter-evans/create-pull-request` from v6 to v7 to fix "Duplicate header: Authorization" error in the MegaLinter auto-fix PR step.
 
 ### Changed
+
 - **GitHub Actions cleanup**: removed the duplicate default CodeQL workflow, kept the advanced scan workflow, and updated stale graph DB workflow action references.
 - **CI linting**: MegaLinter fixes are opened as a separate PR (`APPLY_FIXES_MODE: pull_request`) and auto-approved via `megalinter-auto-approve.yml`; `fast-lint` runs in check-only mode.
 
 ### Added
+
 - **LibreOffice PDF conversion service** (`neo4japp/services/libreoffice.py`): server-side conversion of Office/document files (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.odt`, `.ods`, `.odp`, `.rtf`, `.txt`, `.html`, `.csv`) to PDF using LibreOffice headless mode.
 - **`GET /api/filesystem/objects/<hash_id>/content/pdf`** endpoint: serves any file's content as PDF — passes through existing PDFs unchanged, converts supported document formats on-the-fly.
 - **Client-side transparent rendering**: files with convertible MIME types now open directly in the PDF viewer; conversion is invisible to the user.
@@ -82,6 +147,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **`properties.ini.example`** template files for `common/` and `cloudstorage/` so new contributors know which values to set locally
 
 ### Changed
+
 - **Credentials now read from environment variables first** (`NEO4J_URI`, `NEO4J_DATABASE`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `AZURE_ACCOUNT_STORAGE_NAME`, `AZURE_ACCOUNT_STORAGE_KEY`) with `properties.ini` as local-dev fallback — no more manual file editing in CI/CD
 - **`generate_liquibase_changelog_file()`** signature updated to accept a `Path` output directory and an optional filename; auto-numbers the file when no name is given
 - **`graphdb-migrate.yml`**: `changelog` input changed from a free-text field to a dropdown of known master files, preventing path-typo mistakes
@@ -89,6 +155,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **`app.py` subparser** destination renamed from `domain` to `command` to allow `generate-changelog` and `full-load` as first-class subcommands alongside the existing domain extract commands
 
 ### Removed
+
 - **JIRA prefix validation** removed from `ChangeLog.__init__`, `BaseParser.__init__`, and `app.py` — the `LL-NNNN` format constraint is gone
 - **`jira-` literal prefix** removed from output file names in `liquibase_utils.py`, `base_parser.py`, and `chebi_parser.py`
 
@@ -97,6 +164,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **`.cspell.json`** project dictionary with 418 domain/project-specific words to suppress cspell false-positive warnings
 
 ### Fixed
+
 - Devcontainer Docker Compose startup now resolves app bind mounts against the Docker host workspace path, fixing empty source mounts that hid service startup scripts and broke container launch
 - Devcontainer Elasticsearch now uses a smaller JVM heap and safer single-node settings, preventing restart loops and unhealthy startup during local stack initialization
 - MegaLinter: exclude `graph-db/` from ruff scanning (legacy extractor scripts use wildcard imports by design)
@@ -109,23 +177,28 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - Removed unused `from .rcache import *` wildcard re-export false-positives; added explicit `per-file-ignores` in `ruff.toml` for legacy wildcard-import files (F403/F405)
 
 ### Removed
+
 - Dropped `jquery`, `jquery-ui`, `jquery-ui-dist`, `qtip2`, `jqueryui`, `@types/jquery`, and `@types/jqueryui` dependencies from the client
 
 ### Changed
+
 - Replaced jQuery DOM manipulation in `bioc-view.component.ts` with native DOM APIs and CSS transitions
 - Replaced jQuery + qtip2 annotation tooltips in `pdf-viewer-lib.component.ts` with Bootstrap 5 Popover
 - Replaced jQuery UI `.resizable()` in `resizable.directive.ts` with native CSS `resize` property
 
 ### Security
+
 - Upgrade `pdfjs-dist` 2.9.359 → 4.2.67 to fix arbitrary JavaScript execution on malicious PDF open (CVE-2024-4367, affects ≤ 4.1.392)
 
 ### Changed
+
 - Migrated PDF viewer to pdfjs-dist v4 API: removed `TextLayerBuilder.disableTextLayer`/`enhanceTextSelection` (controlled via `textLayerMode` option), moved `LinkTarget` import from core lib to viewer bundle, updated `EventBus` constructor (no argument), updated all type-import paths to `pdfjs-dist/types/src/`
 - Added `@angular-builders/custom-webpack` with `experiments.topLevelAwait: true` to handle pdfjs-dist v4 ES module bundles that use top-level await
 
 ## [2026-04-12]
 
 ### Added
+
 - **Zero-configuration dev environment** via VS Code Dev Container (`.devcontainer/`) — start developing with a single click in GitHub Codespaces or VS Code ([#154])
 - **Alternative tab/panel implementation** using [`route-with-dynamic-outlets`](https://github.com/Skitionek/route-with-dynamic-outlets): each workspace tab now maps to a named Angular router outlet; open tabs are encoded in the URL ([#153])
 - **Automated UI tests** — added Angular unit specs for `sort-legend`, `results-summary`, `collapsible-window`, `pagination`, `dashboard`, `kg-statistics`, `percent-input`, and `warning-pill` components ([#154])
@@ -133,12 +206,14 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Copilot coding agent** instructions and auto-fix workflow for AI-assisted development ([#149])
 
 ### Changed
+
 - **Angular v9 → v14** (BREAKING): upgraded all Angular, NgRx, RxJS, ng-bootstrap, chart.js, and related packages; removed `entryComponents`, migrated `throwError`/`toPromise` to RxJS 7 API, switched to ES2020 target ([#150])
 - **pdfjs-dist** 2.9.359 → 4.2.67 ([#155])
 
 ## [2026-04-11]
 
 ### Changed
+
 - **Alembic migrations squashed**: replaced 100 incremental migration files with a single clean baseline schema migration (`000000000000_squashed.py`) covering all 21 tables ([#152])
 - Dependabot auto-merge CI pipeline added: automerge patch/minor Dependabot PRs when all CI checks pass ([#149])
 - Various dependency bumps: `bioc` 1.3.7→2.1, `marshmallow-dataclass` 8.5.3→8.7.1, `google-cloud-storage` 1.43→3.10, `requests` 2.33.0→2.33.1, `marshmallow-sqlalchemy` 1.4.2→1.5.0, `pytest` 9.0.2→9.0.3 (appserver, statistical-enrichment, cache-invalidator) ([#136]–[#141])
@@ -149,30 +224,36 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ## [2026-04-02]
 
 ### Fixed
+
 - **Flask 3.x compatibility**: upgraded `flask-sqlalchemy` 2.5.1→3.0.5 to fix `ImportError` on `flask._app_ctx_stack` removed in Flask 2+ ([#132])
 - **TypeScript 3.8 compatibility**: pinned `@types/jqueryui` to 1.12.21 to avoid template literal types introduced in 1.12.22+ that TypeScript 3.8 cannot parse ([#132])
 
 ### Changed
+
 - Various dependency bumps: `sendgrid` 6.9.3→6.12.5, `sentry-sdk` 1.45→2.57, `intervaltree` 3.1→3.2.1, `types-redis`, `types-requests`, `mypy` 1.19→1.20, `gunicorn` 25.2→25.3, `codelyzer` 5.2→6.0, `jasmine-spec-reporter` 4.2→7.0, `@types/node` 12→25 ([#117]–[#128])
 - `lodash` / `lodash-es` 4.17.23→4.18.1 ([#130], [#133])
 
 ## [2026-03-31]
 
 ### Changed
+
 - **Flask** 2.3.3→3.1.3 ([#116])
 
 ### Security
+
 - `cryptography` 46.0.5→46.0.6 ([#115])
 
 ## [2026-03-27]
 
 ### Added
+
 - **Fork branding**: renamed project to *Lifelike Afterhours*, updated logos, README, and project identity to reflect the fork purpose ([#114])
 - **GitHub Actions CI workflows**: Docker build/publish, BrowserStack integration tests, SonarQube analysis, CodeQL code scanning, Dependabot configuration ([#109])
 - **Git hooks** for linting and code formatting ([#109])
 - **VS Code workspace configuration** (`.vscode/`) ([#109])
 
 ### Fixed
+
 - **Bootstrap 5 SCSS architecture**: removed duplicate Bootstrap import from `styles.scss`; fixed `angular.json` build order (`scss/bootstrap.scss` before `styles.scss`); cleaned `_variables.scss`, `_buttons.scss`, `_window.scss` for Bootstrap 5 compatibility ([#109])
 - **d3 v5→v7 migration**: replaced removed `d3.event` global with event parameter; replaced `d3.mouse()` with `d3.pointer()`; migrated `sankey.component.ts` to d3 v7 event API ([#109])
 - **SQLAlchemy 1.4 compatibility**: replaced deprecated `db.Binary` with `db.LargeBinary` in `models/files.py` and `models/views.py` ([#109])
