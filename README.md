@@ -8,49 +8,77 @@ Roadmap:
 
 + [x] Zero-configuration to start developing
 + [x] Provide alternative tab/panel implementation
-+ [ ] Correct sqlachemy models
++ [ ] Correct SQLAlchemy models
 + [ ] Reactive file indexing and annotating
 + [ ] Unified tooltips
 + [ ] Angular PDF.js integration
 + [x] Drop jQuery dependency
-+ [ ] Observable files (pararrel edits)
++ [ ] Observable files (parallel edits)
 + [x] Add automated tests
-+ [x] Automated itegration/deployment
-
-## Comparison with Lifelike
-
-| Feature / Improvement | [SBRG/lifelike](https://github.com/SBRG/lifelike) | Mycelium |
-|---|:---:|:---:|
-| **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
-| **Angular version** | v9 | v14 |
-| **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
-| **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 4.2.67 (CVE-2024-4367 fixed) |
-| **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |
-| **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
-| **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
-| **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
-| **jQuery dependency** | ❌ (jquery, jquery-ui, qtip2) | ✅ Removed — replaced with native DOM APIs & Bootstrap 5 Popover |
-| **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
-| **Comprehensive linting** | ❌ | ✅ MegaLinter with SARIF upload & PR annotations |
-| **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ Angular unit specs for core UI components |
-| **Database migrations** | 100+ incremental Alembic files | Single squashed baseline migration |
-| **d3 version** | v5 | v7 |
-| **Flask version** | 2.x | 3.x |
-| **Bootstrap** | 5 (with import issues) | 5 (fixed SCSS architecture) |
-| **Security hardening** | — | Patched `pdfjs-dist` CVE-2024-4367, `cryptography` bumps |
-| **Copilot / AI dev support** | ❌ | ✅ Copilot coding agent instructions & auto-fix workflow |
-
------------
++ [x] Automated integration/deployment
 
 Mycelium started as a fork of Lifelike that aims to provide a simple, yet powerful platform for turning structured and unstructured data from a variety of sources into a single, coherent and explorable knowledge graph.
 
 [![DOI](https://zenodo.org/badge/437040913.svg)](https://zenodo.org/badge/latestdoi/437040913)
 
+## Engineering highlights
+
+A few pieces of this codebase are worth reading on their own.
+
+### Byte-reproducible visual regression tests
+
+Every in-scope UI component has a Storybook story, and every story produces a
+committed PNG that CI diffs with a **0-pixel tolerance**. Getting that to be
+stable rather than permanently flaky took a few decisions:
+
+- Rendering happens inside a pinned `mcr.microsoft.com/playwright` container,
+  used identically in CI (via `container:`) and locally (via
+  `yarn snapshot:docker`), because font rasterisation differs between machines.
+- The Storybook build vendors pinned local copies of the web fonts and JS that
+  `index.html` otherwise loads from CDNs, and blocks those hosts during a run —
+  a self-updating CDN asset and a 0-pixel threshold cannot coexist.
+- Components whose layout depends on randomness get a seeded RNG; components
+  that lay out asynchronously use `imageSnapshot.waitFor` / `settle`.
+
+See [`client/.storybook/test-runner.ts`](client/.storybook/test-runner.ts).
+
+### A coverage gate that can only ratchet
+
+[`client/tools/check-story-coverage.js`](client/tools/check-story-coverage.js)
+fails the build when an in-scope component has no story beside it. Components
+that predate the harness sit on an allowlist in
+[`story-coverage-pending.json`](client/tools/story-coverage-pending.json)
+(79 entries and falling), and the check **also** fails when an entry on that
+list has since gained a story.
+
+That second rule is the interesting half: the list can only shrink, so the
+backlog cannot quietly grow, and a newly added component always needs a story.
+
+### Tab and panel state encoded in the URL
+
+The workspace uses Angular named router outlets, encoded into the URL via
+`route-with-dynamic-outlets`, rather than a bespoke tab component holding state
+in memory. A layout of open tabs and split panes is therefore a link — it
+survives a reload and can be shared.
+
+### One squashed migration baseline
+
+Upstream carried 100+ incremental Alembic revisions. Those are collapsed into a
+single
+[baseline](appserver/migrations/versions/000000000000_squashed.py),
+with new revisions added on top from there.
+
+### Ten services, one command
+
+`make up-dev` builds and starts the whole system — Angular frontend, Flask API,
+PDFParser, the statistical-enrichment and cache-invalidator services,
+PostgreSQL, Neo4j, Elasticsearch, Solr and Redis — with a dev-container
+definition so a Codespace arrives ready to work in.
+
 ## Attribution
 
 - Textual legend: "This project uses code provided by Lifelike.bio"
-- Embeded Lifelike logo image:
+- Embedded Lifelike logo image:
 
   [![Lifelike logo](https://github.com/SBRG/lifelike-website/raw/main/lifelike.png)](https://github.com/SBRG/lifelike)
 
@@ -154,7 +182,8 @@ development:
   githooks                        Set up Git commit hooks for linting and code formatting
 
 docker:
-  up                              Build and run container(s) for development. [c=<names>]
+  up                              Run all containers. [c=<names>]
+  up-dev                          Build and run all container(s) for development. [c=<names>]
   images                          Build container(s) for distribution.
   status                          Show container(s) status. [c=<names>]
   logs                            Show container(s) logs. [c=<names>]
@@ -163,21 +192,28 @@ docker:
   exec                            Execute a command inside a container. [c=<name>, cmd=<command>]
   test                            Execute test suite
   down                            Destroy all containers and volumes
-  reset                           Destroy and recreate all containers and volumes
   diagram                         Generate an architecture diagram from the Docker Compose files
 
 helm:
-  helm-lint                       Run helm lint on Mycelium chart
+  helm-lint                       Run helm lint on mycelium chart
   helm-dependency-update          Install or update chart dependencies
   helm-schema-gen                 Generate Helm chart values JSON schema
   helm-docs                       Generate Helm chart README docs
-  helm-package                    Generate Mycelium helm chart package
-  helm-install                    Install or upgrade Mycelium chart
-  helm-install-single-node        Install or upgrade Mycelium chart using the single-node example values
+  helm-package                    Generate mycelium helm chart package
+  helm-publish                    Publish a new version of mycelium helm chart to the ChartMuseum registry
+  helm-install                    Install or upgrade mycelium chart <n=namespace>
+  helm-install-single-node        Install or upgrade mycelium chart using the single-node.yaml example values
 
 other:
   help                            Show this help.
 ```
+
+Note that `up` starts the published images, while `up-dev` additionally applies
+`docker/docker-compose.dev.yml` — source bind mounts, dev builds and the
+fixed host ports used by `.vscode/launch.json`. Use `up-dev` when developing.
+
+For running the linters the way CI does, see
+[Running the linters locally](docs/local-linting.md).
 
 ## Architecture
 
@@ -224,6 +260,39 @@ flowchart TD
 - **Redis** as a key-value cache store.
 - **PDFParser** as a document parsing library.
 - **Sendgrid** as an email messaging service.
+
+## Comparison with Lifelike
+
+<details>
+<summary>What this fork changed relative to upstream</summary>
+
+The upstream column describes [SBRG/lifelike](https://github.com/SBRG/lifelike)
+**at the point this fork diverged**; it has not been re-checked since and
+upstream may have moved on.
+
+| Feature / Improvement | Lifelike (at fork) | Mycelium |
+|---|:---:|:---:|
+| **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
+| **Angular version** | v9 | v16 |
+| **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
+| **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 6.3.289 (well past CVE-2024-4367) |
+| **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |
+| **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
+| **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
+| **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
+| **jQuery dependency** | jquery, jquery-ui, qtip2 | ✅ Removed — native DOM APIs & Bootstrap 5 Popover |
+| **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
+| **Repo-wide linting** | ❌ | MegaLinter with SARIF upload & PR annotations — Python, JSON, YAML and Markdown only; `client/` TypeScript is not yet covered |
+| **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
+| **Automated UI tests** | ❌ | ✅ 50 Angular unit specs, plus Storybook image snapshots at a 0-pixel threshold |
+| **Backend test suites** | ❌ | Unit suites run in CI; the `tests/api` and `tests/database` suites need an isolated test database and do not yet run |
+| **Database migrations** | 100+ incremental Alembic files | Squashed to a single baseline, plus revisions added since |
+| **d3 version** | v5 | v7 |
+| **Flask version** | 2.x | 3.1 |
+| **Bootstrap** | 5 (with import issues) | 5 (fixed SCSS architecture) |
+| **Copilot / AI dev support** | ❌ | ✅ Coding-agent instructions & auto-fix workflow |
+
+</details>
 
 ## License
 
