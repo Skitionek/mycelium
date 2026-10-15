@@ -96,18 +96,18 @@ flask-sqlalchemy==3.1.1
     # via
     #   appserver
     #   flask-migrate
-google-api-core==2.40.0
+google-api-core==2.42.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.59.1
+google-auth==2.61.0
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
 google-cloud-core==2.8.0
     # via google-cloud-storage
-google-cloud-storage==3.16.0
+google-cloud-storage==3.17.0
     # via appserver
 google-crc32c==1.9.0
     # via
@@ -121,7 +121,7 @@ graphviz==0.21
     # via appserver
 greenlet==3.3.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
     # via sqlalchemy
-gunicorn==26.0.0
+gunicorn==26.2.0
     # via appserver
 idna==3.20
     # via requests
@@ -147,7 +147,7 @@ lxml==6.1.3
     # via bioc
 mako==1.4.3
     # via alembic
-markupsafe==3.0.3
+markupsafe==3.0.4
     # via
     #   appserver
     #   flask
@@ -254,7 +254,7 @@ sqlalchemy==2.0.54
     #   sqlalchemy-utils
 sqlalchemy-searchable==3.0.0
     # via appserver
-sqlalchemy-utils==0.42.1
+sqlalchemy-utils==0.43.0
     # via sqlalchemy-searchable
 svg-stack==0.1.0
     # via appserver
