@@ -254,7 +254,7 @@ sqlalchemy==2.0.54
     #   sqlalchemy-utils
 sqlalchemy-searchable==3.0.0
     # via appserver
-sqlalchemy-utils==0.42.1
+sqlalchemy-utils==0.43.0
     # via sqlalchemy-searchable
 svg-stack==0.1.0
     # via appserver
