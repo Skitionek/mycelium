@@ -14,6 +14,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 
+- **Local folders**: folders on the user's computer can be connected from the file browser (or dragged onto it) through the browser's File System Access API. Their files open in the existing viewers without being uploaded, and can be created, uploaded into, moved and deleted on disk. See [`docs/local-folders.md`](docs/local-folders.md) ([#679]).
+- **Background indexing of local folders**: files are text-indexed in the browser (PDF text via PDF.js) and PDFs are annotated with knowledge-graph entities, as they appear and change. Status shows in the navigation bar, on each folder tile and folder header, and per file in a new **Index** column; folder contents can be searched from the folder header ([#679]).
+- **Resumable on-disk index**: index shards are saved in hidden `.mycelium` directories inside the folder, a second after each file is done, and the folder's identity in a manifest there. A disconnected folder, a closed tab or a reload loses at most the file in progress; reconnecting the folder - even with the browser's storage cleared - reuses its ID and processes only new or changed files ([#679]).
 - **`POST /filesystem/annotations/transient`**: annotate a PDF without storing it or its annotations. The content is held in Redis under an unguessable token, at most ten minutes, for the PDF parser to fetch from `GET /annotations/transient/<token>`, and discarded once parsed ([#679]).
 - **`POST /filesystem/convert/pdf`**: convert an uploaded office document to PDF with LibreOffice without storing it, so office files that are not in Mycelium can open in the PDF viewer ([#679]).
 

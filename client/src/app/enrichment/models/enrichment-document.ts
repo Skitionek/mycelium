@@ -4,6 +4,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { mapBlobToBuffer } from 'app/shared/utils/files';
 import { nullCoalesce } from 'app/shared/utils/types';
 import { TextAnnotationGenerationRequest } from 'app/file-browser/schema';
+import { isLocalHashId } from 'app/local-filesystem/local-ids';
 
 import { DomainWrapper, EnrichmentTableService, EnrichmentWrapper, NCBINode, NCBIWrapper, } from '../services/enrichment-table.service';
 
@@ -155,8 +156,9 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
 
   refreshData(): Observable<this> {
     this.result = null;
-    if (this.fileId === '') {
-      // file was just created
+    // Annotated snippets are stored on the server, which has no record of local files
+    if (this.fileId === '' || isLocalHashId(this.fileId)) {
+      // file was just created, or lives in a local folder
       return this.generateEnrichmentResults(this.domains, this.importGenes, this.taxID).pipe(
         map((result: EnrichmentResult) => {
           this.result = result;
@@ -183,6 +185,10 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
   }
 
   private annotate(): Observable<this> {
+    if (isLocalHashId(this.fileId)) {
+      // Shown as stored in the file: entity snippets are kept on the server
+      return of(this);
+    }
     // retrieve annotated enrichment snippets if they exist
     return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
       mergeMap((enriched: EnrichmentParsedData) => {

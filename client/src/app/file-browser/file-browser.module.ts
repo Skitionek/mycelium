@@ -4,6 +4,7 @@ import { AbstractObjectTypeProviderHelper } from 'app/file-types/providers/base-
 import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 import { SharedModule } from 'app/shared/shared.module';
 import { DATA_TRANSFER_DATA_PROVIDER } from 'app/shared/services/data-transfer-data.service';
+import { LocalFilesystemModule } from 'app/local-filesystem/local-filesystem.module';
 
 import { ObjectBrowserComponent } from './components/object-browser.component';
 import { ObjectDeleteDialogComponent } from './components/dialog/object-delete-dialog.component';
@@ -78,6 +79,7 @@ import { BrowserRecentListComponent } from './components/browser/browser-recent-
   ],
   imports: [
     SharedModule,
+    LocalFilesystemModule,
   ],
   exports: [
     ObjectInfoComponent,
