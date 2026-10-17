@@ -25,7 +25,7 @@ from neo4japp.blueprints.auth import auth
 from neo4japp.constants import LogEventType
 from neo4japp.database import db, get_file_type_service, get_authorization_service
 from neo4japp.exceptions import AccessRequestRequiredError, RecordNotFound, NotAuthorized, \
-    ServerException
+    ServerException, InvalidArgument
 from neo4japp.models import (
     Projects,
     Files,
@@ -63,7 +63,7 @@ from neo4japp.schemas.filesystem import (
 )
 from neo4japp.services.file_types.exports import ExportFormatError
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
-from neo4japp.services.libreoffice import convert_to_pdf
+from neo4japp.services.libreoffice import convert_to_pdf, mime_type_for_filename
 from neo4japp.utils.collections import window
 from neo4japp.utils.http import make_cacheable_file_response
 from neo4japp.utils.network import read_url
@@ -71,6 +71,7 @@ from neo4japp.utils.logger import UserEventLog
 from neo4japp.services.file_types.providers import BiocTypeProvider, PDFTypeProvider, \
     EnrichmentTableTypeProvider
 import os
+import subprocess
 
 bp = Blueprint('filesystem', __name__, url_prefix='/filesystem')
 
@@ -1124,6 +1125,62 @@ class FileContentPdfView(FilesystemBaseView):
         )
 
 
+class PdfConversionView(MethodView):
+    """
+    Convert an uploaded document to PDF and return it, storing nothing. Lets office files
+    that are not in Mycelium, such as files in a connected local folder, open in the PDF
+    viewer like stored ones do (see FileContentPdfView).
+    """
+
+    decorators = [auth.login_required]
+
+    def post(self):
+        upload = request.files.get('file')
+        if upload is None:
+            raise InvalidArgument(
+                title='No File',
+                message='Send the document to convert in the "file" field.')
+        content = upload.read()
+        filename = upload.filename or 'document'
+        pdf_filename = os.path.splitext(filename)[0] + '.pdf'
+
+        # Only ever returns LibreOffice's output, never the request body: PDFs need no
+        # conversion and are opened directly by the client
+        mime_type = request.form.get('mimeType') or mime_type_for_filename(filename)
+        if mime_type not in LIBREOFFICE_CONVERTIBLE_MIME_TYPES:
+            raise ServerException(
+                title='Unsupported File Type',
+                message=f"'{filename}' cannot be converted to PDF.",
+                code=415,
+            )
+
+        try:
+            pdf_bytes = convert_to_pdf(content, mime_type).read()
+        except RuntimeError as e:
+            raise ServerException(
+                title='Conversion Unavailable',
+                message=str(e),
+                code=503,
+            )
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            raise ServerException(
+                title='Conversion Failed',
+                message=f"'{filename}' could not be converted to PDF.",
+                code=422,
+            )
+        return self._pdf_response(pdf_bytes, pdf_filename)
+
+    @staticmethod
+    def _pdf_response(content: bytes, filename: str):
+        res = make_response(content)
+        res.headers['Content-Type'] = FILE_MIME_TYPE_PDF
+        safe_filename = filename.replace('"', '').replace('\r', '').replace('\n', '')
+        res.headers['Content-Disposition'] = f'inline; filename="{safe_filename}"'
+        res.headers['Cache-Control'] = 'no-store'
+        res.headers['X-Content-Type-Options'] = 'nosniff'
+        return res
+
+
 class MapContentView(FilesystemBaseView):
     decorators = [auth.login_required]
 
@@ -1567,6 +1624,7 @@ bp.add_url_rule('objects/<string:hash_id>/content',
                 view_func=FileContentView.as_view('file_content'))
 bp.add_url_rule('objects/<string:hash_id>/content/pdf',
                 view_func=FileContentPdfView.as_view('file_content_pdf'))
+bp.add_url_rule('convert/pdf', view_func=PdfConversionView.as_view('pdf_conversion'))
 bp.add_url_rule('objects/<string:hash_id>/map-content',
                 view_func=MapContentView.as_view('map_content'))
 bp.add_url_rule('objects/<string:hash_id>/export', view_func=FileExportView.as_view('file_export'))
