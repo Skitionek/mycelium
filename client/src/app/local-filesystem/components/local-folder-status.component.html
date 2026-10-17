@@ -1,0 +1,69 @@
+<ng-container *ngIf="view$ | async as view">
+  <div class="d-flex align-items-center flex-wrap mt-2 small" data-local-folder-status>
+    <span class="me-2 text-muted text-nowrap">
+      <i class="fa fa-fw fa-hdd"></i> Local folder
+    </span>
+
+    <span class="me-2 text-nowrap"
+          [ngbTooltip]="statusTooltip" container="body">
+      <i class="fa fa-fw fa-spinner fa-spin text-primary"
+         *ngIf="view.status && (view.status.phase === 'indexing' || view.status.phase === 'scanning')"></i>
+      <i class="fa fa-fw fa-check text-success"
+         *ngIf="view.status && view.status.phase === 'idle' && !view.status.lastError"></i>
+      <i class="fa fa-fw fa-exclamation-triangle text-warning"
+         *ngIf="view.root.access !== 'granted' || (view.status && view.status.lastError)"></i>
+      {{ view.text }}
+    </span>
+    <ng-template #statusTooltip>
+      <div class="text-start">
+        <div *ngIf="view.status?.resumed">{{ view.status.resumed }} files picked up from the existing index</div>
+        <div *ngIf="view.status?.current">Working on {{ view.status.current }}</div>
+        <div *ngIf="view.status && !view.status.persisted">
+          Read-only access: the index cannot be saved in the folder and is rebuilt next time
+        </div>
+        <div *ngIf="view.status?.lastError">{{ view.status.lastError }}</div>
+        <div>The index is saved in hidden ".mycelium" folders next to the files</div>
+      </div>
+    </ng-template>
+
+    <div class="progress flex-grow-1 me-2" style="height: 4px; min-width: 60px; max-width: 200px"
+         *ngIf="view.status && view.status.phase === 'indexing' && view.status.queued">
+      <div class="progress-bar" role="progressbar" [style.width.%]="view.progress"
+           [attr.aria-valuenow]="view.progress" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <button class="btn btn-sm btn-outline-primary me-2" *ngIf="view.root.access !== 'granted'"
+            (click)="reconnect(view.root)">
+      Reconnect
+    </button>
+
+    <div ngbDropdown class="d-inline-block" container="body" *ngIf="view.root.access === 'granted'">
+      <button class="btn btn-sm btn-link p-0" ngbDropdownToggle>Index</button>
+      <div ngbDropdownMenu>
+        <button ngbDropdownItem (click)="rescan(view.root)">Look for changes</button>
+        <button ngbDropdownItem (click)="rebuild(view.root)">Rebuild index</button>
+        <button ngbDropdownItem (click)="toggleAnnotate(view.root)">
+          <i class="fa fa-fw" [class.fa-check-square]="view.root.annotate" [class.fa-square]="!view.root.annotate"></i>
+          Annotate PDFs on the server
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group input-group-sm mt-2" style="max-width: 480px" *ngIf="view.root.access === 'granted'">
+    <span class="input-group-text bg-transparent">
+      <i class="fa fa-search"></i>
+    </span>
+    <input class="form-control" type="search" [value]="query" (input)="search($event.target.value)"
+           placeholder="Search the contents of this folder" aria-label="Search the contents of this folder"
+           data-local-folder-search>
+    <button class="btn btn-outline-secondary" type="button" *ngIf="query" (click)="clearSearch()"
+            aria-label="Clear search">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+  <div class="small text-muted mt-1" *ngIf="resultCount != null">
+    {{ resultCount }} matching file{{ resultCount === 1 ? '' : 's' }}
+    <ng-container *ngIf="view.status && view.status.phase !== 'idle'"> so far - indexing is still in progress</ng-container>
+  </div>
+</ng-container>
