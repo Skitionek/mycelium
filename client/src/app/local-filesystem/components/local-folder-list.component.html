@@ -1,0 +1,119 @@
+<div class="module-section"
+     (dragover)="dragOver($event)" (dragleave)="dragLeave()" (drop)="drop($event)"
+     [class.drop-target]="dropActive">
+  <div class="module-section-header">
+    <h2 class="module-section-header-title">Local Folders</h2>
+  </div>
+
+  <div class="module-section-body">
+    <ng-container *ngIf="supported; else unsupported">
+      <div class="mb-3 d-flex align-items-center flex-wrap">
+        <button class="btn btn-primary me-3" (click)="connect()">
+          <i class="fa fa-fw fa-hdd"></i>
+          Connect Folder
+        </button>
+        <span class="text-muted">
+          Open folders on this computer in Mycelium, or drag one here. Files stay where they are and are indexed
+          in the background.
+        </span>
+      </div>
+
+      <ng-container *ngIf="(roots$ | async) as roots">
+        <div class="tile-deck" *ngIf="roots.length">
+          <ng-container *ngIf="(statuses$ | async) as statuses">
+            <div *ngFor="let root of roots; trackBy: trackById" class="tile d-flex flex-column"
+                 [attr.data-local-root]="root.id">
+              <div class="d-flex tile-toolbar">
+                <div ngbDropdown class="d-inline-block ms-auto" container="body">
+                  <button class="btn btn-sm" ngbDropdownToggle aria-label="Folder actions">
+                    <i class="fas fa-cog fa-fw"></i>
+                  </button>
+                  <div ngbDropdownMenu>
+                    <button ngbDropdownItem (click)="open(root)" [disabled]="root.access !== 'granted'">Open</button>
+                    <button ngbDropdownItem (click)="reconnect(root)" *ngIf="root.access !== 'granted'">
+                      Reconnect
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button ngbDropdownItem (click)="rescan(root)" [disabled]="root.access !== 'granted'">
+                      Look for changes
+                    </button>
+                    <button ngbDropdownItem (click)="rebuild(root)" [disabled]="root.access !== 'granted'">
+                      Rebuild index
+                    </button>
+                    <button ngbDropdownItem (click)="toggleAnnotate(root)">
+                      <i class="fa fa-fw" [class.fa-check-square]="root.annotate" [class.fa-square]="!root.annotate"></i>
+                      Annotate PDFs on the server
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button ngbDropdownItem (click)="disconnect(root)">Disconnect</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex-fill d-flex justify-content-center align-items-center my-2">
+                <a [appLink]="['/folders', rootHashId(root)]" class="text-muted" *ngIf="root.access === 'granted'; else lockedIcon">
+                  <i class="fa fa-hdd fa-4x"></i>
+                </a>
+                <ng-template #lockedIcon>
+                  <button class="btn btn-link text-muted p-0" (click)="reconnect(root)"
+                          ngbTooltip="Click to give Mycelium access again" container="body">
+                    <span class="fa-stack fa-2x">
+                      <i class="fa fa-hdd fa-stack-2x"></i>
+                      <i class="fa fa-lock fa-stack-1x text-white" style="top: 0.35em"></i>
+                    </span>
+                  </button>
+                </ng-template>
+              </div>
+
+              <div class="text-truncate text-center">
+                <a [appLink]="['/folders', rootHashId(root)]" class="d-block text-truncate"
+                   *ngIf="root.access === 'granted'; else lockedName">
+                  <strong>{{ root.name }}</strong>
+                </a>
+                <ng-template #lockedName><strong class="d-block text-truncate">{{ root.name }}</strong></ng-template>
+              </div>
+
+              <ng-container *ngIf="statuses.get(root.id) as status; else noStatus">
+                <div class="progress mt-2" style="height: 4px" *ngIf="root.access === 'granted' && status.phase !== 'idle'">
+                  <div class="progress-bar" role="progressbar"
+                       [class.progress-bar-striped]="status.phase === 'scanning'"
+                       [class.progress-bar-animated]="status.phase === 'scanning'"
+                       [style.width.%]="status.phase === 'scanning' ? 100 : progress(status)"
+                       [attr.aria-valuenow]="progress(status)" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="d-block text-center text-muted mt-1 text-truncate"
+                       [ngbTooltip]="statusTooltip" container="body">
+                  {{ describe(root, status) }}
+                </small>
+                <ng-template #statusTooltip>
+                  <div class="text-start">
+                    <div>{{ describe(root, status) }}</div>
+                    <div *ngIf="status.resumed">{{ status.resumed }} picked up from the existing index</div>
+                    <div *ngIf="status.current">Working on {{ status.current }}</div>
+                    <div *ngIf="!status.persisted">Read-only: the index is kept in this browser tab only</div>
+                    <div *ngIf="status.lastError" class="text-warning">{{ status.lastError }}</div>
+                  </div>
+                </ng-template>
+              </ng-container>
+              <ng-template #noStatus>
+                <small class="d-block text-center text-muted mt-1">{{ describe(root, undefined) }}</small>
+              </ng-template>
+
+              <button class="btn btn-sm btn-outline-primary mt-2" *ngIf="root.access === 'prompt' || root.access === 'denied'"
+                      (click)="reconnect(root)">
+                Reconnect
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-template #unsupported>
+      <div class="text-muted">
+        Connecting folders from this computer needs a browser with the File System Access API, such as Chrome or
+        Edge. You can still upload files into a project.
+      </div>
+    </ng-template>
+  </div>
+</div>

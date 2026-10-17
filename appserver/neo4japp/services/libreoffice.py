@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 from io import BytesIO, BufferedIOBase
+from typing import Optional
 
 
 # Extension mapping for MIME types that LibreOffice can convert to PDF.
@@ -30,6 +31,15 @@ _MIME_TO_EXTENSION: dict[str, str] = {
     'text/html': '.html',
     'text/csv': '.csv',
 }
+
+
+def mime_type_for_filename(filename: str) -> Optional[str]:
+    """The convertible MIME type matching a file name's extension, if any."""
+    extension = os.path.splitext(filename or '')[1].lower()
+    for mime_type, mime_extension in _MIME_TO_EXTENSION.items():
+        if mime_extension == extension:
+            return mime_type
+    return None
 
 
 def _find_soffice() -> str:
