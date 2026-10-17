@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
-import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subscription, throwError, from, defer } from 'rxjs';
@@ -120,6 +120,34 @@ export class FilesystemService {
         ...this.apiService.getHttpOptions(true),
         responseType: 'blob',
       },
+    );
+  }
+
+  /**
+   * Like {@link getContent}, but fails (and stops downloading) as soon as the content turns
+   * out to be larger than maxSize bytes.
+   * @param hashId - hash ID of the file to retrieve
+   * @param maxSize - largest content in bytes that is downloaded
+   */
+  getContentUpTo(hashId: string, maxSize: number): Observable<Blob> {
+    return this.http.get(
+      `/api/filesystem/objects/${encodeURIComponent(hashId)}/content`, {
+        ...this.apiService.getHttpOptions(true),
+        observe: 'events',
+        reportProgress: true,
+        responseType: 'blob',
+      },
+    ).pipe(
+      tap(event => {
+        const size = event.type === HttpEventType.ResponseHeader ? Number(event.headers.get('Content-Length'))
+          : event.type === HttpEventType.DownloadProgress ? Math.max(event.total || 0, event.loaded)
+          : 0;
+        if (size > maxSize) {
+          throw new Error(`The file is larger than ${maxSize} bytes.`);
+        }
+      }),
+      filter(event => event.type === HttpEventType.Response),
+      map(event => (event as HttpResponse<Blob>).body),
     );
   }
 

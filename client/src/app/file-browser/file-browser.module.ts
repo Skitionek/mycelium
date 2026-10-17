@@ -31,6 +31,7 @@ import {
 } from './components/object-preview.component';
 import { ObjectExportDialogComponent } from './components/dialog/object-export-dialog.component';
 import { ObjectTileDeckComponent } from './components/object-tile-deck.component';
+import { ObjectThumbnailComponent } from './components/object-thumbnail.component';
 import { DirectoryPreviewComponent } from './components/directory-preview.component';
 import { ProjectActions } from './services/project-actions';
 import { ProjectCollaboratorsDialogComponent } from './components/dialog/project-collaborators-dialog.component';
@@ -62,6 +63,7 @@ import { BrowserRecentListComponent } from './components/browser/browser-recent-
     ObjectSelectionDialogComponent,
     ObjectListComponent,
     ObjectTileDeckComponent,
+    ObjectThumbnailComponent,
     ObjectEditDialogComponent,
     ObjectVersionHistoryComponent,
     ObjectVersionHistoryDialogComponent,
@@ -85,6 +87,7 @@ import { BrowserRecentListComponent } from './components/browser/browser-recent-
     ObjectSelectionDialogComponent,
     ObjectListComponent,
     ObjectTileDeckComponent,
+    ObjectThumbnailComponent,
     ObjectEditDialogComponent,
     ObjectVersionHistoryDialogComponent,
     FileAnnotationHistoryDialogComponent,

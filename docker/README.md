@@ -55,6 +55,40 @@ The stack definition is divided into three Docker Compose files:
 
 You may combine them as you need and/or add your own `docker-compose.override.yml` to override any configuration. (this file will be ignored by Git)
 
+## Office file thumbnails (optional)
+
+The frontend can show thumbnails of Word, Excel, PowerPoint and OpenDocument files, in the
+file tiles and the file preview panel. They are rendered in the visitor's browser by
+[serverless-office-converter](https://github.com/Skitionek/serverless-office-converter)
+(LibreOffice compiled to WebAssembly), so the server does no extra work. They are off by
+default. To switch them on, build the frontend image with the converter:
+
+```shell
+docker build client --build-arg OFFICE_CONVERTER_REF=main -t mycelium-frontend
+```
+
+`OFFICE_CONVERTER_REF` is a branch, tag or commit of the converter. It adds about 45 MB to the
+image and turns on `OFFICE_THUMBNAILS`. Set `OFFICE_THUMBNAILS=off` on the container (with
+Helm, `frontend.extraEnv`) to switch thumbnails off again without rebuilding.
+
+With thumbnails on, nginx sends `Cross-Origin-Opener-Policy: same-origin` and
+`Cross-Origin-Embedder-Policy: credentialless`, because the converter needs a cross-origin
+isolated page. Windows Mycelium opens on other sites lose their link to it (`window.opener`).
+Browsers that don't support `credentialless` show file type icons as before.
+
+Thumbnails are rendered so that they don't slow down the rest of Mycelium:
+
+- Nothing is loaded until a thumbnail is on screen that hasn't been rendered yet. Only then
+  does the browser load the converter (about 45 MB the first time, then from its cache).
+- Files are downloaded and converted one at a time, when the browser is idle. Thumbnails use
+  at most one of the browser's connections to the server, and conversions run in a Web Worker,
+  off the page's main thread.
+- Thumbnails that leave the screen are dropped from the queue, and a download in progress is
+  stopped. Files larger than 25 MB are skipped.
+- The converter is stopped after a minute without work, releasing its memory (up to about
+  1 GB). Each version of a file is converted at most once while the page is open, and a file
+  that can't be converted isn't tried again.
+
 ## Other Docker operations
 
 You can run `make help` to see other available common operation:
