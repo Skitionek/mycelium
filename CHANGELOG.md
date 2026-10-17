@@ -14,6 +14,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 
+- **`POST /filesystem/annotations/transient`**: annotate a PDF without storing it or its annotations. The content is held in Redis under an unguessable token, at most ten minutes, for the PDF parser to fetch from `GET /annotations/transient/<token>`, and discarded once parsed ([#679]).
+- **`POST /filesystem/convert/pdf`**: convert an uploaded office document to PDF with LibreOffice without storing it, so office files that are not in Mycelium can open in the PDF viewer ([#679]).
+
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
@@ -282,3 +285,4 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#679]: https://github.com/Skitionek/mycelium/pull/679
