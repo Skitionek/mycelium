@@ -34,7 +34,7 @@ from ..database import (
     get_excel_export_service,
     get_enrichment_table_service
 )
-from ..exceptions import AnnotationError, ServerException
+from ..exceptions import AnnotationError, InvalidArgument, ServerException
 from ..models import (
     AppUser,
     Files,
@@ -92,7 +92,9 @@ from ..services.annotations.utils.graph_queries import (
     get_global_inclusions_query,
     get_global_inclusions_count_query
 )
+from ..services.annotations.transient_annotation import annotate_transient_pdf
 from ..services.enrichment.data_transfer_objects import EnrichmentCellTextMapping
+from ..services.transient_files import read_transient_file
 from ..utils.logger import UserEventLog
 from ..utils.http import make_cacheable_file_response
 
@@ -1132,6 +1134,70 @@ def get_pdf_to_annotate(file_id):
     return res
 
 
+# PDFs larger than this are not annotated without being stored
+TRANSIENT_ANNOTATION_MAX_BYTES = 100 * 1024 * 1024
+
+
+class TransientAnnotationsView(MethodView):
+    """
+    Annotate a PDF that is not stored in Mycelium, without storing it or its annotations.
+    Used for files in folders connected from the user's computer, whose annotations are
+    kept by the client (in the folder itself).
+    """
+    decorators = [auth.login_required]
+
+    def post(self):
+        upload = request.files.get('file')
+        if upload is None:
+            raise InvalidArgument(
+                title='No File',
+                message='Send the PDF to annotate in the "file" field.')
+        content = upload.read(TRANSIENT_ANNOTATION_MAX_BYTES + 1)
+        if len(content) > TRANSIENT_ANNOTATION_MAX_BYTES:
+            raise ServerException(
+                title='File Too Large',
+                message='The PDF is too large to be annotated without uploading it to a project.',
+                code=413)
+        if not content.startswith(b'%PDF-'):
+            raise ServerException(
+                title='Unsupported File Type',
+                message='Only PDF files can be annotated this way.',
+                code=415)
+        filename = request.form.get('filename') or upload.filename or 'document.pdf'
+
+        annotations = annotate_transient_pdf(content, filename)
+
+        current_app.logger.info(
+            f'Annotated a local file ({len(annotations)} annotations)',
+            extra=UserEventLog(
+                username=g.current_user.username,
+                event_type=LogEventType.ANNOTATION.value).to_dict()
+        )
+        return jsonify(SystemAnnotationListSchema().dump({
+            'results': annotations,
+            'total': len(annotations),
+        }))
+
+
+@bp.route('/transient/<string:token>', methods=['GET'])
+def get_transient_pdf_to_annotate(token):
+    """
+    Like get_pdf_to_annotate, but for a PDF held only while TransientAnnotationsView
+    annotates it. The token is unguessable and the content expires within minutes.
+    """
+    content = read_transient_file(token)
+    if content is None:
+        raise AnnotationError(
+            title='Failed to Annotate',
+            message='The file to annotate is no longer available.',
+            code=404)
+
+    res = make_response(content)
+    res.headers['Content-Type'] = 'application/pdf'
+    res.headers['Cache-Control'] = 'no-store'
+    return res
+
+
 class FilesNeedingReannotationView(MethodView):
     decorators = [auth.login_required, requires_role('admin')]
 
@@ -1217,6 +1283,9 @@ filesystem_bp.add_url_rule(
 filesystem_bp.add_url_rule(
     'annotations/generate',
     view_func=FileAnnotationsGenerationView.as_view('file_annotation_generation'))
+filesystem_bp.add_url_rule(
+    'annotations/transient',
+    view_func=TransientAnnotationsView.as_view('transient_annotations'))
 filesystem_bp.add_url_rule(
     'annotations/refresh',
     # TODO: this can potentially become a generic annotations refresh
