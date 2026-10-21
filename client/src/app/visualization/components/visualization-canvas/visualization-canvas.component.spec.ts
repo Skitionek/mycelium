@@ -270,7 +270,7 @@ describe('VisualizationCanvasComponent', () => {
 
         mockCallbackParams = {
             event: {
-                preventDefault() { /*Do nothing*/ },
+                preventDefault() { /* Do nothing*/ },
             },
             pointer: {
                 DOM: {

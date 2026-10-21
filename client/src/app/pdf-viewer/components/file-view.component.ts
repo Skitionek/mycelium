@@ -41,10 +41,10 @@ import {
 
 class DummyFile implements PdfFile {
   constructor(
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     public file_id: string,
     public filename: string = null,
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     public creation_date: string = null,
     public username: string = null) {
   }
@@ -441,7 +441,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
           // assumes first link will be main database source link
           // tslint ignore cause other option is destructuring and that
           // also gets name shadowing error
-          /* tslint:disable-next-line */
+          /* eslint-disable-next-line */
           url: hyperlink.length > 0 ? JSON.parse(hyperlink[0])['url'] : '',
         }],
         hyperlinks,
@@ -618,16 +618,14 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
   }
 
   parseLocationFromUrl(fragment: string): Location | undefined {
-    let pageMatch;
     let coordMatch;
-    let jumpMatch;
     const params = new URLSearchParams(fragment);
-    pageMatch = params.get('page');
+    const pageMatch = params.get('page');
     const coords = params.get('coords');
     if (coords != null) {
       coordMatch = coords.split(/,/g);
     }
-    jumpMatch = params.get('jump');
+    const jumpMatch = params.get('jump');
     return {
       pageNumber: pageMatch != null ? parseInt(pageMatch, 10) : null,
       rect: coordMatch != null ? coordMatch.map(parseFloat) : null,

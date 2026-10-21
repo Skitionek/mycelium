@@ -41,7 +41,7 @@ class NgbRTLCompat {
  * Show tooltip only if text is truncated (overflows its container).
  */
 @Directive({
-  // tslint:disable-next-line:directive-selector
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '.text-truncate'
 })
 // @ts-ignore
