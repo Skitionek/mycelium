@@ -5359,13 +5359,6 @@ ajv@^6.12.3, ajv@^6.12.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-angular-resize-event@^3.1.1:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/angular-resize-event/-/angular-resize-event-3.2.0.tgz#06ad2585f441ec81b7c9c62ee2fbb92fc5b3bcb3"
-  integrity sha512-8Cx99afBcbcWAFihThuWwt0hB281eieE+2uPA+lwPAcITvvJwTEfd788m6dMwsfz2EoogrCafyF4+l0PDs8Gjw==
-  dependencies:
-    tslib "^2.3.0"
-
 angular-split@^17.2.0:
   version "17.2.0"
   resolved "https://registry.yarnpkg.com/angular-split/-/angular-split-17.2.0.tgz#71868481e05ca2bbc604c531ce11a39af37fcd05"
@@ -7072,7 +7065,7 @@ d3-selection@1:
   resolved "https://registry.yarnpkg.com/d3-selection/-/d3-selection-3.0.0.tgz#c25338207efa72cc5b9bd1458a1a41901f1e1b31"
   integrity sha512-fmTRWbNMmsmWq6xJV8D19U/gw/bwrHfNXxrIN+HfZgnzqTHp9jOmKMhsTUjXOJnZOdZY9Q28y4yebKzqDKlxlQ==
 
-d3-shape@3, d3-shape@^3.2.0:
+d3-shape@3:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/d3-shape/-/d3-shape-3.2.0.tgz#a1a839cbd9ba45f28674c69d7f855bcf91dfc6a5"
   integrity sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA==
@@ -8231,11 +8224,6 @@ figures@^3.0.0:
   integrity sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==
   dependencies:
     escape-string-regexp "^1.0.5"
-
-file-saver@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/file-saver/-/file-saver-2.0.5.tgz#d61cfe2ce059f414d899e9dd6d4107ee25670c38"
-  integrity sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==
 
 fill-range@^7.1.1:
   version "7.1.1"
@@ -10360,11 +10348,6 @@ jsprim@^1.2.2:
     json-schema "0.4.0"
     verror "1.10.0"
 
-jszip-utils@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/jszip-utils/-/jszip-utils-0.1.0.tgz#8c04cdedcdb291e83f055f5b261b3a3188ceca0b"
-  integrity sha512-tBNe0o3HAf8vo0BrOYnLPnXNo5A3KsRMnkBFYjh20Y3GPYGfgyoclEMgvVchx0nnL+mherPi74yLPIusHUQpZg==
-
 jszip@^3.1.3, jszip@^3.10.2:
   version "3.10.2"
   resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.10.2.tgz#9fee8cfaaffb601f6c8796ecc522e4f81cbe88bf"
@@ -10599,7 +10582,7 @@ lodash.flattendeep@^4.4.0:
   resolved "https://registry.yarnpkg.com/lodash.flattendeep/-/lodash.flattendeep-4.4.0.tgz#fb030917f86a3134e5bc9bec0d69e0013ddfedb2"
   integrity sha512-uHaJFihxmJcEX3kT4I23ABqKKalJ/zDrDg0lsFtc1h+3uw49SIJ5beyhx5ExVRti3AvKoOJngIj7xz3oylPdWQ==
 
-lodash@^4.17.15, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.18.1, lodash@^4.7.0:
+lodash@^4.17.15, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.4, lodash@^4.7.0:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
@@ -11631,13 +11614,6 @@ neotraverse@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-1.0.1.tgz#7c89b43f6504ef85928c718f578c68621576d194"
   integrity sha512-WmmLty1YWwJl9yZi77v2dVIV6X2kuYV8YYBI/G3LWGKdGHmHUvL1z7FW0iDvEvGAwNEoc5x1tOOOyDnf5jJw/w==
-
-ng-bullet@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/ng-bullet/-/ng-bullet-1.0.3.tgz#578fd03ac56a1b5ab22c349f18d6e2fd8859a721"
-  integrity sha512-qacsE/w/pLlBxebort1rkrE2B4Vc3idutcpe7tYiHVarz0V6Q5SN8E3d6NUp4UFBMOucpHlCpaASp7qEOsxM1Q==
-  dependencies:
-    tslib "^1.9.0"
 
 ng-mocks@^14.18.4:
   version "14.18.4"
