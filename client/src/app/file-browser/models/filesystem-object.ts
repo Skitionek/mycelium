@@ -1,5 +1,4 @@
 import { isNil } from 'lodash-es';
-import moment from 'moment';
 
 import {
   KnowledgeMap,
@@ -661,11 +660,11 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       const bDate = nullCoalesce(b.modificationDate, b.creationDate);
 
       if (aDate != null && bDate != null) {
-        const aMoment = moment(aDate);
-        const bMoment = moment(bDate);
-        if (aMoment.isAfter(bMoment)) {
+        const aTime = Date.parse(aDate);
+        const bTime = Date.parse(bDate);
+        if (aTime > bTime) {
           return -1;
-        } else if (aMoment.isBefore(bMoment)) {
+        } else if (aTime < bTime) {
           return 1;
         } else {
           return a.name.localeCompare(b.name);
