@@ -55,7 +55,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "pyjwt" },
     { name = "pyparsing" },
-    { name = "pypdf4" },
+    { name = "pypdf" },
     { name = "python-json-logger" },
     { name = "python-magic" },
     { name = "redis" },
@@ -121,7 +121,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = "==2.9.13" },
     { name = "pyjwt", specifier = "==2.15.0" },
     { name = "pyparsing", specifier = "==3.3.2" },
-    { name = "pypdf4", specifier = "==1.27.0" },
+    { name = "pypdf", specifier = "==6.21.1" },
     { name = "python-json-logger", specifier = "==4.2.0" },
     { name = "python-magic", specifier = "==0.4.27" },
     { name = "redis", specifier = "==8.1.0" },
@@ -1512,10 +1512,16 @@ wheels = [
 ]
 
 [[package]]
-name = "pypdf4"
-version = "1.27.0"
+name = "pypdf"
+version = "6.21.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/4f/1f/509b44850c475c101aa5b5c9b81755cedd363389d6fbb5c53be6fa915a61/PyPDF4-1.27.0.tar.gz", hash = "sha256:7c932441146d205572f96254d53c79ea2c30c9e11df55a5cf87e056c7b3d7f89", size = 63925, upload-time = "2018-08-07T20:07:55.922Z" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/51/e1/32a9c4dbd94618145f8bab5c623bdb0a528f23fc8719afd77ba0278fd377/pypdf-6.21.1.tar.gz", hash = "sha256:2d62c383acd6e0dff0a96322ba8b1135229343b084d73c6f6cfd947fd291afcb", size = 7088597, upload-time = "2026-10-17T10:29:52.801Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/85/e6/24c944e473c34e818cf1b98085796fcd780465ecfe17663f2bf8fee1958b/pypdf-6.21.1-py3-none-any.whl", hash = "sha256:553e2d42f5bb3bb2a785a7d3de8ef90bb7df74b5413eff5a7b4388007ea9254b", size = 405134, upload-time = "2026-10-17T10:29:50.687Z" },
+]
 
 [[package]]
 name = "pytest"

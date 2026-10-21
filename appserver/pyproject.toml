@@ -21,7 +21,7 @@ dependencies = [
   "bioc==2.1",
   "pdfminer-six==20260107",
   "graphviz==0.21",
-  "pypdf4==1.27.0",
+  "pypdf==6.21.1",
   "sqlalchemy-searchable==3.0.0",
   "IPy==1.01",
   "sentry-sdk[flask]==2.72.0",
