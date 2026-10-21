@@ -5,6 +5,6 @@
 /* TODO: Force the linter to ignore empty interfaces for now, once we
 * add a root level state we can remove this.*/
 
-/* tslint:disable:no-empty-interface */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface State {
 }

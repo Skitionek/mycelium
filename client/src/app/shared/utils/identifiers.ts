@@ -8,9 +8,9 @@ import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
 
-    /* tslint:disable */
+    /* eslint-disable */
     let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    /* tslint:enable */
+    /* eslint-enable */
     return v.toString(16);
   });
 }

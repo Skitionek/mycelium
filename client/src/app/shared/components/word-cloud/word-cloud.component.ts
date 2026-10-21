@@ -145,12 +145,12 @@ export class WordCloudComponent implements AfterViewInit, OnDestroy {
       .timeInterval(this.timeInterval)
       // ~~ faster substitute for Math.floor() for positive numbers
       // http://rocha.la/JavaScript-bitwise-operators-in-practice
-      // tslint:disable-next-line:no-bitwise
+      // eslint-disable-next-line no-bitwise
       // .rotate(d => d.rotate || (~~(Math.random() * 6) - 3) * 30);
       .rotate(_ => 0);
   }
 
-  @Input('data') set data(data) {
+  @Input() set data(data) {
     const count: any = {};
     if (Array.isArray(data) && data.every(d => typeof d === 'string' && (count[d] = (count[d] || 0) + 1))) {
       this._data = Object.entries(count).map(([text, frequency]) => ({text, frequency}));

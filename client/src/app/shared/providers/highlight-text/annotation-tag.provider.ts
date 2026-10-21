@@ -82,7 +82,6 @@ export class AnnotationTagHandler extends TagHandler {
     const object: FilesystemObject | undefined = detail.object;
 
     if (element != null) {
-      let search;
       let text = element.textContent;
 
       const sources: Source[] = [];
@@ -93,7 +92,7 @@ export class AnnotationTagHandler extends TagHandler {
         sources.push(...object.getGraphEntitySources(meta));
       }
 
-      search = Object.keys(meta.links || []).map(k => {
+      const search = Object.keys(meta.links || []).map(k => {
         return {
           domain: k,
           url: meta.links[k],
@@ -214,7 +213,7 @@ export class AnnotationTagHandler extends TagHandler {
     }
 
     if (idLink !== null) {
-      // tslint:disable-next-line:max-line-length
+      // eslint-disable-next-line @stylistic/max-len
       base.push(annoId && annoId.indexOf('NULL') === -1 ? `Id: <a href=${escape(`${idLink.url}${annoId}`)} target="_blank">${escape(annoId)}</a>` : 'Id: None');
     } else {
       base.push(annoId && annoId.indexOf('NULL') === -1 ? `Id: ${escape(annoId)}` : 'Id: None');

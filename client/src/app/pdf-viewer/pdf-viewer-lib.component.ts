@@ -21,6 +21,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { escape, isNil, uniqueId, defer, forEach } from 'lodash-es';
 import { Observable, Subject, Subscription } from 'rxjs';
 
+import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { DatabaseLink, EntityType, ENTITY_TYPE_MAP } from 'app/shared/annotation-types';
 import { SEARCH_LINKS } from 'app/shared/links';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
@@ -29,8 +31,6 @@ import { openModal } from 'app/shared/utils/modals';
 import { IS_MAC } from 'app/shared/utils/platform';
 import { InternalSearchService } from 'app/shared/services/internal-search.service';
 
-import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
-import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { AddedAnnotationExclusion, Annotation, Location, Meta, Rect, RemovedAnnotationExclusion, } from './annotation-type';
 import { AnnotationEditDialogComponent } from './components/annotation-edit-dialog.component';
 import { AnnotationExcludeDialogComponent } from './components/annotation-exclude-dialog.component';
@@ -40,10 +40,10 @@ import { PDFSource, PDFProgressData, PDFPageRenderEvent, PDFPageView, TextLayerB
 import { AnnotationToolbarComponent } from './components/annotation-toolbar.component';
 import { convertToViewportRectangle } from './utils/viewport-utils';
 
-declare var bootstrap: any;
+declare let bootstrap: any;
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'lib-pdf-viewer-lib',
   templateUrl: './pdf-viewer-lib.component.html',
   styleUrls: ['./pdf-viewer-lib.component.scss'],
@@ -106,7 +106,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     }
   }
 
-  // tslint:disable-next-line: variable-name
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private _showExcludedAnnotations: boolean;
   @Input()
   set showExcludedAnnotations(showExcludedAnnotations: boolean) {
@@ -120,7 +120,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   @Output() loadCompleted = new EventEmitter();
   @Output() annotationDragStart = new EventEmitter<AnnotationDragEvent>();
-  // tslint:disable
+  /* eslint-disable */
   @Output('custom-annotation-created') annotationCreated = new EventEmitter();
   @Output('custom-annotation-removed') annotationRemoved = new EventEmitter();
   @Output('annotation-exclusion-added') annotationExclusionAdded = new EventEmitter();

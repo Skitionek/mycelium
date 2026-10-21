@@ -59,7 +59,7 @@ export class PdfViewerComponent
     this.internalCMapsUrl = cMapsUrl;
   }
 
-  @Input('page')
+  @Input()
   set page(page) {
     page = parseInt(page, 10) || 1;
     const orginalPage = page;
@@ -101,7 +101,7 @@ export class PdfViewerComponent
     this.internalStickToPage = value;
   }
 
-  @Input('zoom')
+  @Input()
   set zoom(value: number) {
     if (value <= 0) {
       return;
@@ -114,7 +114,7 @@ export class PdfViewerComponent
     return this.internalZoom;
   }
 
-  @Input('rotation')
+  @Input()
   set rotation(value: number) {
     if (!(typeof value === 'number' && value % 90 === 0)) {
       console.warn('Invalid pages rotation angle.');
@@ -129,7 +129,7 @@ export class PdfViewerComponent
     this.internalExternalLinkTarget = value;
   }
 
-  @Input('autoresize')
+  @Input()
   set autoresize(value: boolean) {
     this.internalCanAutoResize = Boolean(value);
   }
@@ -216,19 +216,19 @@ export class PdfViewerComponent
   private isInitialized = false;
   private loadingTask: PDFDocumentLoadingTask;
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('after-load-complete') afterLoadComplete = new EventEmitter<PDFDocumentProxy>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('page-rendered') pageRendered = new EventEmitter<CustomEvent>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('text-layer-rendered') textLayerRendered = new EventEmitter<CustomEvent>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('matches-count-updated') matchesCountUpdated = new EventEmitter();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('find-control-state-updated') findControlStateUpdated = new EventEmitter();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('error') onError = new EventEmitter<any>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('on-progress') onProgress = new EventEmitter<PDFProgressData>();
   @Output() pageChange: EventEmitter<number> = new EventEmitter<number>(true);
   @Input()
