@@ -21,7 +21,6 @@ FROM angular-deps as angular-build
 
 # Copy the code and build the app bundle
 COPY src ./src
-COPY e2e ./e2e
 COPY *.json proxy.conf.js webpack.config.js browserslist ./
 
 ARG ANGULAR_CONFIG=production
