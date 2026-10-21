@@ -4863,13 +4863,6 @@
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-2.0.11.tgz#11af57b127e32487774841f7a4e54eab166d03c4"
   integrity sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==
 
-"@types/vis@^4.21.27":
-  version "4.21.27"
-  resolved "https://registry.yarnpkg.com/@types/vis/-/vis-4.21.27.tgz#06769b796177bd394b309a8f4136433b803820ca"
-  integrity sha512-Ma/W/XgSXu9ltuJfKRqS27CVcYNxf+sM8M76F82zWSyB/s/gT+Vw2f8LZhWN+GSnDQ1XahdBKhTtGZi4IK3pzA==
-  dependencies:
-    moment ">=2.13.0"
-
 "@types/wait-on@^5.2.0":
   version "5.3.4"
   resolved "https://registry.yarnpkg.com/@types/wait-on/-/wait-on-5.3.4.tgz#5ee270b3e073fb01073f9f044922c6893de8c4d2"
@@ -11521,11 +11514,6 @@ molstar@5.11.0:
     rxjs "^7.8.2"
     swagger-ui-dist "^5.32.9"
     tslib "^2.8.1"
-
-moment@>=2.13.0:
-  version "2.31.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.31.0.tgz#6e19184e8005a9dfc61c9351263d4d6ea2ace7aa"
-  integrity sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==
 
 mrmime@1.0.1:
   version "1.0.1"
