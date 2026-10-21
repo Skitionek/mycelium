@@ -1,3 +1,6 @@
+import { md5 } from '@noble/hashes/legacy.js';
+import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils.js';
+
 // TODO: Should consolidate this with the existing shared method at the root of the app
 /**
  * universally unique identitifer generator
@@ -25,7 +28,15 @@ function makeid(length = 3) {
   return result;
 }
 
+/**
+ * MD5 hex digest of a string (used for stable, non-security identifiers)
+ */
+function md5Hex(value: string): string {
+  return bytesToHex(md5(utf8ToBytes(value)));
+}
+
 export {
   uuidv4,
   makeid,
+  md5Hex,
 };
