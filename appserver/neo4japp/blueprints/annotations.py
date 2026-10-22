@@ -1,6 +1,5 @@
 import csv
 import hashlib
-import html
 import io
 import json
 import time
@@ -92,7 +91,11 @@ from ..services.annotations.utils.graph_queries import (
     get_global_inclusions_query,
     get_global_inclusions_count_query
 )
-from ..services.annotations.transient_annotation import annotate_transient_pdf
+from ..services.annotations.enrichment_snippets import add_enrichment_snippets
+from ..services.annotations.transient_annotation import (
+    annotate_transient_enrichment_table,
+    annotate_transient_pdf,
+)
 from ..services.enrichment.data_transfer_objects import EnrichmentCellTextMapping
 from ..services.transient_files import read_transient_file
 from ..utils.logger import UserEventLog
@@ -704,64 +707,9 @@ class FileAnnotationsGenerationView(FilesystemBaseView):
             filename=file.filename,
             enrichment_mappings=enriched.text_index_map)
 
-        # NOTE: code below to calculate the correct offsets for enrichment table
-        # and correctly highlight based on cell is not pretty
-        annotations_list = annotations_json['documents'][0]['passages'][0]['annotations']
-        # sort by lo_location_offset to go from beginning to end
-        sorted_annotations_list = sorted(annotations_list, key=lambda x: x['loLocationOffset'])
-
-        prev_index = -1
-        enriched_gene = ''
-
         start = time.time()
-        for index, cell_text in enriched.text_index_map:
-            annotation_chunk = [anno for anno in sorted_annotations_list if anno.get(
-                'hiLocationOffset', None) and anno.get('hiLocationOffset') <= index]
-            # it's sorted so we can do this to make the list shorter every iteration
-            sorted_annotations_list = sorted_annotations_list[len(annotation_chunk):]
-
-            # update JSON to have enrichment row and domain...
-            for anno in annotation_chunk:
-                if prev_index != -1:
-                    # only do this for subsequent cells b/c
-                    # first cell will always have the correct index
-                    # update index offset to be relative to the cell again
-                    # since they're relative to the combined text
-                    anno['loLocationOffset'] = anno['loLocationOffset'] - (prev_index + 1) - 1  # noqa
-                    anno['hiLocationOffset'] = anno['loLocationOffset'] + anno['keywordLength'] - 1  # noqa
-
-                if 'domain' in cell_text:
-                    # imported should come first for each row
-                    if cell_text['domain'] == 'Imported':
-                        enriched_gene = cell_text['text']
-                    anno['enrichmentGene'] = enriched_gene
-                    if cell_text['domain'] == 'Regulon':
-                        anno['enrichmentDomain']['domain'] = cell_text['domain']
-                        anno['enrichmentDomain']['subDomain'] = cell_text['label']
-                    else:
-                        anno['enrichmentDomain']['domain'] = cell_text['domain']
-
-            snippet = self._highlight_annotations(
-                original_text=cell_text['text'],
-                annotations=annotation_chunk
-            )
-            if cell_text['domain'] == 'Imported':
-                enrichment['result']['genes'][cell_text[
-                    'index']]['annotatedImported'] = snippet
-            elif cell_text['domain'] == 'Matched':
-                enrichment['result']['genes'][cell_text[
-                    'index']]['annotatedMatched'] = snippet
-            elif cell_text['domain'] == 'Full Name':
-                enrichment['result']['genes'][cell_text[
-                    'index']]['annotatedFullName'] = snippet
-            else:
-                enrichment['result'][
-                    'genes'][cell_text[
-                        'index']]['domains'][cell_text[
-                            'domain']][cell_text[
-                                'label']]['annotatedText'] = snippet
-
-            prev_index = index
+        add_enrichment_snippets(
+            enrichment, enriched, annotations_json['documents'][0]['passages'][0]['annotations'])
 
         current_app.logger.info(
             f'Time to create enrichment snippets {time.time() - start}')
@@ -787,42 +735,6 @@ class FileAnnotationsGenerationView(FilesystemBaseView):
         }
 
         return update, version
-
-    def _highlight_annotations(self, original_text: str, annotations: List[dict]):
-        # If done right, we would parse the XML but the built-in XML libraries in Python
-        # are susceptible to some security vulns, but because this is an internal API,
-        # we can accept that it can be janky
-
-        texts = []
-        prev_ending_index = -1
-
-        for annotation in annotations:
-            meta = annotation['meta']
-            meta_type = annotation['meta']['type']
-            term = annotation['textInDocument']
-            lo_location_offset = annotation['loLocationOffset']
-            hi_location_offset = annotation['hiLocationOffset']
-
-            text = f'<annotation type="{meta_type}" meta="{html.escape(json.dumps(meta))}">{term}</annotation>'  # noqa
-
-            if lo_location_offset == 0:
-                prev_ending_index = hi_location_offset
-                texts.append(text)
-            else:
-                if not texts:
-                    texts.append(original_text[:lo_location_offset])
-                    prev_ending_index = hi_location_offset
-                    texts.append(text)
-                else:
-                    # TODO: would lo_location_offset == prev_ending_index ever happen?
-                    # if yes, need to handle it
-                    texts.append(original_text[prev_ending_index + 1:lo_location_offset])
-                    prev_ending_index = hi_location_offset
-                    texts.append(text)
-
-        texts.append(original_text[prev_ending_index + 1:])
-        final_text = ''.join(texts)
-        return f'<snippet>{final_text}</snippet>'
 
 
 class RefreshEnrichmentAnnotationsView(FilesystemBaseView):
@@ -1136,6 +1048,8 @@ def get_pdf_to_annotate(file_id):
 
 # PDFs larger than this are not annotated without being stored
 TRANSIENT_ANNOTATION_MAX_BYTES = 100 * 1024 * 1024
+# Likewise for enrichment tables, which are JSON
+TRANSIENT_ENRICHMENT_TABLE_MAX_BYTES = 32 * 1024 * 1024
 
 
 class TransientAnnotationsView(MethodView):
@@ -1177,6 +1091,52 @@ class TransientAnnotationsView(MethodView):
             'results': annotations,
             'total': len(annotations),
         }))
+
+
+class TransientEnrichmentAnnotationsView(MethodView):
+    """
+    Annotate an enrichment table that is not stored in Mycelium, without storing it or its
+    annotations. Answers like EnrichmentAnnotationsView, for files in folders connected
+    from the user's computer.
+    """
+    decorators = [auth.login_required]
+
+    def post(self):
+        upload = request.files.get('file')
+        if upload is None:
+            raise InvalidArgument(
+                title='No File',
+                message='Send the enrichment table to annotate in the "file" field.')
+        content = upload.read(TRANSIENT_ENRICHMENT_TABLE_MAX_BYTES + 1)
+        if len(content) > TRANSIENT_ENRICHMENT_TABLE_MAX_BYTES:
+            raise ServerException(
+                title='File Too Large',
+                message='The enrichment table is too large to be annotated without uploading '
+                        'it to a project.',
+                code=413)
+        try:
+            enrichment = json.loads(content)
+        except (JSONDecodeError, UnicodeDecodeError):
+            raise InvalidArgument(
+                title='Invalid Enrichment Table',
+                message='The enrichment table is not valid JSON.')
+        if not isinstance(enrichment, dict):
+            raise InvalidArgument(
+                title='Invalid Enrichment Table',
+                message='The enrichment table is not in a supported format.')
+        filename = request.form.get('filename') or upload.filename or 'table.enrichment'
+
+        annotated = annotate_transient_enrichment_table(enrichment, filename)
+
+        current_app.logger.info(
+            'Annotated a local enrichment table',
+            extra=UserEventLog(
+                username=g.current_user.username,
+                event_type=LogEventType.ANNOTATION.value).to_dict()
+        )
+        return jsonify({
+            'results': EnrichmentTableSchema().dump(annotated)
+        })
 
 
 @bp.route('/transient/<string:token>', methods=['GET'])
@@ -1286,6 +1246,9 @@ filesystem_bp.add_url_rule(
 filesystem_bp.add_url_rule(
     'annotations/transient',
     view_func=TransientAnnotationsView.as_view('transient_annotations'))
+filesystem_bp.add_url_rule(
+    'annotations/transient/enrichment-table',
+    view_func=TransientEnrichmentAnnotationsView.as_view('transient_enrichment_annotations'))
 filesystem_bp.add_url_rule(
     'annotations/refresh',
     # TODO: this can potentially become a generic annotations refresh
