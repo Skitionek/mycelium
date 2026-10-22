@@ -244,7 +244,7 @@ six==1.17.0
     # via python-dateutil
 sortedcontainers==2.4.0
     # via intervaltree
-sqlalchemy==2.0.54
+sqlalchemy==2.0.55
     # via
     #   alembic
     #   appserver
