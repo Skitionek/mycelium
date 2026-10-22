@@ -1,5 +1,5 @@
 """
-Annotating PDFs that are not stored on the server, such as files in a user's local folder.
+Annotating files that are not stored on the server, such as files in a user's local folder.
 
 The same pipeline as for uploaded documents runs, but nothing is written to the database:
 the annotations are returned to the caller, which keeps them (the local indexer saves them
@@ -7,16 +7,23 @@ into the folder itself).
 """
 from typing import List, Optional
 
-from neo4japp.constants import APPSERVER_URL, FILE_MIME_TYPE_PDF
+from neo4japp.constants import (
+    APPSERVER_URL,
+    FILE_MIME_TYPE_ENRICHMENT_TABLE,
+    FILE_MIME_TYPE_PDF,
+)
+from neo4japp.database import get_enrichment_table_service
 from neo4japp.services.transient_files import discard_transient_file, stash_transient_file
 
 from .constants import DEFAULT_ANNOTATION_CONFIGS
+from .enrichment_snippets import add_enrichment_snippets
 from .initializer import (
     get_annotation_db_service,
     get_annotation_graph_service,
     get_annotation_service,
     get_annotation_tokenizer,
     get_bioc_document_service,
+    get_enrichment_annotation_service,
     get_recognition_service,
 )
 from .pipeline import Pipeline
@@ -77,3 +84,51 @@ def annotate_transient_pdf(
         filename=filename)
 
     return annotations_json['documents'][0]['passages'][0]['annotations']
+
+
+def annotate_transient_enrichment_table(
+    enrichment: dict,
+    filename: str,
+    configs: Optional[dict] = None,
+) -> dict:
+    """
+    Identify entities in the cells of an enrichment table given as its parsed content.
+
+    :param enrichment: the enrichment table, changed in place
+    :param filename: the file's name, which the pipeline uses for logging
+    :param configs: annotation configuration, see DEFAULT_ANNOTATION_CONFIGS
+    :return: the table with annotated snippets, in the shape
+        GET /filesystem/objects/<id>/enrichment/annotations returns it
+    """
+    configs = configs or DEFAULT_ANNOTATION_CONFIGS
+    # Raises AnnotationError if the table is not valid
+    enriched = get_enrichment_table_service().create_annotation_mappings(enrichment)
+    text, parsed = Pipeline.parse(FILE_MIME_TYPE_ENRICHMENT_TABLE, text=enriched.text)
+
+    pipeline = Pipeline(
+        {
+            'adbs': get_annotation_db_service,
+            'ags': get_annotation_graph_service,
+            'aers': get_recognition_service,
+            'tkner': get_annotation_tokenizer,
+            'as': get_enrichment_annotation_service,
+            'bs': get_bioc_document_service,
+        },
+        text=text, parsed=parsed)
+
+    # The table's own organism scopes gene matches, as when the server annotates it
+    data = enrichment.get('data') or {}
+    annotations_json = pipeline.get_globals(
+        excluded_annotations=[],
+        custom_annotations=[],
+    ).identify(
+        annotation_methods=configs['annotation_methods']
+    ).annotate(
+        specified_organism_synonym=data.get('organism') or '',
+        specified_organism_tax_id=data.get('taxId') or '',
+        custom_annotations=[],
+        filename=filename,
+        enrichment_mappings=enriched.text_index_map)
+
+    return add_enrichment_snippets(
+        enrichment, enriched, annotations_json['documents'][0]['passages'][0]['annotations'])
