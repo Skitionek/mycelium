@@ -16,7 +16,7 @@ class FileStorageService:
     Uses the apache-libcloud :class:`~libcloud.storage.base.StorageDriver`
     interface so that the concrete storage backend can be swapped by changing
     the driver (e.g. ``Provider.AZURE_BLOBS``, ``Provider.S3``,
-    ``Provider.LOCAL_STORAGE``).
+    ``Provider.LOCAL``).
 
     File objects are addressed by their *revision*, which is the hex-encoded
     SHA-256 checksum of the content (``FileContent.revision``).  This
