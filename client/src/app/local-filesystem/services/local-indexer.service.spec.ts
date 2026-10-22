@@ -13,6 +13,7 @@ import { LocalFilesystemService } from './local-filesystem.service';
 import { LocalIndexerService, scoreEntry, summarize } from './local-indexer.service';
 
 const TRANSIENT_URL = '/api/filesystem/annotations/transient';
+const TRANSIENT_ENRICHMENT_URL = '/api/filesystem/annotations/transient/enrichment-table';
 const GENE_ANNOTATION = {
   meta: {type: 'Gene', id: '672', allText: 'BRCA1'},
   pageNumber: 1,
@@ -219,6 +220,55 @@ describe('LocalIndexerService', () => {
     await settle(again);
     http.expectNone(TRANSIENT_URL);
     expect(indexer.getFileStatus(hashId).annotations).toBe('done');
+  });
+
+  it('annotates enrichment tables through the server and serves them from the folder', async () => {
+    const table = {
+      data: {genes: 'TP53', taxId: '9606', organism: 'Homo sapiens', sources: []},
+      result: {domainInfo: {}, genes: [{imported: 'TP53', matched: 'TP53', fullName: 'tumor protein p53'}]},
+    };
+    const annotated = JSON.parse(JSON.stringify(table));
+    annotated.result.genes[0].annotatedMatched =
+      '<snippet><annotation type="Gene" meta="{}">TP53</annotation></snippet>';
+    folder.file('genes.enrichment', JSON.stringify(table));
+    createIndexer();
+    const root = await registry.connect(folder);
+    const hashId = encodeLocalHashId(root.id, 'genes.enrichment');
+
+    // Opening the table waits for its annotation
+    const opened = indexer.getEnrichmentAnnotations(hashId);
+    let requests = [];
+    await waitFor(() => (requests = http.match(TRANSIENT_ENRICHMENT_URL)).length > 0);
+    expect(requests.length).toBe(1);
+    expect((requests[0].request.body as FormData).get('filename')).toBe('genes.enrichment');
+    requests[0].flush({results: annotated});
+    expect(await opened).toEqual(annotated);
+
+    await settle(root);
+    http.expectNone(TRANSIENT_URL);
+    expect(indexer.getFileStatus(hashId)).toEqual(jasmine.objectContaining({
+      state: 'indexed', annotations: 'done', annotationCount: 1,
+    }));
+    const file = await (folder.at('genes.enrichment') as MemoryFileHandle).getFile();
+    const annotationPath = `.mycelium/annotations/${annotationFileName('genes.enrichment', file)}`;
+    expect(JSON.parse(await folder.readText(annotationPath))).toEqual(annotated);
+
+    // Annotation files live in the user's folder: malformed ones are ignored
+    (folder.at(annotationPath) as MemoryFileHandle).setContent('[1, 2]');
+    expect(await indexer.getEnrichmentAnnotations(hashId)).toBeNull();
+    // PDF annotations are lists; an annotated table is not passed to the PDF viewer
+    (folder.at(annotationPath) as MemoryFileHandle).setContent(JSON.stringify(annotated));
+    expect(await indexer.getAnnotations(hashId)).toEqual([]);
+  });
+
+  it('leaves enrichment tables unannotated when annotation is off', async () => {
+    folder.file('genes.enrichment', JSON.stringify({data: {genes: 'TP53'}, result: {domainInfo: {}, genes: []}}));
+    createIndexer();
+    const root = await registry.connect(folder);
+    await registry.setAnnotate(root.id, false);
+    await settle(root);
+    expect(await indexer.getEnrichmentAnnotations(encodeLocalHashId(root.id, 'genes.enrichment'))).toBeNull();
+    http.expectNone(TRANSIENT_ENRICHMENT_URL);
   });
 
   it('pauses annotation when the server cannot annotate, keeping the text index', async () => {

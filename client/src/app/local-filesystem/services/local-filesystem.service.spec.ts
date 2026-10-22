@@ -56,6 +56,33 @@ describe('LocalFilesystemService', () => {
     expect(plan.isNavigable).toBe(false);
   });
 
+  it('opens every file type in its built-in viewer', async () => {
+    const viewers = {
+      'paper.pdf': 'files',
+      'report.docx': 'files',
+      'pathway.llmap': 'maps',
+      'flux.graph': 'sankey',
+      'genes.enrichment': 'enrichment-table',
+      'plan.json': 'dmp',
+      'article.bioc': 'bioc',
+      'protein.pdb': 'structure',
+      'model.cif': 'structure',
+      'samples.sdrf.tsv': 'sdrf',
+      'notes.txt': 'code',
+      'script.py': 'code',
+      'table.csv': 'code',
+    };
+    const all = folder.dir('All');
+    for (const name of Object.keys(viewers)) {
+      all.file(name, name === 'plan.json' ? '{"dmp": {"title": "Plan"}}' : 'content');
+    }
+    for (const [name, viewer] of Object.entries(viewers)) {
+      const object = await firstValueFrom(service.get(id(`All/${name}`)));
+      expect(object.isOpenable).withContext(name).toBe(true);
+      expect(object.getCommands()).withContext(name).toEqual(['/projects', 'Lab', viewer, id(`All/${name}`)]);
+    }
+  });
+
   it('reads content', async () => {
     const blob = await firstValueFrom(service.getContent(id('notes.txt')));
     expect(await blob.text()).toBe('hello');
