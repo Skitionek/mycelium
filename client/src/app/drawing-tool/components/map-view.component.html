@@ -41,8 +41,8 @@
                 <app-collapsible-window title="Information" class="flex-fill" [sideCollapse]="true">
                     <div class="window-body">
                         <div class="detail-overlay-properties text-muted">
-                            <div class="text-truncate">
-                                By {{map?.user.firstName}}
+                            <div class="text-truncate" *ngIf="map?.user">
+                                By {{map.user.firstName}}
                             </div>
                             <div class="text-truncate">
                                 Modified {{map?.modificationDate | friendlyDateStr}}

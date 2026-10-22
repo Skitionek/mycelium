@@ -1,7 +1,7 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, merge, Observable, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 
 import { ApiService } from 'app/shared/services/api.service';
@@ -159,16 +159,23 @@ const RESCAN_ON_FOCUS_INTERVAL = 60 * 1000;
 const MAX_ANNOTATION_FAILURES_IN_ROW = 3;
 const MAX_SEARCH_HITS = 200;
 const OPENED_PRIORITY = 10;
-/** Matches the appserver's limit for annotating files it does not store. */
+/** Match the appserver's limits for annotating files it does not store. */
 export const MAX_ANNOTATED_PDF_BYTES = 100 * 1024 * 1024;
+export const MAX_ANNOTATED_ENRICHMENT_TABLE_BYTES = 32 * 1024 * 1024;
+
+/** An enrichment table with its cells annotated, as the appserver returns it. */
+export interface AnnotatedEnrichmentTable {
+  result: { genes: any[], [key: string]: any };
+  [key: string]: any;
+}
 
 /**
  * Indexes connected local folders in the background, as files appear and change.
  *
  * For each file the indexer extracts its text in the browser and records its terms, so local
- * folders can be searched; PDFs are additionally sent to the appserver once (without being
- * stored there) to identify biological entities, which the PDF viewer then shows exactly as
- * it does for uploaded documents.
+ * folders can be searched; PDFs and enrichment tables are additionally sent to the appserver
+ * once (without being stored there) to identify biological entities, which their viewers then
+ * show exactly as they do for uploaded documents.
  *
  * Results are written as shards into hidden `.mycelium` directories inside the folder itself
  * (see index-shard.ts), a second after each file is done. Disconnecting a folder - or closing
@@ -187,7 +194,7 @@ export class LocalIndexerService implements OnDestroy {
   private readonly fileChanges = new Subject<string>();
   private readonly pendingFileChanges = new Set<string>();
   /** Annotations of folders that cannot be written to are kept in memory. */
-  private readonly memoryAnnotations = new Map<string, Annotation[]>();
+  private readonly memoryAnnotations = new Map<string, any>();
   private readonly subscriptions = new Subscription();
   private statusTimer: any = null;
   private jobCounter = 0;
@@ -291,27 +298,24 @@ export class LocalIndexerService implements OnDestroy {
    * annotated (yet).
    */
   async getAnnotations(hashId: string): Promise<Annotation[]> {
-    const resolved = await this.localFilesystem.resolve(hashId);
-    if (resolved.handle.kind !== 'file' || resolved.parent == null) {
-      return [];
-    }
-    const file = await resolved.handle.getFile();
-    const dirPath = parentPath(resolved.ref.path);
-    const state = this.states.get(resolved.root.id);
-    const dir = state ? state.dirs.get(dirPath) : undefined;
-    const shard = dir ? dir.shard : await readShard(resolved.parent).catch(() => null);
-    const entry = shard ? shard.entries[file.name] : undefined;
-    if (entry == null || !matchesFingerprint(entry, file) || entry.annotations == null
-      || entry.annotations.state !== 'done') {
-      return [];
-    }
-    const memory = this.memoryAnnotations.get(`${resolved.root.id}/${resolved.ref.path}|${entry.annotations.file}`);
-    if (memory != null) {
-      return memory;
-    }
-    const stored = await readAnnotationFile(resolved.parent, entry.annotations.file).catch(() => null);
+    const stored = await this.readStoredAnnotations(hashId);
     // The file is in the user's folder and may have been edited; pass on only well-formed annotations
-    return (stored || []).filter(isWellFormedAnnotation);
+    return Array.isArray(stored) ? stored.filter(isWellFormedAnnotation) : [];
+  }
+
+  /**
+   * A local enrichment table with its cells annotated, or null if it is not annotated
+   * because annotation is off or failed. A table that is still waiting to be annotated is
+   * moved to the front of the queue and waited for.
+   */
+  async getEnrichmentAnnotations(hashId: string): Promise<AnnotatedEnrichmentTable | null> {
+    this.prioritize(hashId);
+    await firstValueFrom(merge(this.fileStatus$(hashId), this.status$).pipe(
+      map(() => this.isSettled(hashId)),
+      filter(settled => settled),
+    ));
+    const stored = await this.readStoredAnnotations(hashId);
+    return isWellFormedEnrichmentTable(stored) ? stored : null;
   }
 
   /**
@@ -1002,7 +1006,15 @@ export class LocalIndexerService implements OnDestroy {
     this.scheduleStatus();
 
     try {
-      const annotations = await this.requestAnnotations(file);
+      let annotations: Annotation[] | AnnotatedEnrichmentTable;
+      let count: number;
+      if (entry.mimeType === MimeTypes.EnrichmentTable) {
+        annotations = await this.requestEnrichmentAnnotations(file);
+        count = countEnrichmentAnnotations(annotations);
+      } else {
+        annotations = await this.requestAnnotations(file);
+        count = annotations.length;
+      }
       if (generation !== state.generation) {
         return;
       }
@@ -1015,7 +1027,7 @@ export class LocalIndexerService implements OnDestroy {
       if (entry.annotations != null && entry.annotations.file !== key) {
         dir.annotationsChanged = true;
       }
-      entry.annotations = {state: 'done', file: key, count: annotations.length, date: new Date().toISOString()};
+      entry.annotations = {state: 'done', file: key, count, date: new Date().toISOString()};
       state.annotationFailuresInRow = 0;
     } catch (e) {
       if (generation !== state.generation) {
@@ -1040,6 +1052,48 @@ export class LocalIndexerService implements OnDestroy {
     this.scheduleStatus();
   }
 
+  /**
+   * Whether the file is neither waiting to be (nor being) indexed or annotated, nor about to
+   * be found by a scan of its folder.
+   */
+  protected isSettled(hashId: string): boolean {
+    const status = this.getFileStatus(hashId);
+    if (status != null) {
+      return !(status.state === 'queued' || status.state === 'indexing'
+        || status.annotations === 'queued' || status.annotations === 'annotating');
+    }
+    const ref = decodeLocalHashId(hashId);
+    const root = ref ? this.getRootStatus(ref.rootId) : undefined;
+    return root == null || root.phase === 'idle' || root.phase === 'waiting';
+  }
+
+  /**
+   * What the annotation of a file found, as written to its annotation file; undefined if the
+   * file has not been annotated (yet).
+   */
+  protected async readStoredAnnotations(hashId: string): Promise<any> {
+    const resolved = await this.localFilesystem.resolve(hashId);
+    if (resolved.handle.kind !== 'file' || resolved.parent == null) {
+      return undefined;
+    }
+    const file = await resolved.handle.getFile();
+    const dirPath = parentPath(resolved.ref.path);
+    const state = this.states.get(resolved.root.id);
+    const dir = state ? state.dirs.get(dirPath) : undefined;
+    const shard = dir ? dir.shard : await readShard(resolved.parent).catch(() => null);
+    const entry = shard ? shard.entries[file.name] : undefined;
+    if (entry == null || !matchesFingerprint(entry, file) || entry.annotations == null
+      || entry.annotations.state !== 'done') {
+      return undefined;
+    }
+    const memory = this.memoryAnnotations.get(`${resolved.root.id}/${resolved.ref.path}|${entry.annotations.file}`);
+    if (memory != null) {
+      return memory;
+    }
+    const stored = await readAnnotationFile(resolved.parent, entry.annotations.file).catch(() => null);
+    return stored == null ? undefined : stored;
+  }
+
   protected async requestAnnotations(file: File): Promise<Annotation[]> {
     const form = new FormData();
     form.append('file', file, file.name);
@@ -1047,6 +1101,18 @@ export class LocalIndexerService implements OnDestroy {
     const response = await firstValueFrom(this.http.post<{ results: Annotation[] }>(
       '/api/filesystem/annotations/transient', form, this.apiService.getHttpOptions(true)));
     return response && Array.isArray(response.results) ? response.results : [];
+  }
+
+  protected async requestEnrichmentAnnotations(file: File): Promise<AnnotatedEnrichmentTable> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('filename', file.name);
+    const response = await firstValueFrom(this.http.post<{ results: AnnotatedEnrichmentTable }>(
+      '/api/filesystem/annotations/transient/enrichment-table', form, this.apiService.getHttpOptions(true)));
+    if (response == null || !isWellFormedEnrichmentTable(response.results)) {
+      throw new Error('The annotated enrichment table is not in the expected format.');
+    }
+    return response.results;
   }
 
   // ========================================
@@ -1302,7 +1368,20 @@ export function isWellFormedAnnotation(annotation: any): annotation is Annotatio
 }
 
 export function needsAnnotations(mimeType: string, size: number): boolean {
-  return mimeType === MimeTypes.Pdf && size <= MAX_ANNOTATED_PDF_BYTES;
+  return (mimeType === MimeTypes.Pdf && size <= MAX_ANNOTATED_PDF_BYTES)
+    || (mimeType === MimeTypes.EnrichmentTable && size <= MAX_ANNOTATED_ENRICHMENT_TABLE_BYTES);
+}
+
+export function isWellFormedEnrichmentTable(table: any): table is AnnotatedEnrichmentTable {
+  return table != null && typeof table === 'object' && !Array.isArray(table)
+    && table.result != null && typeof table.result === 'object' && Array.isArray(table.result.genes);
+}
+
+/**
+ * The number of entities highlighted in the cells of an annotated enrichment table.
+ */
+export function countEnrichmentAnnotations(table: AnnotatedEnrichmentTable): number {
+  return (JSON.stringify(table.result).match(/<annotation[\s>]/g) || []).length;
 }
 
 /**

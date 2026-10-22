@@ -14,17 +14,30 @@ browser cannot connect folders.
 1. Open the **File Browser** and click **Connect Folder** under **Local Folders**, or drag a
    folder from your file manager onto that section. The browser asks whether Mycelium may
    view and edit the folder.
-2. Click the folder to browse it. Files open in their usual viewer: PDFs (with entity
-   annotations once indexed), office documents (converted to PDF on the server), text and
-   code, protein structures, BioC, maps, Sankey graphs, enrichment tables and data
-   management plans.
+2. Click the folder to browse it. Files open in the same built-in viewer they would open
+   in after uploading them to a project:
+
+   | Files | Viewer |
+   |---|---|
+   | PDF | PDF viewer, with entity annotations once annotated |
+   | Office documents (`.docx`, `.xlsx`, `.pptx`, `.odt`, ...) | PDF viewer, converted to PDF on the server |
+   | Text, code, CSV, Markdown, JSON, XML | Code viewer |
+   | `.pdb`, `.cif`, `.mmcif` | Protein structure viewer |
+   | `.bioc` | BioC viewer |
+   | `.llmap` | Map viewer and editor |
+   | `.graph` | Sankey viewer |
+   | `.enrichment` | Enrichment table, with entity annotations once annotated, and its statistical enrichment |
+   | JSON data management plans | DMP editor |
+   | `.sdrf.tsv` | SDRF editor |
+
+   **Open in** in a file's menu offers the other viewers that can show it.
 3. Use **Search the contents of this folder** above the file list to search the text of
    everything indexed so far.
 
 You can create folders and files, upload into the folder, move items by dragging them
 onto another folder in it, and delete them; the changes are made on disk. Edits made in
-viewers that save, such as the map editor, are written straight to the file. Enrichment
-tables open with their stored results, without the server-side entity highlighting.
+viewers that save, such as the map, DMP, SDRF and enrichment table editors, are written
+straight to the file.
 
 ### Status indicators
 
@@ -53,7 +66,8 @@ Papers/
     manifest.json          only in the connected folder: its ID and settings
     index.json             one entry per file in Papers/
     annotations/
-      1f2e3d4c-....json    entity annotations of review.pdf
+      1f2e3d4c-....json    entity annotations of review.pdf (for an enrichment
+                           table: the table with its cells annotated)
   2024/
     trial.pdf
     .mycelium/
@@ -82,7 +96,8 @@ Papers/
 | Files | Indexed as |
 |---|---|
 | PDF | Text of every page (extracted in the browser with PDF.js), and entity annotations |
-| Text, code, CSV, Markdown, JSON, XML, BioC, enrichment tables, plans, structures | Their text |
+| Enrichment tables | Their text, and entity annotations of their cells |
+| Text, code, CSV, Markdown, JSON, XML, BioC, enrichment tables, plans, SDRF, structures | Their text |
 | Maps (`.llmap`) and graphs (`.graph`) | The text in their nodes, edges and details |
 | Anything else (images, office documents, archives) | Only the file name is searchable |
 
@@ -92,13 +107,18 @@ folder-level `.annotations` configuration file.
 ### Annotation and privacy
 
 Text extraction and search run entirely in the browser. Identifying entities in PDFs
-uses the same pipeline as uploaded documents, so each PDF is sent to the Mycelium server
-once. The server keeps it in Redis for at most ten minutes while the PDF parser reads it,
-deletes it as soon as parsing is done, and stores neither the file nor its annotations.
-PDFs over 100 MB are not sent.
+and enrichment tables uses the same pipeline as uploaded documents, so each of them is
+sent to the Mycelium server once. The server keeps a PDF in Redis for at most ten minutes
+while the PDF parser reads it and deletes it as soon as parsing is done; enrichment tables
+are annotated in memory. Neither the files nor their annotations are stored. PDFs over
+100 MB and enrichment tables over 32 MB are not sent.
 
-Turn this off per folder with **Annotate PDFs on the server** in the folder's menu; the
-setting is saved in the folder's manifest. If the annotation service is unavailable,
+The result is saved in the folder's index, so the viewers show annotations without
+asking the server again. A file opened while it is waiting to be annotated is moved to
+the front of the queue.
+
+Turn this off per folder with **Annotate PDFs and enrichment tables on the server** in
+the folder's menu; the setting is saved in the folder's manifest. If the annotation service is unavailable,
 annotation pauses for the session and is retried the next time the folder is scanned,
 without affecting the text index.
 
@@ -136,10 +156,11 @@ The client code lives in `client/src/app/local-filesystem/`:
 | `text-extraction.ts`, `mime.ts` | Text extraction and tokenizing; type detection mirroring the appserver. |
 
 `FilesystemService` and `AnnotationsService` hand any local hash ID to these services,
-which is why viewers need no changes to open local files. The appserver adds two
-stateless endpoints: `POST /filesystem/annotations/transient` (annotate a PDF without
-storing it) and `POST /filesystem/convert/pdf` (convert an office document without
-storing it).
+which is why viewers need no changes to open local files; `EnrichmentTableService` does
+the same for annotated enrichment tables. The appserver adds three stateless endpoints:
+`POST /filesystem/annotations/transient` (annotate a PDF without storing it),
+`POST /filesystem/annotations/transient/enrichment-table` (the same for an enrichment
+table) and `POST /filesystem/convert/pdf` (convert an office document without storing it).
 
 `real-filesystem.spec.ts` runs the main flows against the browser's own implementation of
 the API, using the origin private file system.

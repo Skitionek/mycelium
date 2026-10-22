@@ -208,6 +208,7 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       case MimeTypes.Graph:
       case MimeTypes.BioC:
       case MimeTypes.Dmp:
+      case MimeTypes.Sdrf:
       case 'application/pdf':
         return true;
       default:
@@ -558,6 +559,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return ['/projects', projectName, 'sankey', this.hashId];
       case MimeTypes.Dmp:
         return ['/projects', projectName, 'dmp', this.hashId];
+      case MimeTypes.Sdrf:
+        return ['/projects', projectName, 'sdrf', this.hashId];
       default:
         if (isCodemirrorHandledMimeType(this.mimeType)) {
           return ['/projects', projectName, 'code', this.hashId];
