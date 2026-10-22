@@ -115,6 +115,24 @@ export class SdrfDocument {
     return doc;
   }
 
+  /** Returns a minimal blank SDRF document text with the required columns. */
+  static blankTemplate(): string {
+    const headers = [
+      'source name',
+      'characteristics[organism]',
+      'characteristics[organism part]',
+      'characteristics[disease]',
+      'characteristics[biological replicate]',
+      'assay name',
+      'technology type',
+      'comment[data file]',
+    ];
+    const doc = new SdrfDocument();
+    doc.columns = headers.map(classifySdrfColumn);
+    doc.rows = [];
+    return doc.toText();
+  }
+
   /** Serialise to TSV text. */
   toText(): string {
     const headerRow = this.columns.map(c => c.header);
@@ -150,23 +168,5 @@ export class SdrfDocument {
   /** Remove a row by index. */
   removeRow(index: number): void {
     this.rows.splice(index, 1);
-  }
-
-  /** Returns a minimal blank SDRF document text with the required columns. */
-  static blankTemplate(): string {
-    const headers = [
-      'source name',
-      'characteristics[organism]',
-      'characteristics[organism part]',
-      'characteristics[disease]',
-      'characteristics[biological replicate]',
-      'assay name',
-      'technology type',
-      'comment[data file]',
-    ];
-    const doc = new SdrfDocument();
-    doc.columns = headers.map(classifySdrfColumn);
-    doc.rows = [];
-    return doc.toText();
   }
 }

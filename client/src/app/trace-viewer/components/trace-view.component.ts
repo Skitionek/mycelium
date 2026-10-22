@@ -1,7 +1,6 @@
 import { Component, EventEmitter, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import * as CryptoJS from 'crypto-js';
 import visNetwork from 'vis-network';
 import { combineLatest, Subscription, Observable } from 'rxjs';
 
@@ -10,6 +9,7 @@ import { UserError } from 'app/shared/exceptions';
 import { ModuleAwareComponent, ModuleProperties } from 'app/shared/modules';
 import { BackgroundTask } from 'app/shared/rxjs/background-task';
 import { uuidv4 } from 'app/shared/utils';
+import { md5Hex } from 'app/shared/utils/identifiers';
 import { mapBlobToBuffer, mapBufferToJson } from 'app/shared/utils/files';
 import { TruncatePipe } from 'app/shared/pipes';
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
@@ -170,12 +170,12 @@ export class TraceViewComponent implements OnDestroy, ModuleAwareComponent {
   getMatchingTrace(networkTraces: GraphTraceNetwork[], traceHash: string) {
     for (const networkTrace of networkTraces) {
       for (const trace of networkTrace.traces) {
-        const hash = CryptoJS.MD5(JSON.stringify({
+        const hash = md5Hex(JSON.stringify({
           ...networkTrace,
           traces: [],
           source: trace.source,
           target: trace.target
-        })).toString();
+        }));
         if (hash === traceHash) {
           return trace;
         }

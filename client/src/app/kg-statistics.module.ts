@@ -4,7 +4,7 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
 
 import { SharedModule } from 'app/shared/shared.module';
 
-import { KgStatisticsComponent } from './kg-statistics.component';
+import { KgStatisticsComponent } from 'app/kg-statistics.component';
 
 @NgModule({
   declarations: [

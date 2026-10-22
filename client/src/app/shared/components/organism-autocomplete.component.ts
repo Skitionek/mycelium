@@ -55,7 +55,7 @@ export class OrganismAutocompleteComponent implements OnInit {
       )
     ),
     tap(() => this.isFetching = false),
-  )
+  );
 
   formatter = (organism: OrganismAutocomplete) => organism.organism_name;
 

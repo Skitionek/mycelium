@@ -21,7 +21,7 @@ dependencies = [
   "bioc==2.1",
   "pdfminer-six==20260107",
   "graphviz==0.21",
-  "pypdf4==1.27.0",
+  "pypdf==6.21.1",
   "sqlalchemy-searchable==3.0.0",
   "IPy==1.01",
   "sentry-sdk[flask]==2.72.0",
@@ -41,7 +41,7 @@ dependencies = [
   "sqlalchemy==2.0.55",
   "azure-storage-file==2.1.0",
   "azure-storage-blob==12.31.0",
-  "neo4j==6.1.0",
+  "neo4j==6.4.1",
   "python-magic==0.4.27",
   "sendgrid==6.12.5",
   "werkzeug==3.1.9",
@@ -56,7 +56,7 @@ dependencies = [
 [dependency-groups]
 dev = [
   "ipython==8.39.0",
-  "pytest==9.0.3",
+  "pytest==9.1.1",
   "ruff==0.16.10",
   "pycodestyle==2.15.0",
   "mypy==2.4.0",
