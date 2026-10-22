@@ -25,7 +25,8 @@ from jsonlines import Reader as BioCJsonIterReader, Writer as BioCJsonIterWriter
 import os
 import bioc
 from marshmallow import ValidationError
-from PyPDF4 import PdfFileWriter, PdfFileReader
+from pypdf import PdfReader, PdfWriter
+from pypdf.annotations import Link
 from PIL import Image
 from lxml import etree
 
@@ -1172,12 +1173,13 @@ class MapTypeProvider(BaseFileTypeProvider):
         """
         links = links or []
         final_bytes = io.BytesIO()
-        writer = PdfFileWriter()
+        writer = PdfWriter()
         half_size = int(ICON_SIZE) * DEFAULT_DPI / 2.0
         for i, out_file in enumerate(files):
             out_file = self.get_file_export(out_file, 'pdf')
-            reader = PdfFileReader(out_file, strict=False)
-            writer.appendPagesFromReader(reader)
+            reader = PdfReader(out_file, strict=False)
+            for page in reader.pages:
+                writer.add_page(page)
         for link in links:
             file_index = link['page_origin']
             coord_offset, pixel_offset = get_content_offsets(files[file_index])
@@ -1185,9 +1187,11 @@ class MapTypeProvider(BaseFileTypeProvider):
                 PDF_MARGIN * DEFAULT_DPI + pixel_offset[0]
             y_base = ((-1 * link['y'] - coord_offset[1]) / SCALING_FACTOR * POINT_TO_PIXEL) + \
                 PDF_MARGIN * DEFAULT_DPI - pixel_offset[1]
-            writer.addLink(file_index, link['page_destination'],
-                           [x_base - half_size, y_base - half_size - LABEL_OFFSET,
-                            x_base + half_size, y_base + half_size])
+            writer.add_annotation(file_index, Link(
+                rect=(x_base - half_size, y_base - half_size - LABEL_OFFSET,
+                      x_base + half_size, y_base + half_size),
+                target_page_index=link['page_destination'],
+            ))
         writer.write(final_bytes)
         return final_bytes
 

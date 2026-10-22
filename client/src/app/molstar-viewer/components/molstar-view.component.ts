@@ -32,6 +32,8 @@ type ProteinStructureFormat = 'pdb' | 'mmcif';
   encapsulation: ViewEncapsulation.None,
 })
 export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwareComponent {
+  private static scriptLoadPromise: Promise<void> | null = null;
+
   @Input() embedded = false;
   @ViewChild('molstarContainer', { static: false }) molstarContainer: ElementRef<HTMLDivElement>;
 
@@ -46,7 +48,6 @@ export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwa
   private structureData: string | undefined;
   private structureFormat: ProteinStructureFormat | undefined;
   private readonly subscriptions = new Subscription();
-  private static scriptLoadPromise: Promise<void> | null = null;
 
   constructor(
     protected readonly filesystemService: FilesystemService,
