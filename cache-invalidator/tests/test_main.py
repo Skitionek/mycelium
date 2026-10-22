@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from unittest.mock import MagicMock, patch
 
+import neo4j
 import pytest
 
 
@@ -40,6 +41,24 @@ def main_module():
         yield module, mock_redis, mock_neo4j_driver
 
     sys.modules.pop("main", None)
+
+
+@pytest.fixture
+def neo4j_session(main_module):
+    """
+    A session mock bound to the installed driver's Session API.
+
+    The `spec` matters: a bare MagicMock answers to any attribute, so these
+    tests kept passing after the driver dropped `read_transaction` while
+    main.py still called it — the service was broken in production and green
+    in CI. Binding the mock to the real class makes that failure show up here.
+    """
+    _, _, mock_neo4j_driver = main_module
+
+    session = MagicMock(spec=neo4j.Session)
+    mock_neo4j_driver.session.return_value = session
+
+    return session
 
 
 # ---------------------------------------------------------------------------
@@ -79,12 +98,14 @@ def test_cache_data_disconnects_pool(main_module):
 # get_kg_statistics – label filtering logic
 # ---------------------------------------------------------------------------
 
-def test_get_kg_statistics_separates_domain_and_entity_labels(main_module):
+def test_get_kg_statistics_separates_domain_and_entity_labels(
+    main_module, neo4j_session
+):
     """
     Labels prefixed with 'db_' must be treated as domain labels; all other
     labels (except 'Synonym') must be treated as entity labels.
     """
-    module, mock_redis, mock_neo4j_driver = main_module
+    module, _, _ = main_module
 
     # Simulate db.labels() returning a mix of domain, entity and Synonym labels.
     label_rows = [
@@ -95,25 +116,22 @@ def test_get_kg_statistics_separates_domain_and_entity_labels(main_module):
         {"label": "Synonym"},  # should be excluded from entity labels
     ]
 
-    mock_session = MagicMock()
-    mock_neo4j_driver.session.return_value = mock_session
-
-    # First read_transaction → db.labels(); subsequent ones → entity counts
+    # First execute_read → db.labels(); subsequent ones → entity counts
     count_result = [{"count": 0}]
-    mock_session.read_transaction.side_effect = [
+    neo4j_session.execute_read.side_effect = [
         label_rows,
         *([count_result] * 4),  # 2 domains × 2 entities = 4 count queries
     ]
 
     module.get_kg_statistics()
 
-    # read_transaction is called once for db.labels() + once per domain/entity pair
-    assert mock_session.read_transaction.call_count == 1 + 2 * 2
+    # execute_read is called once for db.labels() + once per domain/entity pair
+    assert neo4j_session.execute_read.call_count == 1 + 2 * 2
 
 
-def test_get_kg_statistics_excludes_synonym_label(main_module):
+def test_get_kg_statistics_excludes_synonym_label(main_module, neo4j_session):
     """'Synonym' should never appear as an entity label in the statistics."""
-    module, mock_redis, mock_neo4j_driver = main_module
+    module, _, _ = main_module
 
     label_rows = [
         {"label": "db_Human"},
@@ -121,11 +139,8 @@ def test_get_kg_statistics_excludes_synonym_label(main_module):
         {"label": "Synonym"},
     ]
 
-    mock_session = MagicMock()
-    mock_neo4j_driver.session.return_value = mock_session
-
-    # db.labels() + 1 domain × 1 entity = 2 read_transactions
-    mock_session.read_transaction.side_effect = [
+    # db.labels() + 1 domain × 1 entity = 2 execute_read calls
+    neo4j_session.execute_read.side_effect = [
         label_rows,
         [{"count": 5}],
     ]
@@ -137,9 +152,9 @@ def test_get_kg_statistics_excludes_synonym_label(main_module):
         assert "Synonym" not in domain_stats
 
 
-def test_get_kg_statistics_omits_zero_counts(main_module):
+def test_get_kg_statistics_omits_zero_counts(main_module, neo4j_session):
     """Entities with a count of zero should not appear in the statistics."""
-    module, mock_redis, mock_neo4j_driver = main_module
+    module, _, _ = main_module
 
     label_rows = [
         {"label": "db_Human"},
@@ -147,10 +162,7 @@ def test_get_kg_statistics_omits_zero_counts(main_module):
         {"label": "Disease"},
     ]
 
-    mock_session = MagicMock()
-    mock_neo4j_driver.session.return_value = mock_session
-
-    mock_session.read_transaction.side_effect = [
+    neo4j_session.execute_read.side_effect = [
         label_rows,
         [{"count": 10}],   # Human/Gene → should be included
         [{"count": 0}],    # Human/Disease → should be excluded

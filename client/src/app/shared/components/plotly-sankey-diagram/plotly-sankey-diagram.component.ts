@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 
 import { uuidv4 } from 'app/shared/utils';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- global from the Plotly script
 declare const Plotly: any;
 
 @Component({

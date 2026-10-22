@@ -75,6 +75,11 @@ class VizSearchSchema(ma.Schema):
     query = ma.String(required=True)
     page = ma.Integer(required=True, validate=validate.Range(min=1))
     limit = ma.Integer(required=True, validate=validate.Range(min=0, max=1000))
-    domains = ma.List(ma.String(required=True))
-    entities = ma.List(ma.String(required=True))
+    # Optional filters. The search DAO reads an empty list as "no filter,
+    # search every domain/entity" (see SearchService.sanitize_filter), so the
+    # default has to be an empty list rather than absent: @use_kwargs passes
+    # one keyword argument per key the schema returns, and visualizer_search()
+    # declares both of these as required parameters.
+    domains = ma.List(ma.String(), load_default=lambda: [])
+    entities = ma.List(ma.String(), load_default=lambda: [])
     organism = ma.String(required=True)

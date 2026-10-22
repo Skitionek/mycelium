@@ -270,7 +270,7 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
                       fullName: node.full_name || '',
                       annotatedFullName: node.full_name || '',
                       link,
-                      domains: this.generateGeneDomainResults(domains, domainWrapper, node)
+                      domains: this.generateGeneDomainResults(domains, domainWrapper)
                     });
                   }
                 }
@@ -307,11 +307,10 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
    * TODO: Could make more efficient by adding domain as input to domain get request.
    * @param domains requested domains
    * @param wrapper data returned from get domains request
-   * @param ncbiNode matched ncbi data
    * @returns table entries
    */
-  private generateGeneDomainResults(domains: string[], wrapper: DomainWrapper,
-                                    ncbiNode: NCBINode): { [domain: string]: EnrichedGeneDomain } {
+  private generateGeneDomainResults(domains: string[],
+                                    wrapper: DomainWrapper): { [domain: string]: EnrichedGeneDomain } {
     const results: { [domain: string]: EnrichedGeneDomain } = {};
 
     if (domains.includes('Regulon')) {
@@ -371,8 +370,7 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
           Annotation: {
             text,
             annotatedText: text,
-            link: wrapper.uniprot !== null ? wrapper.go.link + wrapper.uniprot.result.id :
-              'http://amigo.geneontology.org/amigo/search/annotation?q=' + encodeURIComponent(ncbiNode.name)
+            link: wrapper.go.link
           },
         };
       }

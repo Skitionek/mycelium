@@ -1,14 +1,24 @@
+import os
 from typing import List
 
 import pandas as pd
 
+from . import mozg_go
 from ..rcache import redis_cached, redis_server
 from .enrich_methods import fisher
 
 
 class EnrichmentVisualisationService:
-    def __init__(self, graph):
+    def __init__(self, graph=None):
         self.graph = graph
+
+    def _use_mozg(self) -> bool:
+        """Whether GO data comes from Mozg rather than the Neo4j graph.
+
+        Read per call so this can never disagree with the choice
+        :func:`get_enrichment_visualisation_service` made about ``graph``.
+        """
+        return bool(os.getenv("MOZG_URL"))
 
     def enrich_go(self, gene_names: List[str], analysis, organism):
         if analysis == "fisher":
@@ -25,7 +35,28 @@ class EnrichmentVisualisationService:
         raise NotImplementedError
 
     def query_go_term(self, organism_id, gene_names):
-        r = self.graph.read_transaction(
+        if self._use_mozg():
+            return self._query_go_term_mozg(organism_id, gene_names)
+        return self._query_go_term_neo4j(organism_id, gene_names)
+
+    def _query_go_term_mozg(self, organism_id, gene_names):
+        """Fetch GO terms from EBI QuickGO via Mozg.
+
+        The term and gene-list caps this path works under, and what they do to
+        the statistics computed from them, are described in
+        :mod:`statistical_enrichment.services.enrichment.mozg_go`.
+        """
+        terms = mozg_go.fetch_go_terms(organism_id, gene_names)
+
+        # raise if empty - should never happen so fail fast
+        if not terms:
+            raise Exception(
+                f"Could not find related GO terms for organism id: {organism_id}"
+            )
+        return terms
+
+    def _query_go_term_neo4j(self, organism_id, gene_names):
+        r = self.graph.execute_read(
             lambda tx: list(
                 tx.run(
                     """
@@ -62,7 +93,23 @@ class EnrichmentVisualisationService:
         )
 
     def query_go_term_count(self, organism_id):
-        r = self.graph.read_transaction(
+        if self._use_mozg():
+            return self._query_go_term_count_mozg(organism_id)
+        return self._query_go_term_count_neo4j(organism_id)
+
+    def _query_go_term_count_mozg(self, organism_id):
+        """Get the total number of distinct GO terms for an organism via Mozg."""
+        go_term_count = mozg_go.fetch_go_term_count(organism_id)
+
+        # raise if empty - should never happen so fail fast
+        if not go_term_count:
+            raise Exception(
+                f"Could not find GO term count for organism id: {organism_id}"
+            )
+        return go_term_count
+
+    def _query_go_term_count_neo4j(self, organism_id):
+        r = self.graph.execute_read(
             lambda tx: list(
                 tx.run(
                     """

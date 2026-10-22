@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminPanelComponent } from 'app/admin/components/admin-panel.component';
 import { ObjectBrowserComponent } from 'app/file-browser/components/object-browser.component';
 import { LoginComponent } from 'app/auth/components/login.component';
+import { ResetPasswordComponent } from 'app/auth/components/reset-password.component';
 import { DashboardComponent } from 'app/dashboard.component';
 import { AdminGuard } from 'app/admin/services/admin-guard.service';
 import { AuthGuard } from 'app/auth/guards/auth-guard.service';
@@ -289,6 +290,16 @@ const routes: Routes = [
     data: {
       title: 'Login',
       fontAwesomeIcon: 'sign-in-alt',
+    },
+  },
+  {
+    // Reached from a password reset email, so it must not require a session.
+    // The token in the URL is the credential.
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent,
+    data: {
+      title: 'Reset Password',
+      fontAwesomeIcon: 'key',
     },
   },
   {

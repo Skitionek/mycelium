@@ -15,9 +15,9 @@ import { EnrichmentService } from './enrichment.service';
 
 export interface EnrichWithGOTermsResult {
   'p-value': any;
-  'goLabel': string[];
-  'geneNames': string[];
-  'gene': string;
+  goLabel: string[];
+  geneNames: string[];
+  gene: string;
 }
 
 const MIN_REPRESENTED_NUMBER = 0.0000000001;

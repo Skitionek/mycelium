@@ -3,7 +3,8 @@ import time
 from flask import current_app
 from neo4j import Transaction as Neo4jTx
 from neo4j.graph import Node as N4jDriverNode, Relationship as N4jDriverRelationship
-from typing import List
+from typing import List, Optional
+from urllib.parse import quote
 
 from neo4japp.constants import (
     BIOCYC_ORG_ID_DICT,
@@ -26,6 +27,26 @@ from neo4japp.util import (
     snake_to_camel_dict
 )
 from neo4japp.utils.logger import EventLog
+
+
+def build_go_annotations_link(uniprot_id: Optional[str], gene_name: str) -> str:
+    """Build a GO annotation link scoped to a single gene.
+
+    QuickGO can filter annotations by gene product, but it only recognizes
+    accessions, not NCBI gene names. Genes with no UniProt accession in the
+    graph fall back to an AmiGO free text search, which is less precise but
+    still lands on the gene rather than on every annotation in the database.
+    """
+    if uniprot_id:
+        return (
+            'https://www.ebi.ac.uk/QuickGO/annotations'
+            f'?geneProductId=UniProtKB:{quote(uniprot_id, safe="")}'
+        )
+
+    return (
+        'http://amigo.geneontology.org/amigo/search/annotation'
+        f'?q={quote(gene_name or "", safe="")}'
+    )
 
 
 class KgService(HybridDBDao):
@@ -225,7 +246,10 @@ class KgService(HybridDBDao):
         return {
             result['node_id']: {
                 'result': result['go_terms'],
-                'link': 'https://www.ebi.ac.uk/QuickGO/annotations?geneProductId='
+                'link': build_go_annotations_link(
+                    result['uniprot_id'],
+                    result['gene_name'],
+                )
             } for result in results}
 
     def get_regulon_genes(self, ncbi_gene_ids: List[int]):
@@ -362,12 +386,17 @@ class KgService(HybridDBDao):
         ).data()
 
     def get_go_genes_query(self, tx: Neo4jTx, ncbi_gene_ids: List[int]) -> List[dict]:
+        """Collect the GO terms before looking up the UniProt accession, so a
+        gene mapped to several accessions cannot multiply its GO terms."""
         return tx.run(
             """
             UNWIND $ncbi_gene_ids AS node_id
             MATCH (g)-[:GO_LINK]-(x:db_GO)
             WHERE id(g)=node_id
-            RETURN node_id, collect(x.name) AS go_terms
+            WITH node_id, g, collect(x.name) AS go_terms
+            OPTIONAL MATCH (g)-[:HAS_GENE]-(u:db_UniProt)
+            RETURN node_id, go_terms, g.name AS gene_name,
+                head(collect(u.eid)) AS uniprot_id
             """,
             ncbi_gene_ids=ncbi_gene_ids
         ).data()

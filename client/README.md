@@ -18,9 +18,13 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+## Running visual regression tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Run `yarn build-storybook` and then `yarn snapshot` to compare Storybook stories against the image snapshots via the Playwright-based [Storybook test runner](https://github.com/storybookjs/test-runner). Use `yarn snapshot:docker` to run them in the same browser build as CI.
+
+## Linting
+
+Run `yarn lint` to lint TypeScript and templates with ESLint (`eslint.config.mjs`).
 
 ## Further help
 

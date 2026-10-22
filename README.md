@@ -1,9 +1,11 @@
 # ![Mycelium](./client/src/assets/icons/mycelium-logo.svg) Mycelium
+
 *Mycelium* is a high-performance knowledge discovery platform designed to map the intricate networks of biological data. Just as mycelium forms the underlying nervous system of the natural world, this platform unifies disparate datasets into a cohesive, navigable graph architecture—empowering researchers to uncover hidden relationships and accelerate the pace of scientific insight.
 
 [![Open in Codespaces (Demo)](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/Skitionek/mycelium?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 
 Roadmap:
+
 + [x] Zero-configuration to start developing
 + [x] Provide alternative tab/panel implementation
 + [ ] Correct SQLAlchemy models
@@ -92,15 +94,25 @@ cd Mycelium
 
 make up
 ```
-Shell into appserver and run:
+
+Then set up the development database from inside the appserver container. The
+first script resets PostgreSQL and rebuilds the Elasticsearch index; the second
+loads the fixture data, including the default admin user:
+
 ```shell
-./bin/dev-db-setup
-flask seed
+make exec c=appserver cmd="./bin/dev-db-setup"
+make exec c=appserver cmd="flask seed"
 ```
 
 This will take a few minutes to complete, after which you can start using Mycelium by pointing your browser to [http://localhost:8080](http://localhost:8080).
 
 You can log in using the default admin user `admin@example.com` and password `password`.
+
+`dev-db-setup` is destructive — it drops every table and enum in the `public`
+schema before migrating. It covers PostgreSQL and Elasticsearch only. Neo4j
+comes up with the same stack, but this script does not touch it: its
+constraints and indexes come from the Liquibase migrator under `graph-db/`,
+which is not currently wired into the main compose project.
 
 ## Speed up Codespaces startup with prebuilds
 
@@ -263,17 +275,17 @@ upstream may have moved on.
 | **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
 | **Angular version** | v9 | v16 |
 | **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
-| **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 6.3.289 (well past CVE-2024-4367) |
+| **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 6.4.299 (well past CVE-2024-4367) |
 | **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |
 | **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
 | **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
 | **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
 | **jQuery dependency** | jquery, jquery-ui, qtip2 | ✅ Removed — native DOM APIs & Bootstrap 5 Popover |
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
-| **Repo-wide linting** | ❌ | MegaLinter with SARIF upload & PR annotations — Python, JSON, YAML and Markdown only; `client/` TypeScript is not yet covered |
+| **Repo-wide linting** | ❌ | MegaLinter with SARIF upload & PR annotations, over Python, JSON, YAML and Markdown; `client/` TypeScript is linted by ESLint via the pre-commit hook, not yet in CI |
 | **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ 50 Angular unit specs, plus Storybook image snapshots at a 0-pixel threshold |
-| **Backend test suites** | ❌ | Unit suites run in CI; the `tests/api` and `tests/database` suites need an isolated test database and do not yet run |
+| **Automated UI tests** | ❌ | ✅ 52 Angular unit specs, plus Storybook image snapshots at a 0-pixel threshold |
+| **Backend test suites** | ❌ | Unit and `tests/database` suites run in CI against throwaway PostgreSQL, Neo4j and Solr; `tests/api` does not yet run |
 | **Database migrations** | 100+ incremental Alembic files | Squashed to a single baseline, plus revisions added since |
 | **d3 version** | v5 | v7 |
 | **Flask version** | 2.x | 3.1 |

@@ -11,6 +11,15 @@ def get_knowledge_graph_statistics():
     statistics = redis_server.get('kg_statistics')
     if statistics:
         return statistics, 200
+
+    # The key is written by the cache-invalidator service, which recomputes it
+    # on a timer. A missing key means that service has not completed a pass
+    # yet -- a transient dependency state, not a failure of this request.
     raise ServerException(
-        title='Failed to get Statistics',
-        message='Knowledge Graph Statistics Not Available.')
+        title='Knowledge graph statistics are not ready',
+        message=(
+            'Statistics are computed in the background and are not available '
+            'yet. If this persists, check that the cache-invalidator service '
+            'is running and can reach Neo4j and Redis.'
+        ),
+        code=503)
