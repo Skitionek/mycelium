@@ -100,14 +100,14 @@ google-api-core==2.42.0
     # via
     #   google-cloud-core
     #   google-cloud-storage
-google-auth==2.61.0
+google-auth==2.62.0
     # via
     #   google-api-core
     #   google-cloud-core
     #   google-cloud-storage
 google-cloud-core==2.8.0
     # via google-cloud-storage
-google-cloud-storage==3.17.0
+google-cloud-storage==3.17.1
     # via appserver
 google-crc32c==1.9.0
     # via
@@ -244,7 +244,7 @@ six==1.17.0
     # via python-dateutil
 sortedcontainers==2.4.0
     # via intervaltree
-sqlalchemy==2.0.54
+sqlalchemy==2.0.55
     # via
     #   alembic
     #   appserver
