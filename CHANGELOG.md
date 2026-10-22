@@ -114,6 +114,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
+- **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
 - **Client production bundle budget failure**: reenabled Angular production optimization and build optimizer in `client/angular.json`, reducing the initial bundle size.
 - **VS Code client debug task**: added a background readiness matcher for `client: dev-start` and a full-stack debug compound so the browser can attach once the Angular dev server is ready.
