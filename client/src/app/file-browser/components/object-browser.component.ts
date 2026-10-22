@@ -14,6 +14,7 @@ import { WorkspaceManager } from 'app/shared/workspace-manager';
 import { ModuleProperties } from 'app/shared/modules';
 import { MessageArguments, MessageDialog } from 'app/shared/services/message-dialog.service';
 import { RankedItem } from 'app/shared/schemas/common';
+import { CollectionModel } from 'app/shared/utils/collection-model';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
 
 import { FilesystemObject } from '../models/filesystem-object';
@@ -34,6 +35,8 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   protected annotationSubscription: Subscription;
   object$: Observable<FilesystemObject> = from([]);
   createActions$: Observable<CreateDialogAction[]> = from([]);
+  /** Results of searching a local folder's index, shown instead of its contents. */
+  localSearchResults: CollectionModel<FilesystemObject> | null = null;
 
   constructor(protected readonly router: Router,
               protected readonly snackBar: MatLegacySnackBar,
@@ -86,6 +89,9 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   }
 
   load(hashId: string): Observable<any> {
+    if (hashId !== this.hashId) {
+      this.localSearchResults = null;
+    }
     this.hashId = hashId;
     const object$ = this.filesystemService.get(hashId).pipe(map(object => {
       if (this.annotationSubscription) {

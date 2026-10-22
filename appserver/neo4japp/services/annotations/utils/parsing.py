@@ -58,15 +58,19 @@ def parse_content(content_type=FILE_MIME_TYPE_PDF, **kwargs) -> Tuple[str, List[
     url = f'{PDFPARSER_URL}{parserPath}'
 
     if 'exclude_references' in kwargs:
+        # The parser pulls the PDF from a URL: either a stored file's, or one serving
+        # content that is only held for as long as it is being annotated
+        file_url = kwargs.get('file_url')
         try:
-            file_id = kwargs['file_id']
+            if file_url is None:
+                file_url = f'{APPSERVER_URL}/annotations/files/{kwargs["file_id"]}'
             exclude_references = kwargs['exclude_references']
         except KeyError:
             raise ServerException(
                 'Parsing Error',
                 'Cannot parse the PDF file, the file id is missing or data is corrupted.')
         data = {
-            'fileUrl': f'{APPSERVER_URL}/annotations/files/{file_id}',
+            'fileUrl': file_url,
             'excludeReferences': exclude_references
         }
     else:

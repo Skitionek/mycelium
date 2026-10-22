@@ -94,6 +94,9 @@ export enum MimeTypes {
   Dmp = 'vnd.mycelium.document/dmp'
 }
 
+/** The pdf.js worker, copied from pdfjs-dist into the build (see angular.json). */
+export const PDF_WORKER_PATH = 'assets/vendor/pdfjs/pdf.worker.min.mjs';
+
 export const PROTEIN_STRUCTURE_MIME_TYPES: ReadonlySet<string> = new Set([
   MimeTypes.Pdb,
   MimeTypes.Cif,

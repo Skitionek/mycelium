@@ -29,6 +29,7 @@ Roadmap:
 | **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
 | **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
 | **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
+| **Local folders** | ❌ | ✅ Open folders from your computer via the File System Access API, indexed in the background with resumable on-disk shards ([docs](docs/local-folders.md)) |
 | **jQuery dependency** | ❌ (jquery, jquery-ui, qtip2) | ✅ Removed — replaced with native DOM APIs & Bootstrap 5 Popover |
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
 | **Comprehensive linting** | ❌ | ✅ MegaLinter with SARIF upload & PR annotations |
@@ -135,6 +136,14 @@ Mycelium currently provides the following built-in visualization types:
 - Enrichment tables
 - Sankey diagrams
 - Pathway Browser
+
+### Local folders
+
+Folders on your own computer can be connected next to projects, in Chromium-based
+browsers. Their files open in the same built-in viewers as uploaded files, without being
+uploaded, and are indexed in the background for search; PDFs and enrichment tables also
+get entity annotations. The index is saved in hidden `.mycelium` directories inside the
+folder, so it survives disconnecting and is picked up when the folder is connected again. See [Local folders](docs/local-folders.md).
 
 ### Other features
 
