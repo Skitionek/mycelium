@@ -13,6 +13,8 @@ import {
   NgZone
 } from '@angular/core';
 
+import { PDF_WORKER_PATH } from 'app/shared/constants';
+
 import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
@@ -161,9 +163,8 @@ export class PdfViewerComponent
     ) {
       pdfWorkerSrc = (window as any).pdfWorkerSrc;
     } else {
-      pdfWorkerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${
-        PDFJS.version
-      }/pdf.worker.min.js`;
+      // Served with the app: cdnjs has no pdf.worker.min.js for pdf.js 4 and later
+      pdfWorkerSrc = new URL(PDF_WORKER_PATH, document.baseURI).toString();
     }
 
     PDFJS.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
@@ -368,7 +369,6 @@ export class PdfViewerComponent
             rotation
           }).width * PdfViewerComponent.CSS_UNITS;
         let scale = this.internalZoom;
-        let stickToPage = true;
 
         // Scale the document when it shouldn't be in original size or doesn't fit into the viewport
         if (
@@ -380,10 +380,11 @@ export class PdfViewerComponent
             (page as any).getViewport({scale: 1, rotation})
               .width
           );
-          stickToPage = !this.internalStickToPage;
         }
 
-        currentViewer._setScale(scale, stickToPage);
+        // pdf.js 4 and later have no _setScale(scale, noScroll); the setter keeps the
+        // current page in view
+        currentViewer.currentScale = scale;
       });
   }
 

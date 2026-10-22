@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 
-import { MimeTypes } from 'app/shared/constants';
+import { MimeTypes, PDF_WORKER_PATH } from 'app/shared/constants';
 
 /**
  * Turning local files into searchable text. Everything here runs in the browser, so a
@@ -180,7 +180,7 @@ function loadPdfJs(): Promise<any> {
         const custom = (window as any).pdfWorkerSrc;
         lib.GlobalWorkerOptions.workerSrc = typeof custom === 'string' && custom
           ? custom
-          : `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${lib.version}/pdf.worker.min.js`;
+          : new URL(PDF_WORKER_PATH, document.baseURI).toString();
       }
       return lib;
     }).catch(error => {

@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -27,8 +26,14 @@ import { getLanguageExtension } from '../codemirror-language';
   templateUrl: './codemirror-view.component.html',
   styleUrls: ['./codemirror-view.component.scss'],
 })
-export class CodemirrorViewComponent implements AfterViewInit, OnDestroy, ModuleAwareComponent {
-  @ViewChild('editorContainer', { static: false }) editorContainer: ElementRef<HTMLDivElement>;
+export class CodemirrorViewComponent implements OnDestroy, ModuleAwareComponent {
+  // The container is rendered once the file has loaded
+  @ViewChild('editorContainer', { static: false }) set editorContainer(container: ElementRef<HTMLDivElement>) {
+    if (container != null && this.editorView == null) {
+      this.initEditor(container.nativeElement, this.pendingContent ?? '');
+      this.pendingContent = undefined;
+    }
+  }
 
   modulePropertiesChange = new EventEmitter<ModuleProperties>();
 
@@ -66,14 +71,6 @@ export class CodemirrorViewComponent implements AfterViewInit, OnDestroy, Module
     this.loadTask.update(fileId);
   }
 
-  ngAfterViewInit(): void {
-    this.initEditor('');
-    if (this.pendingContent !== undefined) {
-      this.setEditorContent(this.pendingContent);
-      this.pendingContent = undefined;
-    }
-  }
-
   ngOnDestroy(): void {
     this.editorView?.destroy();
     this.subscriptions.unsubscribe();
@@ -98,13 +95,13 @@ export class CodemirrorViewComponent implements AfterViewInit, OnDestroy, Module
     return extensions;
   }
 
-  private initEditor(initialContent: string): void {
+  private initEditor(parent: HTMLElement, initialContent: string): void {
     this.editorView = new EditorView({
       state: EditorState.create({
         doc: initialContent,
         extensions: this.buildExtensions(),
       }) as any,
-      parent: this.editorContainer.nativeElement,
+      parent,
     });
   }
 

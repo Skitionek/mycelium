@@ -34,6 +34,11 @@
                 "glob": "molstar.js",
                 "input": "node_modules/molstar/build/viewer",
                 "output": "/assets/vendor/molstar"
+              },
+              {
+                "glob": "pdf.worker.min.mjs",
+                "input": "node_modules/pdfjs-dist/build",
+                "output": "/assets/vendor/pdfjs"
               }
             ],
             "styles": [

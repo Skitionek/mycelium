@@ -65,3 +65,19 @@ import 'hammerjs';
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+
+/**
+ * zone.js 0.13 replaces Promise with its own, which lacks Promise.withResolvers.
+ * pdf.js 4 and later call it.
+ */
+if (typeof (Promise as any).withResolvers !== 'function') {
+  (Promise as any).withResolvers = function withResolvers() {
+    let resolve;
+    let reject;
+    const promise = new this((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return {promise, resolve, reject};
+  };
+}
