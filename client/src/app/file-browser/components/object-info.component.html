@@ -32,6 +32,12 @@
     <hr class="my-3">
 
     <ul class="list-unstyled mt-3 mb-0">
+      <li *ngIf="object.isLocal">
+        <i class="fa fa-fw text-icon fa-hdd"></i> On this computer: <span class="text-break">{{ object.filePath }}</span>
+      </li>
+      <li *ngIf="object.isLocal && object.isFile">
+        <strong>Index:</strong>&nbsp;<app-local-index-badge [object]="object" [detailed]="true"></app-local-index-badge>
+      </li>
       <li *ngIf="object.public">
         <i class="fa fa-fw text-icon fa-globe"></i> Public
       </li>

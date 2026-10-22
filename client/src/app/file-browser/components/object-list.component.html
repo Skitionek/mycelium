@@ -40,9 +40,9 @@
                         Name
                     </ng-template>
                 </th>
-                <th class="text-truncate d-none d-cbp-sm-table-cell">Annotated</th>
+                <th class="text-truncate d-none d-cbp-sm-table-cell">{{ parent?.isLocal ? 'Index' : 'Annotated' }}</th>
                 <th class="text-truncate d-none d-cbp-md-table-cell">Modified</th>
-                <th class="text-truncate">User</th>
+                <th class="text-truncate">{{ parent?.isLocal ? 'Location' : 'User' }}</th>
                 <th></th>
             </tr>
             </thead>
@@ -158,6 +158,8 @@
 
                 <td class="align-middle text-nowrap overflow-hidden d-none d-cbp-sm-table-cell"
                     (click)="objects.toggle(object)">
+                    <app-local-index-badge *ngIf="object.isLocal" [object]="object" class="d-block text-truncate">
+                    </app-local-index-badge>
                     <div popoverTitle="Annotation Status" [ngbPopover]="object.annotationsTooltipContent"
                          container="body" class="text-truncate"
                          placement="right" triggers="mouseenter:mouseleave"
@@ -176,7 +178,12 @@
 
                 <td class="align-middle text-nowrap overflow-hidden text-truncate"
                     (click)="objects.toggle(object)">
-                    <app-user [user]="object.user"></app-user>
+                    <span *ngIf="object.isLocal; else serverUser" class="text-muted" [title]="object.filePath">
+                        <i class="fa fa-fw fa-hdd"></i> {{ object.project?.name }}
+                    </span>
+                    <ng-template #serverUser>
+                        <app-user [user]="object.user"></app-user>
+                    </ng-template>
                 </td>
 
                 <td class="align-middle">

@@ -4,6 +4,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { mapBlobToBuffer } from 'app/shared/utils/files';
 import { nullCoalesce } from 'app/shared/utils/types';
 import { TextAnnotationGenerationRequest } from 'app/file-browser/schema';
+import { isLocalHashId } from 'app/local-filesystem/local-ids';
 
 import { DomainWrapper, EnrichmentTableService, EnrichmentWrapper, NCBINode, NCBIWrapper, } from '../services/enrichment-table.service';
 
@@ -155,8 +156,9 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
 
   refreshData(): Observable<this> {
     this.result = null;
-    if (this.fileId === '') {
-      // file was just created
+    // The server re-annotates stored tables; local ones are annotated again once saved
+    if (this.fileId === '' || isLocalHashId(this.fileId)) {
+      // file was just created, or lives in a local folder
       return this.generateEnrichmentResults(this.domains, this.importGenes, this.taxID).pipe(
         map((result: EnrichmentResult) => {
           this.result = result;
@@ -183,6 +185,17 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
   }
 
   private annotate(): Observable<this> {
+    if (isLocalHashId(this.fileId)) {
+      // Annotated by the local indexer; shown as stored in the file if annotation is off
+      return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
+        map((annotated: EnrichmentParsedData) => {
+          if (annotated.result != null) {
+            this.result = annotated.result;
+          }
+          return this;
+        }),
+      );
+    }
     // retrieve annotated enrichment snippets if they exist
     return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
       mergeMap((enriched: EnrichmentParsedData) => {

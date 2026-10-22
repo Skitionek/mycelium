@@ -23,6 +23,7 @@ import { GlobalErrorHandler } from 'app/global-error-handler';
 import { EnrichmentTablesModule } from 'app/enrichment/enrichment-tables.module';
 import { EnrichmentVisualisationsModule } from 'app/enrichment/enrichment-visualisation.module';
 import { FileTypesModule } from 'app/file-types/file-types.module';
+import { LocalFilesystemModule } from 'app/local-filesystem/local-filesystem.module';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { FileTypesModule } from 'app/file-types/file-types.module';
     AppRoutingModule,
     FileTypesModule,
     FileBrowserModule,
+    LocalFilesystemModule,
     UserModule,
     // ngrx
     RootStoreModule,

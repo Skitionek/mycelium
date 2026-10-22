@@ -68,10 +68,10 @@ single
 [baseline](appserver/migrations/versions/000000000000_squashed.py),
 with new revisions added on top from there.
 
-### Ten services, one command
+### Eleven services, one command
 
 `make up-dev` builds and starts the whole system — Angular frontend, Flask API,
-PDFParser, the statistical-enrichment and cache-invalidator services,
+PDFParser, Mozg, the statistical-enrichment and cache-invalidator services,
 PostgreSQL, Neo4j, Elasticsearch, Solr and Redis — with a dev-container
 definition so a Codespace arrives ready to work in.
 
@@ -163,6 +163,14 @@ Mycelium currently provides the following built-in visualization types:
 - Enrichment tables
 - Sankey diagrams
 - Pathway Browser
+
+### Local folders
+
+Folders on your own computer can be connected next to projects, in Chromium-based
+browsers. Their files open in the same built-in viewers as uploaded files, without being
+uploaded, and are indexed in the background for search; PDFs and enrichment tables also
+get entity annotations. The index is saved in hidden `.mycelium` directories inside the
+folder, so it survives disconnecting and is picked up when the folder is connected again. See [Local folders](docs/local-folders.md).
 
 ### Other features
 
@@ -280,11 +288,12 @@ upstream may have moved on.
 | **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
 | **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
 | **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
+| **Local folders** | ❌ | ✅ Open folders from your computer via the File System Access API, indexed in the background with resumable on-disk shards ([docs](docs/local-folders.md)) |
 | **jQuery dependency** | jquery, jquery-ui, qtip2 | ✅ Removed — native DOM APIs & Bootstrap 5 Popover |
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
 | **Repo-wide linting** | ❌ | MegaLinter with SARIF upload & PR annotations, over Python, JSON, YAML and Markdown; `client/` TypeScript is linted by ESLint via the pre-commit hook, not yet in CI |
 | **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ 52 Angular unit specs, plus Storybook image snapshots at a 0-pixel threshold |
+| **Automated UI tests** | ❌ | ✅ Angular unit specs across the shared components and services, plus Storybook image snapshots at a 0-pixel threshold |
 | **Backend test suites** | ❌ | Unit and `tests/database` suites run in CI against throwaway PostgreSQL, Neo4j and Solr; `tests/api` does not yet run |
 | **Database migrations** | 100+ incremental Alembic files | Squashed to a single baseline, plus revisions added since |
 | **d3 version** | v5 | v7 |
