@@ -84,7 +84,12 @@ class PostgreSQLStorageDriver(StorageDriver):
 
     def iterate_objects(self, container):
         from neo4japp.models.files import FileContent
-        for row in self._get_session().query(FileContent).all():
+        q = (
+            self._get_session()
+            .query(FileContent)
+            .execution_options(stream_results=True)
+        )
+        for row in q.yield_per(100):
             yield self._make_object(row, container, self)
 
     def get_container(self, container_name: str) -> Container:
@@ -127,9 +132,11 @@ class PostgreSQLStorageDriver(StorageDriver):
     ) -> Object:
         """Write *iterator* bytes to ``files_content.raw_file``.
 
-        If a row with the same checksum already exists it is returned
-        unchanged (idempotent, content-addressed storage).
+        The SHA-256 of the received bytes is verified against *object_name*
+        to preserve the content-addressed invariant. If a row with the same
+        checksum already exists it is returned unchanged (idempotent).
         """
+        import hashlib as _hashlib
         from neo4japp.models.files import FileContent
 
         data = b''.join(iterator)
@@ -140,6 +147,13 @@ class PostgreSQLStorageDriver(StorageDriver):
                 f"object_name must be a 64-character hex-encoded SHA-256 checksum, "
                 f"got {object_name!r}"
             ) from exc
+
+        actual_checksum = _hashlib.sha256(data).digest()
+        if actual_checksum != checksum:
+            raise ValueError(
+                f"SHA-256 checksum mismatch: object_name is {object_name!r} but "
+                f"content hashes to {actual_checksum.hex()!r}"
+            )
 
         session = self._get_session()
         row = session.query(FileContent).filter(
