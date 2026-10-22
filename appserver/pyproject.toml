@@ -24,7 +24,7 @@ dependencies = [
   "pypdf4==1.27.0",
   "sqlalchemy-searchable==3.0.0",
   "IPy==1.01",
-  "sentry-sdk[flask]==2.58.0",
+  "sentry-sdk[flask]==2.72.0",
   "redis==8.1.0",
   "webargs==8.7.1",
   "requests==2.34.2",
