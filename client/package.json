@@ -134,7 +134,7 @@
     "ng-mocks": "^14.18.4",
     "playwright": "1.64.0",
     "protractor": "~7.0.0",
-    "storybook": "10.6.1",
+    "storybook": "10.6.2",
     "ts-node": "~10.9.2",
     "tslint": "~6.1.3",
     "typescript": "~5.1.6",
