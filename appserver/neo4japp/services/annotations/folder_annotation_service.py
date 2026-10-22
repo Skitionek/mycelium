@@ -54,11 +54,14 @@ def _lookup_annotations_config(folder_id: int) -> Optional[dict]:
     if row is None:
         return None
 
-    raw = (
-        db.session.query(FileContent.raw_file)
+    fc = (
+        db.session.query(FileContent)
         .filter(FileContent.id == row.content_id)
-        .scalar()
+        .one_or_none()
     )
+    if fc is None:
+        return None
+    raw = fc.get_bytes()
     if not raw:
         return None
 
