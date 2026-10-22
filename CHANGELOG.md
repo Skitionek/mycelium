@@ -113,7 +113,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
+
 ### Changed
+
 - **Storage backend**: migrated from Azure-specific SDKs to [apache-libcloud](https://libcloud.apache.org/) Object Storage API (`apache-libcloud==3.9.0`), making it easy to swap in alternative backends (GCS, S3, Azure Blobs) by supplying a different libcloud driver.
 - Replaced `azure-storage-file` (`FileService`) in `lmdb_manager` with a new `LibcloudStorageProvider`; `AzureStorageProvider` is now a thin libcloud-Azure subclass. Removed Azure-File-specific `create_remote_dir`.
 - Replaced `azure-storage-blob` (`BlobServiceClient`) in `blueprints/storage.py` with libcloud `get_object` / `download_object_as_stream` / `upload_object_via_stream`.
@@ -122,10 +124,12 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - New `FILE_STORAGE_PROVIDER` / `FILE_STORAGE_CONTAINER` / `FILE_STORAGE_KEY` / `FILE_STORAGE_SECRET` app-config keys control the libcloud backend (default: `POSTGRESQL`).
 
 ### Fixed
+
 - **Security**: pinned `cryptography>=46.0.7` directly to resolve CVE-2026-39892 (buffer overflow in non-contiguous buffer handling).
 - **CI linting**: upgraded `peter-evans/create-pull-request` from v6 to v7 to fix "Duplicate header: Authorization" error in the MegaLinter auto-fix PR step.
 
 ### Added
+
 - `neo4japp/services/storage_drivers/postgresql.py` — `PostgreSQLStorageDriver`, a libcloud `StorageDriver` implementation that stores objects in the `files_content` PostgreSQL table via SQLAlchemy.
 - `neo4japp/services/file_storage.py` — `FileStorageService` wrapping the libcloud `StorageDriver` API with `store`, `retrieve`, and `delete` methods.
 - `get_file_storage_service()` factory in `neo4japp/database.py` — builds the libcloud driver from app config and memoises it to the request context.
@@ -157,6 +161,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **CI linting**: MegaLinter fixes are opened as a separate PR (`APPLY_FIXES_MODE: pull_request`) and auto-approved via `megalinter-auto-approve.yml`; `fast-lint` runs in check-only mode.
 
 ### Added
+
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 - **LibreOffice PDF conversion service** (`neo4japp/services/libreoffice.py`): server-side conversion of Office/document files (`.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`, `.odt`, `.ods`, `.odp`, `.rtf`, `.txt`, `.html`, `.csv`) to PDF using LibreOffice headless mode.
 - **`GET /api/filesystem/objects/<hash_id>/content/pdf`** endpoint: serves any file's content as PDF — passes through existing PDFs unchanged, converts supported document formats on-the-fly.
@@ -173,6 +178,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **`properties.ini.example`** template files for `common/` and `cloudstorage/` so new contributors know which values to set locally
 
 ### Changed
+
 - **Storage backend**: migrated from Azure-specific SDKs to [apache-libcloud](https://libcloud.apache.org/) Object Storage API (`apache-libcloud==3.9.0`), making it easy to swap in alternative backends (GCS, S3, Azure Blobs) by supplying a different libcloud driver.
 - Replaced `azure-storage-file` (`FileService`) in `lmdb_manager` with a new `LibcloudStorageProvider`; `AzureStorageProvider` is now a thin libcloud-Azure subclass. Removed Azure-File-specific `create_remote_dir`.
 - Replaced `azure-storage-blob` (`BlobServiceClient`) in `blueprints/storage.py` with libcloud `get_object` / `download_object_as_stream` / `upload_object_via_stream`.
