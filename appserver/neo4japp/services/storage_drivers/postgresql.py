@@ -140,7 +140,8 @@ class PostgreSQLStorageDriver(StorageDriver):
             checksum = bytes.fromhex(object_name)
         except ValueError as exc:
             raise ValueError(
-                f"object_name must be a hex-encoded SHA-256 checksum, got {object_name!r}"
+                f"object_name must be a 64-character hex-encoded SHA-256 checksum, "
+                f"got {object_name!r}"
             ) from exc
 
         session = self._get_session()
