@@ -104,7 +104,7 @@
     "@fontsource/inter": "5.3.0",
     "@fontsource/roboto": "5.3.0",
     "@fortawesome/fontawesome-free": "7.3.1",
-    "@storybook/angular": "10.6.1",
+    "@storybook/angular": "10.6.2",
     "@storybook/test-runner": "0.26.0",
     "@types/color": "^4.2.1",
     "@types/d3": "^7.4.3",
