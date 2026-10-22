@@ -131,7 +131,7 @@
     "karma-viewport": "^1.0.9",
     "lint-staged": "^17.5.1",
     "ng-bullet": "^1.0.3",
-    "ng-mocks": "^14.18.1",
+    "ng-mocks": "^14.18.4",
     "playwright": "1.64.0",
     "protractor": "~7.0.0",
     "storybook": "10.6.1",
