@@ -156,7 +156,7 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
 
   refreshData(): Observable<this> {
     this.result = null;
-    // Annotated snippets are stored on the server, which has no record of local files
+    // The server re-annotates stored tables; local ones are annotated again once saved
     if (this.fileId === '' || isLocalHashId(this.fileId)) {
       // file was just created, or lives in a local folder
       return this.generateEnrichmentResults(this.domains, this.importGenes, this.taxID).pipe(
@@ -186,8 +186,15 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
 
   private annotate(): Observable<this> {
     if (isLocalHashId(this.fileId)) {
-      // Shown as stored in the file: entity snippets are kept on the server
-      return of(this);
+      // Annotated by the local indexer; shown as stored in the file if annotation is off
+      return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
+        map((annotated: EnrichmentParsedData) => {
+          if (annotated.result != null) {
+            this.result = annotated.result;
+          }
+          return this;
+        }),
+      );
     }
     // retrieve annotated enrichment snippets if they exist
     return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(

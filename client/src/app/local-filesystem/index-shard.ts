@@ -242,13 +242,17 @@ export async function writeManifest(dir: LocalDirectoryHandle, manifest: FolderM
   await writeTextFile(indexDir, MANIFEST_FILE_NAME, JSON.stringify(manifest, null, 2));
 }
 
-export async function writeAnnotationFile(dir: LocalDirectoryHandle, fileName: string, annotations: any[]): Promise<void> {
+export async function writeAnnotationFile(dir: LocalDirectoryHandle, fileName: string, annotations: unknown): Promise<void> {
   const indexDir = await getIndexDirectory(dir, true);
   const annotationsDir = await indexDir.getDirectoryHandle(ANNOTATIONS_DIR_NAME, {create: true});
   await writeTextFile(annotationsDir, fileName, JSON.stringify(annotations));
 }
 
-export async function readAnnotationFile(dir: LocalDirectoryHandle, fileName: string): Promise<any[] | null> {
+/**
+ * @return what the annotation file holds: a list of annotations for PDFs, the annotated
+ * table for enrichment tables; null if there is no such file or it is not JSON
+ */
+export async function readAnnotationFile(dir: LocalDirectoryHandle, fileName: string): Promise<any> {
   const indexDir = await getIndexDirectory(dir, false);
   if (indexDir == null) {
     return null;
@@ -267,8 +271,7 @@ export async function readAnnotationFile(dir: LocalDirectoryHandle, fileName: st
     return null;
   }
   try {
-    const data = JSON.parse(text);
-    return Array.isArray(data) ? data : null;
+    return JSON.parse(text);
   } catch (e) {
     return null;
   }

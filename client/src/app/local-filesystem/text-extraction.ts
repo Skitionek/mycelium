@@ -34,6 +34,7 @@ const TEXT_MIME_TYPES = new Set<string>([
   MimeTypes.EnrichmentTable,
   MimeTypes.Dmp,
   MimeTypes.BioC,
+  MimeTypes.Sdrf,
   MimeTypes.Pdb,
   MimeTypes.Cif,
 ]);

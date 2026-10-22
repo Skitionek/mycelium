@@ -140,10 +140,10 @@ Mycelium currently provides the following built-in visualization types:
 ### Local folders
 
 Folders on your own computer can be connected next to projects, in Chromium-based
-browsers. Their files open in the usual viewers without being uploaded, and are indexed
-in the background for search and entity annotation. The index is saved in hidden
-`.mycelium` directories inside the folder, so it survives disconnecting and is picked up
-when the folder is connected again. See [Local folders](docs/local-folders.md).
+browsers. Their files open in the same built-in viewers as uploaded files, without being
+uploaded, and are indexed in the background for search; PDFs and enrichment tables also
+get entity annotations. The index is saved in hidden `.mycelium` directories inside the
+folder, so it survives disconnecting and is picked up when the folder is connected again. See [Local folders](docs/local-folders.md).
 
 ### Other features
 

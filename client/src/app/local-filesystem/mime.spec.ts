@@ -12,7 +12,8 @@ describe('local MIME type detection', () => {
     expect(guessMimeType('report.docx'))
       .toBe('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     expect(guessMimeType('script.py')).toBe('text/x-python');
-    expect(guessMimeType('samples.sdrf.tsv')).toBe('text/plain');
+    expect(guessMimeType('samples.SDRF.tsv')).toBe(MimeTypes.Sdrf);
+    expect(guessMimeType('samples.tsv')).toBe('text/plain');
     expect(guessMimeType('README')).toBe('application/octet-stream');
   });
 
@@ -43,6 +44,7 @@ describe('local MIME type detection', () => {
   it('adds an extension to new files of Mycelium types', () => {
     expect(withTypeExtension('My map', MimeTypes.Map)).toBe('My map.llmap');
     expect(withTypeExtension('already.llmap', MimeTypes.Map)).toBe('already.llmap');
+    expect(withTypeExtension('Samples', MimeTypes.Sdrf)).toBe('Samples.sdrf.tsv');
     expect(withTypeExtension('notes', 'text/plain')).toBe('notes');
   });
 });

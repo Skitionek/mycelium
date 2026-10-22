@@ -78,6 +78,7 @@ const MIME_TYPE_EXTENSIONS: { [mimeType: string]: string } = {
   [MimeTypes.Dmp]: '.json',
   [MimeTypes.BioC]: '.bioc',
   [MimeTypes.Pdf]: '.pdf',
+  [MimeTypes.Sdrf]: '.sdrf.tsv',
 };
 
 const GENERIC_MIME_TYPE = 'application/octet-stream';
@@ -93,6 +94,10 @@ export function getExtension(filename: string): string {
 }
 
 export function guessMimeType(filename: string): string {
+  // Sample and data relationship files are TSV files named by convention (see SdrfTypeProvider)
+  if ((filename || '').toLowerCase().endsWith('.sdrf.tsv')) {
+    return MimeTypes.Sdrf;
+  }
   return EXTENSION_MIME_TYPES[getExtension(filename)] || GENERIC_MIME_TYPE;
 }
 
