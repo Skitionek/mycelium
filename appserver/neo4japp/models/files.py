@@ -65,6 +65,16 @@ class FileContent(RDBMSBase):
     checksum_sha256 = db.Column(db.LargeBinary(32), nullable=False, index=True, unique=True)
     creation_date = db.Column(db.DateTime, nullable=False, default=db.func.now())
 
+    @property
+    def revision(self) -> str:
+        """Hex-encoded SHA-256 of the file content.
+
+        This is the canonical revision identifier for the file content.  It is
+        also the key used when storing / retrieving bytes via
+        :class:`~neo4japp.services.file_storage.FileStorageService`.
+        """
+        return self.checksum_sha256.hex()
+
     def get_bytes(self) -> bytes:
         """Return the file bytes via the configured storage service.
 
@@ -78,9 +88,7 @@ class FileContent(RDBMSBase):
             from flask import has_app_context
             if has_app_context():
                 from neo4japp.database import get_file_storage_service
-                result = get_file_storage_service().retrieve(
-                    self.checksum_sha256.hex()
-                )
+                result = get_file_storage_service().retrieve(self.revision)
                 if result is not None:
                     return result
         except Exception:  # noqa: BLE001
