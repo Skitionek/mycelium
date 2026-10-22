@@ -3,6 +3,7 @@ Endpoints the client uses for files in folders connected from the user's compute
 files are never stored, so they are annotated and converted to PDF on request, statelessly.
 """
 import io
+import json
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -15,6 +16,7 @@ from neo4japp.blueprints.filesystem import bp as filesystem_bp
 from neo4japp.factory import register_error_handlers
 from neo4japp.services import transient_files
 from neo4japp.services.annotations import transient_annotation
+from neo4japp.services.enrichment.enrichment_table import EnrichmentTableService
 from neo4japp.services.libreoffice import mime_type_for_filename
 
 PDF = b'%PDF-1.7\n% a tiny pdf\n'
@@ -182,6 +184,106 @@ def test_transient_pdf_url_rejects_unknown_and_malformed_tokens(client, redis):
     assert client.get('/annotations/transient/short').status_code == 404
     assert transient_files.read_transient_file('../../etc/passwd') is None
     assert client.get(f'/annotations/transient/{token}').data == PDF
+
+
+def enrichment_table():
+    return {
+        'data': {'genes': 'TP53', 'taxId': '9606', 'organism': 'Homo sapiens', 'sources': []},
+        'result': {
+            'domainInfo': {},
+            'genes': [{'imported': 'TP53', 'matched': 'TP53', 'fullName': 'tumor protein p53'}],
+        },
+    }
+
+
+def test_transient_enrichment_annotation_returns_the_annotated_table(client, logged_in):
+    annotated = enrichment_table()
+    annotated['result']['genes'][0]['annotatedMatched'] = '<snippet>TP53</snippet>'
+    with patch.object(annotations_blueprint, 'annotate_transient_enrichment_table',
+                      return_value=annotated) as annotate:
+        response = client.post(
+            '/filesystem/annotations/transient/enrichment-table',
+            data=upload(json.dumps(enrichment_table()).encode(), 'genes.enrichment',
+                        filename='My genes.enrichment'),
+            headers=AUTH,
+        )
+
+    assert response.status_code == 200
+    gene = response.json['results']['result']['genes'][0]
+    assert gene['annotatedMatched'] == '<snippet>TP53</snippet>'
+    annotate.assert_called_once_with(enrichment_table(), 'My genes.enrichment')
+
+
+def test_transient_enrichment_annotation_needs_login_and_a_table(client, logged_in):
+    with patch.object(annotations_blueprint, 'annotate_transient_enrichment_table') as annotate:
+        missing = client.post(
+            '/filesystem/annotations/transient/enrichment-table', data={}, headers=AUTH)
+        not_json = client.post(
+            '/filesystem/annotations/transient/enrichment-table',
+            data=upload(b'\xff not json', 'genes.enrichment'), headers=AUTH)
+        not_a_table = client.post(
+            '/filesystem/annotations/transient/enrichment-table',
+            data=upload(b'[1, 2]', 'genes.enrichment'), headers=AUTH)
+        anonymous = client.post(
+            '/filesystem/annotations/transient/enrichment-table',
+            data=upload(b'{}', 'genes.enrichment'))
+
+    assert missing.status_code == 400
+    assert not_json.status_code == 400
+    assert not_a_table.status_code == 400
+    assert anonymous.status_code == 401
+    annotate.assert_not_called()
+
+
+def test_transient_enrichment_annotation_highlights_cells():
+    """Annotations of the combined cell text end up as snippets in the cells they came from."""
+    gene = {
+        'meta': {'type': 'Gene', 'id': '7157', 'allText': 'TP53'},
+        'textInDocument': 'TP53',
+        'keyword': 'TP53',
+        'keywordLength': 4,
+        # 'TP53 TP53 tumor protein p53 ': the second TP53 is the Matched cell
+        'loLocationOffset': 5,
+        'hiLocationOffset': 8,
+        'enrichmentDomain': {},
+    }
+    calls = {}
+
+    class FakePipeline:
+        @classmethod
+        def parse(cls, content_type, text):
+            calls['text'] = text
+            return text, []
+
+        def __init__(self, steps, text, parsed):
+            pass
+
+        def get_globals(self, excluded_annotations, custom_annotations):
+            return self
+
+        def identify(self, annotation_methods):
+            return self
+
+        def annotate(self, **kwargs):
+            calls['annotate'] = kwargs
+            return {'documents': [{'passages': [{'annotations': [gene]}]}]}
+
+    tables = SimpleNamespace(
+        create_annotation_mappings=lambda table: EnrichmentTableService.create_annotation_mappings(
+            None, table))
+    with patch.object(transient_annotation, 'Pipeline', FakePipeline), \
+            patch.object(transient_annotation, 'get_enrichment_table_service', return_value=tables):
+        result = transient_annotation.annotate_transient_enrichment_table(
+            enrichment_table(), 'genes.enrichment')
+
+    assert calls['text'] == 'TP53 TP53 tumor protein p53 '
+    assert calls['annotate']['specified_organism_tax_id'] == '9606'
+    row = result['result']['genes'][0]
+    assert row['annotatedImported'] == '<snippet>TP53</snippet>'
+    assert row['annotatedMatched'].startswith('<snippet><annotation type="Gene" meta="')
+    assert row['annotatedMatched'].endswith('>TP53</annotation></snippet>')
+    assert row['annotatedFullName'] == '<snippet>tumor protein p53</snippet>'
+    assert gene['enrichmentDomain'] == {'domain': 'Matched'}
 
 
 # ---------------------------------------------------------------------------
