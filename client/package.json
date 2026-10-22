@@ -16,11 +16,11 @@
     "storybook": "ng run client:storybook",
     "build-storybook": "ng run client:build-storybook",
     "snapshot": "concurrently -k -s first -n SB,TEST \"yarn snapshot:serve\" \"wait-on tcp:127.0.0.1:6006 && test-storybook --ci\"",
-    "snapshot:docker": "docker run --rm --ipc=host --user \"$(id -u):$(id -g)\" -e HOME=/tmp -v \"$PWD/..\":/repo -w /repo/client mcr.microsoft.com/playwright:v1.63.0-noble yarn snapshot",
+    "snapshot:docker": "docker run --rm --ipc=host --user \"$(id -u):$(id -g)\" -e HOME=/tmp -v \"$PWD/..\":/repo -w /repo/client mcr.microsoft.com/playwright:v1.64.1-noble yarn snapshot",
     "check-story-coverage": "node tools/check-story-coverage.js",
     "snapshot:serve": "http-server storybook-static -p 6006 --silent",
     "snapshot:update": "concurrently -k -s first -n SB,TEST \"yarn snapshot:serve\" \"wait-on tcp:127.0.0.1:6006 && test-storybook -u\"",
-    "snapshot:docker:update": "docker run --rm --ipc=host --user \"$(id -u):$(id -g)\" -e HOME=/tmp -v \"$PWD/..\":/repo -w /repo/client mcr.microsoft.com/playwright:v1.63.0-noble yarn snapshot:update"
+    "snapshot:docker:update": "docker run --rm --ipc=host --user \"$(id -u):$(id -g)\" -e HOME=/tmp -v \"$PWD/..\":/repo -w /repo/client mcr.microsoft.com/playwright:v1.64.1-noble yarn snapshot:update"
   },
   "lint-staged": {
     "*.ts": "yarn lint"
