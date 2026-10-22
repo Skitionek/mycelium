@@ -37,6 +37,25 @@ CMD yarn dev-start
 
 
 # ========================================
+# Optional: in-browser LibreOffice for office file thumbnails
+# ========================================
+# Left out unless OFFICE_CONVERTER_REF names a branch, tag or commit of
+# serverless-office-converter, e.g. --build-arg OFFICE_CONVERTER_REF=main.
+# Adds about 45 MB to the image; served under /office-converter/.
+FROM $NODE_IMAGE_TAG as office-converter
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ARG OFFICE_CONVERTER_REF=
+ARG OFFICE_CONVERTER_REPO=https://github.com/Skitionek/serverless-office-converter
+COPY tools/unpack-office-converter.js /tools/
+WORKDIR /out
+RUN if [ -n "$OFFICE_CONVERTER_REF" ]; then \
+      curl -fsSL "$OFFICE_CONVERTER_REPO/archive/$OFFICE_CONVERTER_REF.tar.gz" \
+        | tar -xz --strip-components=2 --wildcards '*/web/office-converter' \
+      && node /tools/unpack-office-converter.js office-converter/lo; \
+    fi
+
+
+# ========================================
 # Runtime stage - NGINX
 # ========================================
 FROM nginx:1.21
@@ -46,6 +65,7 @@ WORKDIR /usr/share/nginx/html
 
 # Copy built assets
 COPY --from=angular-build /app/dist ./
+COPY --from=office-converter /out/ ./
 
 # Copy nginx configuraiton template
 COPY nginx.conf /etc/nginx/templates/default.conf.template
@@ -59,6 +79,11 @@ ENV GZIP_EXTRA_TYPES text/tsv vnd.mycelium.document/bioc vnd.mycelium.document/e
 
 # Runtime environment configuration preset
 ENV ENVIRONMENT_CONFIG production
+
+# Office file thumbnails rendered in the browser (on/off). On by default when the
+# image bundles the converter; "on" makes the pages cross-origin isolated.
+ARG OFFICE_CONVERTER_REF=
+ENV OFFICE_THUMBNAILS=${OFFICE_CONVERTER_REF:+on}
 
 # Listen port
 ENV PORT 80
