@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: appserver
-        run: uv pip install --system -r requirements.txt -r requirements-dev.txt
+        run: uv export --locked --no-hashes --no-emit-project | uv pip install --system -r -
 
       - name: Run unit tests
         working-directory: appserver
@@ -99,7 +99,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: appserver
-        run: uv pip install --system -r requirements.txt -r requirements-dev.txt
+        run: uv export --locked --no-hashes --no-emit-project | uv pip install --system -r -
 
       # Solr cannot be a `services:` container: the `file` core is created by
       # the image's `solr-precreate` command, and service containers cannot
@@ -247,7 +247,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: statistical-enrichment
-        run: uv pip install --system -r requirements.txt -r requirements-dev.txt
+        run: uv export --locked --no-hashes --no-emit-project | uv pip install --system -r -
 
       - name: Run tests
         working-directory: statistical-enrichment
@@ -273,7 +273,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: cache-invalidator
-        run: uv pip install --system -r requirements.txt -r requirements-dev.txt
+        run: uv export --locked --no-hashes --no-emit-project | uv pip install --system -r -
 
       - name: Run tests
         working-directory: cache-invalidator

@@ -26,8 +26,9 @@ updates:
         patterns:
           - docker/*
 
-  # Maintain dependencies for Python
-  - package-ecosystem: pip
+  # Maintain dependencies for Python. The `uv` ecosystem bumps pyproject.toml
+  # and re-locks uv.lock, which is what CI and the Docker images install from.
+  - package-ecosystem: uv
     directory: /appserver
     schedule:
       interval: weekly
@@ -98,7 +99,7 @@ updates:
       # so those PRs must be merged together (all services talk to one
       # Neo4j/Redis deployment).
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /statistical-enrichment
     schedule:
       interval: weekly
@@ -125,7 +126,7 @@ updates:
           - neo4j
           - redis
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /cache-invalidator
     schedule:
       interval: weekly
