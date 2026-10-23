@@ -6728,7 +6728,7 @@ compressible@~2.0.18:
   dependencies:
     mime-db ">= 1.43.0 < 2"
 
-compression@^1.7.4, compression@^1.8.1:
+compression@^1.7.4, compression@^1.8.2:
   version "1.8.2"
   resolved "https://registry.yarnpkg.com/compression/-/compression-1.8.2.tgz#781397127ae2da00c0c5f7c76bda5b2a9b32a49f"
   integrity sha512-o8vI5RE5A6EVVOd9o41jKp41aJom+QTEO/Bx8MYNjexMo/Bv2WOjUfZr+aL0WnYSgymUy6zeguqLTsIhV0gMvQ==
@@ -11460,10 +11460,10 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
-molstar@5.11.0:
-  version "5.11.0"
-  resolved "https://registry.yarnpkg.com/molstar/-/molstar-5.11.0.tgz#591a8bdac7eac9851dffb49e5a9e0764a4f1acd6"
-  integrity sha512-Jv2oHkKoCpzrhqLmGlknepm0pfRsoTDebsGRkvXpbUFb6p+JIAkhLyM3uqV2twC6VR83ZbXtdswOtouPhozpuQ==
+molstar@5.13.1:
+  version "5.13.1"
+  resolved "https://registry.yarnpkg.com/molstar/-/molstar-5.13.1.tgz#d19b9ceef8cef63d83adf61091d2a3eab5feafa4"
+  integrity sha512-iExD98bJN2P4JK6+pVMwdJlPePldBH8oNT0pZhs8ucxOp086NU2b/gThKwYMC3SWkdmv++a1g4fGwKfu4Glx1w==
   dependencies:
     "@types/argparse" "^2.0.17"
     "@types/benchmark" "^2.1.5"
@@ -11472,7 +11472,7 @@ molstar@5.11.0:
     "@types/node" "^22.20.1"
     "@types/swagger-ui-dist" "3.30.6"
     argparse "^2.0.1"
-    compression "^1.8.1"
+    compression "^1.8.2"
     cors "^2.8.6"
     express "^5.2.1"
     h264-mp4-encoder "^1.0.12"
@@ -11482,7 +11482,7 @@ molstar@5.11.0:
     react-markdown "^10.1.0"
     remark-gfm "^4.0.1"
     rxjs "^7.8.2"
-    swagger-ui-dist "^5.32.9"
+    swagger-ui-dist "^5.33.1"
     tslib "^2.8.1"
 
 mrmime@2.0.0:
@@ -13922,10 +13922,10 @@ svg-pan-zoom@^3.6.2:
   resolved "https://registry.yarnpkg.com/svg-pan-zoom/-/svg-pan-zoom-3.6.2.tgz#be136506211b242627a234a9656f8128fcbbabed"
   integrity sha512-JwnvRWfVKw/Xzfe6jriFyfey/lWJLq4bUh2jwoR5ChWQuQoOH8FEh1l/bEp46iHHKHEJWIyFJETbazraxNWECg==
 
-swagger-ui-dist@^5.32.9:
-  version "5.32.14"
-  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.32.14.tgz#bb3a3e738bf17bc2ee2640a711fcc44be76fde4c"
-  integrity sha512-nOA2pSQhcmODMUQZpJHYKNuwniDUqcOWGNaSCOoZv12FdOSJ9JxV95HtyRGNMqEBj6h6lCNTy20TgZDYTSuUIg==
+swagger-ui-dist@^5.33.1:
+  version "5.34.0"
+  resolved "https://registry.yarnpkg.com/swagger-ui-dist/-/swagger-ui-dist-5.34.0.tgz#5be3205fdaa7f3e7ec9fbb2ab6717c10e34e876b"
+  integrity sha512-H6tAIjr3XqE31PbkZl0OFya1ziRLDfTwh3J6OHdumPtPCLfjTnyLeagl/55kFNZcTOz9a9QI9WP0FXldwiGJag==
   dependencies:
     "@scarf/scarf" "=1.4.0"
 
