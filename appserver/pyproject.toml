@@ -57,7 +57,7 @@ dependencies = [
 dev = [
   "ipython==8.39.0",
   "pytest==9.1.1",
-  "ruff==0.16.10",
+  "ruff==0.17.1",
   "pycodestyle==2.15.0",
   "mypy==2.4.0",
   "httpretty==1.1.4",
