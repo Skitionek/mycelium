@@ -150,6 +150,33 @@
             }
           }
         },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "e2e/protractor.conf.js",
+            "devServerTarget": "client:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "client:serve:production"
+            },
+            "staging": {
+              "devServerTarget": "client:serve:production,staging"
+            },
+            "qa": {
+              "devServerTarget": "client:serve:production,qa"
+            },
+            "demo": {
+              "devServerTarget": "client:serve:production,demo"
+            }
+          }
+        },
         "storybook": {
           "builder": "@storybook/angular:start-storybook",
           "options": {

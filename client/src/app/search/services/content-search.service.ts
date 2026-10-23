@@ -29,7 +29,7 @@ export class ContentSearchService {
   // then add an if block for mime_type?
   annotate(params: AnnotationRequestOptions): Observable<AnnotationResponse> {
     return this.http.post<AnnotationResponse>(
-      `/api/filesystem/annotations/text/generate`,
+      '/api/filesystem/annotations/text/generate',
       params,
       this.apiService.getHttpOptions(true),
     );
@@ -37,7 +37,7 @@ export class ContentSearchService {
 
   search(request: ContentSearchQueryParameters): Observable<ContentSearchResponse> {
     return this.http.get<ContentSearchResponseData>(
-      `/api/search/content`,
+      '/api/search/content',
       {
         ...this.apiService.getHttpOptions(true),
         params: {
@@ -62,7 +62,7 @@ export class ContentSearchService {
 
   getProjects(): Observable<ProjectData[]> {
     return this.http.get<{results: ProjectData[]}>(
-      `/api/projects/projects`, {
+      '/api/projects/projects', {
         ...this.apiService.getHttpOptions(true),
       },
     ).pipe(map(resp => resp.results));
@@ -70,7 +70,7 @@ export class ContentSearchService {
 
   getSynoynms(searchTerm: string, organisms: string[], types: string[], page: number, limit: number): Observable<SynonymSearchResponse> {
     return this.http.get<SynonymSearchResponse>(
-      `/api/search/synonyms`, {
+      '/api/search/synonyms', {
         ...this.apiService.getHttpOptions(true),
         params: {
           term: searchTerm,

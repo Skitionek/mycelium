@@ -113,7 +113,7 @@ export class FilesystemObjectTargetDirective {
             finalize(() => progressDialogRef.close()),
             this.errorHandler.create({label: 'Move object from drag and drop'}),
           ).subscribe(() => {
-            this.snackBar.open(`Moved item to new folder.`, 'Close', {
+            this.snackBar.open('Moved item to new folder.', 'Close', {
               duration: 5000,
             });
           });

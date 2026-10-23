@@ -17,6 +17,7 @@ import { openDownloadForBlob } from 'app/shared/utils/files';
 import { ResultMapping } from 'app/shared/schemas/common';
 import { Progress } from 'app/interfaces/common-dialog.interface';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
+import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 
 import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 import { ObjectDeleteDialogComponent } from '../components/dialog/object-delete-dialog.component';

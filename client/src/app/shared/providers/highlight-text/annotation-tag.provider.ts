@@ -74,7 +74,7 @@ export class AnnotationTagHandler extends TagHandler {
   }
 
   end(element: Element): string {
-    return `</span>`;
+    return '</span>';
   }
 
   dragStart(event: DragEvent, detail: { [key: string]: any }) {
@@ -223,7 +223,7 @@ export class AnnotationTagHandler extends TagHandler {
       base.push(`Data Source: ${escape(meta.idType)}`);
     }
     if (meta.isCustom) {
-      base.push(`User generated annotation`);
+      base.push('User generated annotation');
     }
 
     let htmlLinks = '<div>';
@@ -240,7 +240,7 @@ export class AnnotationTagHandler extends TagHandler {
           htmlLinks += `<a target="_blank" href="${escape(url)}">${escape(label)}</a><br>`;
       }
 
-      htmlLinks += `</div></div>`;
+      htmlLinks += '</div></div>';
     }
 
     // search links
@@ -257,7 +257,7 @@ export class AnnotationTagHandler extends TagHandler {
       const link = meta.links[domain.toLowerCase()] || url.replace(/%s/, encodeURIComponent(meta.allText));
       htmlLinks += `<a target="_blank" href="${escape(link)}">${escape(domain.replace('_', ' '))}</a><br>`;
     }
-    htmlLinks += `</div></div>`;
+    htmlLinks += '</div></div>';
 
     // search internal links
     // TODO: collapsing doesn't work here
@@ -274,7 +274,7 @@ export class AnnotationTagHandler extends TagHandler {
     htmlLinks += `<a target="_blank" href="${contLink}">File Content</a><br>`;
     const mapLink = this.internalSearch.getFileContentLink(meta.allText, {types: ['map']});
     htmlLinks += `<a target="_blank" href="${mapLink}">Map Content</a><br>`;
-    htmlLinks += `</div></div>`;
+    htmlLinks += '</div></div>';
 
     base.push(htmlLinks);
     base = [base.join('<br>')];

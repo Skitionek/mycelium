@@ -45,7 +45,7 @@ export class MissingRolesDialogComponent extends CommonFormDialogComponent {
   fixMissingUserRole(user: AppUser) {
     const updateRequest: UserUpdateRequest = {hashId: user.hashId, roles: ['user']};
     const progressDialogRef = this.progressDialog.display({
-            title: `Updating User`,
+            title: 'Updating User',
             progressObservable: new BehaviorSubject<Progress>(new Progress({
               status: 'Updating user...',
             })),
@@ -59,7 +59,7 @@ export class MissingRolesDialogComponent extends CommonFormDialogComponent {
       this.users.splice(index, 1);
       if (this.users.length === 0) {
       this.snackBar.open(
-        `All roles fixed!`,
+        'All roles fixed!',
         'close',
         {duration: 5000},
       );

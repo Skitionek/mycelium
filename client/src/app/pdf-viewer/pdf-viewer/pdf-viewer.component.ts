@@ -19,6 +19,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+
 import { PDFProgressData, PDFViewerParams, PDFSource } from './interfaces';
 import { createEventBus } from '../utils/event-bus-utils';
 import { FindState, RenderTextMode } from '../utils/constants';
