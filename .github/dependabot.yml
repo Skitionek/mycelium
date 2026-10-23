@@ -255,6 +255,17 @@ updates:
       # on 6.x until that unblocks a compatible zone.js.
       - dependency-name: 'jasmine-core'
         versions: ['>=7.0.0']
+      # ng-bootstrap majors track the Angular major; 15.x is the last that
+      # supports Angular 16. Cap at one major at a time until the Angular
+      # upgrade unblocks it. (PR #585 jumped 15 → 21.)
+      - dependency-name: '@ng-bootstrap/ng-bootstrap'
+        versions: ['>=17']
+      # ngrx majors also track the Angular major; 16.x is the last that
+      # supports Angular 16. Cap at one major at a time. (PR #569 jumped 16 → 22.)
+      - dependency-name: '@ngrx/*'
+        versions: ['>=18']
+      - dependency-name: ngrx-store-localstorage
+        versions: ['>=18']
 
   # Maintain dependencies for Java
   - package-ecosystem: maven
