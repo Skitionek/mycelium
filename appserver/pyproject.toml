@@ -48,7 +48,7 @@ dependencies = [
   "markupsafe==3.0.4",
   "lmdb==3.0.0",
   "pillow==12.3.0",
-  "pyparsing==3.3.2",
+  "pyparsing==3.3.3",
   "svg-stack==0.1.0",
   "elastic-apm[flask]",
 ]
