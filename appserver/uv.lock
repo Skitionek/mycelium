@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.10.*"
 
 [[package]]
@@ -111,7 +111,7 @@ requires-dist = [
     { name = "markupsafe", specifier = "==3.0.4" },
     { name = "marshmallow", specifier = "==4.3.1" },
     { name = "marshmallow-dataclass", specifier = "==8.7.1" },
-    { name = "marshmallow-sqlalchemy", specifier = "==1.5.0" },
+    { name = "marshmallow-sqlalchemy", specifier = "==1.6.0" },
     { name = "neo4j", specifier = "==6.4.1" },
     { name = "openpyxl", specifier = "==3.1.5" },
     { name = "pandas", specifier = "==2.3.3" },
@@ -1116,15 +1116,15 @@ wheels = [
 
 [[package]]
 name = "marshmallow-sqlalchemy"
-version = "1.5.0"
+version = "1.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "marshmallow" },
     { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ee/fe/247c297809e64116f766716632adbc3f4cd06f376f56dc15bb92f170d247/marshmallow_sqlalchemy-1.5.0.tar.gz", hash = "sha256:e51192c204770645a2fab0d72f44f8789272eef75951f84b1608d6b4b0bfe0e6", size = 51349, upload-time = "2026-04-01T23:21:03.833Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/6d/097b9792559b6eef8c6c130d659be0ed8c9fe65b14ad4c425f6cfbc6e90c/marshmallow_sqlalchemy-1.6.0.tar.gz", hash = "sha256:adebc7e36a7ec5662de93b00b850b50e36f4e8fe67ccf6e9e8e5ff42a78b1696", size = 50981, upload-time = "2026-10-19T17:21:14.182Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/b7/407c44dbd77a7670b7be6b7fedbe5329348fe00b4e62dae0f5c83a9aeafa/marshmallow_sqlalchemy-1.5.0-py3-none-any.whl", hash = "sha256:3865232672f3dd38c4d5e4e85fdedce76904200742c3594948a2d11d0af93258", size = 16582, upload-time = "2026-04-01T23:21:02.376Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/ef/7bf44661d2983a6ccf34a886bd848a344726ab21a952fbfa6eb1501fe406/marshmallow_sqlalchemy-1.6.0-py3-none-any.whl", hash = "sha256:09ce8cddb9f8f2cf415261ea939542527f722943488b70a5ad69106486d259ea", size = 17715, upload-time = "2026-10-19T17:21:12.682Z" },
 ]
 
 [[package]]
