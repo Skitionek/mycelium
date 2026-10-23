@@ -5,52 +5,66 @@
                 placement="top left right">Trace
             Details:
         </legend>
-        <ngb-accordion ngbAccordion activeIds="source target">
-            <ngb-panel id="source">
-                <ng-template disabled="true" ngbPanelHeader>
-                    <app-button-with-selectable-text ngbPanelToggle [disabled]="true">
+        <div ngbAccordion>
+            <div ngbAccordionItem="source" [collapsed]="false">
+                <h2 ngbAccordionHeader>
+                    <app-button-with-selectable-text ngbAccordionToggle>
                         <b title>Source</b>
                         {{ getNodeById(entity.source).id }}
                     </app-button-with-selectable-text>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                    {{ getNodeById(entity.source).description }}
-                </ng-template>
-            </ngb-panel>
-            <ngb-panel id="target">
-                <ng-template disabled="true" ngbPanelHeader>
-                    <app-button-with-selectable-text ngbPanelToggle [disabled]="true">
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            {{ getNodeById(entity.source).description }}
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+            <div ngbAccordionItem="target" [collapsed]="false">
+                <h2 ngbAccordionHeader>
+                    <app-button-with-selectable-text ngbAccordionToggle>
                         <b title>Target</b>
                         {{ getNodeById(entity.target).id }}
                     </app-button-with-selectable-text>
-                </ng-template>
-                <ng-template ngbPanelContent>
-                    {{ getNodeById(entity.target).description }}
-                </ng-template>
-            </ngb-panel>
-            <ngb-panel [disabled]="true">
-                <ng-template disabled="true" ngbPanelHeader>
-                    <app-button-with-selectable-text ngbPanelToggle [disabled]="true">
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            {{ getNodeById(entity.target).description }}
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+            <div ngbAccordionItem [disabled]="true">
+                <h2 ngbAccordionHeader>
+                    <app-button-with-selectable-text ngbAccordionToggle [disabled]="true">
                         <b title>Group</b>
                         {{ parseProperty(entity.group) }}
                     </app-button-with-selectable-text>
-                </ng-template>
-            </ngb-panel>
-            <ngb-panel *ngIf="entity.detail_edges">
-                <ng-template disabled="true" ngbPanelHeader>
+                </h2>
+                <div ngbAccordionCollapse><div ngbAccordionBody><ng-template></ng-template></div></div>
+            </div>
+            <div ngbAccordionItem [disabled]="true" *ngIf="entity.detail_edges">
+                <h2 ngbAccordionHeader>
                     <button (click)="openTraceView(entity)" class="btn btn-link">Show detailed
                         network
                     </button>
-                </ng-template>
-            </ngb-panel>
-            <ngb-panel title="Details">
-                <ng-template ngbPanelContent>
-                    <app-object-explorer [dataSource]="entity"></app-object-explorer>
-                </ng-template>
-            </ngb-panel>
-        </ngb-accordion>
+                </h2>
+                <div ngbAccordionCollapse><div ngbAccordionBody><ng-template></ng-template></div></div>
+            </div>
+            <div ngbAccordionItem>
+                <h2 ngbAccordionHeader>
+                    <button ngbAccordionToggle>Details</button>
+                </h2>
+                <div ngbAccordionCollapse>
+                    <div ngbAccordionBody>
+                        <ng-template>
+                            <app-object-explorer [dataSource]="entity"></app-object-explorer>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+        </div>
     </fieldset>
 </form>
-
-
-
