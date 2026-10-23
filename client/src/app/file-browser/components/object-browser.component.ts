@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { from, Observable, Subscription, throwError } from 'rxjs';
@@ -39,7 +39,7 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   localSearchResults: CollectionModel<FilesystemObject> | null = null;
 
   constructor(protected readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly messageDialog: MessageDialog,
               protected readonly errorHandler: ErrorHandler,

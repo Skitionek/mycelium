@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Observable } from 'rxjs';
 
@@ -30,7 +30,7 @@ export class LocalFolderListComponent {
               protected readonly indexer: LocalIndexerService,
               protected readonly workspaceManager: WorkspaceManager,
               protected readonly errorHandler: ErrorHandler,
-              protected readonly snackBar: MatLegacySnackBar) {
+              protected readonly snackBar: MatSnackBar) {
   }
 
   rootHashId(root: LocalRoot): string {

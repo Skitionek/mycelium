@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 
-import { MatLegacyTooltipModule } from '@angular/material/legacy-tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { componentWrapperDecorator, moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { NodeRelationshipComponent } from 'app/shared/components/node-relationship-display.component';
@@ -10,7 +10,7 @@ const meta: Meta<NodeRelationshipComponent> = {
   component: NodeRelationshipComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, MatLegacyTooltipModule],
+      imports: [CommonModule, MatTooltipModule],
     }),
     componentWrapperDecorator((story) => `<div style="width: 620px">${story}</div>`),
   ],

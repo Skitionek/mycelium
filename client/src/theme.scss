@@ -1,6 +1,6 @@
 @use '@angular/material' as mat;
 
-@include mat.legacy-core();
+@include mat.core();
 
 $light-primary-text: white;
 $dark-primary-text: black;
@@ -83,4 +83,4 @@ $lifelike-theme: mat.define-light-theme((
   )
 ));
 
-@include mat.all-legacy-component-themes($lifelike-theme);
+@include mat.all-component-themes($lifelike-theme);
