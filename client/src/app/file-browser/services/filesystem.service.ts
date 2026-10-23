@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -54,7 +54,7 @@ export class FilesystemService {
   protected lmdbsDates = new BehaviorSubject<object>({});
 
   constructor(protected readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly errorHandler: ErrorHandler,

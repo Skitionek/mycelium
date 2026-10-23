@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AccountService } from 'app/users/services/account.service';
 
@@ -35,7 +35,7 @@ export class ResetPasswordComponent {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly snackBar: MatLegacySnackBar,
+    private readonly snackBar: MatSnackBar,
     private readonly accountService: AccountService
   ) {}
 

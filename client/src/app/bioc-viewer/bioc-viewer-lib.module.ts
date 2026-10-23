@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { MatLegacyFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatLegacyDialogModule } from '@angular/material/legacy-dialog';
-import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
-import { MatLegacySelectModule } from '@angular/material/legacy-select';
-import { MatLegacyInputModule } from '@angular/material/legacy-input';
-import { MatLegacyButtonModule } from '@angular/material/legacy-button';
-import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { SharedModule } from 'app/shared/shared.module';
 import { FileBrowserModule } from 'app/file-browser/file-browser.module';
@@ -32,15 +32,15 @@ import { BiocTableViewComponent } from './components/bioc-table-view/bioc-table-
     CommonModule,
     FormsModule,
     BrowserAnimationsModule,
-    MatLegacyFormFieldModule,
-    MatLegacyCheckboxModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
     MatSidenavModule,
-    MatLegacyDialogModule,
-    MatLegacyChipsModule,
-    MatLegacySelectModule,
-    MatLegacyInputModule,
-    MatLegacyButtonModule,
-    MatLegacyRadioModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatRadioModule,
     SharedModule,
     FileBrowserModule,
     RouterModule.forRoot([]),

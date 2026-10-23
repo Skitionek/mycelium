@@ -52,6 +52,9 @@
               "node_modules/bootstrap/dist/js/bootstrap.min.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json",
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             }
@@ -145,6 +148,9 @@
             ],
             "include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
             "scripts": ["node_modules/molstar/build/viewer/molstar.js"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             }
