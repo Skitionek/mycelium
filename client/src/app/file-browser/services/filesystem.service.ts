@@ -19,6 +19,9 @@ import {
 } from 'app/shared/schemas/common';
 import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
 import { PdfFile } from 'app/interfaces/pdf-files.interface';
+import { isLocalHashId } from 'app/local-filesystem/local-ids';
+import { unsupportedError } from 'app/local-filesystem/local-folder-errors';
+import { LocalFilesystemService } from 'app/local-filesystem/services/local-filesystem.service';
 
 import { FilesystemObject } from '../models/filesystem-object';
 import {
@@ -41,6 +44,10 @@ import { RecentFilesService } from './recent-files.service';
 
 /**
  * Endpoints to manage with the filesystem exposed to the user.
+ *
+ * Objects in folders connected from the user's computer have local hash IDs (see
+ * local-ids.ts); requests for them are handled by {@link LocalFilesystemService} instead
+ * of the server, so callers do not need to tell the two apart.
  */
 @Injectable({providedIn: 'root'})
 export class FilesystemService {
@@ -54,7 +61,8 @@ export class FilesystemService {
               protected readonly route: ActivatedRoute,
               protected readonly http: HttpClient,
               protected readonly apiService: ApiService,
-              protected readonly recentFilesService: RecentFilesService) {
+              protected readonly recentFilesService: RecentFilesService,
+              protected readonly localFilesystem: LocalFilesystemService) {
     this.getLMDBsDates().subscribe(lmdbsDates => {
       this.lmdbsDates.next(lmdbsDates);
     });
@@ -85,6 +93,9 @@ export class FilesystemService {
   create(request: ObjectCreateRequest): Observable<HttpEvent<any> & {
     bodyValue?: FilesystemObject,
   }> {
+    if (isLocalHashId(request.parentHashId)) {
+      return this.localFilesystem.create(request);
+    }
     return this.http.post(
       `/api/filesystem/objects`,
       objectToMixedFormData(request), {
@@ -105,6 +116,11 @@ export class FilesystemService {
   }
 
   get(hashId: string, updateRecent = true): Observable<FilesystemObject> {
+    if (isLocalHashId(hashId)) {
+      return this.localFilesystem.get(hashId).pipe(
+        tap(fileObj => updateRecent && this.recentFilesService.addToList(fileObj)),
+      );
+    }
     return this.http.get<SingleResult<FilesystemObjectData>>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}`,
       this.apiService.getHttpOptions(true),
@@ -115,6 +131,9 @@ export class FilesystemService {
   }
 
   getContent(hashId: string): Observable<Blob> {
+    if (isLocalHashId(hashId)) {
+      return this.localFilesystem.getContent(hashId);
+    }
     return this.http.get(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/content`, {
         ...this.apiService.getHttpOptions(true),
@@ -129,6 +148,9 @@ export class FilesystemService {
    * @param hashId - hash ID of the file to retrieve as PDF
    */
   getContentAsPdf(hashId: string): Observable<Blob> {
+    if (isLocalHashId(hashId)) {
+      return this.localFilesystem.getContentAsPdf(hashId);
+    }
     return this.http.get(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/content/pdf`, {
         ...this.apiService.getHttpOptions(true),
@@ -146,6 +168,9 @@ export class FilesystemService {
    * @raises ValidationError - when a file is not a map or file content is corrupted
    */
   getMapContent(hashId: string): Observable<Blob> {
+    if (isLocalHashId(hashId)) {
+      return this.localFilesystem.getMapContent(hashId);
+    }
     return this.http.get(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/map-content`, {
         ...this.apiService.getHttpOptions(true),
@@ -167,6 +192,10 @@ export class FilesystemService {
   }
 
   generateExport(hashId: string, request: ObjectExportRequest): Observable<Blob> {
+    if (isLocalHashId(hashId)) {
+      return throwError(() => unsupportedError(
+        'Exporting to other formats needs the file to be in a project. Download it instead.'));
+    }
     return this.http.post(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/export`,
       request, {
@@ -179,6 +208,18 @@ export class FilesystemService {
   save(hashIds: string[], changes: Partial<BulkObjectUpdateRequest>,
        updateWithLatest?: { [hashId: string]: FilesystemObject }):
     Observable<{ [hashId: string]: FilesystemObject }> {
+    const local = this.partitionLocal(hashIds);
+    if (local == null) {
+      return throwError(() => unsupportedError('Local files and project files cannot be changed together.'));
+    }
+    if (local || isLocalHashId(changes.parentHashId)) {
+      if (!local) {
+        return throwError(() => unsupportedError('Items cannot be moved between a project and a local folder.'));
+      }
+      return this.localFilesystem.save(hashIds, changes, updateWithLatest).pipe(
+        tap(ret => this.recentFilesService.updateFileObjects(ret)),
+      );
+    }
     return this.http.patch<ResultMapping<FilesystemObjectData>>(
       `/api/filesystem/objects`, objectToMixedFormData({
         ...changes,
@@ -202,6 +243,15 @@ export class FilesystemService {
   delete(hashIds: string[],
          updateWithLatest?: { [hashId: string]: FilesystemObject }):
     Observable<{ [hashId: string]: FilesystemObject }> {
+    const local = this.partitionLocal(hashIds);
+    if (local == null) {
+      return throwError(() => unsupportedError('Local files and project files cannot be deleted together.'));
+    }
+    if (local) {
+      return this.localFilesystem.delete(hashIds, updateWithLatest).pipe(
+        tap(() => hashIds.forEach(hashId => this.recentFilesService.deleteFromList({hashId} as FilesystemObjectData))),
+      );
+    }
     return this.http.request<ResultMapping<FilesystemObjectData>>(
       'DELETE',
       `/api/filesystem/objects`, {
@@ -232,6 +282,10 @@ export class FilesystemService {
   }
 
   getBackupContent(hashId: string): Observable<Blob | null> {
+    if (isLocalHashId(hashId)) {
+      // Edits to local files are written straight to the file, so there is never a backup
+      return of(null);
+    }
     return this.http.get(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/backup/content`, {
         ...this.apiService.getHttpOptions(true),
@@ -254,6 +308,9 @@ export class FilesystemService {
   }
 
   putBackup(request: ObjectBackupCreateRequest): Observable<{}> {
+    if (isLocalHashId(request.hashId)) {
+      return of({});
+    }
     return this.http.put<unknown>(
       `/api/filesystem/objects/${encodeURIComponent(request.hashId)}/backup`,
       objectToMixedFormData(request),
@@ -264,6 +321,9 @@ export class FilesystemService {
   }
 
   deleteBackup(hashId: string): Observable<{}> {
+    if (isLocalHashId(hashId)) {
+      return of({});
+    }
     return this.http.delete<unknown>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/backup`, {
         ...this.apiService.getHttpOptions(true),
@@ -275,6 +335,9 @@ export class FilesystemService {
 
   getVersionHistory(fileHashId: string,
                     options: PaginatedRequestOptions = {}): Observable<ObjectVersionHistory> {
+    if (isLocalHashId(fileHashId)) {
+      return of(new ObjectVersionHistory());
+    }
     return this.http.get<ObjectVersionHistoryResponse>(
       `/api/filesystem/objects/${encodeURIComponent(fileHashId)}/versions`, {
         ...this.apiService.getHttpOptions(true),
@@ -311,6 +374,9 @@ export class FilesystemService {
    */
   getAnnotationHistory(hashId: string, options: Partial<PaginatedRequestOptions> = {}):
     Observable<FileAnnotationHistory> {
+    if (isLocalHashId(hashId)) {
+      return of(new FileAnnotationHistory().update({total: 0, results: []} as FileAnnotationHistoryResponse));
+    }
     return this.http.get<FileAnnotationHistoryResponse>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/annotation-history`, {
         ...this.apiService.getHttpOptions(true),
@@ -363,6 +429,9 @@ export class FilesystemService {
   }
 
   getLocks(hashId: string): Observable<ObjectLock[]> {
+    if (isLocalHashId(hashId)) {
+      return of([]);
+    }
     return this.http.get<ResultList<ObjectLockData>>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/locks`, {
         ...this.apiService.getHttpOptions(true),
@@ -375,6 +444,10 @@ export class FilesystemService {
   }
 
   acquireLock(hashId: string): Observable<ObjectLock[]> {
+    if (isLocalHashId(hashId)) {
+      // Local files are only edited from this browser
+      return of([]);
+    }
     return this.http.put<ResultList<ObjectLockData>>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/locks`,
       { own: true },
@@ -397,6 +470,9 @@ export class FilesystemService {
   }
 
   deleteLock(hashId: string): Observable<{}> {
+    if (isLocalHashId(hashId)) {
+      return of({});
+    }
     return this.http.delete<unknown>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/locks`, {
         ...this.apiService.getHttpOptions(true, { contentType: 'application/json' }),
@@ -405,6 +481,17 @@ export class FilesystemService {
     ).pipe(
       map(() => ({})),
     );
+  }
+
+  /**
+   * Whether the hash IDs are all local (true) or all on the server (false); null if mixed.
+   */
+  private partitionLocal(hashIds: string[]): boolean | null {
+    const localCount = hashIds.filter(hashId => isLocalHashId(hashId)).length;
+    if (localCount === 0) {
+      return false;
+    }
+    return localCount === hashIds.length ? true : null;
   }
 
   getHierarchy(directoriesOnly: boolean = false): Observable<FileHierarchyResponse> {

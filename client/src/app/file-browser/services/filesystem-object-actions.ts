@@ -270,6 +270,10 @@ export class FilesystemObjectActions {
       addOption('BioC viewer', ['/projects', projectName, 'bioc', object.hashId]);
     }
 
+    if (object.mimeType === MimeTypes.Sdrf) {
+      addOption('SDRF viewer', ['/projects', projectName, 'sdrf', object.hashId]);
+    }
+
     if (object.isProteinStructure) {
       addOption('Protein structure viewer', ['/projects', projectName, 'structure', object.hashId]);
     }

@@ -14,9 +14,17 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 
+- **Local folders**: folders on the user's computer can be connected from the file browser (or dragged onto it) through the browser's File System Access API. Their files open in the same built-in viewers as uploaded files (PDF, office documents, code, protein structures, BioC, maps, Sankey, enrichment tables, DMP and SDRF) without being uploaded, and can be created, uploaded into, moved and deleted on disk. See [`docs/local-folders.md`](docs/local-folders.md) ([#679]).
+- **Background indexing of local folders**: files are text-indexed in the browser (PDF text via PDF.js), and PDFs and enrichment tables are annotated with knowledge-graph entities, as they appear and change. Status shows in the navigation bar, on each folder tile and folder header, and per file in a new **Index** column; folder contents can be searched from the folder header ([#679]).
+- **Resumable on-disk index**: index shards are saved in hidden `.mycelium` directories inside the folder, a second after each file is done, and the folder's identity in a manifest there. A disconnected folder, a closed tab or a reload loses at most the file in progress; reconnecting the folder - even with the browser's storage cleared - reuses its ID and processes only new or changed files ([#679]).
+- **`POST /filesystem/annotations/transient`**: annotate a PDF without storing it or its annotations. The content is held in Redis under an unguessable token, at most ten minutes, for the PDF parser to fetch from `GET /annotations/transient/<token>`, and discarded once parsed ([#679]).
+- **`POST /filesystem/annotations/transient/enrichment-table`**: annotate an enrichment table without storing it or its annotations, answering like `GET /filesystem/objects/<id>/enrichment/annotations`. The cell snippets are built by the same code as for stored tables, now in `services/annotations/enrichment_snippets.py` ([#679]).
+- **`POST /filesystem/convert/pdf`**: convert an uploaded office document to PDF with LibreOffice without storing it, so office files that are not in Mycelium can open in the PDF viewer ([#679]).
+
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
+- **SDRF routing**: files of the SDRF type open in the SDRF editor and offer it under **Open in**; nothing routed them there before ([#679]).
 - **Codespaces prebuild-friendly devcontainer flow**: `.devcontainer/devcontainer.json` now runs `.devcontainer/post-create.sh` during container creation, allowing GitHub Codespaces prebuilds to pre-run stack build/start work and reduce first-start latency.
 
 ### Changed
@@ -108,6 +116,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
+- **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
 - **Client production bundle budget failure**: reenabled Angular production optimization and build optimizer in `client/angular.json`, reducing the initial bundle size.
 - **VS Code client debug task**: added a background readiness matcher for `client: dev-start` and a full-stack debug compound so the browser can attach once the Angular dev server is ready.
@@ -282,3 +292,4 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#679]: https://github.com/Skitionek/mycelium/pull/679
