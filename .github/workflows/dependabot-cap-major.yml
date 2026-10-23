@@ -1,0 +1,253 @@
+name: Cap Dependabot major bumps
+
+# What this does
+# --------------
+# When Dependabot proposes a bump that skips more than one major version
+# (e.g. 1.x → 3.x), this workflow:
+#   1. Adds an `ignore` rule to .github/dependabot.yml that caps the package
+#      at the next single major (prev+2 exclusive), then commits and pushes it
+#      to the default branch so Dependabot will respect it from its next run.
+#   2. Closes the over-reaching PR with an explanation; Dependabot will open a
+#      new one for the single-major bump on its next scheduled run.
+#
+# Why pull_request_target
+# -----------------------
+# A Dependabot-triggered `pull_request` event gets a read-only token and
+# cannot access Actions secrets, so the app token needed to push to main is
+# unreachable. `pull_request_target` runs in the base repo's context instead.
+# This job never checks out or executes code from the PR head, so that is safe.
+#
+# Credentials
+# -----------
+# Pushing to a protected default branch requires the same app or PAT that the
+# dependabot-train workflow uses.  Configure ONE of:
+#   * DEPENDABOT_TRAIN_APP_ID (var or secret) + DEPENDABOT_TRAIN_APP_PRIVATE_KEY
+#     (secret) for a GitHub App with contents:write + pull-requests:write.
+#   * DEPENDABOT_TRAIN_TOKEN secret — a fine-grained PAT with the same scopes.
+# Without either, the push step will fail if main has branch-protection rules.
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: dependabot-cap-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cap:
+    name: Cap if multi-major
+    runs-on: ubuntu-latest
+    # Only act on Dependabot PRs; skip drafts (they are never multi-major caps).
+    if: >
+      startsWith(github.event.pull_request.user.login, 'dependabot') &&
+      !github.event.pull_request.draft
+
+    env:
+      APP_ID: ${{ vars.DEPENDABOT_TRAIN_APP_ID || secrets.DEPENDABOT_TRAIN_APP_ID }}
+
+    steps:
+      # Mint an app token that has contents:write on this repo so the push to
+      # main can bypass branch-protection rules that block github-actions[bot].
+      # continue-on-error so a minting failure is diagnosed in the next step.
+      - name: Mint a GitHub App token
+        id: app-token
+        if: env.APP_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ env.APP_ID }}
+          private-key: ${{ secrets.DEPENDABOT_TRAIN_APP_PRIVATE_KEY }}
+
+      - name: Diagnose missing credential
+        if: env.APP_ID != '' && steps.app-token.outcome == 'failure'
+        run: |
+          echo "::error::App $APP_ID is configured but no token was minted."
+          echo "Check: app is installed on this repo with contents:write + pull-requests:write."
+          exit 1
+
+      # fetch-metadata parses the Dependabot commit message to surface the
+      # version delta without needing to inspect lockfiles or manifests.
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Parse the major-version delta and decide whether capping is needed.
+      - name: Determine whether to cap
+        id: check
+        env:
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          PREV: ${{ steps.meta.outputs.previous-version }}
+          NEW:  ${{ steps.meta.outputs.new-version }}
+        run: |
+          set -euo pipefail
+
+          if [ "$UPDATE_TYPE" != "version-update:semver-major" ]; then
+            echo "Not a major bump (type: $UPDATE_TYPE); skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Strip any leading non-numeric prefix (e.g. "v1.2.3" → 1).
+          prev_major=$(printf '%s' "$PREV" | grep -oP '^\D*\K[0-9]+' || true)
+          new_major=$(printf '%s' "$NEW"  | grep -oP '^\D*\K[0-9]+' || true)
+
+          if [ -z "$prev_major" ] || [ -z "$new_major" ]; then
+            echo "::warning::Cannot parse major versions from '$PREV' → '$NEW'; skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          diff=$((new_major - prev_major))
+          if [ "$diff" -le 1 ]; then
+            echo "Single-major bump ($PREV → $NEW); nothing to cap."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Cap: only the immediately next major is allowed (prev+1.x).
+          # The ignore rule will be `>= prev+2`, blocking anything beyond that.
+          cap=$((prev_major + 2))
+          next_major=$((prev_major + 1))
+
+          echo "Multi-major bump: $PREV → $NEW (${diff} majors). Capping at < $cap."
+          echo "skip=false"         >> "$GITHUB_OUTPUT"
+          echo "prev_major=$prev_major" >> "$GITHUB_OUTPUT"
+          echo "new_major=$new_major"   >> "$GITHUB_OUTPUT"
+          echo "next_major=$next_major" >> "$GITHUB_OUTPUT"
+          echo "cap=$cap"              >> "$GITHUB_OUTPUT"
+
+      # Check out the default branch so we can edit dependabot.yml on it.
+      # Uses the app token (or PAT fallback) so the subsequent push has the
+      # credentials it needs without a separate `git remote set-url` step.
+      - name: Check out default branch
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          token: >-
+            ${{
+              steps.app-token.outputs.token
+              || secrets.DEPENDABOT_TRAIN_TOKEN
+              || github.token
+            }}
+
+      - name: Install ruamel.yaml
+        if: steps.check.outputs.skip == 'false'
+        run: pip install --quiet 'ruamel.yaml>=0.18'
+
+      # Edit .github/dependabot.yml in-place, preserving all existing comments
+      # and formatting, to add (or update) an ignore rule for the dependency.
+      - name: Patch .github/dependabot.yml
+        if: steps.check.outputs.skip == 'false'
+        env:
+          DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
+          ECOSYSTEM: ${{ steps.meta.outputs.package-ecosystem }}
+          DIRECTORY: ${{ steps.meta.outputs.directory }}
+          CAP:       ${{ steps.check.outputs.cap }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, sys
+          from ruamel.yaml import YAML
+          from ruamel.yaml.comments import CommentedSeq
+
+          dep_names  = [n.strip() for n in os.environ['DEP_NAMES'].split(',') if n.strip()]
+          ecosystem  = os.environ['ECOSYSTEM']
+          directory  = os.environ['DIRECTORY']
+          cap        = int(os.environ['CAP'])
+          version_rule = f'>={cap}'
+
+          path = '.github/dependabot.yml'
+          yaml = YAML()
+          yaml.preserve_quotes = True
+          yaml.width = 4096
+
+          with open(path) as f:
+              doc = yaml.load(f)
+
+          changed = False
+          for update in doc.get('updates', []):
+              if (update.get('package-ecosystem') == ecosystem and
+                      update.get('directory') == directory):
+                  if 'ignore' not in update:
+                      update['ignore'] = CommentedSeq()
+                  ignore = update['ignore']
+                  for dep_name in dep_names:
+                      existing = next(
+                          (r for r in ignore if r.get('dependency-name') == dep_name),
+                          None)
+                      if existing is not None:
+                          existing['versions'] = [version_rule]
+                          print(f'Updated ignore rule for {dep_name!r}: versions {version_rule}')
+                      else:
+                          ignore.append({
+                              'dependency-name': dep_name,
+                              'versions': [version_rule],
+                          })
+                          print(f'Added ignore rule for {dep_name!r}: versions {version_rule}')
+                  changed = True
+                  break
+
+          if not changed:
+              print(
+                  f'::error::No updates entry found for '
+                  f'ecosystem={ecosystem!r} directory={directory!r}',
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          with open(path, 'w') as f:
+              yaml.dump(doc, f)
+          PYEOF
+
+      - name: Commit and push ignore rule
+        if: steps.check.outputs.skip == 'false'
+        env:
+          DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
+          CAP:       ${{ steps.check.outputs.cap }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/dependabot.yml
+          if git diff --cached --quiet; then
+            echo "No changes to .github/dependabot.yml (ignore rule already in place)."
+          else
+            git commit -m "chore(deps): cap ${DEP_NAMES} at major < ${CAP}
+
+          Dependabot proposed a multi-major version jump.
+          Added an ignore rule so it only proposes one major at a time."
+            git push
+          fi
+
+      # Close the PR after the rule is committed so Dependabot will re-open
+      # it at the capped version on its next scheduled run.
+      - name: Close PR with explanation
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER:  ${{ github.event.pull_request.number }}
+          DEP_NAMES:  ${{ steps.meta.outputs.dependency-names }}
+          PREV:       ${{ steps.meta.outputs.previous-version }}
+          NEW:        ${{ steps.meta.outputs.new-version }}
+          NEXT_MAJOR: ${{ steps.check.outputs.next_major }}
+          CAP:        ${{ steps.check.outputs.cap }}
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --body "$(cat <<BODY
+          This PR jumps \`$DEP_NAMES\` from \`$PREV\` to \`$NEW\`, which skips more than one major version at a time.
+
+          \`.github/dependabot.yml\` has been updated to ignore versions \`>= $CAP\`, so Dependabot will now propose only the next single-major upgrade (\`$NEXT_MAJOR.x\`) on its next scheduled run.
+
+          Closing this PR. The capped upgrade will appear automatically.
+          BODY
+          )"
+          gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
