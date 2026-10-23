@@ -4,34 +4,30 @@ name: Cap Dependabot major bumps
 # --------------
 # When Dependabot proposes a bump that skips more than one major version
 # (e.g. 1.x → 3.x), this workflow:
-#   1. Adds an `ignore` rule to .github/dependabot.yml that caps the package
-#      at the next single major (prev+2 exclusive), then commits and pushes it
-#      to the default branch so Dependabot will respect it from its next run.
-#   2. Closes the over-reaching PR with an explanation; Dependabot will open a
-#      new one for the single-major bump on its next scheduled run.
+#   1. Creates a short-lived branch, patches .github/dependabot.yml to add an
+#      `ignore` rule that caps the package at the next single major (prev+2
+#      exclusive), and opens a PR against the default branch.
+#   2. Comments on the original Dependabot PR explaining what happened and
+#      closes it; once the patch PR merges, Dependabot will re-open it for
+#      the single-major bump on its next scheduled run.
+#
+# No special credentials are required — GITHUB_TOKEN with contents:write and
+# pull-requests:write is sufficient because this workflow only pushes to a
+# new branch, not directly to the protected default branch.
 #
 # Why pull_request_target
 # -----------------------
 # A Dependabot-triggered `pull_request` event gets a read-only token and
-# cannot access Actions secrets, so the app token needed to push to main is
-# unreachable. `pull_request_target` runs in the base repo's context instead.
-# This job never checks out or executes code from the PR head, so that is safe.
-#
-# Credentials
-# -----------
-# Pushing to a protected default branch requires the same app or PAT that the
-# dependabot-train workflow uses.  Configure ONE of:
-#   * DEPENDABOT_TRAIN_APP_ID (var or secret) + DEPENDABOT_TRAIN_APP_PRIVATE_KEY
-#     (secret) for a GitHub App with contents:write + pull-requests:write.
-#   * DEPENDABOT_TRAIN_TOKEN secret — a fine-grained PAT with the same scopes.
-# Without either, the push step will fail if main has branch-protection rules.
+# cannot read Actions secrets. `pull_request_target` runs in the base repo's
+# context instead. This job never checks out or executes code from the PR
+# head, so that is safe.
 
 on:
   pull_request_target:
     types: [opened, reopened]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 concurrency:
@@ -47,29 +43,7 @@ jobs:
       startsWith(github.event.pull_request.user.login, 'dependabot') &&
       !github.event.pull_request.draft
 
-    env:
-      APP_ID: ${{ vars.DEPENDABOT_TRAIN_APP_ID || secrets.DEPENDABOT_TRAIN_APP_ID }}
-
     steps:
-      # Mint an app token that has contents:write on this repo so the push to
-      # main can bypass branch-protection rules that block github-actions[bot].
-      # continue-on-error so a minting failure is diagnosed in the next step.
-      - name: Mint a GitHub App token
-        id: app-token
-        if: env.APP_ID != ''
-        continue-on-error: true
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ env.APP_ID }}
-          private-key: ${{ secrets.DEPENDABOT_TRAIN_APP_PRIVATE_KEY }}
-
-      - name: Diagnose missing credential
-        if: env.APP_ID != '' && steps.app-token.outcome == 'failure'
-        run: |
-          echo "::error::App $APP_ID is configured but no token was minted."
-          echo "Check: app is installed on this repo with contents:write + pull-requests:write."
-          exit 1
-
       # fetch-metadata parses the Dependabot commit message to surface the
       # version delta without needing to inspect lockfiles or manifests.
       - name: Fetch Dependabot metadata
@@ -123,20 +97,12 @@ jobs:
           echo "next_major=$next_major" >> "$GITHUB_OUTPUT"
           echo "cap=$cap"              >> "$GITHUB_OUTPUT"
 
-      # Check out the default branch so we can edit dependabot.yml on it.
-      # Uses the app token (or PAT fallback) so the subsequent push has the
-      # credentials it needs without a separate `git remote set-url` step.
+      # Check out the default branch so we can branch off it for the patch PR.
       - name: Check out default branch
         if: steps.check.outputs.skip == 'false'
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
-          token: >-
-            ${{
-              steps.app-token.outputs.token
-              || secrets.DEPENDABOT_TRAIN_TOKEN
-              || github.token
-            }}
 
       - name: Install ruamel.yaml
         if: steps.check.outputs.skip == 'false'
@@ -206,29 +172,7 @@ jobs:
               yaml.dump(doc, f)
           PYEOF
 
-      - name: Commit and push ignore rule
-        if: steps.check.outputs.skip == 'false'
-        env:
-          DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
-          CAP:       ${{ steps.check.outputs.cap }}
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/dependabot.yml
-          if git diff --cached --quiet; then
-            echo "No changes to .github/dependabot.yml (ignore rule already in place)."
-          else
-            git commit -m "chore(deps): cap ${DEP_NAMES} at major < ${CAP}
-
-          Dependabot proposed a multi-major version jump.
-          Added an ignore rule so it only proposes one major at a time."
-            git push
-          fi
-
-      # Close the PR after the rule is committed so Dependabot will re-open
-      # it at the capped version on its next scheduled run.
-      - name: Close PR with explanation
+      - name: Open a PR with the ignore rule
         if: steps.check.outputs.skip == 'false'
         env:
           GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
@@ -240,14 +184,45 @@ jobs:
           CAP:        ${{ steps.check.outputs.cap }}
         run: |
           set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="dependabot-cap/${DEP_NAMES//,/-}-lt${CAP}"
+          # Sanitise branch name: spaces and special chars → hyphens.
+          BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
+
+          git checkout -b "$BRANCH"
+          git add .github/dependabot.yml
+
+          if git diff --cached --quiet; then
+            echo "No changes to .github/dependabot.yml (ignore rule already in place)."
+            exit 0
+          fi
+
+          git commit -m "chore(deps): cap ${DEP_NAMES} at major < ${CAP}
+
+          Dependabot proposed a multi-major version jump.
+          Added an ignore rule so it only proposes one major at a time."
+          git push origin "$BRANCH"
+
+          PATCH_PR_URL=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "chore(deps): cap ${DEP_NAMES} upgrades to one major at a time" \
+            --body "$(cat <<BODY
+          Dependabot PR #${PR_NUMBER} proposes jumping \`${DEP_NAMES}\` from \`${PREV}\` to \`${NEW}\`, which skips more than one major version at a time.
+
+          This PR adds an \`ignore\` rule to \`.github/dependabot.yml\` that caps versions at \`>= ${CAP}\`, so Dependabot will only propose the next single-major upgrade (\`${NEXT_MAJOR}.x\`) from now on.
+
+          Merge this first, then Dependabot will re-open #${PR_NUMBER} at the capped version on its next scheduled run.
+          BODY
+          )")
+
+          # Comment on the original Dependabot PR so it links back.
           gh pr comment "$PR_NUMBER" \
             --repo "$GITHUB_REPOSITORY" \
-            --body "$(cat <<BODY
-          This PR jumps \`$DEP_NAMES\` from \`$PREV\` to \`$NEW\`, which skips more than one major version at a time.
+            --body "This PR skips more than one major version (\`${PREV}\` → \`${NEW}\`). A patch PR has been opened to cap \`.github/dependabot.yml\` at \`${NEXT_MAJOR}.x\`: ${PATCH_PR_URL}
 
-          \`.github/dependabot.yml\` has been updated to ignore versions \`>= $CAP\`, so Dependabot will now propose only the next single-major upgrade (\`$NEXT_MAJOR.x\`) on its next scheduled run.
-
-          Closing this PR. The capped upgrade will appear automatically.
-          BODY
-          )"
+          Closing this PR. Dependabot will re-open it at the capped version once that patch merges."
           gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
