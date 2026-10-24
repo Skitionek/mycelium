@@ -129,7 +129,7 @@
     "storybook": "10.6.3",
     "typescript": "~5.4.0",
     "typescript-eslint": "^8.72.0",
-    "wait-on": "8.0.1"
+    "wait-on": "9.5.1"
   },
   "resolutions": {
     "@types/d3-array": "2.12.3",
