@@ -103,7 +103,6 @@ uv run --python .venv/bin/python locust \
 These tests are written in Typescript using the [Element](https://element.flood.io/docs/) tool.
 They are run in real browsers and are intended to mimic real use case scenarios.
 
-
 ### Running the tests
 
 Install NPM dependencies:
