@@ -20,7 +20,7 @@
                         <i class="fas fa-spinner fa-pulse fa-fw" *ngIf="tab.loading; else notLoading"></i>
                         <ng-template #notLoading>
                           <i
-                            [class]="'fa-fw ' + (calculateFontAwesomeIcon(tab.fontAwesomeIcon) || 'fa window-maximize')"></i>
+                            [class]="'fa-fw ' + calculateFontAwesomeIcon(tab.fontAwesomeIcon)"></i>
                         </ng-template>
                         {{tab.title}}
                       </span>
