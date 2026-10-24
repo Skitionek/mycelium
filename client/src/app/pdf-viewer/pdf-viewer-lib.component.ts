@@ -439,7 +439,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     // source links if any
     if (an.meta.idHyperlinks && an.meta.idHyperlinks.length > 0) {
       htmlLinks += `
-        <a>Source Links <i class="fas fa-external-link-alt ml-1 text-muted"></i></a>
+        <a>Source Links <i class="fas fa-external-link-alt ms-1 text-muted"></i></a>
         <div>
       `;
 
@@ -462,7 +462,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
           data-target="#${searchLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchLinkCollapseTargetId}"
-        >Search links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        >Search links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div class="collapse" id="${searchLinkCollapseTargetId}">
     `;
     // links should be sorted in the order that they appear in SEARCH_LINKS
@@ -483,7 +483,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
           data-target="#${searchInternalLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchInternalLinkCollapseTargetId}"
-        >Search internal links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        >Search internal links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div class="collapse" id="${searchInternalLinkCollapseTargetId}">
     `;
     const visLink = this.internalSearch.getVisualizerLink(an.meta.allText);
@@ -502,7 +502,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div class="mt-1">
           <button
             type="button"
-            class="btn btn-primary btn-block"
+            class="btn btn-primary w-100"
             onclick="
                 window.pdfViewerRef['${this.pdfViewerId}']
                   .removeCustomAnnotation(${escape(
@@ -526,7 +526,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       };
       base.push(`
         <div class="mt-1">
-          <button type="button" class="btn btn-primary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].openExclusionPanel(${escape(
+          <button type="button" class="btn btn-primary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].openExclusionPanel(${escape(
         JSON.stringify(annExclusion))})">
             <i class="fas fa-fw fa-minus-circle"></i>
             <span>Mark for Exclusion</span>
@@ -536,7 +536,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     }
     base.push(`
         <div class="mt-1">
-          <button type="button" class="btn btn-secondary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].highlightAllAnnotations(${escape(
+          <button type="button" class="btn btn-secondary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].highlightAllAnnotations(${escape(
       JSON.stringify(an.meta.id))}, false);window.pdfViewerRef['${this.pdfViewerId}'].hideAllAnnotationPopovers()">
             <i class="fas fa-fw fa-search"></i>
             <span>Find Occurrences</span>
@@ -556,7 +556,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
             ${an.meta.exclusionComment ? `<span style="line-height: 16px"><i>comment: </i>${escape(an.meta.exclusionComment)}</span>` : ''}
           </div>
           <div class="mt-1">
-            <button type="button" class="btn btn-primary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].removeAnnotationExclusion(${escape(
+            <button type="button" class="btn btn-primary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].removeAnnotationExclusion(${escape(
         JSON.stringify(annExclusion))})">
               <i class="fas fa-fw fa-undo"></i>
               <span>Unmark Exclusion</span>

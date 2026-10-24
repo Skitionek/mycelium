@@ -231,7 +231,7 @@ export class AnnotationTagHandler extends TagHandler {
     // source links if any
     if (meta.idHyperlinks && meta.idHyperlinks.length > 0) {
       htmlLinks += `
-        <div>Source Links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Source Links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
       `;
 
@@ -249,7 +249,7 @@ export class AnnotationTagHandler extends TagHandler {
     const searchLinkCollapseTargetId = uniqueId('enrichment-tooltip-collapse-target');
     htmlLinks += `
       <div>
-        <div>Search links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Search links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
     `;
     // links should be sorted in the order that they appear in SEARCH_LINKS
@@ -265,7 +265,7 @@ export class AnnotationTagHandler extends TagHandler {
     const searchInternalLinkCollapseTargetId = uniqueId('enrichment-tooltip-internal-collapse-target');
     htmlLinks += `
       <div>
-        <div>Search internal links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Search internal links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
     `;
     const visLink = this.internalSearch.getVisualizerLink(meta.allText);
