@@ -76,7 +76,7 @@
     "ng2-charts": "^11.0.0",
     "ngrx-store-localstorage": "~17.0.0",
     "pdfjs-dist": "6.4.299",
-    "plotly.js-dist-min": "1.58.5",
+    "plotly.js-dist-min": "4.1.2",
     "route-with-dynamic-outlets": "^1.0.0",
     "rxjs": "~7.5.0",
     "tachyons": "4.12.0",

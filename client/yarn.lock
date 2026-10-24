@@ -12350,10 +12350,10 @@ playwright@1.64.1, playwright@^1.14.0:
   dependencies:
     playwright-core "1.64.1"
 
-plotly.js-dist-min@1.58.5:
-  version "1.58.5"
-  resolved "https://registry.yarnpkg.com/plotly.js-dist-min/-/plotly.js-dist-min-1.58.5.tgz#bd511199c876240fbc4b0d2e5810d247d0b33894"
-  integrity sha512-GeH6TQ9icfZTzgeQm80YiENHZ5JtXO27FBgG58ejVBe9XLkOdPElHoFv8VLfv6DncPan0wRxtRA2GFrVk/begg==
+plotly.js-dist-min@4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/plotly.js-dist-min/-/plotly.js-dist-min-4.1.2.tgz#6ce58e12a5430c14594e22ebdabbb3d037967acb"
+  integrity sha512-VSmS9KVNun16S8qFYYp9LlL/XBby4ueeGqB+K9AqRCVsup8dSpGULap4UyR1f2mz4pV3qjWp1sR5chwLgIKPoQ==
 
 pngjs@^3.4.0:
   version "3.4.0"
