@@ -258,7 +258,7 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
         .then((m) => m.EnrichmentVisualisationRouteModule),
     data: {
       title: 'Enrichment Visualisation',
-      fontAwesomeIcon: 'fas chart-bar',
+      fontAwesomeIcon: 'fas fa-chart-bar',
     },
   },
 ];
