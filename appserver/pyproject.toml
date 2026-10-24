@@ -61,7 +61,7 @@ dev = [
   "pycodestyle==2.15.0",
   "mypy==2.4.0",
   "httpretty==1.1.4",
-  "types-paramiko==5.0.0.20261006",
+  "types-paramiko==5.0.0.20261021",
   "types-redis==4.6.0.20241004",
   "types-requests==2.33.0.20261006",
   "pytest-cov==7.1.0",
