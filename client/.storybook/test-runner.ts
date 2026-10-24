@@ -39,7 +39,7 @@ interface ImageSnapshotParameters {
 }
 
 /**
- * Fonts and plotly are bundled from pinned npm packages, and Storybook loads
+ * Fonts and plotly are served from pinned npm packages, and Storybook loads
  * Font Awesome Free from npm in place of the app's Font Awesome Pro kit (see
  * angular.json). These are the CDNs the app loads or used to load them from;
  * any request that still escapes to one of them is blocked:
