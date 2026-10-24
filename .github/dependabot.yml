@@ -232,14 +232,20 @@ updates:
           - playwright
           - jest-image-snapshot
           - "@types/jest-image-snapshot"
-      # Fonts and icons are vendored locally so Storybook renders offline and
-      # identically everywhere. Any bump changes glyph shapes and therefore
-      # invalidates every committed image snapshot, so they move together and
-      # the bump PR must include regenerated PNGs.
+      # Fonts and icons are bundled from npm, not a CDN, so the app and
+      # Storybook render offline and identically everywhere. Any bump changes
+      # glyph shapes and therefore invalidates every committed image snapshot,
+      # so they move together and the bump PR must include regenerated PNGs.
       webfonts:
         patterns:
           - "@fontsource/*"
           - "@fortawesome/*"
+      # Pinned to 1.58.5, the build the old plotly-latest.min.js CDN URL froze
+      # at. v2 dropped APIs and changed defaults, so a major bump needs the
+      # sankey views checked by hand.
+      plotly:
+        patterns:
+          - plotly.js*
     ignore:
       # Fix angular version until refactor is done. The rest of the `angular`
       # group is ignored too, otherwise the CLI/devkit/TypeScript halves would

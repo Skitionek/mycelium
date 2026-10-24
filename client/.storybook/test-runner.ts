@@ -39,9 +39,9 @@ interface ImageSnapshotParameters {
 }
 
 /**
- * index.html and styles.scss pull fonts, icons and plotly from CDNs. Pinned
- * local copies are loaded instead (see the `styles` of the storybook target in
- * angular.json), so any request that still escapes to one of these is blocked:
+ * Fonts, icons and plotly are bundled from pinned npm packages (see the
+ * `styles` and `scripts` in angular.json). These are the CDNs the app used to
+ * load them from; any request that still escapes to one of them is blocked:
  * letting it through would make a snapshot depend on the network and on
  * whatever those hosts serve that day.
  */
