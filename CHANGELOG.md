@@ -117,6 +117,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Missing side borders**: column separators in the shared data table, the divider beside the file browser and preview sidebars, the SDRF actions column, the collapsed split-pane tab and clustergram match cells all show again. Their `border-left`/`border-right` had become `border-start`/`border-end`, which are not CSS properties, so browsers dropped them; they are now `border-inline-start`/`border-inline-end` ([#744]).
 - **Quick search links**: external search links are labelled "NCBI Gene" and "NCBI Taxonomy" like everywhere else rather than with their `NCBI_Gene` keys, and links saved on a map node are listed in the usual order whatever the case of their domain ([#744]).
 - **Unreadable grey badges**: the search term in the PDF and map search control and the **Re-Annotation** badge in a file's annotation history were white on the light grey secondary colour. They now use `text-bg-secondary`, which picks a contrasting text colour ([#744]).
 - **Bootstrap 4 leftovers**: full-width buttons are full width again (login, map node and edge **Delete**, annotation filter **Show/Hide All**, the PDF annotation popups and others); `btn-block` no longer exists in Bootstrap 5, so they had shrunk to their label. The Sankey **Delete View** dialog gets a proper close button instead of a bare browser-styled "×", and the remaining `ml-*`, `rounded-left` and `jumbotron` classes use their Bootstrap 5 names ([#744]).
