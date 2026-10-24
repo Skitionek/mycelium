@@ -95,10 +95,11 @@ const chromeLauncherBase = process.env.CHROMIUM_BIN ? 'ChromiumHeadless' : 'Chro
 
 module.exports = function (config) {
   config.set({
-    // Adding "files:" to fix errors as explained at:
-    // https://github.com/SBRG/kg-prototypes/pull/93#issuecomment-617272392
+    // Served as a plain <script>, not through the builder's `scripts`: those
+    // are wrapped as webpack modules, where plotly 1.x's top-level `this` is
+    // undefined and it throws on load.
     files: [
-      { pattern: 'https://cdn.plot.ly/plotly-latest.js', watched: false },
+      { pattern: 'node_modules/plotly.js-dist-min/plotly.min.js', watched: false },
     ],
     basePath: '',
     // The threshold for this timeout is likely to increase as we add more code to the
