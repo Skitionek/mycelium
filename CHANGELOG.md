@@ -117,6 +117,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **PDF annotation popovers**: clicking an annotation in the PDF viewer opens its popover again, with its **Delete Annotation**, **Mark for Exclusion**, **Find Occurrences** and **Unmark Exclusion** buttons and expandable search links. The app loaded Bootstrap without the Popper it needs, so every popover failed to open; Bootstrap 5's sanitizer also stripped the buttons and collapse toggles from its content, and the toggles still used Bootstrap 4's `data-toggle` ([#744]).
 - **`flask upload-lmdb` errors**: creating a directory in Azure file storage no longer hides failures. A `finally` block re-ran the creation and returned, which discarded every error other than a missing parent, and retried an error that kept failing until Python ran out of stack ([#744]).
 - **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
 - **Workspace tab icons**: tabs whose view sets no icon show the window icon again instead of an empty gap; the fallback class was missing its `fa` prefixes, and it was truthy, so the template's own fallback never applied. Enrichment Visualisation tabs get their chart icon back too: their route named it `fas chart-bar` ([#744]).

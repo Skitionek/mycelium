@@ -371,6 +371,16 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
           trigger: 'click',
           placement: 'top',
           container: overlayContainer,
+          // Bootstrap sanitizes popover HTML against an allowlist with no
+          // <button>, inline handlers or data-* attributes, which stripped
+          // the action buttons and the collapse toggles out of this markup.
+          // prepareTooltipContent() escapes every value it interpolates.
+          allowList: {
+            ...bootstrap.Popover.Default.allowList,
+            div: ['data-bs-toggle', 'data-bs-target', 'style'],
+            span: ['style'],
+            button: ['type', 'onclick'],
+          },
         });
         this.annotationPopoverMap.set(overlayDiv, popover);
       }
@@ -458,8 +468,8 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div
           class="tooltip-collapse-control collapsed"
           role="button"
-          data-toggle="collapse"
-          data-target="#${searchLinkCollapseTargetId}"
+          data-bs-toggle="collapse"
+          data-bs-target="#${searchLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchLinkCollapseTargetId}"
         >Search links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
@@ -479,8 +489,8 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div
           class="tooltip-collapse-control collapsed"
           role="button"
-          data-toggle="collapse"
-          data-target="#${searchInternalLinkCollapseTargetId}"
+          data-bs-toggle="collapse"
+          data-bs-target="#${searchInternalLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchInternalLinkCollapseTargetId}"
         >Search internal links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
