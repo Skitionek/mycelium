@@ -204,7 +204,7 @@ export class WorkspaceComponent implements AfterViewInit, OnChanges, AfterConten
 
   calculateFontAwesomeIcon(s: string) {
     if (s == null) {
-      return 'window-maximize';
+      return 'fa fa-window-maximize';
     } else if (s.includes(' ')) {
       return s;
     } else {
