@@ -31,7 +31,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
 - **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback) ([#245]).
-- **No runtime CDNs**: Font Awesome, the Roboto, IBM Plex Sans and Inter fonts, and Plotly are bundled from pinned npm packages instead of loaded from a Font Awesome kit, Google Fonts and `cdn.plot.ly`. Plotly is pinned to 1.58.5, the build the `plotly-latest` URL served ([#744]).
+- **Fonts and Plotly bundled**: the Roboto, IBM Plex Sans and Inter fonts and Plotly are bundled from pinned npm packages instead of loaded from Google Fonts and `cdn.plot.ly`. Plotly is pinned to 1.58.5, the build the `plotly-latest` URL served. Font Awesome still loads from its kit: it is Font Awesome 5 Pro with custom icons the app draws by name and code point ([#744]).
 - **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
 - **Elevation**: Heavy box-shadows replaced with subtle `1px solid #e2e8f0` borders on module headers, toolbars, dropdowns and popovers for a "clinical lab" aesthetic ([#245]).
 - **Knowledge Graph nodes**: Default node stroke and edge colour updated from `#2B7CE9` to Deep Sea Teal `#004B49`; default node background updated to `#F1F5F9` ([#245]).
