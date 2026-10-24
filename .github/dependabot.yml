@@ -274,6 +274,16 @@ updates:
       - dependency-name: ngrx-store-localstorage
         versions: ['>=18']
 
+  # End-to-end suite (tests/e2e). Independent of the client's pinned
+  # `playwright`: the e2e job installs whichever browser build its
+  # @playwright/test version asks for.
+  - package-ecosystem: npm
+    directory: /tests/e2e
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: npm
+
   # Maintain dependencies for Java
   - package-ecosystem: maven
     directory: /graph-db

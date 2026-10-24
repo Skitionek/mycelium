@@ -34,7 +34,7 @@ Roadmap:
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
 | **Comprehensive linting** | ❌ | ✅ MegaLinter with SARIF upload & PR annotations |
 | **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ Angular unit specs for core UI components |
+| **Automated UI tests** | ❌ | ✅ Angular unit specs for core UI components and Playwright end-to-end tests against the full stack ([tests/e2e](tests/e2e)) |
 | **Database migrations** | 100+ incremental Alembic files | Single squashed baseline migration |
 | **d3 version** | v5 | v7 |
 | **Flask version** | 2.x | 3.x |
