@@ -114,7 +114,7 @@
   }
 
   .module-body-split-sidebar {
-    border-start: 1px solid $border-color;
+    border-inline-start: 1px solid $border-color;
     background: $light;
     min-width: 400px;
   }
@@ -132,7 +132,7 @@
   }
 
   .module-body-split-sidebar {
-    border-start: 1px solid $border-color;
+    border-inline-start: 1px solid $border-color;
     display: none;
 
     @include module-breakpoint-up(md) {
