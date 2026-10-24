@@ -30,7 +30,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Changed
 
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
-- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback); Inter loaded from Google Fonts ([#245]).
+- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback) ([#245]).
+- **No runtime CDNs**: Font Awesome, the Roboto, IBM Plex Sans and Inter fonts, and Plotly are bundled from pinned npm packages instead of loaded from a Font Awesome kit, Google Fonts and `cdn.plot.ly`. Plotly is pinned to 1.58.5, the build the `plotly-latest` URL served ([#744]).
 - **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
 - **Elevation**: Heavy box-shadows replaced with subtle `1px solid #e2e8f0` borders on module headers, toolbars, dropdowns and popovers for a "clinical lab" aesthetic ([#245]).
 - **Knowledge Graph nodes**: Default node stroke and edge colour updated from `#2B7CE9` to Deep Sea Teal `#004B49`; default node background updated to `#F1F5F9` ([#245]).
@@ -116,6 +117,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
@@ -293,3 +295,5 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
 [#679]: https://github.com/Skitionek/mycelium/pull/679
+[#743]: https://github.com/Skitionek/mycelium/pull/743
+[#744]: https://github.com/Skitionek/mycelium/pull/744
