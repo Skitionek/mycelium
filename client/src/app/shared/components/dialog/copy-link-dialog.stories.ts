@@ -7,9 +7,8 @@ import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { CopyLinkDialogComponent } from 'app/shared/components/dialog/copy-link-dialog.component';
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
-import { ModalHeaderComponent } from 'app/shared/components/modal/modal-header.component';
-import { ModalBodyComponent } from 'app/shared/components/modal/modal-body.component';
 import { AutoFocusDirective } from 'app/shared/directives/auto-focus.directive';
+import { MODAL_DECLARATIONS, modalDialogWrapper } from 'app/shared/storybook/modal-dialog';
 
 const meta: Meta<CopyLinkDialogComponent> = {
   title: 'Shared/Copy Link Dialog',
@@ -17,12 +16,13 @@ const meta: Meta<CopyLinkDialogComponent> = {
   decorators: [
     moduleMetadata({
       imports: [CommonModule, MatSnackBarModule],
-      declarations: [ModalHeaderComponent, ModalBodyComponent, AutoFocusDirective],
+      declarations: [...MODAL_DECLARATIONS, AutoFocusDirective],
       providers: [
         MockProvider(NgbActiveModal),
         MockProvider(MessageDialog),
       ],
     }),
+    modalDialogWrapper,
   ],
 };
 

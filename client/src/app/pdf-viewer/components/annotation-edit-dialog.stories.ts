@@ -1,31 +1,35 @@
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { MockComponents, MockProvider } from 'ng-mocks';
+import { MockProvider } from 'ng-mocks';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { AnnotationEditDialogComponent } from 'app/pdf-viewer/components/annotation-edit-dialog.component';
-import { ModalHeaderComponent } from 'app/shared/components/modal/modal-header.component';
-import { ModalBodyComponent } from 'app/shared/components/modal/modal-body.component';
-import { ModalFooterComponent } from 'app/shared/components/modal/modal-footer.component';
+import { LinksPanelComponent } from 'app/drawing-tool/components/links-panel.component';
+import { FormInputFeedbackComponent } from 'app/shared/components/form/form-input-feedback.component';
 import { FormRowComponent } from 'app/shared/components/form/form-row.component';
+import { DataTransferDataService } from 'app/shared/services/data-transfer-data.service';
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
+import { MODAL_DECLARATIONS, modalDialogWrapper } from 'app/shared/storybook/modal-dialog';
+import { WorkspaceManager } from 'app/shared/workspace-manager';
 
 const meta: Meta<AnnotationEditDialogComponent> = {
   title: 'PDF Viewer/Annotation Edit Dialog',
   component: AnnotationEditDialogComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, ReactiveFormsModule, NgbModule],
-      declarations: [
-        MockComponents(ModalHeaderComponent, ModalBodyComponent, ModalFooterComponent, FormRowComponent),
-      ],
+      // FormsModule: the links panel is bound with [(ngModel)] inside the reactive form.
+      imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbModule],
+      declarations: [...MODAL_DECLARATIONS, FormRowComponent, FormInputFeedbackComponent, LinksPanelComponent],
       providers: [
         MockProvider(NgbActiveModal),
         MockProvider(MessageDialog),
+        MockProvider(DataTransferDataService),
+        MockProvider(WorkspaceManager),
       ],
     }),
+    modalDialogWrapper,
   ],
 };
 

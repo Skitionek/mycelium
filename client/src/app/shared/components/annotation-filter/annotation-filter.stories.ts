@@ -1,6 +1,7 @@
-import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { AnnotationFilterComponent } from 'app/shared/components/annotation-filter/annotation-filter.component';
@@ -28,7 +29,8 @@ const meta: Meta<AnnotationFilterComponent<AnnotationFilterEntity>> = {
   component: AnnotationFilterComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, ReactiveFormsModule],
+      // The template mixes reactive forms with a [(ngModel)] grouping select.
+      imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbModule],
     }),
   ],
 };

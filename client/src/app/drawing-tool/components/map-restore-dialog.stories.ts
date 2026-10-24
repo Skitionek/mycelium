@@ -5,6 +5,7 @@ import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { MockProvider } from 'ng-mocks';
 
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
+import { MODAL_DECLARATIONS, modalDialogWrapper } from 'app/shared/storybook/modal-dialog';
 
 import { MapRestoreDialogComponent } from './map-restore-dialog.component';
 
@@ -14,11 +15,13 @@ const meta: Meta<MapRestoreDialogComponent> = {
   decorators: [
     moduleMetadata({
       imports: [CommonModule, NgbModule],
+      declarations: MODAL_DECLARATIONS,
       providers: [
         MockProvider(NgbActiveModal),
         MockProvider(MessageDialog),
       ],
     }),
+    modalDialogWrapper,
   ],
 };
 

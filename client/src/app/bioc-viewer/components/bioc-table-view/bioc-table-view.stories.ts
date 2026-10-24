@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { MockComponents } from 'ng-mocks';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { BiocTableViewComponent } from 'app/bioc-viewer/components/bioc-table-view/bioc-table-view.component';
@@ -13,7 +12,8 @@ const meta: Meta<BiocTableViewComponent> = {
   decorators: [
     moduleMetadata({
       imports: [CommonModule, NgbModule],
-      declarations: [MockComponents(AnnotatedTextComponent)],
+      // Renders the caption and plain-text table bodies.
+      declarations: [AnnotatedTextComponent],
     }),
   ],
 };

@@ -7,21 +7,24 @@ import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { ObjectPathComponent } from 'app/shared/components/object-path/object-path.component';
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 import { WorkspaceManager } from 'app/shared/workspace-manager';
+import { MimeTypes } from 'app/shared/constants';
 import { ProjectIconComponent } from 'app/shared/components/project-icon/project-icon.component';
 import { LinkWithHrefDirective, LinkWithoutHrefDirective } from 'app/shared/directives/link.directive';
 import { FilesystemObjectTargetDirective } from 'app/shared/directives/filesystem-object-target.directive';
 import { ContextMenuDirective, ContextMenuBodyDirective } from 'app/shared/directives/context-menu.directive';
 
-function makeObject(filename: string, parent?: FilesystemObject): FilesystemObject {
+function makeObject(filename: string, parent?: FilesystemObject, mimeType?: string): FilesystemObject {
   const obj = new FilesystemObject();
   obj.filename = filename;
+  obj.mimeType = mimeType;
   obj.hashId = Math.random().toString(36).slice(2);
   obj.parent = parent ?? null;
   return obj;
 }
 
-const project = makeObject('My Project');
-const folder = makeObject('Sub Folder', project);
+// `rootName` only replaces the label of a root that is a directory.
+const project = makeObject('My Project', undefined, MimeTypes.Directory);
+const folder = makeObject('Sub Folder', project, MimeTypes.Directory);
 const file = makeObject('Document.pdf', folder);
 
 const meta: Meta<ObjectPathComponent> = {

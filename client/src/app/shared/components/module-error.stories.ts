@@ -8,6 +8,11 @@ import { ModuleErrorComponent } from 'app/shared/components/module-error.compone
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
 import { UserError } from 'app/shared/exceptions';
 
+const messages: Record<number, string> = {
+  404: 'The requested resource could not be found.',
+  500: 'The server encountered an error. Please try again later.',
+};
+
 const meta: Meta<ModuleErrorComponent> = {
   title: 'Shared/Module Error',
   component: ModuleErrorComponent,
@@ -16,8 +21,7 @@ const meta: Meta<ModuleErrorComponent> = {
       imports: [CommonModule],
       providers: [
         MockProvider(ErrorHandler, {
-          createUserError: (_error, _opts) =>
-            of(new UserError('Not Found', 'The requested resource could not be found.', [])),
+          createUserError: (error) => of(new UserError(error.message, messages[error.status], [])),
         }),
       ],
     }),
@@ -40,7 +44,8 @@ export const ServerError: Story = {
   },
 };
 
-export const NoError: Story = {
+/** A null error renders the placeholder shown while the error is resolved. */
+export const Loading: Story = {
   args: {
     error: null,
   },

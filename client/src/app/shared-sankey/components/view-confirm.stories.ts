@@ -4,6 +4,8 @@ import { NgbModule, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { MockProvider } from 'ng-mocks';
 
+import { modalDialogWrapper } from 'app/shared/storybook/modal-dialog';
+
 import { SankeyViewConfirmComponent } from './view-confirm.component';
 
 const meta: Meta<SankeyViewConfirmComponent> = {
@@ -14,6 +16,7 @@ const meta: Meta<SankeyViewConfirmComponent> = {
       imports: [CommonModule, NgbModule],
       providers: [MockProvider(NgbActiveModal)],
     }),
+    modalDialogWrapper,
   ],
 };
 

@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-import { MockProvider, MockComponents } from 'ng-mocks';
+import { MockProvider } from 'ng-mocks';
 import { of } from 'rxjs';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { UserSelectComponent } from 'app/shared/components/form/user-select.component';
 import { SelectInputComponent } from 'app/shared/components/form/select-input.component';
+import { MouseNavigableDirective } from 'app/shared/directives/mouse-navigable.directive';
 import { AccountsService } from 'app/shared/services/accounts.service';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
 
@@ -14,13 +16,14 @@ const meta: Meta<UserSelectComponent> = {
   component: UserSelectComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule],
-      declarations: [MockComponents(SelectInputComponent)],
+      imports: [CommonModule, FormsModule],
+      // The select input is everything this wrapper renders, so it stays real.
+      declarations: [SelectInputComponent, MouseNavigableDirective],
       providers: [
         MockProvider(AccountsService, {
           search: () => of({ results: { items: [], total: 0 } } as any),
         }),
-        MockProvider(ErrorHandler),
+        MockProvider(ErrorHandler, { create: () => (source) => source }),
       ],
     }),
   ],

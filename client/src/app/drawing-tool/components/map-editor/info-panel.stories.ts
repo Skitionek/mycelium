@@ -1,9 +1,14 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { MockProvider, MockComponents } from 'ng-mocks';
 
 import { WorkspaceManager } from 'app/shared/workspace-manager';
+import { InternalSearchService } from 'app/shared/services/internal-search.service';
+import { LinksPanelComponent } from 'app/drawing-tool/components/links-panel.component';
 import { InfoPanel } from 'app/drawing-tool/models/info-panel';
 import {
   GraphEntityType,
@@ -19,9 +24,10 @@ const meta: Meta<InfoPanelComponent> = {
   component: InfoPanelComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule],
-      declarations: [MockComponents(NodeFormComponent, EdgeFormComponent)],
-      providers: [MockProvider(WorkspaceManager)],
+      imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbModule],
+      // The forms are all the panel renders, so they stay real.
+      declarations: [NodeFormComponent, EdgeFormComponent, MockComponents(LinksPanelComponent)],
+      providers: [MockProvider(WorkspaceManager), MockProvider(InternalSearchService)],
     }),
   ],
 };
