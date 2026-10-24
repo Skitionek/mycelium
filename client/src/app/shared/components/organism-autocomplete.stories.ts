@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MockProvider } from 'ng-mocks';
@@ -13,7 +14,7 @@ const meta: Meta<OrganismAutocompleteComponent> = {
   component: OrganismAutocompleteComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, NgbModule],
+      imports: [CommonModule, FormsModule, NgbModule],
       providers: [
         MockProvider(SharedSearchService, {
           getOrganisms: () => of({ nodes: [] } as any),

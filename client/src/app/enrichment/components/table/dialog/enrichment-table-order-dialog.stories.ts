@@ -6,7 +6,10 @@ import { NgbModule, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { MockProvider } from 'ng-mocks';
 
+import { FormInputFeedbackComponent } from 'app/shared/components/form/form-input-feedback.component';
+import { FormRowComponent } from 'app/shared/components/form/form-row.component';
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
+import { MODAL_DECLARATIONS, modalDialogWrapper } from 'app/shared/storybook/modal-dialog';
 
 import { EnrichmentTableOrderDialogComponent } from './enrichment-table-order-dialog.component';
 
@@ -16,11 +19,13 @@ const meta: Meta<EnrichmentTableOrderDialogComponent> = {
   decorators: [
     moduleMetadata({
       imports: [CommonModule, ReactiveFormsModule, NgbModule, DragDropModule],
+      declarations: [...MODAL_DECLARATIONS, FormRowComponent, FormInputFeedbackComponent],
       providers: [
         MockProvider(NgbActiveModal),
         MockProvider(MessageDialog),
       ],
     }),
+    modalDialogWrapper,
   ],
 };
 

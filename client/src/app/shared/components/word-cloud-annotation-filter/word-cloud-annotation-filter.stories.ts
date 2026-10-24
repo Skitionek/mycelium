@@ -1,6 +1,7 @@
-import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { WordCloudAnnotationFilterComponent } from 'app/shared/components/word-cloud-annotation-filter/word-cloud-annotation-filter.component';
@@ -32,7 +33,8 @@ const meta: Meta<WordCloudAnnotationFilterComponent> = {
   component: WordCloudAnnotationFilterComponent,
   decorators: [
     moduleMetadata({
-      imports: [CommonModule, ReactiveFormsModule],
+      // The template mixes reactive forms with a [(ngModel)] grouping select.
+      imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbModule],
     }),
   ],
 };

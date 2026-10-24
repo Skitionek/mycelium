@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MockProvider } from 'ng-mocks';
-import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
+import { componentWrapperDecorator, moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { AnnotationToolbarComponent } from 'app/pdf-viewer/components/annotation-toolbar.component';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
@@ -16,6 +16,9 @@ const meta: Meta<AnnotationToolbarComponent> = {
       imports: [CommonModule, NgbModule, MatSnackBarModule],
       providers: [MockProvider(ErrorHandler)],
     }),
+    // The toolbar is absolutely positioned and drawn above its anchor point, so
+    // it needs a positioned frame with room above `position.top` to be visible.
+    componentWrapperDecorator((story) => `<div style="position: relative; height: 64px">${story}</div>`),
   ],
 };
 
@@ -26,13 +29,13 @@ type Story = StoryObj<AnnotationToolbarComponent>;
 export const Active: Story = {
   args: {
     active: true,
-    position: { top: 0, left: 0 },
+    position: { top: 56, left: 16 },
   },
 };
 
 export const Inactive: Story = {
   args: {
     active: false,
-    position: { top: 0, left: 0 },
+    position: { top: 56, left: 16 },
   },
 };

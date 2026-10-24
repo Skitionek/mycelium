@@ -1,9 +1,13 @@
-import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
+import { applicationConfig, moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 import { MockProvider } from 'ng-mocks';
-import { RouterTestingModule } from '@angular/router/testing';
+import { NEVER } from 'rxjs';
+import { provideRouter, withDisabledInitialNavigation } from '@angular/router';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { EnrichmentVisualisationService } from 'app/enrichment/services/enrichment-visualisation.service';
-import { EnrichmentService } from 'app/enrichment/services/enrichment.service';
+import { FilesystemService } from 'app/file-browser/services/filesystem.service';
+import { ApiService } from 'app/shared/services/api.service';
 
 import { EnrichmentVisualisationViewerComponent } from './enrichment-visualisation-viewer.component';
 
@@ -14,11 +18,22 @@ const meta: Meta<EnrichmentVisualisationViewerComponent> = {
     imageSnapshot: { skip: true },
   },
   decorators: [
-    moduleMetadata({
-      imports: [RouterTestingModule],
+    // The component provides its own services, which shadow any mock in
+    // moduleMetadata. Their root-level dependencies are stubbed here instead:
+    // file loads never emit and the testing backend holds every request, so
+    // the viewer stays in its loading state.
+    applicationConfig({
       providers: [
-        MockProvider(EnrichmentVisualisationService),
-        MockProvider(EnrichmentService),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([], withDisabledInitialNavigation()),
+        MockProvider(FilesystemService, { get: () => NEVER, getContent: () => NEVER }),
+      ],
+    }),
+    moduleMetadata({
+      imports: [MatSnackBarModule],
+      providers: [
+        MockProvider(ApiService),
       ],
     }),
   ],

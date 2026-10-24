@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MockProvider, MockDirective } from 'ng-mocks';
-import { moduleMetadata, Meta, StoryObj } from '@storybook/angular';
+import { componentWrapperDecorator, moduleMetadata, Meta, StoryObj } from '@storybook/angular';
 
 import { ProjectMenuComponent } from 'app/shared/components/project-menu/project-menu.component';
 import { ProjectImpl } from 'app/file-browser/models/filesystem-object';
@@ -27,6 +27,8 @@ const meta: Meta<ProjectMenuComponent> = {
       declarations: [MockDirective(LinkWithHrefDirective), MockDirective(LinkWithoutHrefDirective)],
       providers: [MockProvider(ProjectActions)],
     }),
+    // The menu is the body of a dropdown; render it inside one.
+    componentWrapperDecorator((story) => `<div class="dropdown-menu show position-static">${story}</div>`),
   ],
 };
 

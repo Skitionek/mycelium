@@ -9,8 +9,8 @@ function buildForm(models: string[]): FormGroup {
   const methodsGroup: Record<string, FormGroup> = {};
   for (const model of models) {
     methodsGroup[model] = new FormGroup({
-      nlp: new FormControl(true),
-      rules: new FormControl(false),
+      nlp: new FormControl(model === 'Gene'),
+      rulesBased: new FormControl(model !== 'Gene'),
     });
   }
   return new FormGroup({
