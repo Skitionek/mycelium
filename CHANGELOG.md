@@ -117,6 +117,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Bootstrap 4 leftovers**: full-width buttons are full width again (login, map node and edge **Delete**, annotation filter **Show/Hide All**, the PDF annotation popups and others); `btn-block` no longer exists in Bootstrap 5, so they had shrunk to their label. The Sankey **Delete View** dialog gets a proper close button instead of a bare browser-styled "×", and the remaining `ml-*`, `rounded-left` and `jumbotron` classes use their Bootstrap 5 names ([#744]).
 - **Fieldset legends**: section labels such as "Annotation", "Additional Links" and "Enrichment Table Parameters" sit on their divider line again, with the fields starting below them. Bootstrap 5 floats every `legend`, so these labels had left the line and the first field of each section wrapped up beside them, out of line with the rest of the form ([#744]).
 - **Release tagging**: the release workflow now sets a tagger identity for its annotated tag. The first run to pass the gate failed at `git tag -a` with "Committer identity unknown", so still no release had been cut ([#744]).
 - **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
