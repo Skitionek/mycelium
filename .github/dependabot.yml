@@ -232,10 +232,11 @@ updates:
           - playwright
           - jest-image-snapshot
           - "@types/jest-image-snapshot"
-      # Fonts and icons are bundled from npm, not a CDN, so the app and
-      # Storybook render offline and identically everywhere. Any bump changes
-      # glyph shapes and therefore invalidates every committed image snapshot,
-      # so they move together and the bump PR must include regenerated PNGs.
+      # Fonts are bundled from npm, not a CDN, and Storybook also vendors Font
+      # Awesome Free in place of the app's Pro kit, so snapshots render offline
+      # and identically everywhere. Any bump changes glyph shapes and therefore
+      # invalidates every committed image snapshot, so they move together and
+      # the bump PR must include regenerated PNGs.
       webfonts:
         patterns:
           - "@fontsource/*"
