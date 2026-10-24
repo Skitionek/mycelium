@@ -117,6 +117,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Quick search links**: external search links are labelled "NCBI Gene" and "NCBI Taxonomy" like everywhere else rather than with their `NCBI_Gene` keys, and links saved on a map node are listed in the usual order whatever the case of their domain ([#744]).
 - **Unreadable grey badges**: the search term in the PDF and map search control and the **Re-Annotation** badge in a file's annotation history were white on the light grey secondary colour. They now use `text-bg-secondary`, which picks a contrasting text colour ([#744]).
 - **Bootstrap 4 leftovers**: full-width buttons are full width again (login, map node and edge **Delete**, annotation filter **Show/Hide All**, the PDF annotation popups and others); `btn-block` no longer exists in Bootstrap 5, so they had shrunk to their label. The Sankey **Delete View** dialog gets a proper close button instead of a bare browser-styled "×", and the remaining `ml-*`, `rounded-left` and `jumbotron` classes use their Bootstrap 5 names ([#744]).
 - **Fieldset legends**: section labels such as "Annotation", "Additional Links" and "Enrichment Table Parameters" sit on their divider line again, with the fields starting below them. Bootstrap 5 floats every `legend`, so these labels had left the line and the first field of each section wrapped up beside them, out of line with the rest of the form ([#744]).
