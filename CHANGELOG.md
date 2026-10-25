@@ -169,6 +169,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Graph search filters**: the organism picked for a graph search is applied. Reading the search back from the URL dropped it, and turned no domains into one domain named `""`, which left literature data out of the results. A content search without folders no longer comes back with one folder named `""` ([#766]).
 - **Passwords in connection URLs**: a Redis password with `/`, `?` or `#`, as Azure access keys often have, no longer stops the appserver, cache invalidator and statistical-enrichment on start, and a PostgreSQL password with `@` no longer sends the appserver to the wrong host. A Neo4j password may contain `/` ([#766]).
 - **`flask load-lmdb` and `flask upload-lmdb`**: both start again. The LMDB manager built its database URL in a way SQLAlchemy 2 rejects, which also kept the API pod from starting when the Helm chart loads LMDB files ([#766]).
+- **Global inclusions on Neo4j 5**: listing, counting, annotating with and removing global inclusions work on Neo4j 5. Their queries tested properties with `exists()`, which Neo4j 5 removed, and use `IS NOT NULL` now ([#765]).
+- **Removing a global inclusion**: removing the last global inclusion for a synonym takes the `GlobalInclusion` label off it, which never happened, and the query no longer needs APOC. A failed label cleanup afterwards answers with its error instead of an `UnboundLocalError` ([#765]).
 - **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
@@ -346,6 +348,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#765]: https://github.com/Skitionek/mycelium/pull/765
 [#766]: https://github.com/Skitionek/mycelium/pull/766
 [#763]: https://github.com/Skitionek/mycelium/pull/763
 [#760]: https://github.com/Skitionek/mycelium/pull/760
