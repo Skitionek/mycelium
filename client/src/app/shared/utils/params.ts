@@ -19,12 +19,20 @@ export function getChoicesFromQuery<T>(params: { [key: string]: string }, key: s
   }
 }
 
+/**
+ * Parse a positive integer from the URL, which a user can edit to anything.
+ */
+function parsePositiveInt(value: string | undefined, fallback: number): number {
+  const parsed = value ? parseInt(value, 10) : NaN;
+  return parsed > 0 ? parsed : fallback;
+}
+
 export const deserializePaginatedParams = (
   {page, limit, sort = ''}: { [key in keyof PaginatedRequestOptions]?: string },
   defaultLimit: number
 ): Required<PaginatedRequestOptions> => ({
-  page: page ? parseInt(page, 10) : 1,
-  limit: limit ? parseInt(limit, 10) : defaultLimit,
+  page: parsePositiveInt(page, 1),
+  limit: parsePositiveInt(limit, defaultLimit),
   sort
 });
 

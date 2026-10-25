@@ -41,13 +41,15 @@ export class TableCSVExporter {
   }
 
   private escapeCell(value: any) {
-    if (value instanceof Date) {
+    if (value == null) {
+      value = '';
+    } else if (value instanceof Date) {
       value = value.toLocaleString();
     } else {
       value = String(value);
     }
     value = value.replace(/"/g, '""');
-    if (value.search(/("|,|\n)/g) >= 0) {
+    if (value.search(/[",\r\n]/) >= 0) {
       value = '"' + value + '"';
     }
     return value;
