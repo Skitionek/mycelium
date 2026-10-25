@@ -27,7 +27,11 @@ class EnrichmentTableService(KgService):
                 title='Could not annotate enrichment table',
                 message='Could not annotate enrichment table, there was a problem validating the format.')  # noqa
 
-        # got here so passed validation
+        # got here so passed validation, but a table may hold only its parameters
+        if 'result' not in enrichment:
+            raise AnnotationError(
+                title='Could not annotate enrichment table',
+                message='Could not annotate enrichment table, it has no results to annotate.')
         data = enrichment['result']
 
         total_index = 0
