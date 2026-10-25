@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 
 import pytest
@@ -161,3 +162,45 @@ def test_enrich_requires_gene_names(client, mozg_go):
     response = client.post("/enrich-with-go-terms", json=body)
 
     assert response.status_code == 422
+
+
+def test_enrich_reads_go_terms_precalculated_by_the_cache_invalidator(
+    client, fake_redis, mozg_go
+):
+    """cache-invalidator stores every GO term of an organism as JSON."""
+    fake_redis.set("GO_for_9606", json.dumps(GO_TERMS))
+
+    response = enrich(client)
+
+    assert response.status_code == 200
+    rows = response.get_json()
+    assert {row["goId"] for row in rows} == {"GO:0006915", "GO:0007049"}
+    mozg_go.fetch_go_terms.assert_not_called()
+
+
+def test_enrich_with_precalculated_terms_drops_unrelated_terms(
+    client, fake_redis, mozg_go
+):
+    unrelated = {
+        "goId": "GO:0000001",
+        "goTerm": "mitochondrion inheritance",
+        "goLabel": ["BiologicalProcess"],
+        "geneNames": ["MDM10"],
+    }
+    fake_redis.set("GO_for_9606", json.dumps(GO_TERMS + [unrelated]))
+
+    rows = enrich(client).get_json()
+
+    assert "GO:0000001" not in {row["goId"] for row in rows}
+
+
+def test_enrich_with_precalculated_terms_and_no_matching_gene(
+    client, fake_redis, mozg_go
+):
+    """No submitted gene carries any term: an empty result, not a crash."""
+    fake_redis.set("GO_for_9606", json.dumps(GO_TERMS))
+
+    response = enrich(client, geneNames=["NOTAGENE"])
+
+    assert response.status_code == 200
+    assert response.get_json() == []

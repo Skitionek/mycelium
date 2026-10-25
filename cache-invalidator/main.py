@@ -138,7 +138,6 @@ def precalculateGO():
 
 
 def _precalculate_go(graph):
-
     def fetch_organism_go_query(tx, organism):
         logger.debug(f'Precomputing GO for {organism["name"]} ({organism["id"]})')
         return tx.run(

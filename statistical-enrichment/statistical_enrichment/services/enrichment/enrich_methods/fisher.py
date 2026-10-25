@@ -36,6 +36,8 @@ def fisher(geneNames, GOterms, related_go_terms_count):
     Run standard fisher's exact tests for each annotation term.
     """
     df = pd.DataFrame(GOterms)
+    if df.empty:
+        return "[]"
     universe = set(df["geneNames"].explode().dropna())
     # A submitted gene no term mentions lies outside the universe the terms
     # are drawn from; counting it as drawn would leave the test undefined.

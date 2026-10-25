@@ -177,3 +177,7 @@ def test_add_q_value_tolerates_a_term_count_below_the_rows():
 
     assert len(df) == 3
     assert df["q-value"].notna().all()
+
+
+def test_fisher_without_terms_returns_an_empty_list():
+    assert json.loads(fisher(["A"], [], related_go_terms_count=10)) == []
