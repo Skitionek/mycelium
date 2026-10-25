@@ -302,6 +302,8 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
         operand = quoted_term_with_parens | term
         query_parser = ZeroOrMore(operand)
 
+        # Solr reads only upper case AND/OR/NOT as operators, so write them that way:
+        # a lower case 'and' would just be one more word to look for
         unstackable_logical_ops = ['and', 'or']
         new_query = []
         tokens = list(query_parser.parseString(query))
@@ -322,7 +324,7 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
                                 + 'encountered immediately following a NOT operator.',
                         code=400,
                     )
-                new_query += [curr]
+                new_query += [curr.upper()]
             elif curr.lower() in unstackable_logical_ops:
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
@@ -331,9 +333,9 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
                                 + 'were encountered in succession.',
                         code=400,
                     )
-                new_query += [curr]
+                new_query += [curr.upper()]
             elif _next.lower() not in unstackable_logical_ops + [')']:
-                new_query += [curr, 'and']
+                new_query += [curr, 'AND']
             else:
                 new_query += [curr]
         return ' '.join(new_query)
