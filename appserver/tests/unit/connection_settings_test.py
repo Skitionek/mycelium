@@ -1,4 +1,8 @@
 import importlib
+import os
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 from sqlalchemy.engine import make_url
@@ -8,6 +12,8 @@ from neo4japp.services import rcache
 
 # Characters that mean something in a URL; Azure's access keys contain some
 PASSWORD = 'p@ss/w#r?d%41+='
+
+appserver_dir = Path(__file__).parents[2]
 
 
 @pytest.fixture
@@ -43,3 +49,17 @@ def test_redis_connection_keeps_the_password(reload_with_env):
 
     assert (settings['host'], settings['password']) == ('cache.example', PASSWORD)
 
+
+
+def test_neo4j_password_may_contain_a_slash():
+    # neo4japp.database connects on import, and reloading it would replace the
+    # app's SQLAlchemy instance
+    result = subprocess.run(
+        [sys.executable, '-c', 'from neo4japp.database import password; print(password)'],
+        cwd=appserver_dir,
+        env={**os.environ, 'NEO4J_AUTH': 'neo4j/pa/ss'},
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.stdout.strip() == 'pa/ss', result.stderr
