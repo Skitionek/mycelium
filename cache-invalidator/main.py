@@ -50,47 +50,50 @@ def main():
     logger.info('Starting cache-invalitation loop...')
     next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
     while True:
+        failed = False
         try:
             # Still counts Neo4j labels with Mozg in use: the statistics
             # describe what the graph holds, and /kg-statistics would answer
             # 503 forever if nothing wrote the key.
             cache_data('kg_statistics', get_kg_statistics())
-            next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
-            logger.debug(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
         except Exception as err:
-            logger.error(
-                f'Error occured, will try again in {next_error_sleep_time} seconds: {err}'
-            )
+            failed = True
+            logger.error(f'Error occured while caching Kg statistics: {err}')
+        if not MOZG_URL:
+            # Nothing to pre-compute when Mozg is the knowledge-graph layer;
+            # see precalculateGO's docstring.
+            try:
+                precalculateGO()
+            except Exception as err:
+                failed = True
+                logger.error(f'Error occured while precalculating GO: {err}')
+
+        # One sleep per round, and only a fully successful round resets the
+        # backoff: otherwise a task that keeps failing is retried every
+        # ERROR_INITIAL_SLEEP_TIME seconds forever.
+        if failed:
+            logger.error(f'Will try again in {next_error_sleep_time} seconds')
             time.sleep(next_error_sleep_time)
             next_error_sleep_time = min(
                 ERROR_MAX_SLEEP_TIME,
                 next_error_sleep_time * ERROR_SLEEP_TIME_MULTIPLIER,
             )
-        finally:
-            try:
-                if not MOZG_URL:
-                    # Nothing to pre-compute when Mozg is the knowledge-graph
-                    # layer; see precalculateGO's docstring.
-                    precalculateGO()
-                next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
-                logger.info(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
-            except Exception as err:
-                logger.error(
-                    f'Error occured, will try again in {next_error_sleep_time} seconds: {err}'
-                )
-                time.sleep(next_error_sleep_time)
-                next_error_sleep_time = min(
-                    ERROR_MAX_SLEEP_TIME,
-                    next_error_sleep_time * ERROR_SLEEP_TIME_MULTIPLIER,
-                )
-            else:
-                time.sleep(SUCCESSFUL_SLEEP_TIME)
+        else:
+            next_error_sleep_time = ERROR_INITIAL_SLEEP_TIME
+            logger.info(f'Going to sleep for {SUCCESSFUL_SLEEP_TIME} seconds...')
+            time.sleep(SUCCESSFUL_SLEEP_TIME)
 
 
 def get_kg_statistics():
     logger.info('Getting Kg Statistics')
     graph = neo4j_driver.session()
+    try:
+        return _get_kg_statistics(graph)
+    finally:
+        graph.close()
 
+
+def _get_kg_statistics(graph):
     logger.debug('Kg Statistics Query start...')
     results = graph.execute_read(lambda tx: tx.run('CALL db.labels()').data())
     logger.debug('Kg Statistics Query finished')
@@ -113,7 +116,6 @@ def get_kg_statistics():
             count = result[0]['count']
             if count != 0:
                 statistics[domain.replace('db_', '', 1)][entity] = count
-    graph.close()
     return statistics
 
 
@@ -129,6 +131,13 @@ def precalculateGO():
     """
     logger.debug('Precalculating GO from Neo4j...')
     graph = neo4j_driver.session()
+    try:
+        _precalculate_go(graph)
+    finally:
+        graph.close()
+
+
+def _precalculate_go(graph):
 
     def fetch_organism_go_query(tx, organism):
         logger.debug(f'Precomputing GO for {organism["name"]} ({organism["id"]})')
@@ -164,7 +173,6 @@ def precalculateGO():
             f'GO_for_{organism["id"]}',
             graph.execute_read(fetch_organism_go_query, organism),
         )
-    graph.close()
 
 
 def cache_data(key, value):
