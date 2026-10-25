@@ -48,7 +48,12 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/serverless-office-converter/web/office-converter",
-                "ignore": ["lo/*.xz.*", "vendor/**", "service-worker.js", "package.json"],
+                "ignore": [
+                  "lo/*.xz.*",
+                  "vendor/**",
+                  "service-worker.js",
+                  "package.json"
+                ],
                 "output": "/assets/vendor/office-converter"
               }
             ],
