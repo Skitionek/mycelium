@@ -118,6 +118,18 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Fixed
 
+- **Enrichment visualisation**: the statistical-enrichment request returns its results again. GO terms were written to Redis as a list, which Redis refuses; the result, already JSON, was encoded a second time into a JSON string the client could not map over; and cached answers, which Redis returns as bytes, could not be sent at all. GO terms the cache-invalidator precalculated could not be read back either, so in Neo4j deployments every request for such an organism failed ([#754]).
+- **Enrichment statistics**: a submitted gene outside every returned GO term no longer turns every p- and q-value into `null`, a gene list matching no precalculated term answers an empty result instead of an error, and the q-value correction no longer fails when the organism's approximate term count undercounts ([#754]).
+- **Enrichment organism validation**: a malformed `taxID/name` organism is answered with 422 instead of 500, and organism names that contain a slash, such as influenza strains, are accepted ([#754]).
+- **Cache invalidator backoff**: repeated failures now back off as intended. A successful or skipped GO precalculation (always skipped with Mozg) reset the delay, so a failing Kg statistics query was retried every minute forever, and a failed round slept twice. Neo4j sessions are closed when a query fails instead of leaking on every retry ([#754]).
+- **Mozg client**: a query answered with a `null` result and no errors yields no rows instead of an `AttributeError`, in both the appserver and statistical-enrichment ([#754]).
+- **URL uploads**: fixing up a URL before fetching it no longer encodes `+` in its query, which turned a space into a literal plus for the server, nor drops the brackets of an IPv6 host ([#754]).
+- **File download names**: a `"` or `\` in a filename no longer ends the `Content-Disposition` header's fallback filename early, and not-modified answers carry the file's ETag ([#754]).
+- **Executable upload names**: filenames such as `x.exe.` or `x.exe. `, which Windows saves as `x.exe`, are rejected like `x.exe` ([#754]).
+- **Empty page and limit parameters**: an empty integer field that allows null loads as null, and one that does not is answered with a validation error instead of a 500 ([#754]).
+- **Enrichment table CSV export**: empty cells are exported empty instead of as `undefined` or `null`, and cells holding a carriage return are quoted ([#754]).
+- **Pagination from the URL**: a hand-edited `page` or `limit` that is not a positive integer falls back to its default instead of sending `NaN`, 0 or a negative number ([#754]).
+- **BioC files with CRLF line endings**: blank lines no longer fail to parse ([#754]).
 - **PDF annotation popovers**: clicking an annotation in the PDF viewer opens its popover again, with its **Delete Annotation**, **Mark for Exclusion**, **Find Occurrences** and **Unmark Exclusion** buttons and expandable search links. The app loaded Bootstrap without the Popper it needs, so every popover failed to open; Bootstrap 5's sanitizer also stripped the buttons and collapse toggles from its content, and the toggles still used Bootstrap 4's `data-toggle` ([#744]).
 - **`flask upload-lmdb` errors**: creating a directory in Azure file storage no longer hides failures. A `finally` block re-ran the creation and returned, which discarded every error other than a missing parent, and retried an error that kept failing until Python ran out of stack ([#744]).
 - **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
@@ -308,3 +320,4 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#679]: https://github.com/Skitionek/mycelium/pull/679
 [#743]: https://github.com/Skitionek/mycelium/pull/743
 [#744]: https://github.com/Skitionek/mycelium/pull/744
+[#754]: https://github.com/Skitionek/mycelium/pull/754
