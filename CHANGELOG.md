@@ -162,9 +162,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Content search in folders with a `\` in their name**: the folder's files are found, and a folder name ending in `\` no longer makes every search in it fail ([#760]).
 - **Office file icons**: files with an upper case extension, such as `REPORT.DOCX`, get the Word, Excel, PowerPoint or Cytoscape icon in the file browser and on maps ([#760]).
 - **Long map labels**: a node label with a word too long for the node, such as `TP53` in a narrowed node or a long number, no longer stops the map from drawing. A broken word gets no hyphen after its last piece, and a node sized to such a label is as wide as the label instead of 0 wide ([#760]).
-- **Admin user list**: the user browser lists users again. `GET /accounts` built its query with `select([...])`, which SQLAlchemy 2 rejects, so listing users, or getting one, answered 500 ([#761]).
-- **Creating and updating users as an admin**: the user browser's dialogs send the picked role as a list, as the accounts API takes, instead of a string it rejected with "Not a valid list". Creating a user no longer answers 500 after saving it: JSON responses serialize dates again ([#761]).
-- **Database test isolation**: each database test's writes are rolled back. Its session ran on the app's engine instead of the fixture's connection, so rows leaked into the tests after it; the three test files CI left out for this run again ([#761]).
+- **Admin user list**: the user browser lists users again. `GET /accounts` built its query with `select([...])`, which SQLAlchemy 2 rejects, so listing users, or getting one, answered 500 ([#763]).
+- **Creating and updating users as an admin**: the user browser's dialogs send the picked role as a list, as the accounts API takes, instead of a string it rejected with "Not a valid list". Creating a user no longer answers 500 after saving it: JSON responses serialize dates again ([#763]).
+- **Database test isolation**: each database test's writes are rolled back. Its session ran on the app's engine instead of the fixture's connection, so rows leaked into the tests after it; the three test files CI left out for this run again ([#763]).
 - **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
@@ -342,7 +342,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
-[#761]: https://github.com/Skitionek/mycelium/pull/761
+[#763]: https://github.com/Skitionek/mycelium/pull/763
 [#760]: https://github.com/Skitionek/mycelium/pull/760
 [#759]: https://github.com/Skitionek/mycelium/pull/759
 [#679]: https://github.com/Skitionek/mycelium/pull/679
