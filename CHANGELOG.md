@@ -113,6 +113,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Security
 
+- **DOI lookups**: exporting a map no longer makes the server request the URL of any node source labelled DOI, which let a map's author have the server fetch internal addresses such as the cloud metadata endpoint. DOIs are only ever looked up on `doi.org`, over HTTPS, without following its redirect to the publisher, and every lookup has a timeout, so a `doi.org` that never answers no longer holds a PDF upload indefinitely ([#756]).
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
@@ -132,6 +133,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **BioC files with CRLF line endings**: blank lines no longer fail to parse ([#754]).
 - **PDF annotation popovers**: clicking an annotation in the PDF viewer opens its popover again, with its **Delete Annotation**, **Mark for Exclusion**, **Find Occurrences** and **Unmark Exclusion** buttons and expandable search links. The app loaded Bootstrap without the Popper it needs, so every popover failed to open; Bootstrap 5's sanitizer also stripped the buttons and collapse toggles from its content, and the toggles still used Bootstrap 4's `data-toggle` ([#744]).
 - **`flask upload-lmdb` errors**: creating a directory in Azure file storage no longer hides failures. A `finally` block re-ran the creation and returned, which discarded every error other than a missing parent, and retried an error that kept failing until Python ran out of stack ([#744]).
+- **Misused session tokens**: a refresh or password reset token sent in place of an access token is refused with 401 instead of failing with 500, so the client renews or ends the session, and an expired session is reported as expired rather than invalid ([#756]).
+- **Select-all checkboxes**: the select-all checkbox of an empty folder, or of an empty list of annotations in the admin pages, no longer shows ticked ([#756]).
+- **Map export**: a map link node with hyperlinks but no sources no longer fails the export ([#756]).
 - **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
 - **Workspace tab icons**: tabs whose view sets no icon show the window icon again instead of an empty gap; the fallback class was missing its `fa` prefixes, and it was truthy, so the template's own fallback never applied. Enrichment Visualisation tabs get their chart icon back too: their route named it `fas chart-bar` ([#744]).
 - **Missing side borders**: column separators in the shared data table, the divider beside the file browser and preview sidebars, the SDRF actions column, the collapsed split-pane tab and clustergram match cells all show again. Their `border-left`/`border-right` had become `border-start`/`border-end`, which are not CSS properties, so browsers dropped them; they are now `border-inline-start`/`border-inline-end` ([#744]).
@@ -318,6 +322,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
 [#679]: https://github.com/Skitionek/mycelium/pull/679
+[#756]: https://github.com/Skitionek/mycelium/pull/756
 [#743]: https://github.com/Skitionek/mycelium/pull/743
 [#744]: https://github.com/Skitionek/mycelium/pull/744
 [#754]: https://github.com/Skitionek/mycelium/pull/754
