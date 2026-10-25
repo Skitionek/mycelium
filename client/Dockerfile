@@ -6,8 +6,9 @@ ARG NODE_IMAGE_TAG=node:20
 FROM $NODE_IMAGE_TAG as angular-deps
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (tools/ has the postinstall script)
 COPY package.json yarn.lock ./
+COPY tools/unpack-office-converter.js ./tools/
 ARG YARN_INSTALL_OPTS=--ignore-engines
 RUN yarn install ${YARN_INSTALL_OPTS}
 
@@ -18,10 +19,6 @@ ENV ENVIRONMENT_CONFIG development
 # Angular app bundle build
 # ========================================
 FROM angular-deps as angular-build
-
-# Fetch the in-browser office converter (vendor/office-converter, see the script)
-COPY tools/fetch-office-converter.js ./tools/
-RUN node tools/fetch-office-converter.js
 
 # Copy the code and build the app bundle
 COPY src ./src

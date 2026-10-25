@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
-/** Where angular.json serves the converter fetched by tools/fetch-office-converter.js. */
+/** Where angular.json serves the serverless-office-converter package. */
 const ENGINE_BASE = 'assets/vendor/office-converter/';
 
 /** The part of serverless-office-converter's `OfficeEngine` used here. */
