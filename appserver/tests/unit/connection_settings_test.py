@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy.engine import make_url
 
 import config
+from neo4japp.lmdb_manager.manager import BaseCloudStorageProvider, LMDBManager
 from neo4japp.services import rcache
 
 # Characters that mean something in a URL; Azure's access keys contain some
@@ -49,6 +50,16 @@ def test_redis_connection_keeps_the_password(reload_with_env):
 
     assert (settings['host'], settings['password']) == ('cache.example', PASSWORD)
 
+
+def test_lmdb_manager_connects_to_the_configured_database(monkeypatch):
+    monkeypatch.setenv('POSTGRES_HOST', 'db.example')
+    monkeypatch.setenv('POSTGRES_PASSWORD', PASSWORD)
+
+    manager = LMDBManager(BaseCloudStorageProvider(), 'lmdb', config={})
+
+    url = manager.db.get_bind().url
+    assert url.get_backend_name() == 'postgresql'
+    assert (url.host, url.password) == ('db.example', PASSWORD)
 
 
 def test_neo4j_password_may_contain_a_slash():
