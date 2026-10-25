@@ -62,7 +62,7 @@ class AccountView(MethodView):
         t_appuser = AppUser.__table__.alias('t_appuser')
         t_approle = AppRole.__table__.alias('t_approle')
 
-        query = select([
+        query = select(
             t_appuser.c.id,
             t_appuser.c.hash_id,
             t_appuser.c.username,
@@ -72,7 +72,7 @@ class AccountView(MethodView):
             t_appuser.c.failed_login_count,
             func.string_agg(
                 t_approle.c.name, aggregate_order_by(literal_column("','"), t_approle.c.name)),
-        ]).select_from(
+        ).select_from(
             t_appuser.join(user_role, user_role.c.appuser_id == t_appuser.c.id, isouter=True)
             .join(t_approle, user_role.c.app_role_id == t_approle.c.id, isouter=True)
         ).group_by(
