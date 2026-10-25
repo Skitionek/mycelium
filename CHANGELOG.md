@@ -137,6 +137,10 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Misused session tokens**: a refresh or password reset token sent in place of an access token is refused with 401 instead of failing with 500, so the client renews or ends the session, and an expired session is reported as expired rather than invalid ([#756]).
 - **Select-all checkboxes**: the select-all checkbox of an empty folder, or of an empty list of annotations in the admin pages, no longer shows ticked ([#756]).
 - **Map export**: a map link node with hyperlinks but no sources no longer fails the export ([#756]).
+- **Office documents opened at the same time**: converting several office documents to PDF at once no longer makes some of the conversions fail; each LibreOffice run now has a profile of its own ([#757]).
+- **Organism search**: a search ending in a backslash, or with two spaces between words, no longer fails ([#757]).
+- **Sankey search**: nodes and links that appear in several traces or trace networks are found in each of them, a trace reached through several links no longer lists its matches repeatedly, and with several search terms a result that merely starts with one of them is no longer ranked as an exact match ([#757]).
+- **Phrase search**: a quoted phrase of three or more words matches text with extra spaces between any of its words, not just the first two ([#757]).
 - **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
 - **Workspace tab icons**: tabs whose view sets no icon show the window icon again instead of an empty gap; the fallback class was missing its `fa` prefixes, and it was truthy, so the template's own fallback never applied. Enrichment Visualisation tabs get their chart icon back too: their route named it `fas chart-bar` ([#744]).
 - **Missing side borders**: column separators in the shared data table, the divider beside the file browser and preview sidebars, the SDRF actions column, the collapsed split-pane tab and clustergram match cells all show again. Their `border-left`/`border-right` had become `border-start`/`border-end`, which are not CSS properties, so browsers dropped them; they are now `border-inline-start`/`border-inline-end` ([#744]).
@@ -330,6 +334,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#759]: https://github.com/Skitionek/mycelium/pull/759
 [#679]: https://github.com/Skitionek/mycelium/pull/679
 [#756]: https://github.com/Skitionek/mycelium/pull/756
+[#757]: https://github.com/Skitionek/mycelium/pull/757
 [#743]: https://github.com/Skitionek/mycelium/pull/743
 [#744]: https://github.com/Skitionek/mycelium/pull/744
 [#754]: https://github.com/Skitionek/mycelium/pull/754
