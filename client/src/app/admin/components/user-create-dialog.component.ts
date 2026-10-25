@@ -35,8 +35,11 @@ export class UserCreateDialogComponent extends CommonFormDialogComponent {
   }
 
   getValue(): UserCreationRequest {
+    const {roles, ...value} = this.form.value;
     return {
-      ...this.form.value,
+      ...value,
+      // The form picks one role, the API takes a list of them
+      roles: [roles],
       createdByAdmin: true,
     };
   }
