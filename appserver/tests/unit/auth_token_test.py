@@ -154,3 +154,22 @@ def test_refresh_rejects_an_access_token(client, tokens):
     response = client.post('/auth/refresh', json={'jwt': tokens.get_access_token(EMAIL)['token']})
 
     assert response.status_code == 401
+
+
+def test_refresh_for_a_deleted_account_is_unauthorized(client, tokens):
+    """A decodable token whose subject is gone is a rejected credential, not a 404."""
+    with patch('neo4japp.blueprints.auth.AppUser') as app_user:
+        app_user.query.filter_by.return_value.one.side_effect = NoResultFound()
+        response = client.post(
+            '/auth/refresh', json={'jwt': tokens.get_refresh_token(EMAIL)['token']})
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize('issue', ['get_access_token', 'get_refresh_token'])
+def test_issued_tokens_are_strings(tokens, issue):
+    """PyJWT 2 returns str where 1.x returned bytes; tokens must be JSON-serialisable text."""
+    token = getattr(tokens, issue)(EMAIL)['token']
+
+    assert isinstance(token, str)
+    assert jwt.decode(token, JWT_SECRET, algorithms=['HS256'])['sub'] == EMAIL
