@@ -1,56 +1,63 @@
 import { TextElement } from './text-element';
 
 describe('TextElement', () => {
-  const font = '12px sans-serif';
-  const ctx = document.createElement('canvas').getContext('2d');
+  /**
+   * A context where every character is 6 wide, except that a hyphen after a word
+   * comes out a hair wider than a hyphen alone, as kerning can make it.
+   */
+  const ctx = {
+    font: '',
+    measureText: (text: string) => ({
+      width: text.length * 6 + (text.length > 1 && text.endsWith('-') ? 0.25 : 0),
+      actualBoundingBoxAscent: 8,
+      actualBoundingBoxDescent: 2,
+    }),
+  } as unknown as CanvasRenderingContext2D;
 
-  function textbox(text: string, maxWidth: number) {
-    return new TextElement(ctx, {text, maxWidth, font});
+  function textbox(text: string, maxWidth: number, context = ctx) {
+    return new TextElement(context, {text, maxWidth, font: '12px sans-serif'});
   }
 
   describe('a word too long for a line', () => {
     const word = 'Supercalifragilisticexpialidocious';
-    const maxWidth = 60;
 
-    it('is broken on syllables, with a hyphen at each break', () => {
-      const lines = textbox(word, maxWidth).lines.map(line => line.text);
-
-      expect(lines.length).toBeGreaterThan(1);
-      expect(lines.slice(0, -1).every(line => line.endsWith('-'))).toBeTrue();
-      expect(lines.map(line => line.replace(/-$/, '')).join('')).toBe(word);
+    it('is broken on syllables, with a hyphen at each break but not after its end', () => {
+      expect(textbox(word, 54).lines.map(line => line.text))
+        .toEqual(['Superca-', 'lifragi-', 'listicex-', 'pialido-', 'cious']);
+      expect(textbox('tumor protein p53', 40).lines.map(line => line.text))
+        .toEqual(['tumor', ' pro-', 'tein', ' p53']);
     });
 
-    it('gets no hyphen after its last piece', () => {
-      const lines = textbox(word, maxWidth).lines.map(line => line.text);
+    it('draws a piece that fills the line, though its hyphen comes out a hair wider', () => {
+      const element = textbox(word, 54);
 
-      expect(lines[lines.length - 1]).toBe('cious');
-      expect(textbox('tumor protein p53', 40).lines.map(line => line.text)).not.toContain('tein-');
+      expect(element.horizontalOverflow).toBeFalse();
+      expect(element.lines.map(line => line.horizontalOverflow)).not.toContain(true);
     });
 
     it('sizes the box to fit the pieces', () => {
-      const element = textbox(word, maxWidth);
-      const widest = Math.max(...element.lines.map(line => line.metrics.width));
+      const element = textbox(word, 54);
 
-      expect(element.horizontalOverflow).toBeFalse();
-      expect(element.actualWidth).toBe(widest);
-      expect(widest).toBeLessThanOrEqual(maxWidth);
+      expect(element.actualWidth).toBe(54);
       for (const line of element.lines) {
-        // Centred lines start within the box, not to the left of it
-        expect(line.xOffset).toBeGreaterThanOrEqual(0);
-        ctx.font = font;
         expect(line.metrics.width).toBe(ctx.measureText(line.text).width);
+        // Centred lines start within the box, give or take that hair
+        expect(line.xOffset).toBeGreaterThan(-0.5);
       }
     });
   });
 
   describe('a word without vowels too long for a line', () => {
     it('stays whole and is marked as overflowing', () => {
-      for (const word of ['1234567890123456789', 'GCGCGCTTTCGCGCGCGCGCGCGT']) {
-        const element = textbox(word, 40);
+      const canvas = document.createElement('canvas').getContext('2d');
+      for (const context of [ctx, canvas]) {
+        for (const word of ['1234567890123456789', 'GCGCGCTTTCGCGCGCGCGCGCGT']) {
+          const element = textbox(word, 40, context);
 
-        expect(element.lines.map(line => line.text)).toEqual([word]);
-        expect(element.lines[0].horizontalOverflow).toBeTrue();
-        expect(element.horizontalOverflow).toBeTrue();
+          expect(element.lines.map(line => line.text)).toEqual([word]);
+          expect(element.lines[0].horizontalOverflow).toBeTrue();
+          expect(element.horizontalOverflow).toBeTrue();
+        }
       }
     });
   });

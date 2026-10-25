@@ -214,15 +214,18 @@ export class TextElement {
               // Since we break the words, add hyphen, but not after the end of the word
               const text = widthFitLine.remainingTokens ? widthFitLine.line + '-' : widthFitLine.line;
               const splitMetrics = this.ctx.measureText(text);
-              const stillOverflow = splitMetrics.width > effectiveWidth;
+              // A piece is fitted to leave room for its hyphen, so judge it by that: drawn,
+              // the hyphen can come out a hair wider than alone, as kerning may make it
+              const stillOverflow = widthFitLine.metrics.width >
+                effectiveWidth - (widthFitLine.remainingTokens ? this.hyphenWidth : 0);
               // If that did not help, we cannot do anything else
               if (stillOverflow) {
                 // If this line overflows, make sure to mark the box as overflowing and
                 // update the width of the box
                 boxHorizontalOverflow = true;
                 actualWidth = effectiveWidth;
-              } else if (splitMetrics.width > actualWidth) {
-                actualWidth = splitMetrics.width;
+              } else {
+                actualWidth = Math.max(actualWidth, Math.min(splitMetrics.width, effectiveWidth));
               }
               lines.push({
                 text,
