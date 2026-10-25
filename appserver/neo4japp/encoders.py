@@ -16,7 +16,8 @@ class CustomJSONEncoder(json.JSONEncoder):
                 return str(obj)
         except TypeError:
             pass
-        return json.JSONEncoder.default(self, obj)
+        # Then whatever Flask serializes, such as dates, which json.JSONEncoder rejects
+        return DefaultJSONProvider.default(obj)
 
 
 class CustomJSONProvider(DefaultJSONProvider):
