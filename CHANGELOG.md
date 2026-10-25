@@ -158,6 +158,11 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Enrichment tables without results**: re-annotating several files no longer fails for all of them when one table holds only its parameters; that file is reported as failed ([#759]).
 - **UniProt links from graph search**: a UniProt result dragged onto a map links to its protein page instead of a page that does not exist ([#759]).
 - **Links to folders and projects**: following a link to a folder opens or focuses that folder instead of whichever folder was open, and a link to an open project focuses its tab instead of opening another ([#759]).
+- **Content search with several words**: a search finds files with all of its words again, and `not` leaves out files with the word after it. Solr reads only upper case `AND`, `OR` and `NOT` as operators, so the lower case `and` joining the words made each word optional, and a lower case `not` was a word to find ([#760]).
+- **Content search by file type**: picking file types limits the results to files of those types. The `type:` terms were sent to Solr as text to find in an index with no such field ([#760]).
+- **Content search in folders with a `\` in their name**: the folder's files are found, and a folder name ending in `\` no longer makes every search in it fail ([#760]).
+- **Office file icons**: files with an upper case extension, such as `REPORT.DOCX`, get the Word, Excel, PowerPoint or Cytoscape icon in the file browser and on maps ([#760]).
+- **Long map labels**: a node label with a word too long for the node, such as `TP53` in a narrowed node or a long number, no longer stops the map from drawing. A broken word gets no hyphen after its last piece, and a node sized to such a label is as wide as the label instead of 0 wide ([#760]).
 - **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
@@ -335,6 +340,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#760]: https://github.com/Skitionek/mycelium/pull/760
 [#759]: https://github.com/Skitionek/mycelium/pull/759
 [#679]: https://github.com/Skitionek/mycelium/pull/679
 [#756]: https://github.com/Skitionek/mycelium/pull/756
