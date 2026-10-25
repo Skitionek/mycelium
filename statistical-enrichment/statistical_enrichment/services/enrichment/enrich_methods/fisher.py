@@ -7,7 +7,8 @@ from statsmodels.stats.multitest import fdrcorrection
 def add_q_value(df, related_go_terms_count, inplace=True):
     p_values = df["p-value"]
     extended_p_values = pd.concat(
-        [p_values, pd.Series(np.ones(related_go_terms_count - len(p_values)))]
+        # The term count is approximate, so it is not trusted to cover the rows.
+        [p_values, pd.Series(np.ones(max(related_go_terms_count - len(p_values), 0)))]
     ).reset_index(drop=True)
     r = fdrcorrection(extended_p_values, method="indep")
     if inplace:
@@ -35,12 +36,16 @@ def fisher(geneNames, GOterms, related_go_terms_count):
     Run standard fisher's exact tests for each annotation term.
     """
     df = pd.DataFrame(GOterms)
-    query = pd.unique(geneNames)
-    M = df["geneNames"].explode().nunique()
+    universe = set(df["geneNames"].explode().dropna())
+    # A submitted gene no term mentions lies outside the universe the terms
+    # are drawn from; counting it as drawn would leave the test undefined.
+    query = [gene for gene in dict.fromkeys(geneNames) if gene in universe]
+    M = len(universe)
     N = len(query)
 
     def f(go):
-        matching_gene_names = list(set(go["geneNames"]).intersection(query))
+        term_genes = set(go["geneNames"])
+        matching_gene_names = [gene for gene in query if gene in term_genes]
         go["p-value"] = fisher_p(len(matching_gene_names), M, len(go["geneNames"]), N)
         go["gene"] = f"{go['goTerm']} ({go['goId']})"
         go["geneNames"] = matching_gene_names
