@@ -63,7 +63,11 @@ from neo4japp.schemas.filesystem import (
 )
 from neo4japp.services.file_types.exports import ExportFormatError
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
-from neo4japp.services.libreoffice import convert_to_pdf, mime_type_for_filename
+from neo4japp.services.libreoffice import (
+    ConversionFailedError,
+    convert_to_pdf,
+    mime_type_for_filename,
+)
 from neo4japp.utils.collections import window
 from neo4japp.utils.http import make_cacheable_file_response
 from neo4japp.utils.network import read_url
@@ -1162,7 +1166,7 @@ class PdfConversionView(MethodView):
                 message=str(e),
                 code=503,
             )
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        except (ConversionFailedError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
             raise ServerException(
                 title='Conversion Failed',
                 message=f"'{filename}' could not be converted to PDF.",

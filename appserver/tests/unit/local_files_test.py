@@ -4,6 +4,7 @@ files are never stored, so they are annotated and converted to PDF on request, s
 """
 import io
 import json
+import shutil
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -17,7 +18,11 @@ from neo4japp.factory import register_error_handlers
 from neo4japp.services import transient_files
 from neo4japp.services.annotations import transient_annotation
 from neo4japp.services.enrichment.enrichment_table import EnrichmentTableService
-from neo4japp.services.libreoffice import mime_type_for_filename
+from neo4japp.services.libreoffice import (
+    ConversionFailedError,
+    convert_to_pdf,
+    mime_type_for_filename,
+)
 
 PDF = b'%PDF-1.7\n% a tiny pdf\n'
 DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -344,6 +349,24 @@ def test_conversion_reports_missing_libreoffice(client, logged_in):
             '/filesystem/convert/pdf', data=upload(b'doc', 'a.docx'), headers=AUTH)
 
     assert response.status_code == 503
+
+
+def test_conversion_reports_an_unconvertible_document(client, logged_in):
+    """LibreOffice is there but makes nothing of the file: the file is at fault."""
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf',
+               side_effect=ConversionFailedError('no PDF in /tmp/mycelium_lo_x')):
+        response = client.post(
+            '/filesystem/convert/pdf', data=upload(b'PK\x03\x04', 'a.docx'), headers=AUTH)
+
+    assert response.status_code == 422
+    assert b'/tmp/' not in response.data
+
+
+@pytest.mark.skipif(shutil.which('soffice') is None, reason='LibreOffice is not installed')
+def test_libreoffice_fails_to_convert_a_corrupt_document():
+    """soffice exits cleanly for a damaged .docx, but writes no PDF."""
+    with pytest.raises(ConversionFailedError):
+        convert_to_pdf(b'PK\x03\x04garbage', DOCX)
 
 
 def test_conversion_needs_login(client):

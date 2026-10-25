@@ -43,6 +43,10 @@ def mime_type_for_filename(filename: str) -> Optional[str]:
     return None
 
 
+class ConversionFailedError(Exception):
+    """LibreOffice ran, but could not make a PDF of the document."""
+
+
 def _find_soffice() -> str:
     """Return the path to the soffice / libreoffice binary, or raise RuntimeError."""
     for candidate in ('soffice', 'libreoffice'):
@@ -67,6 +71,8 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
     :raises ValueError: If the MIME type is not supported.
     :raises subprocess.CalledProcessError: If LibreOffice exits with a non-zero
         status code.
+    :raises ConversionFailedError: If LibreOffice exits cleanly without a PDF, as
+        it does for a damaged document.
     """
     extension = _MIME_TO_EXTENSION.get(mime_type.lower())
     if extension is None:
@@ -104,7 +110,7 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
         # LibreOffice names the output file after the input stem.
         pdf_path = os.path.join(tmpdir, 'input.pdf')
         if not os.path.exists(pdf_path):
-            raise RuntimeError(
+            raise ConversionFailedError(
                 f'LibreOffice did not produce a PDF at {pdf_path!r}. '
                 'The conversion may have failed silently.'
             )
