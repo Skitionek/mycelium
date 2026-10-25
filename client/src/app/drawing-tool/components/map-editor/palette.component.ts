@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AnnotationStyle, annotationTypes } from 'app/shared/annotation-styles';
 
@@ -16,7 +16,7 @@ export class PaletteComponent {
   expanded = false;
 
   constructor(
-    private readonly snackBar: MatLegacySnackBar,
+    private readonly snackBar: MatSnackBar,
   ) {
   }
 

@@ -2,15 +2,15 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatLegacyFormFieldModule } from '@angular/material/legacy-form-field';
-import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatLegacyChipsModule } from '@angular/material/legacy-chips';
-import { MatLegacyDialogModule } from '@angular/material/legacy-dialog';
-import { MatLegacyInputModule } from '@angular/material/legacy-input';
-import { MatLegacySelectModule } from '@angular/material/legacy-select';
-import { MatLegacyButtonModule } from '@angular/material/legacy-button';
-import { MatLegacyRadioModule } from '@angular/material/legacy-radio';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
 
 import { SharedModule } from 'app/shared/shared.module';
 
@@ -34,15 +34,15 @@ import { ButtonWithSelectableTextComponent } from './button-with-selectable-text
     CommonModule,
     FormsModule,
     BrowserAnimationsModule,
-    MatLegacyFormFieldModule,
-    MatLegacyCheckboxModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
     MatSidenavModule,
-    MatLegacyDialogModule,
-    MatLegacyChipsModule,
-    MatLegacySelectModule,
-    MatLegacyInputModule,
-    MatLegacyButtonModule,
-    MatLegacyRadioModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatSelectModule,
+    MatInputModule,
+    MatButtonModule,
+    MatRadioModule,
     SharedModule,
   ],
   exports: [

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -27,7 +27,7 @@ export class ObjectTileDeckComponent extends ObjectListComponent {
   @Input() moreButtonText = 'View more...';
 
   constructor(router: Router,
-              snackBar: MatLegacySnackBar,
+              snackBar: MatSnackBar,
               modalService: NgbModal,
               errorHandler: ErrorHandler,
               route: ActivatedRoute,

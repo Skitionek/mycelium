@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import { FilesystemObject, ProjectImpl } from 'app/file-browser/models/filesystem-object';
 import { BulkObjectUpdateRequest, ObjectCreateRequest } from 'app/file-browser/schema';
 import { ApiService } from 'app/shared/services/api.service';
+import { OfficeConverterService } from 'app/shared/services/office-converter.service';
 import { LIBREOFFICE_CONVERTIBLE_MIME_TYPES, MimeTypes } from 'app/shared/constants';
 
 import {
@@ -86,6 +87,7 @@ export class LocalFilesystemService {
   constructor(protected readonly registry: LocalFolderRegistry,
               protected readonly http: HttpClient,
               protected readonly apiService: ApiService,
+              protected readonly officeConverter: OfficeConverterService,
               protected readonly ngZone: NgZone) {
   }
 
@@ -109,7 +111,8 @@ export class LocalFilesystemService {
   }
 
   /**
-   * The file as a PDF. Office documents are converted by the server, without being stored.
+   * The file as a PDF. Office documents are converted in the browser, or where that is not
+   * possible by the server, without being stored.
    */
   getContentAsPdf(hashId: string): Observable<Blob> {
     return defer(async () => {
@@ -121,6 +124,13 @@ export class LocalFilesystemService {
       }
       if (!LIBREOFFICE_CONVERTIBLE_MIME_TYPES.has(mimeType) && !isPdfConvertible(file.name, mimeType)) {
         throw unsupportedError(`"${file.name}" cannot be shown as a PDF.`);
+      }
+      if (this.officeConverter.available) {
+        try {
+          return await firstValueFrom(this.officeConverter.toPdf(file, file.name));
+        } catch (e) {
+          console.warn(`Converting "${file.name}" in the browser failed, converting it on the server`, e);
+        }
       }
       const form = new FormData();
       form.append('file', file, file.name);

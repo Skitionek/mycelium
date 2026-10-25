@@ -7,16 +7,14 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
   template: `
   <div class="modal-header">
     <h4 class="modal-title" id="modal-title">{{ header }}</h4>
-    <button type="button" class="close" aria-label="Close button" aria-describedby="modal-title" (click)="modal.dismiss()">
-      <span aria-hidden="true">&times;</span>
-    </button>
+    <button type="button" class="btn-close" aria-label="Close button" aria-describedby="modal-title" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
     {{ body }}
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
-    <button type="button" ngbAutofocus class="btn btn-danger ml-2" (click)="modal.close()">Ok</button>
+    <button type="button" ngbAutofocus class="btn btn-danger ms-2" (click)="modal.close()">Ok</button>
   </div>
   `
 })

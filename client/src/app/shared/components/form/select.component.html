@@ -23,11 +23,11 @@
   </button>
   <div ngbDropdownMenu class="dropdown-body dropdown-menu">
     <div class="mb-2">
-      <button type="button" *ngIf="isAllSelected()" class="btn btn-outline-secondary btn-block"
+      <button type="button" *ngIf="isAllSelected()" class="btn btn-outline-secondary w-100"
               (click)="toggleAll(false)">
         Select None
       </button>
-      <button type="button" *ngIf="!isAllSelected()" class="btn btn-outline-secondary btn-block"
+      <button type="button" *ngIf="!isAllSelected()" class="btn btn-outline-secondary w-100"
               (click)="toggleAll(true)">
         Select All
       </button>

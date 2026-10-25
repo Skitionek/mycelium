@@ -16,8 +16,9 @@ export function getLink(data: FTSQueryRecord) {
     return DOMAINS_URL[domain + '_' + type] + data.node.data.eid;
   } else if (domain === 'NCBI' && type === 'Taxonomy') {
     return DOMAINS_URL[domain + '_' + type] + data.node.data.eid;
-  } else if (domain === 'GO' || domain === 'UniProt') {
-    return DOMAINS_URL[domain] + `GO:${data.node.data.eid}`;
+  } else if (domain === 'GO') {
+    const eid = String(data.node.data.eid);
+    return DOMAINS_URL[domain] + (eid.startsWith('GO:') ? eid : `GO:${eid}`);
   } else {
     return DOMAINS_URL[domain] + data.node.data.eid;
   }

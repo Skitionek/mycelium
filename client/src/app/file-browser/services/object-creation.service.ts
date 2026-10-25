@@ -1,7 +1,7 @@
 import { HttpEventType } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { BehaviorSubject, firstValueFrom, Observable, iif, of, merge } from 'rxjs';
 import { filter, finalize, map, mergeMap, tap } from 'rxjs/operators';
@@ -31,7 +31,7 @@ import { ObjectReannotateResultsDialogComponent } from '../components/dialog/obj
 export class ObjectCreationService {
 
   constructor(protected readonly annotationsService: AnnotationsService,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly route: ActivatedRoute,

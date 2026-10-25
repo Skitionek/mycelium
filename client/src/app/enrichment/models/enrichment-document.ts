@@ -94,10 +94,14 @@ export class BaseEnrichmentDocument {
           try {
             return JSON.parse(s) as EnrichmentData;
           } catch (e) {
-            // Old enrichment table format was just a string for the data
+            // Old enrichment table format was just a string for the data:
+            // genes/taxId/organism/sources, where the organism name may hold slashes
             const split = s.split('/');
+            const [genes, taxId] = split;
+            const organism = split.slice(2, -1).join('/');
+            const sources = split[split.length - 1].split(',');
             return {
-              data: {genes: split[0], taxId: split[1], organism: split[2], sources: split[3].split(',')},
+              data: {genes, taxId, organism, sources},
             };
           }
         }),
@@ -123,7 +127,8 @@ export class BaseEnrichmentDocument {
     const importGenes = data.genes.split(',');
     const taxID = data.taxId;
     const organism = data.organism;
-    const domains = data.sources.filter(domain => domain.length);
+    // Sources are optional in the format; parseParameters defaults them
+    const domains = data.sources?.filter(domain => domain.length);
     return {
       importGenes, taxID, organism, domains, ...rest
     };

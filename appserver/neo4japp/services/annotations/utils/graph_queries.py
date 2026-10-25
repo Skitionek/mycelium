@@ -71,7 +71,7 @@ def get_protein_to_organism_query():
 def get_global_inclusions_count_query():
     return """
     MATCH (s:GlobalInclusion:Synonym)-[r:HAS_SYNONYM]-(n)
-    WHERE r.global_inclusion = true AND exists(r.inclusion_date)
+    WHERE r.global_inclusion = true AND r.inclusion_date IS NOT NULL
     RETURN count(s) AS total
     """
 
@@ -79,7 +79,7 @@ def get_global_inclusions_count_query():
 def get_global_inclusions_query():
     return """
     MATCH (s:GlobalInclusion:Synonym)-[r:HAS_SYNONYM]-(n)
-    WHERE r.global_inclusion = true AND exists(r.inclusion_date)
+    WHERE r.global_inclusion = true AND r.inclusion_date IS NOT NULL
     RETURN
         id(n) AS node_internal_id,
         id(s) AS syn_node_internal_id,
@@ -97,7 +97,7 @@ def get_global_inclusions_query():
 def get_global_inclusions_paginated_query():
     return """
     MATCH (s:GlobalInclusion:Synonym)-[r:HAS_SYNONYM]-(n)
-    WHERE r.global_inclusion = true AND exists(r.inclusion_date)
+    WHERE r.global_inclusion = true AND r.inclusion_date IS NOT NULL
     RETURN
         id(n) AS node_internal_id,
         id(s) AS syn_node_internal_id,
@@ -139,7 +139,7 @@ def get_mesh_by_ids():
 def get_node_labels_and_relationship_query():
     return """
     MATCH (n)-[r:HAS_SYNONYM]-()
-    WHERE id(n) IN $node_ids AND exists(n.original_entity_types)
+    WHERE id(n) IN $node_ids AND n.original_entity_types IS NOT NULL
     RETURN id(n) AS node_id, n.eid AS entity_id,
         [l IN labels(n) WHERE NOT l starts WITH 'db_' AND
             NOT l IN [
@@ -160,15 +160,13 @@ def get_delete_global_inclusion_query():
     MATCH (s)-[r:HAS_SYNONYM]-(n)
     WHERE id(n) = node_ids[0] AND id(s) = node_ids[1]
     DELETE r
-    WITH s
-    MATCH (s)-[r:HAS_SYNONYM]-()
-    WHERE r.global_inclusion = true AND exists(r.inclusion_date)
-    WITH s, collect(r) AS synonym_rel
-    CALL apoc.do.when(
-        size(synonym_rel) = 0,
-        'REMOVE s:GlobalInclusion', '', {synonym_rel: synonym_rel, s:s}
-    )
-    YIELD value
+    WITH DISTINCT s
+    // OPTIONAL, or a synonym with no inclusions left would drop out here
+    OPTIONAL MATCH (s)-[r:HAS_SYNONYM]-()
+    WHERE r.global_inclusion = true AND r.inclusion_date IS NOT NULL
+    WITH s, count(r) AS inclusions
+    WHERE inclusions = 0
+    REMOVE s:GlobalInclusion
     RETURN COUNT(*)
     """
 
@@ -184,7 +182,7 @@ def get_global_inclusions_by_type_query(entity_type):
 
     return f"""
     MATCH (s:GlobalInclusion:Synonym)-[r:HAS_SYNONYM]-(n:{query_label})
-    WHERE r.global_inclusion = true AND exists(r.inclusion_date)
+    WHERE r.global_inclusion = true AND r.inclusion_date IS NOT NULL
     RETURN
         id(n) AS internal_id,
         n.eid AS entity_id,

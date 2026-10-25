@@ -106,17 +106,31 @@ extension_mime_types = {
 }
 
 
+# Map sources are user content, so a "DOI" may be any URL at all; only doi.org
+# is ever asked about one.
+DOI_URL_RE = re.compile(r'^https?://((?:dx\.)?doi\.org/10\..*)$', re.IGNORECASE | re.DOTALL)
+DOI_LOOKUP_TIMEOUT = 10
+
+
 def is_valid_doi(doi):
+    match = DOI_URL_RE.match(doi) if isinstance(doi, str) else None
+    if match is None:
+        return False
     try:
+        # doi.org answers a registered DOI with a redirect to the publisher, which
+        # is enough to know; the target is not fetched. Over plain HTTP it
+        # redirects to HTTPS whatever the DOI, so it is always asked over HTTPS.
         # not [bad request, not found] but yes to 403 - no access
-        return requests.get(doi,
+        return requests.get(f'https://{match.group(1)}',
                             headers={
                                 # sometimes request is filtered if there is no user-agent header
                                 "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
                                               "AppleWebKit/537.36 "
                                               "(KHTML, like Gecko) Chrome/51.0.2704.103 "
                                               "Safari/537.36"
-                            }
+                            },
+                            allow_redirects=False,
+                            timeout=DOI_LOOKUP_TIMEOUT,
                             ).status_code not in [400, 404]
     except Exception:
         return False
@@ -603,7 +617,7 @@ def get_link_icon_type(node):
             return 'sankey', link['url']
         elif DOCUMENT_RE.match(link['url']):
             doi_src = next(
-                (src for src in node['data'].get('sources') if src.get(
+                (src for src in node['data'].get('sources', []) if src.get(
                     'domain') == "DOI"), None)
             # If there is a valid doi, link to DOI
             if doi_src and is_valid_doi(doi_src['url']):

@@ -104,19 +104,15 @@ class AzureStorageProvider(BaseCloudStorageProvider):
 
     def create_remote_dir(self, storage_name: str, remote_object_dir: str) -> str:
         """ Creates the directories in azure storage if they do not exist """
-        if self.client.exists(storage_name, remote_object_dir):
-            return remote_object_dir
-        else:
+        if not self.client.exists(storage_name, remote_object_dir):
             try:
                 self.client.create_directory(storage_name, remote_object_dir)
             except AzureMissingResourceHttpError as err:
-                if err.error_code == 'ParentNotFound':
-                    return self.create_remote_dir(storage_name, os.path.dirname(remote_object_dir))
-                else:
+                if err.error_code != 'ParentNotFound':
                     raise
-            finally:
-                self.create_remote_dir(storage_name, remote_object_dir)
-                return remote_object_dir
+                self.create_remote_dir(storage_name, os.path.dirname(remote_object_dir))
+                self.client.create_directory(storage_name, remote_object_dir)
+        return remote_object_dir
 
     def upload(self, storage_name: str, remote_object_path: str, source_path: str):
         local_src_hash = self.get_hash(source_path, hashlib.md5)
@@ -224,14 +220,14 @@ class LMDBManager:
         POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres')
         POSTGRES_DB = os.environ.get('POSTGRES_DB', 'postgres')
         engine = sqlalchemy.create_engine(
-            sqlalchemy.engine.url.URL(
-                        drivername='postgres+psycopg2',
-                        username=POSTGRES_USER,
-                        password=POSTGRES_PASSWORD,
-                        host=POSTGRES_HOST,
-                        port=POSTGRES_PORT,
-                        database=POSTGRES_DB,
-                    )
+            sqlalchemy.engine.URL.create(
+                drivername='postgresql+psycopg2',
+                username=POSTGRES_USER,
+                password=POSTGRES_PASSWORD,
+                host=POSTGRES_HOST,
+                port=POSTGRES_PORT,
+                database=POSTGRES_DB,
+            )
         )
         Session = sessionmaker(bind=engine)
         session = Session()

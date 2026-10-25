@@ -6,8 +6,9 @@ ARG NODE_IMAGE_TAG=node:20
 FROM $NODE_IMAGE_TAG as angular-deps
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (tools/ has the postinstall script)
 COPY package.json yarn.lock ./
+COPY tools/unpack-office-converter.js ./tools/
 ARG YARN_INSTALL_OPTS=--ignore-engines
 RUN yarn install ${YARN_INSTALL_OPTS}
 
@@ -44,6 +45,10 @@ WORKDIR /usr/share/nginx/html
 
 # Copy built assets
 COPY --from=angular-build /app/dist ./
+# Precompress the office converter's runtime (~145 MB), served with gzip_static
+RUN if [ -d assets/vendor/office-converter/lo ]; then \
+      find assets/vendor/office-converter/lo -type f -size +100k -exec gzip -9 -k {} +; \
+    fi
 
 # Copy nginx configuraiton template
 COPY nginx.conf /etc/nginx/templates/default.conf.template

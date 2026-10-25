@@ -1,3 +1,4 @@
+import json
 import os
 from typing import List
 
@@ -24,7 +25,8 @@ class EnrichmentVisualisationService:
         if analysis == "fisher":
             GO_terms = redis_server.get(f"GO_for_{organism.id}")
             if GO_terms:
-                df = pd.read_json(GO_terms)
+                # Redis answers bytes, which read_json does not take.
+                df = pd.DataFrame(json.loads(GO_terms))
                 go_count = len(df)
                 mask = ~df.geneNames.map(set(gene_names).isdisjoint)
                 go = df[mask]
@@ -90,6 +92,8 @@ class EnrichmentVisualisationService:
         return redis_cached(
             f"get_go_terms_{organism}_{','.join(gene_names)}",
             lambda: self.query_go_term(organism.id, gene_names),
+            load=json.loads,
+            dump=json.dumps,
         )
 
     def query_go_term_count(self, organism_id):
@@ -132,5 +136,7 @@ class EnrichmentVisualisationService:
 
     def get_go_term_count(self, organism):
         return redis_cached(
-            f"go_term_count_{organism}", lambda: self.query_go_term_count(organism.id)
+            f"go_term_count_{organism}",
+            lambda: self.query_go_term_count(organism.id),
+            load=int,
         )

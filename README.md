@@ -46,13 +46,13 @@ See [`client/.storybook/test-runner.ts`](client/.storybook/test-runner.ts).
 
 [`client/tools/check-story-coverage.js`](client/tools/check-story-coverage.js)
 fails the build when an in-scope component has no story beside it. Components
-that predate the harness sit on an allowlist in
-[`story-coverage-pending.json`](client/tools/story-coverage-pending.json)
-(79 entries and falling), and the check **also** fails when an entry on that
-list has since gained a story.
+that predated the harness sat on an allowlist in
+[`story-coverage-pending.json`](client/tools/story-coverage-pending.json), and
+the check **also** fails when an entry on that list has since gained a story.
 
-That second rule is the interesting half: the list can only shrink, so the
-backlog cannot quietly grow, and a newly added component always needs a story.
+That second rule is the interesting half: the list could only shrink, so the
+backlog could not quietly grow, and a newly added component always needs a
+story. The allowlist is now empty — every in-scope component has one.
 
 ### Tab and panel state encoded in the URL
 
@@ -281,7 +281,7 @@ upstream may have moved on.
 | Feature / Improvement | Lifelike (at fork) | Mycelium |
 |---|:---:|:---:|
 | **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
-| **Angular version** | v9 | v16 |
+| **Angular version** | v9 | v17 |
 | **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
 | **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 6.4.299 (well past CVE-2024-4367) |
 | **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |
@@ -293,7 +293,7 @@ upstream may have moved on.
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
 | **Repo-wide linting** | ❌ | MegaLinter with SARIF upload & PR annotations, over Python, JSON, YAML and Markdown; `client/` TypeScript is linted by ESLint via the pre-commit hook, not yet in CI |
 | **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ Angular unit specs across the shared components and services, plus Storybook image snapshots at a 0-pixel threshold |
+| **Automated UI tests** | ❌ | ✅ Angular unit specs across the shared components and services, Storybook image snapshots at a 0-pixel threshold, and Playwright end-to-end tests against the full stack ([tests/e2e](tests/e2e)) |
 | **Backend test suites** | ❌ | Unit and `tests/database` suites run in CI against throwaway PostgreSQL, Neo4j and Solr; `tests/api` does not yet run |
 | **Database migrations** | 100+ incremental Alembic files | Squashed to a single baseline, plus revisions added since |
 | **d3 version** | v5 | v7 |

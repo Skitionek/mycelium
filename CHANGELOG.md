@@ -14,11 +14,13 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Added
 
+- **End-to-end tests**: a Playwright suite in [`tests/e2e`](tests/e2e) drives the Angular client against the real appserver, PostgreSQL and Solr - login, Terms of Service, the file browser, creating projects and folders, and uploading and opening a file - and runs in CI as the *End-to-End Tests* job.
 - **Local folders**: folders on the user's computer can be connected from the file browser (or dragged onto it) through the browser's File System Access API. Their files open in the same built-in viewers as uploaded files (PDF, office documents, code, protein structures, BioC, maps, Sankey, enrichment tables, DMP and SDRF) without being uploaded, and can be created, uploaded into, moved and deleted on disk. See [`docs/local-folders.md`](docs/local-folders.md) ([#679]).
 - **Background indexing of local folders**: files are text-indexed in the browser (PDF text via PDF.js), and PDFs and enrichment tables are annotated with knowledge-graph entities, as they appear and change. Status shows in the navigation bar, on each folder tile and folder header, and per file in a new **Index** column; folder contents can be searched from the folder header ([#679]).
 - **Resumable on-disk index**: index shards are saved in hidden `.mycelium` directories inside the folder, a second after each file is done, and the folder's identity in a manifest there. A disconnected folder, a closed tab or a reload loses at most the file in progress; reconnecting the folder - even with the browser's storage cleared - reuses its ID and processes only new or changed files ([#679]).
 - **`POST /filesystem/annotations/transient`**: annotate a PDF without storing it or its annotations. The content is held in Redis under an unguessable token, at most ten minutes, for the PDF parser to fetch from `GET /annotations/transient/<token>`, and discarded once parsed ([#679]).
 - **`POST /filesystem/annotations/transient/enrichment-table`**: annotate an enrichment table without storing it or its annotations, answering like `GET /filesystem/objects/<id>/enrichment/annotations`. The cell snippets are built by the same code as for stored tables, now in `services/annotations/enrichment_snippets.py` ([#679]).
+- **Office documents are converted to PDF in the browser**: the PDF viewer converts Word, Excel, PowerPoint and OpenDocument files, stored or local, with [serverless-office-converter](https://github.com/Skitionek/serverless-office-converter) (LibreOffice compiled to WebAssembly, installed from GitHub, unpacked by `client/tools/unpack-office-converter.js` after install and loaded on first use) instead of asking the appserver. The client is now served cross-origin isolated (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: credentialless`), which the converter needs; browsers that cannot be isolated (Safari) and documents the converter fails on still go to the server.
 - **`POST /filesystem/convert/pdf`**: convert an uploaded office document to PDF with LibreOffice without storing it, so office files that are not in Mycelium can open in the PDF viewer ([#679]).
 
 - **Mycelium rebrand**: Renamed project from "Lifelike Afterhours" to "Mycelium" across all user-facing strings, browser title, navigation, login page, version dialog, and Terms of Service.
@@ -30,7 +32,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Changed
 
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
-- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback); Inter loaded from Google Fonts ([#245]).
+- **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback) ([#245]).
+- **Fonts and Plotly bundled**: the Roboto, IBM Plex Sans and Inter fonts and Plotly are bundled from pinned npm packages instead of loaded from Google Fonts and `cdn.plot.ly`. Plotly is pinned to 1.58.5, the build the `plotly-latest` URL served. Font Awesome still loads from its kit: it is Font Awesome 5 Pro with custom icons the app draws by name and code point ([#744]).
 - **Border radius**: Global `$border-radius` set to 6px (rounded-md) for all buttons and components ([#245]).
 - **Elevation**: Heavy box-shadows replaced with subtle `1px solid #e2e8f0` borders on module headers, toolbars, dropdowns and popovers for a "clinical lab" aesthetic ([#245]).
 - **Knowledge Graph nodes**: Default node stroke and edge colour updated from `#2B7CE9` to Deep Sea Teal `#004B49`; default node background updated to `#F1F5F9` ([#245]).
@@ -111,11 +114,67 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Security
 
+- **DOI lookups**: exporting a map no longer makes the server request the URL of any node source labelled DOI, which let a map's author have the server fetch internal addresses such as the cloud metadata endpoint. DOIs are only ever looked up on `doi.org`, over HTTPS, without following its redirect to the publisher, and every lookup has a timeout, so a `doi.org` that never answers no longer holds a PDF upload indefinitely ([#756]).
+- **Annotation list export**: text users typed into the global inclusion and exclusion lists, such as a comment starting with `=`, is written to the admin's Excel export as text instead of as a live formula ([#759]).
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
 ### Fixed
 
+- **Enrichment visualisation**: the statistical-enrichment request returns its results again. GO terms were written to Redis as a list, which Redis refuses; the result, already JSON, was encoded a second time into a JSON string the client could not map over; and cached answers, which Redis returns as bytes, could not be sent at all. GO terms the cache-invalidator precalculated could not be read back either, so in Neo4j deployments every request for such an organism failed ([#754]).
+- **Enrichment statistics**: a submitted gene outside every returned GO term no longer turns every p- and q-value into `null`, a gene list matching no precalculated term answers an empty result instead of an error, and the q-value correction no longer fails when the organism's approximate term count undercounts ([#754]).
+- **Enrichment organism validation**: a malformed `taxID/name` organism is answered with 422 instead of 500, and organism names that contain a slash, such as influenza strains, are accepted ([#754]).
+- **Cache invalidator backoff**: repeated failures now back off as intended. A successful or skipped GO precalculation (always skipped with Mozg) reset the delay, so a failing Kg statistics query was retried every minute forever, and a failed round slept twice. Neo4j sessions are closed when a query fails instead of leaking on every retry ([#754]).
+- **Mozg client**: a query answered with a `null` result and no errors yields no rows instead of an `AttributeError`, in both the appserver and statistical-enrichment ([#754]).
+- **URL uploads**: fixing up a URL before fetching it no longer encodes `+` in its query, which turned a space into a literal plus for the server, nor drops the brackets of an IPv6 host ([#754]).
+- **File download names**: a `"` or `\` in a filename no longer ends the `Content-Disposition` header's fallback filename early, and not-modified answers carry the file's ETag ([#754]).
+- **Executable upload names**: filenames that end in dots or spaces, such as `x.exe.`, which Windows saves as `x.exe`, are rejected like `x.exe` ([#754]).
+- **Empty page and limit parameters**: an empty integer field that allows null loads as null, and one that does not is answered with a validation error instead of a 500 ([#754]).
+- **Enrichment table CSV export**: empty cells are exported empty instead of as `undefined` or `null`, and cells holding a carriage return are quoted ([#754]).
+- **Pagination from the URL**: a hand-edited `page` or `limit` that is not a positive integer falls back to its default instead of sending `NaN`, 0 or a negative number ([#754]).
+- **BioC files with CRLF line endings**: blank lines no longer fail to parse ([#754]).
+- **PDF annotation popovers**: clicking an annotation in the PDF viewer opens its popover again, with its **Delete Annotation**, **Mark for Exclusion**, **Find Occurrences** and **Unmark Exclusion** buttons and expandable search links. The app loaded Bootstrap without the Popper it needs, so every popover failed to open; Bootstrap 5's sanitizer also stripped the buttons and collapse toggles from its content, and the toggles still used Bootstrap 4's `data-toggle` ([#744]).
+- **`flask upload-lmdb` errors**: creating a directory in Azure file storage no longer hides failures. A `finally` block re-ran the creation and returned, which discarded every error other than a missing parent, and retried an error that kept failing until Python ran out of stack ([#744]).
+- **Misused session tokens**: a refresh or password reset token sent in place of an access token is refused with 401 instead of failing with 500, so the client renews or ends the session, and an expired session is reported as expired rather than invalid ([#756]).
+- **Select-all checkboxes**: the select-all checkbox of an empty folder, or of an empty list of annotations in the admin pages, no longer shows ticked ([#756]).
+- **Map export**: a map link node with hyperlinks but no sources no longer fails the export ([#756]).
+- **Office documents opened at the same time**: converting several office documents to PDF at once no longer makes some of the conversions fail; each LibreOffice run now has a profile of its own ([#757]).
+- **Organism search**: a search ending in a backslash, or with two spaces between words, no longer fails ([#757]).
+- **Sankey search**: nodes and links that appear in several traces or trace networks are found in each of them, a trace reached through several links no longer lists its matches repeatedly, and with several search terms a result that merely starts with one of them is no longer ranked as an exact match ([#757]).
+- **Phrase search**: a quoted phrase of three or more words matches text with extra spaces between any of its words, not just the first two ([#757]).
+- **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
+- **Search-term highlighting**: searching for words such as "amp" or "lt" no longer breaks the text of the results, terms holding `&`, `<` or quotes are highlighted, and a search for `""` no longer litters the results with empty highlights ([#758]).
+- **Enrichment tables without sources**: tables that name no domains open with every domain instead of failing to load, and tables in the old slash-separated format keep organism names that contain slashes ([#758]).
+- **Damaged office documents**: converting one to PDF reports that the document could not be converted (422) instead of claiming conversion is unavailable (503) and quoting a server path ([#758]).
+- **Workspace tab icons**: tabs whose view sets no icon show the window icon again instead of an empty gap; the fallback class was missing its `fa` prefixes, and it was truthy, so the template's own fallback never applied. Enrichment Visualisation tabs get their chart icon back too: their route named it `fas chart-bar` ([#744]).
+- **Missing side borders**: column separators in the shared data table, the divider beside the file browser and preview sidebars, the SDRF actions column, the collapsed split-pane tab and clustergram match cells all show again. Their `border-left`/`border-right` had become `border-start`/`border-end`, which are not CSS properties, so browsers dropped them; they are now `border-inline-start`/`border-inline-end` ([#744]).
+- **Quick search links**: external search links are labelled "NCBI Gene" and "NCBI Taxonomy" like everywhere else rather than with their `NCBI_Gene` keys, and links saved on a map node are listed in the usual order whatever the case of their domain ([#744]).
+- **Unreadable grey badges**: the search term in the PDF and map search control and the **Re-Annotation** badge in a file's annotation history were white on the light grey secondary colour. They now use `text-bg-secondary`, which picks a contrasting text colour ([#744]).
+- **Bootstrap 4 leftovers**: full-width buttons are full width again (login, map node and edge **Delete**, annotation filter **Show/Hide All**, the PDF annotation popups and others); `btn-block` no longer exists in Bootstrap 5, so they had shrunk to their label. The Sankey **Delete View** dialog gets a proper close button instead of a bare browser-styled "×", and the remaining `ml-*`, `rounded-left` and `jumbotron` classes use their Bootstrap 5 names ([#744]).
+- **Fieldset legends**: section labels such as "Annotation", "Additional Links" and "Enrichment Table Parameters" sit on their divider line again, with the fields starting below them. Bootstrap 5 floats every `legend`, so these labels had left the line and the first field of each section wrapped up beside them, out of line with the rest of the form ([#744]).
+- **Release tagging**: the release workflow now sets a tagger identity for its annotated tag. The first run to pass the gate failed at `git tag -a` with "Committer identity unknown", so still no release had been cut ([#744]).
+- **Map edge selection**: clicking an edge that rises to the right selects that edge, and clicking empty canvas across from it no longer selects it, nor wins over the edge actually under the pointer ([#759]).
+- **Enrichment table cells with `&` or `<`**: annotated cells such as "Na(+) & K(+)" show their text instead of an XML error message ([#759]).
+- **Enrichment tables without results**: re-annotating several files no longer fails for all of them when one table holds only its parameters; that file is reported as failed ([#759]).
+- **UniProt links from graph search**: a UniProt result dragged onto a map links to its protein page instead of a page that does not exist ([#759]).
+- **Links to folders and projects**: following a link to a folder opens or focuses that folder instead of whichever folder was open, and a link to an open project focuses its tab instead of opening another ([#759]).
+- **Content search with several words**: a search finds files with all of its words again, and `not` leaves out files with the word after it. Solr reads only upper case `AND`, `OR` and `NOT` as operators, so the lower case `and` joining the words made each word optional, and a lower case `not` was a word to find ([#760]).
+- **Content search by file type**: picking file types limits the results to files of those types. The `type:` terms were sent to Solr as text to find in an index with no such field ([#760]).
+- **Content search in folders with a `\` in their name**: the folder's files are found, and a folder name ending in `\` no longer makes every search in it fail ([#760]).
+- **Office file icons**: files with an upper case extension, such as `REPORT.DOCX`, get the Word, Excel, PowerPoint or Cytoscape icon in the file browser and on maps ([#760]).
+- **Long map labels**: a node label with a word too long for the node, such as `TP53` in a narrowed node or a long number, no longer stops the map from drawing. A broken word gets no hyphen after its last piece, and a node sized to such a label is as wide as the label instead of 0 wide. A piece that fills its line is drawn as text, not as a grey bar, when its hyphen comes out a hair wider ([#760], [#764]).
+- **Admin user list**: the user browser lists users again. `GET /accounts` built its query with `select([...])`, which SQLAlchemy 2 rejects, so listing users, or getting one, answered 500 ([#763]).
+- **Creating and updating users as an admin**: the user browser's dialogs send the picked role as a list, as the accounts API takes, instead of a string it rejected with "Not a valid list". Creating a user no longer answers 500 after saving it: JSON responses serialize dates again ([#763]).
+- **Database test isolation**: each database test's writes are rolled back. Its session ran on the app's engine instead of the fixture's connection, so rows leaked into the tests after it; the three test files CI left out for this run again ([#763]).
+- **Pasting map nodes**: copied nodes are pasted as they were laid out, around the cursor, with the edges between them. Every node was pasted on the cursor, on top of each other, and the edges were dropped ([#768]).
+- **Office documents that fail to convert**: opening a stored document LibreOffice can't convert, or while LibreOffice is unavailable, answers with what went wrong (422 or 503) instead of a server error ([#768]).
+- **Enrichment table CSV export**: text starting with `=`, `+`, `-`, `@` or a tab, such as an imported gene name `=HYPERLINK(...)`, is exported as text a spreadsheet won't run as a formula ([#768]).
+- **Graph search filters**: the organism picked for a graph search is applied. Reading the search back from the URL dropped it, and turned no domains into one domain named `""`, which left literature data out of the results. A content search without folders no longer comes back with one folder named `""` ([#766]).
+- **Passwords in connection URLs**: a Redis password with `/`, `?` or `#`, as Azure access keys often have, no longer stops the appserver, cache invalidator and statistical-enrichment on start, and a PostgreSQL password with `@` no longer sends the appserver to the wrong host. A Neo4j password may contain `/` ([#766]).
+- **`flask load-lmdb` and `flask upload-lmdb`**: both start again. The LMDB manager built its database URL in a way SQLAlchemy 2 rejects, which also kept the API pod from starting when the Helm chart loads LMDB files ([#766]).
+- **Global inclusions on Neo4j 5**: listing, counting, annotating with and removing global inclusions work on Neo4j 5. Their queries tested properties with `exists()`, which Neo4j 5 removed, and use `IS NOT NULL` now ([#765]).
+- **Removing a global inclusion**: removing the last global inclusion for a synonym takes the `GlobalInclusion` label off it, which never happened, and the query no longer needs APOC. A failed label cleanup afterwards answers with its error instead of an `UnboundLocalError` ([#765]).
+- **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
 - **Lazy-loaded workspace routes**: moved `search/graph`, `pathway-browser-prototype`, enrichment table/visualisation, map editor/viewer, `kg-statistics`, and `kg-visualizer` behind route-level lazy loading so they no longer inflate the initial client bundle ([#415]).
@@ -292,4 +351,17 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#765]: https://github.com/Skitionek/mycelium/pull/765
+[#766]: https://github.com/Skitionek/mycelium/pull/766
+[#768]: https://github.com/Skitionek/mycelium/pull/768
+[#764]: https://github.com/Skitionek/mycelium/pull/764
+[#763]: https://github.com/Skitionek/mycelium/pull/763
+[#760]: https://github.com/Skitionek/mycelium/pull/760
+[#759]: https://github.com/Skitionek/mycelium/pull/759
 [#679]: https://github.com/Skitionek/mycelium/pull/679
+[#756]: https://github.com/Skitionek/mycelium/pull/756
+[#757]: https://github.com/Skitionek/mycelium/pull/757
+[#743]: https://github.com/Skitionek/mycelium/pull/743
+[#744]: https://github.com/Skitionek/mycelium/pull/744
+[#754]: https://github.com/Skitionek/mycelium/pull/754
+[#758]: https://github.com/Skitionek/mycelium/pull/758

@@ -1,14 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpEventType } from '@angular/common/http';
+import { HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { MimeTypes } from 'app/shared/constants';
+import { OfficeConverterService } from 'app/shared/services/office-converter.service';
 
 import { encodeLocalHashId } from '../local-ids';
 import { LocalFolderError } from '../local-folder-errors';
 import { MemoryDirectoryHandle, MemoryFileHandle } from '../testing/memory-filesystem.spec';
-import { configureLocalFolderTestBed } from '../testing/local-folder-test-utils.spec';
+import { configureLocalFolderTestBed, waitFor } from '../testing/local-folder-test-utils.spec';
 import { LocalFolderRegistry, LocalRoot } from './local-folder-registry.service';
 import { LocalFilesystemService } from './local-filesystem.service';
 
@@ -87,6 +89,52 @@ describe('LocalFilesystemService', () => {
     const blob = await firstValueFrom(service.getContent(id('notes.txt')));
     expect(await blob.text()).toBe('hello');
     expect(await (await firstValueFrom(service.getContentAsPdf(id('paper.pdf')))).text()).toBe('%PDF-1.7 ...');
+  });
+
+  describe('shows office documents as PDFs', () => {
+    let converter: jasmine.SpyObj<OfficeConverterService>;
+    let available: boolean;
+
+    beforeEach(() => {
+      available = true;
+      converter = TestBed.inject(OfficeConverterService) as jasmine.SpyObj<OfficeConverterService>;
+      spyOnProperty(converter, 'available').and.callFake(() => available);
+      spyOn(converter, 'toPdf');
+      folder.file('report.docx', 'PK...');
+    });
+
+    it('converting them in the browser', async () => {
+      converter.toPdf.and.returnValue(of(new Blob(['%PDF-1.7 converted'])));
+      const pdf = await firstValueFrom(service.getContentAsPdf(id('report.docx')));
+      expect(await pdf.text()).toBe('%PDF-1.7 converted');
+      const [file, name] = converter.toPdf.calls.mostRecent().args;
+      expect(await file.text()).toBe('PK...');
+      expect(name).toBe('report.docx');
+      TestBed.inject(HttpTestingController).expectNone('/api/filesystem/convert/pdf');
+    });
+
+    async function convertedOnServer(): Promise<string> {
+      const http = TestBed.inject(HttpTestingController);
+      const pdf = firstValueFrom(service.getContentAsPdf(id('report.docx')));
+      let requests: TestRequest[] = [];
+      await waitFor(() => (requests = http.match('/api/filesystem/convert/pdf')).length > 0);
+      expect(requests[0].request.body.get('file').name).toBe('report.docx');
+      requests[0].flush(new Blob(['%PDF-1.7 server']));
+      return (await pdf).text();
+    }
+
+    it('converting them on the server where the browser cannot', async () => {
+      available = false;
+      expect(await convertedOnServer()).toBe('%PDF-1.7 server');
+      expect(converter.toPdf).not.toHaveBeenCalled();
+    });
+
+    it('converting them on the server when the browser fails to', async () => {
+      spyOn(console, 'warn');
+      converter.toPdf.and.returnValue(throwError(() => new Error('The engine stopped.')));
+      expect(await convertedOnServer()).toBe('%PDF-1.7 server');
+      expect(console.warn).toHaveBeenCalled();
+    });
   });
 
   it('reports missing files clearly', async () => {

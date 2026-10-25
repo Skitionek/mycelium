@@ -7,6 +7,7 @@ from pyparsing import (
     ZeroOrMore,
     printables,
 )
+import re
 import requests
 from sqlalchemy import and_
 from sqlalchemy.orm import joinedload, raiseload
@@ -14,7 +15,7 @@ from typing import Dict, List
 from urllib.parse import urlencode
 
 from neo4japp.constants import FILE_INDEX_ID, LogEventType
-from neo4japp.database import SearchIndexConnection, GraphConnection
+from neo4japp.database import SearchIndexConnection, GraphConnection, get_file_type_service
 from neo4japp.exceptions import ServerException
 from neo4japp.models import Files, Projects
 from neo4japp.models.files_queries import build_file_hierarchy_query
@@ -30,6 +31,8 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
         'project_id',
         'public',
     })
+    # A type:<shorthand> term of the query, maybe with the parentheses of a group around it
+    FILE_TYPE_TERM = re.compile(r'^(\(*)type:([^\s()]+)(\)*)$')
 
     def _collection(self, index_id: str) -> str:
         return index_id
@@ -290,6 +293,21 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
 
         return words_phrases_and_wildcards
 
+    def _file_type_term_to_filter(self, token: str) -> str:
+        """Turn a type:<shorthand> term into a match on the mime type of that file type.
+
+        The index has no type field, so Solr would otherwise look for the
+        text 'type:pdf' and find nothing.
+        """
+        m = self.FILE_TYPE_TERM.match(token)
+        if m is None:
+            return token
+        opening, shorthand, closing = m.groups()
+        mime_type = get_file_type_service().get_shorthand_to_mime_type_map().get(
+            shorthand, shorthand
+        )
+        return f'{opening}{self._map_field("mime_type")}:{self._format_value(mime_type)}{closing}'
+
     def _pre_process_query(self, query):
         query = self._strip_unmatched_characters(query)
 
@@ -302,9 +320,11 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
         operand = quoted_term_with_parens | term
         query_parser = ZeroOrMore(operand)
 
+        # Solr reads only upper case AND/OR/NOT as operators, so write them that way:
+        # a lower case 'and' would just be one more word to look for
         unstackable_logical_ops = ['and', 'or']
         new_query = []
-        tokens = list(query_parser.parseString(query))
+        tokens = [self._file_type_term_to_filter(t) for t in query_parser.parseString(query)]
         for i, curr in enumerate(tokens):
             if i == len(tokens) - 1:
                 new_query += [curr]
@@ -322,7 +342,7 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
                                 + 'encountered immediately following a NOT operator.',
                         code=400,
                     )
-                new_query += [curr]
+                new_query += [curr.upper()]
             elif curr.lower() in unstackable_logical_ops:
                 if _next.lower() in unstackable_logical_ops:
                     raise ServerException(
@@ -331,9 +351,9 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
                                 + 'were encountered in succession.',
                         code=400,
                     )
-                new_query += [curr]
+                new_query += [curr.upper()]
             elif _next.lower() not in unstackable_logical_ops + [')']:
-                new_query += [curr, 'and']
+                new_query += [curr, 'AND']
             else:
                 new_query += [curr]
         return ' '.join(new_query)
@@ -355,7 +375,8 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
             return self._normalize_bool(value)
         if isinstance(value, (int, float)):
             return str(value)
-        value = str(value).replace('"', '\\"')
+        # Escape the escape character first, or a value ending in \ escapes the closing quote
+        value = str(value).replace('\\', '\\\\').replace('"', '\\"')
         return f'"{value}"'
 
     def _convert_filter_clause(self, clause: dict) -> str:

@@ -4,17 +4,14 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "files": [
-    "src/main.ts",
-    "src/polyfills.ts"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ],
+  "files": ["src/main.ts", "src/polyfills.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "src/test.ts",
     "src/**/*.spec.ts",
     "**/*.stories.*",
+    // Story-only helpers; they import @storybook/angular, which is not an app dependency.
+    "src/app/shared/storybook/**",
     "src/**/*.worker.ts"
   ]
 }

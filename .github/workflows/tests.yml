@@ -131,22 +131,10 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
 
-      # Three files are excluded whole rather than test by test. They are not
-      # flaky and not newly broken: the `session` fixture's rollback does not
-      # hold, so after the first test in a file commits, every later test in it
-      # collides with the leaked rows (#619). Which individual tests fail is
-      # therefore an artefact of collection order, and pinning those names here
-      # would encode that ordering. Excluding the files keeps this honest and
-      # stable; drop these three lines when #619 is fixed.
-      #
       # tests/api is not run here at all -- it hangs indefinitely (#620).
       - name: Run database tests
         working-directory: appserver
-        run: |
-          pytest tests/database -v \
-            --ignore tests/database/services/annotations/manual_annotations \
-            --ignore tests/database/services/auth_test.py \
-            --ignore tests/database/services/projects_test.py
+        run: pytest tests/database -v
         env:
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
@@ -225,6 +213,104 @@ jobs:
         with:
           name: image-snapshot-diffs
           path: client/__image_snapshots__/__diff_output__/
+          if-no-files-found: ignore
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      SOLR_URL: http://localhost:8983/solr
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.10'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install appserver dependencies
+        working-directory: appserver
+        run: uv export --locked --no-hashes --no-emit-project | uv pip install --system -r -
+
+      # Every file write indexes into Solr, so seeding and uploads fail
+      # without the `file` core. See appserver-database-tests for why this is
+      # not a `services:` container.
+      - name: Start Solr with the file core
+        run: |
+          docker run -d --name solr -p 8983:8983 solr:9 solr-precreate file
+          for _ in $(seq 1 30); do
+            if curl -sf "http://localhost:8983/solr/admin/cores?action=STATUS" >/dev/null; then
+              echo "solr ready"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "solr did not become ready" >&2
+          exit 1
+
+      - name: Migrate and seed the database
+        working-directory: appserver
+        run: |
+          flask db upgrade
+          flask seed
+        env:
+          FLASK_APP: app.py
+
+      - name: Install client dependencies
+        working-directory: client
+        run: yarn install --frozen-lockfile
+
+      - name: Install e2e dependencies
+        working-directory: tests/e2e
+        run: |
+          yarn install --frozen-lockfile
+          yarn playwright install --with-deps chromium
+
+      # Playwright starts the appserver and the Angular dev server itself
+      # (see webServer in tests/e2e/playwright.config.ts).
+      - name: Run end-to-end tests
+        working-directory: tests/e2e
+        run: yarn test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-playwright-report
+          path: |
+            tests/e2e/playwright-report/
+            tests/e2e/test-results/
           if-no-files-found: ignore
 
   statistical-enrichment-tests:

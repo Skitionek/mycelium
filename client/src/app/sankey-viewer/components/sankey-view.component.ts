@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map, delay, catchError, tap, switchMap } from 'rxjs/operators';
@@ -62,7 +62,7 @@ export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, Aft
     protected readonly filesystemService: FilesystemService,
     protected readonly route: ActivatedRoute,
     readonly modalService: NgbModal,
-    readonly snackBar: MatLegacySnackBar,
+    readonly snackBar: MatSnackBar,
     protected readonly workSpaceManager: WorkspaceManager,
     readonly router: Router,
     readonly sessionStorage: SessionStorageService,

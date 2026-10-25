@@ -3,9 +3,6 @@
 // ============================================================
 // Mycelium "Bio-Digital Lab" design tokens
 // ============================================================
-// Inter font — loaded via CSS @import to avoid build-time inlining
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
 :root {
   --color-primary:   #004B49;
   --color-accent:    #D4FF00;
