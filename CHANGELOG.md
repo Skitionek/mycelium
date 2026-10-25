@@ -126,7 +126,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Mozg client**: a query answered with a `null` result and no errors yields no rows instead of an `AttributeError`, in both the appserver and statistical-enrichment ([#754]).
 - **URL uploads**: fixing up a URL before fetching it no longer encodes `+` in its query, which turned a space into a literal plus for the server, nor drops the brackets of an IPv6 host ([#754]).
 - **File download names**: a `"` or `\` in a filename no longer ends the `Content-Disposition` header's fallback filename early, and not-modified answers carry the file's ETag ([#754]).
-- **Executable upload names**: filenames such as `x.exe.` or `x.exe.`, which Windows saves as `x.exe`, are rejected like `x.exe` ([#754]).
+- **Executable upload names**: filenames that end in dots or spaces, such as `x.exe.`, which Windows saves as `x.exe`, are rejected like `x.exe` ([#754]).
 - **Empty page and limit parameters**: an empty integer field that allows null loads as null, and one that does not is answered with a validation error instead of a 500 ([#754]).
 - **Enrichment table CSV export**: empty cells are exported empty instead of as `undefined` or `null`, and cells holding a carriage return are quoted ([#754]).
 - **Pagination from the URL**: a hand-edited `page` or `limit` that is not a positive integer falls back to its default instead of sending `NaN`, 0 or a negative number ([#754]).
