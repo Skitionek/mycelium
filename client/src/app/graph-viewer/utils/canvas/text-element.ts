@@ -207,21 +207,26 @@ export class TextElement {
 
           if (lineHorizontalOverflow) {
             // If we can split on the previous, try to break the words on syllables
+            // (a word without vowels, like a number, has none and stays whole)
             const splitTokens = line.match(
-              /[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?/gi);
+              /[^aeiouy]*[aeiouy]+(?:[^aeiouy]*$|[^aeiouy](?=[^aeiouy]))?/gi) ?? [line];
             for (const widthFitLine of this.getWidthFittedLines(splitTokens, effectiveWidth - this.hyphenWidth)) {
-              const stillOverflow = widthFitLine.metrics.width > effectiveWidth;
+              // Since we break the words, add hyphen, but not after the end of the word
+              const text = widthFitLine.remainingTokens ? widthFitLine.line + '-' : widthFitLine.line;
+              const splitMetrics = this.ctx.measureText(text);
+              const stillOverflow = splitMetrics.width > effectiveWidth;
               // If that did not help, we cannot do anything else
               if (stillOverflow) {
                 // If this line overflows, make sure to mark the box as overflowing and
                 // update the width of the box
                 boxHorizontalOverflow = true;
                 actualWidth = effectiveWidth;
+              } else if (splitMetrics.width > actualWidth) {
+                actualWidth = splitMetrics.width;
               }
               lines.push({
-                // Since we break the words, add hyphen.
-                text: widthFitLine.line + '-',
-                metrics: widthFitLine.metrics,
+                text,
+                metrics: splitMetrics,
                 xOffset: 0,
                 horizontalOverflow: stillOverflow
               });
