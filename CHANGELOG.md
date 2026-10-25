@@ -142,6 +142,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Sankey search**: nodes and links that appear in several traces or trace networks are found in each of them, a trace reached through several links no longer lists its matches repeatedly, and with several search terms a result that merely starts with one of them is no longer ranked as an exact match ([#757]).
 - **Phrase search**: a quoted phrase of three or more words matches text with extra spaces between any of its words, not just the first two ([#757]).
 - **Login password feedback**: submitting the login form without a password now says "This field is required." under the password field; its row was bound to a `label` control that does not exist, so it never showed any feedback ([#744]).
+- **Search-term highlighting**: searching for words such as "amp" or "lt" no longer breaks the text of the results, terms holding `&`, `<` or quotes are highlighted, and a search for `""` no longer litters the results with empty highlights ([#758]).
+- **Enrichment tables without sources**: tables that name no domains open with every domain instead of failing to load, and tables in the old slash-separated format keep organism names that contain slashes ([#758]).
+- **Damaged office documents**: converting one to PDF reports that the document could not be converted (422) instead of claiming conversion is unavailable (503) and quoting a server path ([#758]).
 - **Workspace tab icons**: tabs whose view sets no icon show the window icon again instead of an empty gap; the fallback class was missing its `fa` prefixes, and it was truthy, so the template's own fallback never applied. Enrichment Visualisation tabs get their chart icon back too: their route named it `fas chart-bar` ([#744]).
 - **Missing side borders**: column separators in the shared data table, the divider beside the file browser and preview sidebars, the SDRF actions column, the collapsed split-pane tab and clustergram match cells all show again. Their `border-left`/`border-right` had become `border-start`/`border-end`, which are not CSS properties, so browsers dropped them; they are now `border-inline-start`/`border-inline-end` ([#744]).
 - **Quick search links**: external search links are labelled "NCBI Gene" and "NCBI Taxonomy" like everywhere else rather than with their `NCBI_Gene` keys, and links saved on a map node are listed in the usual order whatever the case of their domain ([#744]).
@@ -338,3 +341,4 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#743]: https://github.com/Skitionek/mycelium/pull/743
 [#744]: https://github.com/Skitionek/mycelium/pull/744
 [#754]: https://github.com/Skitionek/mycelium/pull/754
+[#758]: https://github.com/Skitionek/mycelium/pull/758
