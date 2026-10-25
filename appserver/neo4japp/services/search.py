@@ -36,7 +36,7 @@ class SearchService(GraphBaseDao):
         See docs: http://lucene.apache.org/ for more information
         We will escape these characters with a forward ( \\ ) slash
         """
-        lucene_chars = re.compile(r'([\+\-\&\|!\(\)\{\}\[\]\^"~\*\?:\/])')
+        lucene_chars = re.compile(r'([\+\-\&\|!\(\)\{\}\[\]\^"~\*\?:\\\/])')
 
         def escape(m):
             """ Adds an escape '\' to reserved Lucene characters"""
@@ -239,7 +239,8 @@ class SearchService(GraphBaseDao):
                 'total': 0,
             }
 
-        terms = query_term.split(' ')
+        # Any run of whitespace separates words; an empty word would leave 'AND AND'
+        terms = query_term.split()
         query_term = ' AND '.join(terms)
         nodes = self.graph.execute_read(self.get_organisms_query, query_term, limit)
 
