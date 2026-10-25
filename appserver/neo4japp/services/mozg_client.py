@@ -149,7 +149,7 @@ def run_query(
             f"{body['errors']}"
         )
 
-    rows = (body.get('data') or {}).get('query', {}).get('data')
+    rows = ((body.get('data') or {}).get('query') or {}).get('data')
     if isinstance(rows, list):
         return rows
     if rows is None:
