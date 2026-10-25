@@ -96,6 +96,23 @@ def test_convert_filter_clause_maps_fields_and_bool_values():
     )
 
 
+def test_convert_filter_clause_escapes_backslashes_as_well_as_quotes():
+    """Folder names may hold backslashes.
+
+    Unescaped, Solr read a backslash in a folder path as an escape, so the
+    folder matched nothing, and one at the end escaped the closing quote,
+    so Solr rejected the search.
+    """
+    service = make_service()
+
+    assert service._convert_filter_clause({'term': {'file_path.tree': '/p/a\\b\\'}}) == (
+        'file_path_ss:"/p/a\\\\b\\\\"'
+    )
+    assert service._convert_filter_clause({'term': {'file_path.tree': '/p/say "hi"'}}) == (
+        'file_path_ss:"/p/say \\"hi\\""'
+    )
+
+
 def test_convert_filter_clause_rejects_unsupported_field():
     service = make_service()
 
