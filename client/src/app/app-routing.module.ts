@@ -264,7 +264,7 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
 ];
 
 // TODO: Add an unprotected home page
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: DashboardComponent,
