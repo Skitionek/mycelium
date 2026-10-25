@@ -25,7 +25,8 @@ class EnrichmentVisualisationService:
         if analysis == "fisher":
             GO_terms = redis_server.get(f"GO_for_{organism.id}")
             if GO_terms:
-                df = pd.read_json(GO_terms)
+                # Redis answers bytes, which read_json does not take.
+                df = pd.DataFrame(json.loads(GO_terms))
                 go_count = len(df)
                 mask = ~df.geneNames.map(set(gene_names).isdisjoint)
                 go = df[mask]
