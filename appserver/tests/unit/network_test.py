@@ -200,6 +200,17 @@ def test_read_url_guards_against_dns_rebinding():
          'https://example.com/test_parameters.pdf?emoji=%F0%9F%A4%99'),
         ('https://example.com/test_parameters.pdf#emoji=🤙',
          'https://example.com/test_parameters.pdf#emoji%3D%F0%9F%A4%99'),
+
+        # Query characters that carry meaning are kept as they are
+        ('https://example.com/search?q=a+b', 'https://example.com/search?q=a+b'),
+        ('https://example.com/a?x=1;y=2,3', 'https://example.com/a?x=1;y=2,3'),
+        ('https://example.com/a?next=http://b.example/c?d',
+         'https://example.com/a?next=http://b.example/c?d'),
+        ('https://example.com/a?q=a b', 'https://example.com/a?q=a%20b'),
+
+        # IPv6 literals keep their brackets
+        ('http://[2001:db8::1]:8080/p', 'http://[2001:db8::1]:8080/p'),
+        ('http://[::1]/p', 'http://[::1]/p'),
     ],
     ids=lambda x: x[0],
 )
@@ -223,3 +234,70 @@ def test_direct_download_handler(url_pair):
     assert DirectDownloadDetectorHandler.rewrite_url(url_pair[0]) == url_pair[1]
     # Testing to make should that double rewriting should not rewrite further
     assert DirectDownloadDetectorHandler.rewrite_url(url_pair[1]) == url_pair[1]
+
+
+@pytest.mark.parametrize('port, allowed', [
+    (80, True), (443, True), (8080, True), (20000, True),
+    (79, False), (20001, False), (21, False), (22, False), (25, False), (587, False),
+], ids=str)
+def test_controlled_connection_port_policy(port, allowed):
+    assert ControlledConnectionMixin().is_port_allowed(port) is allowed
+
+
+@pytest.mark.parametrize('ip, allowed', [
+    ('8.8.8.8', True),
+    ('10.0.0.1', False),
+    ('172.16.0.1', False),
+    ('169.254.169.254', False),  # cloud metadata endpoint
+    ('100.64.0.1', False),
+    ('0.0.0.0', False),
+    ('224.0.0.1', False),
+], ids=str)
+def test_controlled_connection_ip_policy(ip, allowed):
+    assert ControlledConnectionMixin().is_ip_allowed(ip) is allowed
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_read_url_blocks_a_disallowed_port():
+    with monkey_patch_controlled_conn():
+        with pytest.raises(URLError):
+            read_url('http://example.com:22', max_length=1000)
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_read_url_accepts_content_exactly_at_the_limit():
+    with monkey_patch_controlled_conn():
+        httpretty.register_uri(httpretty.GET, 'http://example.com', body='x' * 1000)
+        assert len(read_url('http://example.com', max_length=1000).getvalue()) == 1000
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_read_url_rejects_a_declared_content_length_over_the_limit():
+    with monkey_patch_controlled_conn():
+        httpretty.register_uri(httpretty.GET, 'http://example.com', body='x' * 2000)
+        with pytest.raises(ContentTooLongError, match='Content-Length'):
+            read_url('http://example.com', max_length=1000)
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_read_url_writes_into_a_given_buffer():
+    from io import BytesIO
+
+    with monkey_patch_controlled_conn():
+        httpretty.register_uri(httpretty.GET, 'http://example.com', body='hello')
+        buffer = BytesIO()
+        assert read_url('http://example.com', max_length=1000, buffer=buffer) is buffer
+        assert buffer.getvalue() == b'hello'
+
+
+@httpretty.activate(allow_net_connect=False)
+def test_read_url_rewrites_to_direct_downloads_only_when_asked():
+    with monkey_patch_controlled_conn():
+        httpretty.register_uri(
+            httpretty.GET, 'https://onlinelibrary.wiley.com/doi/epdf/10.1/x', body='viewer')
+        httpretty.register_uri(
+            httpretty.GET, 'https://onlinelibrary.wiley.com/doi/pdfdirect/10.1/x', body='pdf')
+
+        url = 'https://onlinelibrary.wiley.com/doi/epdf/10.1/x'
+        assert read_url(url, max_length=1000).getvalue() == b'viewer'
+        assert read_url(url, max_length=1000, prefer_direct_downloads=True).getvalue() == b'pdf'
