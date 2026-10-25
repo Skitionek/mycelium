@@ -62,14 +62,14 @@ export function compileFind(terms: string[], options: FindOptions = {}): Matcher
   if (options.keepSearchSpecialChars) {
     termPatterns = terms.map(term => {
       const pat = escapeRegExp(term)
-        .replace(' ', ' +')
+        .replace(/ /g, ' +')
         .replace(/(\\\*)/g, '\\w*')
         .replace(/(\\\?)/g, '\\w?');
       return wrapper + pat + wrapper;
     });
   } else {
     termPatterns = terms.map(
-      term => wrapper + escapeRegExp(term).replace(' ', ' +') + wrapper
+      term => wrapper + escapeRegExp(term).replace(/ /g, ' +') + wrapper
     );
   }
 
