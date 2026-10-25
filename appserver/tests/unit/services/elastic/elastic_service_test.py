@@ -16,8 +16,22 @@ def make_service() -> SearchIndexService:
 def test_pre_process_query_inserts_and_between_unstacked_terms():
     service = make_service()
 
-    assert service._pre_process_query('alpha beta') == 'alpha and beta'
-    assert service._pre_process_query('"alpha beta" gamma') == '"alpha beta" and gamma'
+    assert service._pre_process_query('alpha beta') == 'alpha AND beta'
+    assert service._pre_process_query('"alpha beta" gamma') == '"alpha beta" AND gamma'
+
+
+def test_pre_process_query_writes_operators_the_way_solr_reads_them():
+    """Solr takes only upper case AND/OR/NOT as operators.
+
+    A lower case one is just one more word to look for, so 'alpha beta' found
+    every file with either word and 'alpha not beta' did not leave out a thing.
+    """
+    service = make_service()
+
+    assert service._pre_process_query('alpha and beta') == 'alpha AND beta'
+    assert service._pre_process_query('alpha not beta') == 'alpha AND NOT beta'
+    assert service._pre_process_query('not alpha or beta') == 'NOT alpha OR beta'
+    assert service._pre_process_query('"alpha and beta" or gamma') == '"alpha and beta" OR gamma'
 
 
 def test_pre_process_query_rejects_malformed_operator_sequence():
@@ -112,7 +126,7 @@ def test_search_builds_solr_request_and_maps_results(monkeypatch):
     assert captured['url'] == 'http://solr.example/solr/files/select'
 
     params = captured['kwargs']['params']
-    assert ('q', 'foo and bar') in params
+    assert ('q', 'foo AND bar') in params
     assert ('qf', 'description_txt^1 data_content_txt^1 filename_txt^3') in params
     assert ('start', 2) in params
     assert ('rows', 5) in params
