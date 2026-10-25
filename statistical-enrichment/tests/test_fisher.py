@@ -1,4 +1,5 @@
 import json
+import pytest
 
 import pandas as pd
 
@@ -112,3 +113,67 @@ def test_fisher_results_sorted_by_p_value():
 
     p_values = [r["p-value"] for r in result]
     assert p_values == sorted(p_values)
+
+
+def test_fisher_p_matches_scipy_fisher_exact():
+    """fisher_p is the one-sided Fisher's exact test, computed via hypergeom."""
+    from scipy.stats import fisher_exact
+
+    for k, M, n, N in [(2, 10, 4, 3), (0, 50, 5, 5), (5, 100, 5, 5), (3, 20, 10, 6)]:
+        table = [[k, n - k], [N - k, M - n - N + k]]
+        expected = fisher_exact(table, alternative="greater")[1]
+        assert fisher_p(k, M, n, N) == pytest.approx(expected)
+
+
+def test_fisher_ignores_submitted_genes_outside_every_term():
+    """A submitted gene no term mentions is outside the background universe.
+
+    Counting it as drawn would ask for more draws than the universe holds,
+    which turns every p-value into NaN (``null`` in the JSON).
+    """
+    go_terms = [
+        {"goId": "G1", "goTerm": "t", "goLabel": [], "geneNames": ["A", "B", "Y"]},
+        {"goId": "G2", "goTerm": "u", "goLabel": [], "geneNames": ["B", "X", "Z"]},
+    ]
+
+    with_strangers = json.loads(
+        fisher(["A", "B", "C", "D", "E", "F"], go_terms, related_go_terms_count=10)
+    )
+    without = json.loads(fisher(["A", "B"], go_terms, related_go_terms_count=10))
+
+    assert with_strangers == without
+    for row in with_strangers:
+        assert row["p-value"] is not None
+        assert row["q-value"] is not None
+
+
+def test_fisher_reports_matching_genes_in_submitted_order():
+    go_terms = [
+        {"goId": "G1", "goTerm": "t", "goLabel": [], "geneNames": ["Z", "C", "A", "B"]},
+    ]
+
+    result = json.loads(fisher(["B", "A", "C", "B"], go_terms, related_go_terms_count=1))
+
+    assert result[0]["geneNames"] == ["B", "A", "C"]
+
+
+def test_fisher_counts_duplicate_submitted_genes_once():
+    go_terms = [
+        {"goId": "G1", "goTerm": "t", "goLabel": [], "geneNames": ["A", "B", "C"]},
+        {"goId": "G2", "goTerm": "u", "goLabel": [], "geneNames": ["D", "E", "F"]},
+    ]
+
+    once = json.loads(fisher(["A", "B"], go_terms, related_go_terms_count=2))
+    twice = json.loads(fisher(["A", "A", "B", "B"], go_terms, related_go_terms_count=2))
+
+    assert once == twice
+
+
+def test_add_q_value_tolerates_a_term_count_below_the_rows():
+    """The organism-wide term count is approximate and may undercount."""
+    df = pd.DataFrame({"p-value": [0.01, 0.05, 0.10]})
+
+    add_q_value(df, related_go_terms_count=2)
+
+    assert len(df) == 3
+    assert df["q-value"].notna().all()

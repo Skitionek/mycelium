@@ -1,3 +1,4 @@
+import json
 import os
 from typing import List
 
@@ -90,6 +91,8 @@ class EnrichmentVisualisationService:
         return redis_cached(
             f"get_go_terms_{organism}_{','.join(gene_names)}",
             lambda: self.query_go_term(organism.id, gene_names),
+            load=json.loads,
+            dump=json.dumps,
         )
 
     def query_go_term_count(self, organism_id):
@@ -132,5 +135,7 @@ class EnrichmentVisualisationService:
 
     def get_go_term_count(self, organism):
         return redis_cached(
-            f"go_term_count_{organism}", lambda: self.query_go_term_count(organism.id)
+            f"go_term_count_{organism}",
+            lambda: self.query_go_term_count(organism.id),
+            load=int,
         )
