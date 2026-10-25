@@ -1,5 +1,6 @@
 import pytest
 
+from neo4japp.exceptions import AnnotationError
 from neo4japp.services.annotations.constants import EntityType
 from neo4japp.services.annotations.utils.graph_queries import (
     get_delete_global_inclusion_query,
@@ -95,3 +96,14 @@ def test_removing_every_global_inclusion_at_once_unlabels_the_synonym(
 
     assert labels_of(graph, ids['s']) == {'Synonym'}
 
+
+def test_failing_label_cleanup_raises_annotation_error(
+    graph, get_manual_annotation_service, monkeypatch
+):
+    def fail(*args, **kwargs):
+        raise Exception('graph error')
+
+    monkeypatch.setattr(get_manual_annotation_service.graph, 'exec_read_query_with_params', fail)
+
+    with pytest.raises(AnnotationError):
+        get_manual_annotation_service.remove_global_inclusions([(1, 2)])
