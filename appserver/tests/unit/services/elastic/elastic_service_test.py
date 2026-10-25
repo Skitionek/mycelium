@@ -1,4 +1,5 @@
 import pytest
+from flask import Flask
 
 from neo4japp.exceptions import ServerException
 from neo4japp.services.elastic.elastic_service import SearchIndexService
@@ -32,6 +33,37 @@ def test_pre_process_query_writes_operators_the_way_solr_reads_them():
     assert service._pre_process_query('alpha not beta') == 'alpha AND NOT beta'
     assert service._pre_process_query('not alpha or beta') == 'NOT alpha OR beta'
     assert service._pre_process_query('"alpha and beta" or gamma') == '"alpha and beta" OR gamma'
+
+
+@pytest.fixture
+def app_context():
+    # The file type service is kept on flask.g
+    with Flask(__name__).app_context():
+        yield
+
+
+def test_pre_process_query_matches_type_terms_on_the_mime_type(app_context):
+    """Search by file type adds type:<shorthand> terms, but the index has no type field.
+
+    Solr looked for the text 'type:pdf' instead, so picking a type found nothing.
+    """
+    service = make_service()
+
+    assert service._pre_process_query('tp53 (type:pdf OR type:map)') == (
+        'tp53 AND (mime_type_s:"application/pdf" OR mime_type_s:"vnd.mycelium.document/map")'
+    )
+    assert service._pre_process_query('type:enrichment-table') == (
+        'mime_type_s:"vnd.mycelium.document/enrichment-table"'
+    )
+    assert service._pre_process_query('tp53 not type:pdf') == (
+        'tp53 AND NOT mime_type_s:"application/pdf"'
+    )
+
+
+def test_pre_process_query_keeps_a_quoted_type_term_as_text(app_context):
+    service = make_service()
+
+    assert service._pre_process_query('"type:pdf" tp53') == '"type:pdf" AND tp53'
 
 
 def test_pre_process_query_rejects_malformed_operator_sequence():
