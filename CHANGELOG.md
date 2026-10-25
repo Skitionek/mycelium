@@ -166,6 +166,9 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Admin user list**: the user browser lists users again. `GET /accounts` built its query with `select([...])`, which SQLAlchemy 2 rejects, so listing users, or getting one, answered 500 ([#763]).
 - **Creating and updating users as an admin**: the user browser's dialogs send the picked role as a list, as the accounts API takes, instead of a string it rejected with "Not a valid list". Creating a user no longer answers 500 after saving it: JSON responses serialize dates again ([#763]).
 - **Database test isolation**: each database test's writes are rolled back. Its session ran on the app's engine instead of the fixture's connection, so rows leaked into the tests after it; the three test files CI left out for this run again ([#763]).
+- **Pasting map nodes**: copied nodes are pasted as they were laid out, around the cursor, with the edges between them. Every node was pasted on the cursor, on top of each other, and the edges were dropped ([#768]).
+- **Office documents that fail to convert**: opening a stored document LibreOffice can't convert, or while LibreOffice is unavailable, answers with what went wrong (422 or 503) instead of a server error ([#768]).
+- **Enrichment table CSV export**: text starting with `=`, `+`, `-`, `@` or a tab, such as an imported gene name `=HYPERLINK(...)`, is exported as text a spreadsheet won't run as a formula ([#768]).
 - **Graph search filters**: the organism picked for a graph search is applied. Reading the search back from the URL dropped it, and turned no domains into one domain named `""`, which left literature data out of the results. A content search without folders no longer comes back with one folder named `""` ([#766]).
 - **Passwords in connection URLs**: a Redis password with `/`, `?` or `#`, as Azure access keys often have, no longer stops the appserver, cache invalidator and statistical-enrichment on start, and a PostgreSQL password with `@` no longer sends the appserver to the wrong host. A Neo4j password may contain `/` ([#766]).
 - **`flask load-lmdb` and `flask upload-lmdb`**: both start again. The LMDB manager built its database URL in a way SQLAlchemy 2 rejects, which also kept the API pod from starting when the Helm chart loads LMDB files ([#766]).
@@ -347,6 +350,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
 [#766]: https://github.com/Skitionek/mycelium/pull/766
+[#768]: https://github.com/Skitionek/mycelium/pull/768
 [#764]: https://github.com/Skitionek/mycelium/pull/764
 [#763]: https://github.com/Skitionek/mycelium/pull/763
 [#760]: https://github.com/Skitionek/mycelium/pull/760
