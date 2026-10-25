@@ -1,6 +1,7 @@
 import pytest
 import os
 
+from flask_sqlalchemy.session import Session as FlaskSession
 from neo4j import GraphDatabase, Session, Transaction, basic_auth
 from neo4j.graph import Node, Relationship
 from pathlib import Path
@@ -53,21 +54,30 @@ def app(request):
 
 @pytest.fixture(scope='function')
 def session(app, request):
-    """ Creates a new database session """
+    """ Creates a new database session, whose changes are all rolled back after the test """
     connection = db.engine.connect()
     transaction = connection.begin()
-    options = {'bind': connection, 'binds': {}}
-    if hasattr(db, 'create_scoped_session'):
-        session = db.create_scoped_session(options=options)
-    else:
-        # Flask-SQLAlchemy >=3 removed create_scoped_session.
-        session = db._make_scoped_session(options=options)
+
+    class TestSession(FlaskSession):
+        def get_bind(self, *args, **kwargs):
+            # Flask-SQLAlchemy's get_bind picks the app's engine over the session's
+            # bind, so every query ran outside the transaction rolled back below
+            return connection
+
+    session = db._make_scoped_session(options={
+        'bind': connection,
+        'binds': {},
+        'class_': TestSession,
+        # A commit or rollback in the code under test ends a savepoint, not the
+        # transaction rolled back below
+        'join_transaction_mode': 'create_savepoint',
+    })
     db.session = session
 
     def teardown():
+        session.remove()
         transaction.rollback()
         connection.close()
-        session.remove()
         reset_dao()
 
     request.addfinalizer(teardown)
