@@ -264,14 +264,15 @@ class ManualAnnotationService:
                         'we are working on a solution. Please try again later.',
                 code=500)
 
+        # the statement logged if one fails below
+        query = get_node_labels_and_relationship_query()
+        params = {'node_ids': [gid for gid, _ in inclusion_ids]}
         try:
             # we need to do some cleaning up
             # a global could've been added with the wrong entity type
             # so we need to remove those bad labels to prevent
             # incorrect results coming back as synonyms
-            results = self.graph.exec_read_query_with_params(
-                get_node_labels_and_relationship_query(),
-                {'node_ids': [gid for gid, _ in inclusion_ids]})
+            results = self.graph.exec_read_query_with_params(query, params)
 
             for result in results:
                 mismatch = set(result['node_labels']) - set(result['rel_entity_types'])
@@ -304,15 +305,14 @@ class ManualAnnotationService:
                         elif label == 'Taxonomy':
                             s += ':Taxonomy'
                 if s:
-                    self.graph.exec_write_query_with_params(
-                        query_builder(['MATCH (n) WHERE id(n) = $node_id', f'REMOVE n{s}']),
-                        {'node_id': result['node_id']})
+                    query = query_builder(['MATCH (n) WHERE id(n) = $node_id', f'REMOVE n{s}'])
+                    params = {'node_id': result['node_id']}
+                    self.graph.exec_write_query_with_params(query, params)
         except (BrokenPipeError, ServiceUnavailable):
             raise
         except Exception:
             current_app.logger.error(
-                f'Failed executing cypher: {query_builder(["MATCH (n) WHERE id(n) = $node_id", f"REMOVE n{s}"])}.\n' +  # noqa
-                f'PARAMETERS: <node_id: {result["node_id"]}>.',
+                f'Failed executing cypher: {query}.\nPARAMETERS: {params}.',
                 extra=EventLog(event_type=LogEventType.ANNOTATION.value).to_dict()
             )
             raise AnnotationError(
