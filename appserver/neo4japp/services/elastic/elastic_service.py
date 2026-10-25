@@ -375,7 +375,8 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
             return self._normalize_bool(value)
         if isinstance(value, (int, float)):
             return str(value)
-        value = str(value).replace('"', '\\"')
+        # Escape the escape character first, or a value ending in \ escapes the closing quote
+        value = str(value).replace('\\', '\\\\').replace('"', '\\"')
         return f'"{value}"'
 
     def _convert_filter_clause(self, clause: dict) -> str:
