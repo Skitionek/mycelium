@@ -5,10 +5,11 @@ import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType } from '@angula
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subscription, throwError, from, defer } from 'rxjs';
-import { catchError, filter, map, tap } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, tap } from 'rxjs/operators';
 
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
 import { ApiService } from 'app/shared/services/api.service';
+import { OfficeConverterService } from 'app/shared/services/office-converter.service';
 import { objectToMixedFormData } from 'app/shared/utils/forms';
 import { serializePaginatedParams } from 'app/shared/utils/params';
 import {
@@ -19,7 +20,9 @@ import {
 } from 'app/shared/schemas/common';
 import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
 import { PdfFile } from 'app/interfaces/pdf-files.interface';
+import { MimeTypes } from 'app/shared/constants';
 import { isLocalHashId } from 'app/local-filesystem/local-ids';
+import { withMimeTypeExtension } from 'app/local-filesystem/mime';
 import { unsupportedError } from 'app/local-filesystem/local-folder-errors';
 import { LocalFilesystemService } from 'app/local-filesystem/services/local-filesystem.service';
 
@@ -62,7 +65,8 @@ export class FilesystemService {
               protected readonly http: HttpClient,
               protected readonly apiService: ApiService,
               protected readonly recentFilesService: RecentFilesService,
-              protected readonly localFilesystem: LocalFilesystemService) {
+              protected readonly localFilesystem: LocalFilesystemService,
+              protected readonly officeConverter: OfficeConverterService) {
     this.getLMDBsDates().subscribe(lmdbsDates => {
       this.lmdbsDates.next(lmdbsDates);
     });
@@ -143,19 +147,40 @@ export class FilesystemService {
   }
 
   /**
-   * Fetches the file's content as PDF, converting it on the fly via LibreOffice on the server
-   * if the file is not already a PDF. Files that are already PDFs are returned unchanged.
+   * Fetches the file's content as PDF, converting it on the fly with LibreOffice if the file
+   * is not already a PDF: in the browser where it can run (see {@link OfficeConverterService}),
+   * otherwise on the server. Files that are already PDFs are returned unchanged.
    * @param hashId - hash ID of the file to retrieve as PDF
    */
   getContentAsPdf(hashId: string): Observable<Blob> {
     if (isLocalHashId(hashId)) {
       return this.localFilesystem.getContentAsPdf(hashId);
     }
-    return this.http.get(
+    const convertedOnServer$ = this.http.get(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/content/pdf`, {
         ...this.apiService.getHttpOptions(true),
         responseType: 'blob',
       },
+    );
+    if (!this.officeConverter.available) {
+      return convertedOnServer$;
+    }
+    return this.get(hashId, false).pipe(
+      mergeMap(object => {
+        if (object.mimeType === MimeTypes.Pdf || !object.isLibreOfficeConvertible) {
+          // The server sends PDFs as they are, and explains why anything else cannot be shown
+          return convertedOnServer$;
+        }
+        return this.getContent(hashId).pipe(
+          mergeMap(content => this.officeConverter.toPdf(
+            content, withMimeTypeExtension(object.filename, object.mimeType)).pipe(
+            catchError(error => {
+              console.warn(`Converting "${object.filename}" in the browser failed, converting it on the server`, error);
+              return convertedOnServer$;
+            }),
+          )),
+        );
+      }),
     );
   }
 

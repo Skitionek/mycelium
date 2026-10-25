@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "postinstall": "node tools/unpack-office-converter.js",
     "start": "ng serve",
     "dev-start": "ng serve --host=0.0.0.0 --disable-host-check --proxy-config=proxy.conf.js",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build",
@@ -79,6 +80,7 @@
     "plotly.js-dist-min": "4.1.2",
     "route-with-dynamic-outlets": "^1.0.0",
     "rxjs": "~7.5.0",
+    "serverless-office-converter": "git+https://github.com/Skitionek/serverless-office-converter.git#cd6c4a13e67f5b03063bc8094c5406b1d7efe1d5",
     "tachyons": "4.12.0",
     "tslib": "^2.3.0",
     "vis-data": "8.0.5",

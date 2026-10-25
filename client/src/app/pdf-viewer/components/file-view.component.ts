@@ -143,8 +143,8 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     this.loadTask = new BackgroundTask(([hashId, loc]) => {
       return combineLatest(
         this.filesystemService.get(hashId),
-        // Use the /content/pdf endpoint so non-PDF files are converted server-side
-        // before the PDF viewer receives them.
+        // Non-PDF files are converted (in the browser where possible) before the PDF
+        // viewer receives them.
         this.filesystemService.getContentAsPdf(hashId).pipe(
           mapBlobToBuffer(),
         ),
