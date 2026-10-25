@@ -145,12 +145,16 @@ export class CollectionModel<T> {
     const added = new Set<T>();
     const removed = new Set<T>();
 
+    if (!this.multipleSelection) {
+      // Only one item can stay selected, so the others never were
+      items = items.slice(-1);
+    }
+
     for (const item of items) {
       if (!this._selection.has(item)) {
         if (!this.multipleSelection) {
           for (const existingItem of this._selection) {
             removed.add(existingItem);
-            added.delete(existingItem);
           }
           this._selection.clear();
         }
@@ -230,7 +234,7 @@ export class CollectionModel<T> {
   }
 
   isAllSelected(): boolean {
-    return this._selection.size === this._items.size;
+    return this._items.size > 0 && this._selection.size === this._items.size;
   }
 
   isSelected(item: T) {
