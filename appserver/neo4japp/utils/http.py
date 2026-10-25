@@ -11,9 +11,12 @@ def make_cacheable_file_response(request, content, etag: str, filename: str, mim
     """
     # Handle ETag cache response
     if request.if_none_match and etag in request.if_none_match:
-        return '', 304
+        return '', 304, {'ETag': f'"{etag}"'}
     else:
-        fallback_filename = filename.encode('ascii', errors='ignore').decode('ascii')
+        # The fallback is a quoted-string, in which quotes and backslashes
+        # must be escaped or the header ends early
+        fallback_filename = filename.encode('ascii', errors='ignore').decode('ascii') \
+            .replace('\\', '\\\\').replace('"', '\\"')
         quoted_filename = quote(filename)
         response = make_response(content)
         response.headers['Cache-Control'] = 'no-cache, max-age=0'
