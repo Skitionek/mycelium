@@ -3,6 +3,8 @@ documentation.json
 
 # compiled output
 /dist
+# fetched by tools/fetch-office-converter.js
+/vendor/office-converter
 /tmp
 /out-tsc
 # Only exists if Bazel was run

@@ -4,8 +4,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "prestart": "node tools/fetch-office-converter.js",
     "dev-start": "ng serve --host=0.0.0.0 --disable-host-check --proxy-config=proxy.conf.js",
+    "predev-start": "node tools/fetch-office-converter.js",
     "build": "node --max_old_space_size=4096 ./node_modules/@angular/cli/bin/ng build",
+    "prebuild": "node tools/fetch-office-converter.js",
     "test": "ng test --watch=false --progress=false --browsers=ChromeCustom",
     "test:codespace": "npx -y @puppeteer/browsers install chrome@stable --path ~/.cache/puppeteer >/dev/null && NODE_OPTIONS=--openssl-legacy-provider ng test --watch=false --progress=false --browsers=ChromeCustom",
     "test:codespace:watch": "npx -y @puppeteer/browsers install chrome@stable --path ~/.cache/puppeteer >/dev/null && NODE_OPTIONS=--openssl-legacy-provider ng test --watch=true --progress=false --browsers=ChromeCustom",
