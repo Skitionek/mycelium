@@ -94,7 +94,7 @@ def graph(request, app) -> Session:
     scheme = os.getenv('NEO4J_SCHEME', 'bolt')
     port = os.getenv('NEO4J_PORT', '7687')
     url = f'{scheme}://{host}:{port}'
-    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
     driver = GraphDatabase.driver(url, auth=basic_auth(username, password))
 
     graph = driver.session()
@@ -115,7 +115,7 @@ def graph_driver(request, app):
     scheme = os.getenv('NEO4J_SCHEME', 'bolt')
     port = os.getenv('NEO4J_PORT', '7687')
     url = f'{scheme}://{host}:{port}'
-    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
     return GraphDatabase.driver(url, auth=basic_auth(username, password))
 
 

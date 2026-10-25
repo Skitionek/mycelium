@@ -220,14 +220,14 @@ class LMDBManager:
         POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', 'postgres')
         POSTGRES_DB = os.environ.get('POSTGRES_DB', 'postgres')
         engine = sqlalchemy.create_engine(
-            sqlalchemy.engine.url.URL(
-                        drivername='postgres+psycopg2',
-                        username=POSTGRES_USER,
-                        password=POSTGRES_PASSWORD,
-                        host=POSTGRES_HOST,
-                        port=POSTGRES_PORT,
-                        database=POSTGRES_DB,
-                    )
+            sqlalchemy.engine.URL.create(
+                drivername='postgresql+psycopg2',
+                username=POSTGRES_USER,
+                password=POSTGRES_PASSWORD,
+                host=POSTGRES_HOST,
+                port=POSTGRES_PORT,
+                database=POSTGRES_DB,
+            )
         )
         Session = sessionmaker(bind=engine)
         session = Session()

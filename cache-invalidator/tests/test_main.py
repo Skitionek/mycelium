@@ -331,3 +331,23 @@ def test_main_resets_backoff_after_a_successful_round(main_module):
         module.SUCCESSFUL_SLEEP_TIME,
         initial,
     ]
+
+
+# ---------------------------------------------------------------------------
+# connection settings
+# ---------------------------------------------------------------------------
+
+
+def test_redis_connection_keeps_a_password_with_url_characters(monkeypatch):
+    """Azure's access keys contain characters that mean something in a URL."""
+    password = "p@ss/w#r?d%41+="
+    monkeypatch.setenv("REDIS_PASSWORD", password)
+    monkeypatch.setenv("REDIS_HOST", "cache.example")
+
+    with patch("neo4j.GraphDatabase.driver", return_value=MagicMock()):
+        sys.modules.pop("main", None)
+        module = importlib.import_module("main")
+    sys.modules.pop("main", None)
+
+    settings = module.redis_server.connection_pool.connection_kwargs
+    assert (settings["host"], settings["password"]) == ("cache.example", password)

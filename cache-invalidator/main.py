@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from collections import defaultdict
+from urllib.parse import quote
 
 import redis
 from neo4j import GraphDatabase, basic_auth
@@ -35,7 +36,9 @@ logger = logging.getLogger('cache-invalidator')
 
 # Redis connection
 redis_schema = 'rediss' if REDIS_SSL in ['true', '1'] else 'redis'
-redis_url = f'{redis_schema}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+# Escaped, or a character such as / in a password would end it early
+redis_password = quote(REDIS_PASSWORD, safe='')
+redis_url = f'{redis_schema}://:{redis_password}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 redis_server = redis.Redis(
     connection_pool=redis.BlockingConnectionPool.from_url(redis_url)
 )
