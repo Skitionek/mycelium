@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tempfile
 from io import BytesIO, BufferedIOBase
+from pathlib import Path
 from typing import Optional
 
 
@@ -79,10 +80,14 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
         with open(src_path, 'wb') as fh:
             fh.write(content)
 
-        # Run conversion; output PDF lands in the same temp directory.
+        # Run conversion; output PDF lands in the same temp directory. Each run gets
+        # its own profile: runs sharing one collide, and all but the first exit
+        # without converting anything.
+        profile = Path(tmpdir, 'profile').as_uri()
         subprocess.run(
             [
                 soffice,
+                f'-env:UserInstallation={profile}',
                 '--headless',
                 '--norestore',
                 '--nofirststartwizard',
