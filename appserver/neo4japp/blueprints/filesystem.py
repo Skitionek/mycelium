@@ -1076,6 +1076,24 @@ class FileContentView(FilesystemBaseView):
         )
 
 
+def convert_document_to_pdf(content: bytes, mime_type: str, filename: str) -> bytes:
+    """Convert a document with LibreOffice, answering a failure as a client or server error."""
+    try:
+        return convert_to_pdf(content, mime_type).read()
+    except RuntimeError as e:
+        raise ServerException(
+            title='Conversion Unavailable',
+            message=str(e),
+            code=503,
+        )
+    except (ConversionFailedError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        raise ServerException(
+            title='Conversion Failed',
+            message=f"'{filename}' could not be converted to PDF.",
+            code=422,
+        )
+
+
 class FileContentPdfView(FilesystemBaseView):
     """Serve a file's content as PDF, converting on-the-fly via LibreOffice if needed."""
 
@@ -1113,8 +1131,7 @@ class FileContentPdfView(FilesystemBaseView):
                 code=415,
             )
 
-        pdf_buffer = convert_to_pdf(raw, file.mime_type)
-        pdf_bytes = pdf_buffer.read()
+        pdf_bytes = convert_document_to_pdf(raw, file.mime_type, file.filename)
         # Hash the actual PDF output for a reliable ETag that reflects conversion output.
         pdf_etag = hashlib.sha256(pdf_bytes).hexdigest()
 
@@ -1158,20 +1175,7 @@ class PdfConversionView(MethodView):
                 code=415,
             )
 
-        try:
-            pdf_bytes = convert_to_pdf(content, mime_type).read()
-        except RuntimeError as e:
-            raise ServerException(
-                title='Conversion Unavailable',
-                message=str(e),
-                code=503,
-            )
-        except (ConversionFailedError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            raise ServerException(
-                title='Conversion Failed',
-                message=f"'{filename}' could not be converted to PDF.",
-                code=422,
-            )
+        pdf_bytes = convert_document_to_pdf(content, mime_type, filename)
         return self._pdf_response(pdf_bytes, pdf_filename)
 
     @staticmethod

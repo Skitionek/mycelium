@@ -5,6 +5,7 @@ files are never stored, so they are annotated and converted to PDF on request, s
 import io
 import json
 import shutil
+import subprocess
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -13,7 +14,7 @@ from flask import Flask, g
 
 from neo4japp.blueprints import annotations as annotations_blueprint
 from neo4japp.blueprints.auth import auth
-from neo4japp.blueprints.filesystem import bp as filesystem_bp
+from neo4japp.blueprints.filesystem import FilesystemBaseView, bp as filesystem_bp
 from neo4japp.factory import register_error_handlers
 from neo4japp.services import transient_files
 from neo4japp.services.annotations import transient_annotation
@@ -359,6 +360,42 @@ def test_conversion_reports_an_unconvertible_document(client, logged_in):
             '/filesystem/convert/pdf', data=upload(b'PK\x03\x04', 'a.docx'), headers=AUTH)
 
     assert response.status_code == 422
+    assert b'/tmp/' not in response.data
+
+
+@pytest.fixture
+def stored_docx():
+    """A Word document stored in Mycelium, which the user may read."""
+    file = SimpleNamespace(
+        filename='Report v2.docx', mime_type=DOCX, content=SimpleNamespace(raw_file=b'PK\x03\x04'))
+    with patch.object(FilesystemBaseView, 'get_nondeleted_recycled_file', return_value=file), \
+            patch.object(FilesystemBaseView, 'check_file_permissions'):
+        yield file
+
+
+def test_stored_document_is_served_as_pdf(client, logged_in, stored_docx):
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf',
+               return_value=io.BytesIO(b'%PDF-converted')) as convert:
+        response = client.get('/filesystem/objects/abc/content/pdf', headers=AUTH)
+
+    assert response.status_code == 200
+    assert response.data == b'%PDF-converted'
+    assert 'Report v2.pdf' in response.headers['Content-Disposition']
+    convert.assert_called_once_with(b'PK\x03\x04', DOCX)
+
+
+@pytest.mark.parametrize('error, status_code', [
+    (RuntimeError('LibreOffice is not installed'), 503),
+    (ConversionFailedError('no PDF in /tmp/mycelium_lo_x'), 422),
+    (subprocess.CalledProcessError(1, ['soffice', '/tmp/mycelium_lo_x/input.docx']), 422),
+    (subprocess.TimeoutExpired(['soffice', '/tmp/mycelium_lo_x/input.docx'], 120), 422),
+])
+def test_stored_document_conversion_reports_errors(
+        client, logged_in, stored_docx, error, status_code):
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf', side_effect=error):
+        response = client.get('/filesystem/objects/abc/content/pdf', headers=AUTH)
+
+    assert response.status_code == status_code
     assert b'/tmp/' not in response.data
 
 

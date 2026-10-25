@@ -48,6 +48,11 @@ export class TableCSVExporter {
     } else {
       value = String(value);
     }
+    // A spreadsheet runs text starting with one of these as a formula, such as a
+    // gene name imported as =HYPERLINK(...); a leading ' keeps it text
+    if (/^[=+\-@\t\r]/.test(value) && !/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(value)) {
+      value = '\'' + value;
+    }
     value = value.replace(/"/g, '""');
     if (value.search(/[",\r\n]/) >= 0) {
       value = '"' + value + '"';
