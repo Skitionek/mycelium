@@ -171,10 +171,17 @@ class TokenService:
 
     def decode_token(self, token: str) -> JWTResp:
         try:
-            payload = jwt.decode(token, self.app_secret, algorithms=[self.algorithm])
+            payload = jwt.decode(
+                token, self.app_secret, algorithms=[self.algorithm],
+                options={'require': ['sub', 'iat', 'exp', 'type']})
             jwt_resp: JWTResp = {
                 'sub': payload['sub'], 'iat': payload['iat'], 'exp': payload['exp'],
                 'type': payload['type']}
+        # ExpiredSignatureError is an InvalidTokenError, so it is caught first
+        except ExpiredSignatureError:
+            raise JWTTokenException(
+                title='Failed to Authenticate',
+                message='The current authentication session has expired, please try logging back in.')  # noqa
         # default to generic error message
         # NOTE: is this better than avoiding to
         # display an error message about
@@ -183,10 +190,6 @@ class TokenService:
             raise JWTTokenException(
                 title='Failed to Authenticate',
                 message='The current authentication session is invalid, please try logging back in.')  # noqa
-        except ExpiredSignatureError:
-            raise JWTTokenException(
-                title='Failed to Authenticate',
-                message='The current authentication session has expired, please try logging back in.')  # noqa
         else:
             return jwt_resp
 
@@ -233,7 +236,9 @@ def verify_token(token):
                     scope.set_tag('user_email', user.email)
                 return True
     else:
-        raise ServerException(
+        # A refresh or password reset token is a valid credential for something
+        # else, and no reason for a server error
+        raise JWTAuthTokenException(
             title='Failed to Authenticate',
             message='There was a problem authenticating, please try again.')
 
