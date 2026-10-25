@@ -114,6 +114,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 ### Security
 
 - **DOI lookups**: exporting a map no longer makes the server request the URL of any node source labelled DOI, which let a map's author have the server fetch internal addresses such as the cloud metadata endpoint. DOIs are only ever looked up on `doi.org`, over HTTPS, without following its redirect to the publisher, and every lookup has a timeout, so a `doi.org` that never answers no longer holds a PDF upload indefinitely ([#756]).
+- **Annotation list export**: text users typed into the global inclusion and exclusion lists, such as a comment starting with `=`, is written to the admin's Excel export as text instead of as a live formula ([#759]).
 - **`cryptography`** bumped from 46.0.6 → 46.0.7 to fix CVE-2026-39892 (buffer overflow via non-contiguous buffer, MEDIUM severity).
 - **CodeMirror 6 viewer** (`codemirror-viewer`): read-only code/text viewer powered by CodeMirror 6 with syntax highlighting for JSON, Python, JavaScript/TypeScript, XML/HTML, and Markdown; plain-text display for YAML, CSV, and other text types; accessible at `projects/:project_name/code/:file_id`.
 
@@ -144,6 +145,11 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Bootstrap 4 leftovers**: full-width buttons are full width again (login, map node and edge **Delete**, annotation filter **Show/Hide All**, the PDF annotation popups and others); `btn-block` no longer exists in Bootstrap 5, so they had shrunk to their label. The Sankey **Delete View** dialog gets a proper close button instead of a bare browser-styled "×", and the remaining `ml-*`, `rounded-left` and `jumbotron` classes use their Bootstrap 5 names ([#744]).
 - **Fieldset legends**: section labels such as "Annotation", "Additional Links" and "Enrichment Table Parameters" sit on their divider line again, with the fields starting below them. Bootstrap 5 floats every `legend`, so these labels had left the line and the first field of each section wrapped up beside them, out of line with the rest of the form ([#744]).
 - **Release tagging**: the release workflow now sets a tagger identity for its annotated tag. The first run to pass the gate failed at `git tag -a` with "Committer identity unknown", so still no release had been cut ([#744]).
+- **Map edge selection**: clicking an edge that rises to the right selects that edge, and clicking empty canvas across from it no longer selects it, nor wins over the edge actually under the pointer ([#759]).
+- **Enrichment table cells with `&` or `<`**: annotated cells such as "Na(+) & K(+)" show their text instead of an XML error message ([#759]).
+- **Enrichment tables without results**: re-annotating several files no longer fails for all of them when one table holds only its parameters; that file is reported as failed ([#759]).
+- **UniProt links from graph search**: a UniProt result dragged onto a map links to its protein page instead of a page that does not exist ([#759]).
+- **Links to folders and projects**: following a link to a folder opens or focuses that folder instead of whichever folder was open, and a link to an open project focuses its tab instead of opening another ([#759]).
 - **Dialog padding**: dialog headers had half the body's padding and footer buttons sat flush against the dialog edge. The modal overrides in `_variables.scss` are now set before Bootstrap's variables derive from them, and the footer button gap has a unit, which the footer's `calc()` padding needs to be valid ([#743]).
 - **Code viewer**: text and code files open again. `@codemirror/state` was bundled twice (6.5.2 pinned by `resolutions`, 6.7.6 required by `@codemirror/view`), so every editor failed with "Unrecognized extension value", and the editor was created before its container was rendered ([#679]).
 - **PDF.js worker and `Promise.withResolvers`**: the PDF.js worker is served with the app instead of from cdnjs, which has no `pdf.worker.min.js` for PDF.js 4 and later, and `Promise.withResolvers` is polyfilled because zone.js 0.13 replaces `Promise` without it. Without both, PDF.js 6 could not load any PDF; the PDF viewer also no longer calls the removed `_setScale` ([#679]).
@@ -321,6 +327,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#153]: https://github.com/Skitionek/mycelium/pull/153
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
+[#759]: https://github.com/Skitionek/mycelium/pull/759
 [#679]: https://github.com/Skitionek/mycelium/pull/679
 [#756]: https://github.com/Skitionek/mycelium/pull/756
 [#743]: https://github.com/Skitionek/mycelium/pull/743
