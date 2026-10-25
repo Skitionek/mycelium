@@ -162,7 +162,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Content search by file type**: picking file types limits the results to files of those types. The `type:` terms were sent to Solr as text to find in an index with no such field ([#760]).
 - **Content search in folders with a `\` in their name**: the folder's files are found, and a folder name ending in `\` no longer makes every search in it fail ([#760]).
 - **Office file icons**: files with an upper case extension, such as `REPORT.DOCX`, get the Word, Excel, PowerPoint or Cytoscape icon in the file browser and on maps ([#760]).
-- **Long map labels**: a node label with a word too long for the node, such as `TP53` in a narrowed node or a long number, no longer stops the map from drawing. A broken word gets no hyphen after its last piece, and a node sized to such a label is as wide as the label instead of 0 wide ([#760]).
+- **Long map labels**: a node label with a word too long for the node, such as `TP53` in a narrowed node or a long number, no longer stops the map from drawing. A broken word gets no hyphen after its last piece, and a node sized to such a label is as wide as the label instead of 0 wide. A piece that fills its line is drawn as text, not as a grey bar, when its hyphen comes out a hair wider ([#760], [#764]).
 - **Admin user list**: the user browser lists users again. `GET /accounts` built its query with `select([...])`, which SQLAlchemy 2 rejects, so listing users, or getting one, answered 500 ([#763]).
 - **Creating and updating users as an admin**: the user browser's dialogs send the picked role as a list, as the accounts API takes, instead of a string it rejected with "Not a valid list". Creating a user no longer answers 500 after saving it: JSON responses serialize dates again ([#763]).
 - **Database test isolation**: each database test's writes are rolled back. Its session ran on the app's engine instead of the fixture's connection, so rows leaked into the tests after it; the three test files CI left out for this run again ([#763]).
@@ -347,6 +347,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 [#154]: https://github.com/Skitionek/mycelium/pull/154
 [#155]: https://github.com/Skitionek/mycelium/pull/155
 [#766]: https://github.com/Skitionek/mycelium/pull/766
+[#764]: https://github.com/Skitionek/mycelium/pull/764
 [#763]: https://github.com/Skitionek/mycelium/pull/763
 [#760]: https://github.com/Skitionek/mycelium/pull/760
 [#759]: https://github.com/Skitionek/mycelium/pull/759
