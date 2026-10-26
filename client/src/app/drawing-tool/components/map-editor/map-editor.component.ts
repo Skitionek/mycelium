@@ -283,6 +283,12 @@ export class MapEditorComponent extends MapViewComponent<UniversalGraph | undefi
   }
 
   acquireLock() {
+    // The locator is assigned after ngOnInit has started the lock check, and
+    // asking for the locks of a missing file only raises an error dialog
+    if (this.locator == null) {
+      return;
+    }
+
     const monotonicNow = window.performance.now();
 
     if (monotonicNow - this.lastActivityTime > this.veryInactiveDuration) {

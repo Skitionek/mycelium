@@ -73,14 +73,14 @@
                     </ul>
                 </div>
                 <div class="meta">
-                    <span class="pmid"><a href="{{ pmid(doc)[1] }} ">{{ pmid(doc)[0] }}</a></span>
-                    <span class="authors">
+                    <span class="pmid" *ngIf="pmid(doc).length"><a href="{{ pmid(doc)[1] }} ">{{ pmid(doc)[0] }}</a></span>
+                    <span class="authors" *ngIf="authors(doc)">
                         <span>
                             {{ authors(doc) }}
                         </span>
                     </span>
-                    <span class="journal">{{ journal(doc) }}</span>
-                    <span class="year">{{ year(doc) }}</span>
+                    <span class="journal" *ngIf="journal(doc)">{{ journal(doc) }}</span>
+                    <span class="year" *ngIf="year(doc)">{{ year(doc) }}</span>
                 </div>
             </div>
         </div>

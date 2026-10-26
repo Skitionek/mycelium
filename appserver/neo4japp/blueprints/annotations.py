@@ -17,7 +17,7 @@ from flask import (
 )
 from flask.views import MethodView
 from json import JSONDecodeError
-from marshmallow import validate, fields
+from marshmallow import EXCLUDE, validate, fields
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List, Dict, Any
@@ -442,8 +442,9 @@ class FileAnnotationGeneCountsView(FileAnnotationCountsView):
 class FileAnnotationsGenerationView(FilesystemBaseView):
     decorators = [auth.login_required]
 
-    @use_args(lambda request: BulkFileRequestSchema())
-    @use_args(lambda request: AnnotationGenerationRequestSchema())
+    # Both schemas read the same JSON body, so each has to ignore the other's fields.
+    @use_args(lambda request: BulkFileRequestSchema(), unknown=EXCLUDE)
+    @use_args(lambda request: AnnotationGenerationRequestSchema(), unknown=EXCLUDE)
     def post(self, targets, params):
         """Generate annotations for one or more files."""
         current_user = g.current_user

@@ -359,6 +359,11 @@ export class PdfViewerComponent
 
   public updateSize() {
     const currentViewer = this.getCurrentViewer();
+    // pdf.js creates its pages some time after the document is attached and then fires
+    // pagesinit; scaling before that only logs an invalid pageNumber error
+    if (!currentViewer.pagesCount) {
+      return Promise.resolve();
+    }
     return this.internalPdf
       .getPage(currentViewer.currentPageNumber)
       .then((page: PDFPageProxy) => {
@@ -415,6 +420,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagechanging', e => {
@@ -496,6 +502,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagerendered', e => {

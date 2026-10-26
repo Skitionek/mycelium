@@ -53,7 +53,7 @@ export class AuthEffects {
       if (!cookie || outOfDate) {
         this.authService.eraseCookie('terms_of_service');
 
-        const modalRef = this.modalService.open(TermsOfServiceDialogComponent);
+        const modalRef = this.modalService.open(TermsOfServiceDialogComponent, {scrollable: true});
         modalRef.result.then(() => {
           const timeStamp = TERMS_OF_SERVICE.updateTimestamp;
 

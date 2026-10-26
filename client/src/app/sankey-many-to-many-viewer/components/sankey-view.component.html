@@ -143,9 +143,10 @@
                                 ngbDropdownItem>{{predefinedValueAccessor.value.description}}</button>
                     </div>
                 </div>
-                <label class="btn-primary flex-grow-0" ngbButtonLabel>
-                    <input type="checkbox" ngbButton [(ngModel)]="advancedPanel">Advanced
-                </label>
+                <input type="checkbox" class="btn-check" id="sankey-many-to-many-advanced-panel-toggle"
+                       [(ngModel)]="advancedPanel">
+                <label class="btn btn-primary flex-grow-0"
+                       for="sankey-many-to-many-advanced-panel-toggle">Advanced</label>
                 <div class="btn-group btn-group-toggle">
                     <app-sankey-search-control>
                     </app-sankey-search-control>

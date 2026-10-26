@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 })
 export class UnloadConfirmationGuard implements CanDeactivate<any> {
   canDeactivate(component): boolean | Observable<boolean> {
-    return !component.shouldConfirmUnload || !component.shouldConfirmUnload()
+    // Angular passes null when the route's outlet holds no component
+    return !component?.shouldConfirmUnload || !component.shouldConfirmUnload()
       || confirm('Leave page? Changes you made may not be saved.');
   }
 }

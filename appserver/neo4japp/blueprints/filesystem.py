@@ -997,8 +997,10 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            file_ids = [file_id for (file_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(file_ids))
             total = result.total
 
         elif params['type'] == 'linked':
@@ -1016,8 +1018,10 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            map_ids = [map_id for (map_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(map_ids))
             total = len(files)
 
         else:

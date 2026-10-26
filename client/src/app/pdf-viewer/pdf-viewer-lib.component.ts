@@ -1198,9 +1198,9 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   textLayerPortalOutlets: Map<number, DomPortalOutlet> = new Map();
 
-  createTextLayerPortalOutlet({pageNumber, textLayerDiv}: TextLayerBuilder) {
+  createTextLayerPortalOutlet({pageNumber, div}: TextLayerBuilder) {
     const portalOutlet = new DomPortalOutlet(
-      textLayerDiv,
+      div,
       this.cfr,
       this.appRef,
       this.injector

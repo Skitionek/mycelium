@@ -28,7 +28,7 @@ services:
 
   ## PDF parsing service
   pdfparser:
-    image: lifelike.azurecr.io/kg-pdfparser:${PDFPARSER_IMAGE_TAG:-latest}
+    image: ghcr.io/sbrg/lifelike-pdfparser:${PDFPARSER_IMAGE_TAG:-latest}
     restart: unless-stopped
     tty: true
     ports:
