@@ -1,5 +1,6 @@
 import csv
 import hashlib
+import hmac
 import io
 import json
 import time
@@ -27,7 +28,7 @@ from .auth import auth
 from .filesystem import bp as filesystem_bp, FilesystemBaseView
 from .permissions import requires_role
 
-from ..constants import LogEventType, TIMEZONE
+from ..constants import LogEventType, TIMEZONE, PDFPARSE_FETCH_SECRET
 from ..database import (
     db,
     get_excel_export_service,
@@ -1028,9 +1029,16 @@ class GlobalAnnotationListView(MethodView):
 
 @bp.route('/files/<int:file_id>', methods=['GET'])
 def get_pdf_to_annotate(file_id):
-    """This endpoint is sent by the annotation pipeline to the
-    pdfparse service, and acts as a resource pull.
+    """Internal resource endpoint: pdfparse fetches the stored PDF from here
+    during the annotation pipeline. Only the annotation pipeline should call
+    this; it must supply the shared secret as the ?secret query parameter.
     """
+    provided = request.args.get('secret', '')
+    if not hmac.compare_digest(provided, PDFPARSE_FETCH_SECRET):
+        raise AnnotationError(
+            title='Unauthorized',
+            message='Missing or invalid secret.',
+            code=403)
 
     doc = Files.query.get(file_id)
 

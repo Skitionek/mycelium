@@ -5,7 +5,7 @@ import requests
 from neo4japp.constants import FILE_MIME_TYPE_PDF
 from neo4japp.exceptions import ServerException
 
-from ....constants import APPSERVER_URL
+from ....constants import APPSERVER_URL, PDFPARSE_FETCH_SECRET
 from ..constants import (
     MAX_ABBREVIATION_WORD_LENGTH,
     PDFPARSER_URL,
@@ -63,7 +63,10 @@ def parse_content(content_type=FILE_MIME_TYPE_PDF, **kwargs) -> Tuple[str, List[
         file_url = kwargs.get('file_url')
         try:
             if file_url is None:
-                file_url = f'{APPSERVER_URL}/annotations/files/{kwargs["file_id"]}'
+                file_url = (
+                    f'{APPSERVER_URL}/annotations/files/{kwargs["file_id"]}'
+                    f'?secret={PDFPARSE_FETCH_SECRET}'
+                )
             exclude_references = kwargs['exclude_references']
         except KeyError:
             raise ServerException(

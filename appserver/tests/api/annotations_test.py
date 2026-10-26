@@ -1,7 +1,7 @@
 import pytest
 import json
 
-
+from neo4japp.constants import PDFPARSE_FETCH_SECRET
 from neo4japp.models import Files, AppUser
 
 
@@ -126,3 +126,41 @@ def test_user_can_get_global_list(
     assert inclusion['entityType'] == 'Compound'
     assert exclusion['text'] == 'fake-gene'
     assert exclusion['entityType'] == 'Gene'
+
+
+# --- get_pdf_to_annotate secret guard ---
+
+def test_get_pdf_to_annotate_rejects_missing_secret(client):
+    """
+    Given any file id
+    When the pipeline endpoint is called without a secret
+    Then it returns 403 before touching the database
+    """
+    response = client.get('/annotations/files/1')
+
+    assert response.status_code == 403
+
+
+def test_get_pdf_to_annotate_rejects_wrong_secret(client):
+    """
+    Given any file id
+    When the pipeline endpoint is called with an incorrect secret
+    Then it returns 403 before touching the database
+    """
+    response = client.get('/annotations/files/1?secret=wrong-value')
+
+    assert response.status_code == 403
+
+
+def test_get_pdf_to_annotate_allows_correct_secret(client, test_user_with_pdf: Files):
+    """
+    Given a stored file
+    When the pipeline endpoint is called with the correct shared secret
+    Then it returns 200 with the PDF content
+    """
+    response = client.get(
+        f'/annotations/files/{test_user_with_pdf.id}?secret={PDFPARSE_FETCH_SECRET}'
+    )
+
+    assert response.status_code == 200
+    assert response.content_type == 'application/pdf'

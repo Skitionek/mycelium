@@ -1,6 +1,7 @@
 import os
 import codecs
 import re
+import secrets
 
 from datetime import timezone
 from enum import Enum
@@ -461,6 +462,11 @@ FRAGMENT_SIZE = 1024
 
 APPSERVER_URL = os.getenv('APPSERVER_URL', 'http://localhost:5000')
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:4200')
+
+# Shared secret used by the annotation pipeline when pdfparse fetches a stored
+# PDF. Set via env var in production; falls back to a per-process random value
+# so the endpoint is still unreachable from outside without the value.
+PDFPARSE_FETCH_SECRET = os.getenv('PDFPARSE_FETCH_SECRET') or secrets.token_urlsafe(32)
 
 # Start constants for export of merged maps
 SUPPORTED_MAP_MERGING_FORMATS = ['pdf', 'png', 'svg']
