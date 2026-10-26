@@ -90,22 +90,31 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
         # its own profile: runs sharing one collide, and all but the first exit
         # without converting anything.
         profile = Path(tmpdir, 'profile').as_uri()
-        subprocess.run(
-            [
-                soffice,
-                f'-env:UserInstallation={profile}',
-                '--headless',
-                '--norestore',
-                '--nofirststartwizard',
-                '--convert-to', 'pdf',
-                '--outdir', tmpdir,
-                src_path,
-            ],
-            check=True,
-            timeout=120,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        try:
+            subprocess.run(
+                [
+                    soffice,
+                    f'-env:UserInstallation={profile}',
+                    '--headless',
+                    '--norestore',
+                    '--nofirststartwizard',
+                    '--convert-to', 'pdf',
+                    '--outdir', tmpdir,
+                    src_path,
+                ],
+                check=True,
+                timeout=120,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except subprocess.CalledProcessError as exc:
+            # Some soffice versions exit non-zero for corrupt input instead of
+            # exiting cleanly and writing no file; treat either outcome as a
+            # failed conversion so callers only need to handle one error type.
+            raise ConversionFailedError(
+                f'LibreOffice exited with status {exc.returncode} '
+                f'while converting {src_path!r}.'
+            ) from exc
 
         # LibreOffice names the output file after the input stem.
         pdf_path = os.path.join(tmpdir, 'input.pdf')

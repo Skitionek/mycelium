@@ -8,12 +8,10 @@ into the folder itself).
 from typing import List, Optional
 
 from neo4japp.constants import (
-    APPSERVER_URL,
     FILE_MIME_TYPE_ENRICHMENT_TABLE,
     FILE_MIME_TYPE_PDF,
 )
 from neo4japp.database import get_enrichment_table_service
-from neo4japp.services.transient_files import discard_transient_file, stash_transient_file
 
 from .constants import DEFAULT_ANNOTATION_CONFIGS
 from .enrichment_snippets import add_enrichment_snippets
@@ -28,10 +26,6 @@ from .initializer import (
 )
 from .pipeline import Pipeline
 from .utils.parsing import parse_content
-
-
-def transient_file_url(token: str) -> str:
-    return f'{APPSERVER_URL}/annotations/transient/{token}'
 
 
 def annotate_transient_pdf(
@@ -50,16 +44,7 @@ def annotate_transient_pdf(
     :return: the annotations, in the shape GET /filesystem/objects/<id>/annotations returns them
     """
     configs = configs or DEFAULT_ANNOTATION_CONFIGS
-    token = stash_transient_file(content)
-    try:
-        text, parsed = parse_content(
-            FILE_MIME_TYPE_PDF,
-            file_url=transient_file_url(token),
-            exclude_references=configs['exclude_references'],
-        )
-    finally:
-        # The parser has fetched the file by now
-        discard_transient_file(token)
+    text, parsed = parse_content(FILE_MIME_TYPE_PDF, pdf_bytes=content)
 
     pipeline = Pipeline(
         {
