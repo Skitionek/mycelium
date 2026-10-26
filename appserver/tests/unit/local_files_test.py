@@ -131,17 +131,17 @@ def test_transient_annotation_needs_a_pdf(client, logged_in):
     annotate.assert_not_called()
 
 
-def test_transient_pdf_is_served_to_the_parser_only_while_annotating(app, client, redis):
+def test_transient_pdf_passes_bytes_directly_to_parser(app, client):
     """
-    The PDF parser fetches the PDF from a URL; the content must be there while it does,
-    and gone afterwards.
+    Given a PDF in memory
+    When annotate_transient_pdf is called
+    Then parse_content receives the raw bytes — no intermediate URL or temp-file store
     """
-    fetched = {}
+    received = {}
 
-    def parse_content(content_type, file_url, exclude_references):
-        token = file_url.rsplit('/', 1)[1]
-        fetched['response'] = client.get(f'/annotations/transient/{token}')
-        fetched['token'] = token
+    def parse_content(content_type, *, pdf_bytes):
+        received['content_type'] = content_type
+        received['pdf_bytes'] = pdf_bytes
         return 'text', []
 
     class FakePipeline:
@@ -162,34 +162,21 @@ def test_transient_pdf_is_served_to_the_parser_only_while_annotating(app, client
         result = transient_annotation.annotate_transient_pdf(PDF, 'paper.pdf')
 
     assert result == [{'keyword': 'x'}]
-    assert fetched['response'].status_code == 200
-    assert fetched['response'].data == PDF
-    assert fetched['response'].headers['Content-Type'] == 'application/pdf'
-    assert fetched['response'].headers['Cache-Control'] == 'no-store'
-    # Discarded once parsed, and set to expire even if it had not been
-    assert redis.store == {}
-    assert list(redis.expiries.values()) == [transient_files.TRANSIENT_FILE_TTL]
-    assert client.get(f'/annotations/transient/{fetched["token"]}').status_code == 404
+    assert received['pdf_bytes'] == PDF
 
 
-def test_transient_pdf_is_discarded_when_parsing_fails(redis):
-    def failing_parse(content_type, file_url, exclude_references):
+def test_transient_pdf_parse_error_propagates():
+    """
+    Given a parser that raises
+    When annotate_transient_pdf is called
+    Then the exception is not swallowed
+    """
+    def failing_parse(content_type, *, pdf_bytes):
         raise RuntimeError('parser down')
 
     with patch.object(transient_annotation, 'parse_content', failing_parse):
         with pytest.raises(RuntimeError):
             transient_annotation.annotate_transient_pdf(PDF, 'paper.pdf')
-
-    assert redis.store == {}
-
-
-def test_transient_pdf_url_rejects_unknown_and_malformed_tokens(client, redis):
-    token = transient_files.stash_transient_file(PDF)
-
-    assert client.get('/annotations/transient/' + 'x' * 43).status_code == 404
-    assert client.get('/annotations/transient/short').status_code == 404
-    assert transient_files.read_transient_file('../../etc/passwd') is None
-    assert client.get(f'/annotations/transient/{token}').data == PDF
 
 
 def enrichment_table():
