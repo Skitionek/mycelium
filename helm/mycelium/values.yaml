@@ -216,7 +216,7 @@ statisticalEnrichment:
 # ------------------------------------------------------------------------------
 pdfparser:
   image:
-    repository: lifelike.azurecr.io/kg-pdfparser:latest
+    repository: ghcr.io/sbrg/lifelike-pdfparser
     ## -- Overrides the pdfparser image tag
     tag: "latest"
 

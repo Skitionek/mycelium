@@ -1,5 +1,6 @@
 import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -34,6 +35,7 @@ import { LocalFilesystemModule } from 'app/local-filesystem/local-filesystem.mod
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AdminModule,
     AuthModule,
     SharedModule,

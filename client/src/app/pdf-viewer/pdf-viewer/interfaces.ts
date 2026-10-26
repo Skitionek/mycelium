@@ -37,7 +37,7 @@ export interface ScrollDestination {
 
 export interface TextLayerBuilder {
   pageNumber: number;
-  textLayerDiv: Element;
+  div: Element;
 }
 
 export interface PDFPageView {

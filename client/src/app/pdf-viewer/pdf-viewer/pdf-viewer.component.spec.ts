@@ -144,4 +144,21 @@ describe('PDFViewerComponent', () => {
       });
     });
   });
+
+  describe('updateSize', () => {
+    it('should leave the scale alone while pdf.js has not created the pages yet', async () => {
+      // Given a document that is attached to a viewer which has no pages yet
+      const getPage = jasmine.createSpy('getPage').and.returnValue(Promise.resolve({}));
+      const viewer = {pagesCount: 0, currentPageNumber: 1, currentScale: 'unset'};
+      (pdfViewer as any).internalPdf = {getPage};
+      (pdfViewer as any).pdfSinglePageViewer = viewer;
+      (pdfViewer as any).internalShowAll = false;
+
+      // When the size is updated, as it is right after the document is attached
+      await pdfViewer.updateSize();
+
+      // Then the viewer is not asked to scale pages that do not exist
+      expect(viewer.currentScale).toBe('unset');
+    });
+  });
 });

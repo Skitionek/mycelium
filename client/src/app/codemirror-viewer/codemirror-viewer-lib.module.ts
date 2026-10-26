@@ -15,7 +15,7 @@ import { CodemirrorViewComponent } from './components/codemirror-view.component'
     CommonModule,
     SharedModule,
     FileBrowserModule,
-    RouterModule.forRoot([]),
+    RouterModule,
   ],
   exports: [
     CodemirrorViewComponent,

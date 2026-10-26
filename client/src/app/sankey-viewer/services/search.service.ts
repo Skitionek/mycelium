@@ -83,7 +83,7 @@ export class SankeySearchService implements OnDestroy {
   searchTerms = [];
 
   setUpWorker() {
-    this.worker = new Worker('./search.worker', {type: 'module'});
+    this.worker = new Worker(new URL('./search.worker', import.meta.url), {type: 'module'});
     this.worker.onmessage = ({data: {action, actionLoad}}) => {
       switch (action) {
         case WorkerOutputActions.match:
