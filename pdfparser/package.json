@@ -1,0 +1,16 @@
+{
+  "name": "@mycelium/pdfparser",
+  "version": "1.0.0",
+  "description": "PDF word-token extraction service using pdf.js — runs as an HTTP microservice and can be imported as a browser module.",
+  "type": "module",
+  "main": "src/parse.mjs",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test src/parse.test.mjs"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "multer": "^1.4.5-lts.2",
+    "pdfjs-dist": "6.4.299"
+  }
+}
