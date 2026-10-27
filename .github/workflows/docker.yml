@@ -26,6 +26,8 @@ jobs:
             path: appserver
           - name: frontend
             path: client
+          - name: pdfparser
+            path: pdfparser
           # - name: elasticsearch
           #   path: docker
           #   file: docker/elasticsearch.Dockerfile
