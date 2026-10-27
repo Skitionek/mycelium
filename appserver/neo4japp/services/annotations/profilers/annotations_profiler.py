@@ -85,7 +85,7 @@ def main():
         f = db.session.query(Files).filter(Files.hash_id == hash_id).one()
         with cprofiled():
             text, parsed = Pipeline.parse(
-              f.mime_type, file_id=f.id,
+              f.mime_type, pdf_bytes=f.content.raw_file,
               exclude_references=DEFAULT_ANNOTATION_CONFIGS['exclude_references'])
 
             pipeline = Pipeline(

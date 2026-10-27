@@ -106,7 +106,7 @@ class ManualAnnotationService:
         term = custom_annotation['meta']['allText'].strip()
 
         if annotate_all:
-            _, parsed = parse_content(file_id=file.id, exclude_references=False)
+            _, parsed = parse_content(file.mime_type, pdf_bytes=file.content.raw_file)
             is_case_insensitive = custom_annotation['meta']['isCaseInsensitive']
 
             if custom_annotation['meta']['type'] == EntityType.GENE.value:
