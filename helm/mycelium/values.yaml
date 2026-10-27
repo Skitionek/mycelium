@@ -216,9 +216,9 @@ statisticalEnrichment:
 # ------------------------------------------------------------------------------
 pdfparser:
   image:
-    repository: ghcr.io/sbrg/lifelike-pdfparser
-    ## -- Overrides the pdfparser image tag
-    tag: "latest"
+    repository: ghcr.io/Skitionek/mycelium-pdfparser
+    ## -- Overrides the image tag whose default is the chart appVersion.
+    tag: ""
 
   ## -- Number of replicas running, ignored if autoScaling is enabled
   replicaCount: 1
