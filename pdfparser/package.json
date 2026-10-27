@@ -6,7 +6,7 @@
   "main": "src/parse.mjs",
   "scripts": {
     "start": "node src/server.mjs",
-    "test": "node --test src/parse.test.mjs"
+    "test": "node --test src/parse.test.mjs src/server.test.mjs"
   },
   "dependencies": {
     "express": "^4.18.0",
