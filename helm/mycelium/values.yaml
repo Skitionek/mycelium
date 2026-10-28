@@ -26,7 +26,7 @@ ingress:
 # ------------------------------------------------------------------------------
 api:
   image:
-    repository: ghcr.io/Skitionek/mycelium-appserver
+    repository: ghcr.io/skitionek/mycelium-appserver
     ## -- Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
@@ -119,7 +119,7 @@ api:
 # ------------------------------------------------------------------------------
 frontend:
   image:
-    repository: ghcr.io/Skitionek/mycelium-frontend
+    repository: ghcr.io/skitionek/mycelium-frontend
     ## -- Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
@@ -172,7 +172,7 @@ frontend:
 # ------------------------------------------------------------------------------
 statisticalEnrichment:
   image:
-    repository: ghcr.io/Skitionek/mycelium-statistical-enrichment
+    repository: ghcr.io/skitionek/mycelium-statistical-enrichment
     ## -- Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
@@ -216,7 +216,7 @@ statisticalEnrichment:
 # ------------------------------------------------------------------------------
 pdfparser:
   image:
-    repository: ghcr.io/Skitionek/mycelium-pdfparser
+    repository: ghcr.io/skitionek/mycelium-pdfparser
     ## -- Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
@@ -354,7 +354,7 @@ elasticsearch:
   ## -- Set to false to disable automatic deployment of Elasticsearch
   enabled: true
 
-  image: ghcr.io/Skitionek/mycelium-elasticsearch
+  image: ghcr.io/skitionek/mycelium-elasticsearch
   imageTag: 7.16.3
 
   fullnameOverride: elasticsearch
