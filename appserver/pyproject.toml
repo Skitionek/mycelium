@@ -29,7 +29,7 @@ dependencies = [
   "webargs==8.7.1",
   "requests==2.34.2",
   "pandas==2.3.3",
-  "xlsxwriter==3.2.9",
+  "xlsxwriter==3.3.0",
   "python-json-logger==4.2.0",
   "intervaltree==3.2.1",
   "paramiko==5.1.0",
