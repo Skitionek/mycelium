@@ -11,6 +11,11 @@ name: Cap Dependabot major bumps
 #      closes it; once the patch PR merges, Dependabot will re-open it for
 #      the single-major bump on its next scheduled run.
 #
+# When Dependabot proposes a single-major bump (diff == 1) and there is an
+# existing cap rule `>= new_major+1` for that package, the workflow opens a
+# separate PR to lift (remove) that cap, so the next single-major cycle can
+# proceed unblocked.
+#
 # No special credentials are required — GITHUB_TOKEN with contents:write and
 # pull-requests:write is sufficient because this workflow only pushes to a
 # new branch, not directly to the protected default branch.
@@ -52,8 +57,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Parse the major-version delta and decide whether capping is needed.
-      - name: Determine whether to cap
+      # Parse the major-version delta and decide what action to take:
+      #   skip=true, lift=false  — not a major bump, nothing to do
+      #   skip=true, lift=true   — single-major bump; open a cap-lift PR if a
+      #                            matching cap rule exists in dependabot.yml
+      #   skip=false, lift=false — multi-major bump; write a new cap rule
+      - name: Determine whether to cap or lift
         id: check
         env:
           UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
@@ -64,7 +73,8 @@ jobs:
 
           if [ "$UPDATE_TYPE" != "version-update:semver-major" ]; then
             echo "Not a major bump (type: $UPDATE_TYPE); skipping."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "skip=true"  >> "$GITHUB_OUTPUT"
+            echo "lift=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -74,43 +84,58 @@ jobs:
 
           if [ -z "$prev_major" ] || [ -z "$new_major" ]; then
             echo "::warning::Cannot parse major versions from '$PREV' → '$NEW'; skipping."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "skip=true"  >> "$GITHUB_OUTPUT"
+            echo "lift=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           diff=$((new_major - prev_major))
-          if [ "$diff" -le 1 ]; then
-            echo "Single-major bump ($PREV → $NEW); nothing to cap."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+
+          if [ "$diff" -eq 1 ]; then
+            echo "Single-major bump ($PREV → $NEW); will check for a cap to lift."
+            echo "skip=true"           >> "$GITHUB_OUTPUT"
+            echo "lift=true"           >> "$GITHUB_OUTPUT"
+            echo "prev_major=$prev_major" >> "$GITHUB_OUTPUT"
+            echo "new_major=$new_major"   >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # Cap: only the immediately next major is allowed (prev+1.x).
-          # The ignore rule will be `>= prev+2`, blocking anything beyond that.
+          if [ "$diff" -le 0 ]; then
+            echo "::warning::Non-positive major diff ($PREV → $NEW); skipping."
+            echo "skip=true"  >> "$GITHUB_OUTPUT"
+            echo "lift=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Multi-major bump: cap at next single major (prev+2 exclusive).
           cap=$((prev_major + 2))
           next_major=$((prev_major + 1))
 
           echo "Multi-major bump: $PREV → $NEW (${diff} majors). Capping at < $cap."
-          echo "skip=false"         >> "$GITHUB_OUTPUT"
-          echo "prev_major=$prev_major" >> "$GITHUB_OUTPUT"
-          echo "new_major=$new_major"   >> "$GITHUB_OUTPUT"
-          echo "next_major=$next_major" >> "$GITHUB_OUTPUT"
-          echo "cap=$cap"              >> "$GITHUB_OUTPUT"
+          echo "skip=false"            >> "$GITHUB_OUTPUT"
+          echo "lift=false"            >> "$GITHUB_OUTPUT"
+          echo "prev_major=$prev_major"   >> "$GITHUB_OUTPUT"
+          echo "new_major=$new_major"     >> "$GITHUB_OUTPUT"
+          echo "next_major=$next_major"   >> "$GITHUB_OUTPUT"
+          echo "cap=$cap"                 >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # Multi-major path: check out, patch, open cap PR
+      # -----------------------------------------------------------------------
 
       # Check out the default branch so we can branch off it for the patch PR.
-      - name: Check out default branch
+      - name: Check out default branch (cap)
         if: steps.check.outputs.skip == 'false'
         uses: actions/checkout@v7
         with:
           ref: ${{ github.event.repository.default_branch }}
 
-      - name: Install ruamel.yaml
+      - name: Install ruamel.yaml (cap)
         if: steps.check.outputs.skip == 'false'
         run: pip install --quiet 'ruamel.yaml>=0.18'
 
-      # Edit .github/dependabot.yml in-place, preserving all existing comments
-      # and formatting, to add (or update) an ignore rule for the dependency.
-      - name: Patch .github/dependabot.yml
+      # Delegate YAML editing to the versioned script so the logic is testable.
+      - name: Add cap rule to .github/dependabot.yml
         if: steps.check.outputs.skip == 'false'
         env:
           DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
@@ -118,61 +143,13 @@ jobs:
           DIRECTORY: ${{ steps.meta.outputs.directory }}
           CAP:       ${{ steps.check.outputs.cap }}
         run: |
-          python3 - <<'PYEOF'
-          import os, sys
-          from ruamel.yaml import YAML
-          from ruamel.yaml.comments import CommentedSeq
+          python3 .github/scripts/dependabot_cap.py add \
+            --dep-names  "$DEP_NAMES" \
+            --ecosystem  "$ECOSYSTEM" \
+            --directory  "$DIRECTORY" \
+            --cap        "$CAP"
 
-          dep_names  = [n.strip() for n in os.environ['DEP_NAMES'].split(',') if n.strip()]
-          ecosystem  = os.environ['ECOSYSTEM']
-          directory  = os.environ['DIRECTORY']
-          cap        = int(os.environ['CAP'])
-          version_rule = f'>={cap}'
-
-          path = '.github/dependabot.yml'
-          yaml = YAML()
-          yaml.preserve_quotes = True
-          yaml.width = 4096
-
-          with open(path) as f:
-              doc = yaml.load(f)
-
-          changed = False
-          for update in doc.get('updates', []):
-              if (update.get('package-ecosystem') == ecosystem and
-                      update.get('directory') == directory):
-                  if 'ignore' not in update:
-                      update['ignore'] = CommentedSeq()
-                  ignore = update['ignore']
-                  for dep_name in dep_names:
-                      existing = next(
-                          (r for r in ignore if r.get('dependency-name') == dep_name),
-                          None)
-                      if existing is not None:
-                          existing['versions'] = [version_rule]
-                          print(f'Updated ignore rule for {dep_name!r}: versions {version_rule}')
-                      else:
-                          ignore.append({
-                              'dependency-name': dep_name,
-                              'versions': [version_rule],
-                          })
-                          print(f'Added ignore rule for {dep_name!r}: versions {version_rule}')
-                  changed = True
-                  break
-
-          if not changed:
-              print(
-                  f'::error::No updates entry found for '
-                  f'ecosystem={ecosystem!r} directory={directory!r}',
-                  file=sys.stderr,
-              )
-              sys.exit(1)
-
-          with open(path, 'w') as f:
-              yaml.dump(doc, f)
-          PYEOF
-
-      - name: Open a PR with the ignore rule
+      - name: Open a PR with the cap rule
         if: steps.check.outputs.skip == 'false'
         env:
           GH_TOKEN:   ${{ secrets.GITHUB_TOKEN }}
@@ -195,7 +172,7 @@ jobs:
           git add .github/dependabot.yml
 
           if git diff --cached --quiet; then
-            echo "No changes to .github/dependabot.yml (ignore rule already in place)."
+            echo "No changes to .github/dependabot.yml (cap rule already in place)."
             exit 0
           fi
 
@@ -226,3 +203,93 @@ jobs:
 
           Closing this PR. Dependabot will re-open it at the capped version once that patch merges."
           gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+
+      # -----------------------------------------------------------------------
+      # Single-major path: check out, lift the >=new_major+1 cap if present
+      # -----------------------------------------------------------------------
+
+      # Check out the default branch so we can branch off it for the lift PR.
+      - name: Check out default branch (lift)
+        if: steps.check.outputs.lift == 'true'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Install ruamel.yaml (lift)
+        if: steps.check.outputs.lift == 'true'
+        run: pip install --quiet 'ruamel.yaml>=0.18'
+
+      # Remove the cap that was blocking the now-landing major version.
+      # The script exits 0 and prints "unchanged" when no matching rule exists,
+      # so this step is always safe to run.
+      - name: Lift cap rule from .github/dependabot.yml
+        id: lift
+        if: steps.check.outputs.lift == 'true'
+        env:
+          DEP_NAMES:  ${{ steps.meta.outputs.dependency-names }}
+          ECOSYSTEM:  ${{ steps.meta.outputs.package-ecosystem }}
+          DIRECTORY:  ${{ steps.meta.outputs.directory }}
+          NEW_MAJOR:  ${{ steps.check.outputs.new_major }}
+        run: |
+          result=$(python3 .github/scripts/dependabot_cap.py lift \
+            --dep-names  "$DEP_NAMES" \
+            --ecosystem  "$ECOSYSTEM" \
+            --directory  "$DIRECTORY" \
+            --new-major  "$NEW_MAJOR")
+          echo "$result"
+          # Surface whether a rule was actually removed so the next step can
+          # skip the git/PR work when nothing changed.
+          echo "result=${result##*$'\n'}" >> "$GITHUB_OUTPUT"
+
+      - name: Open a PR to lift the cap
+        if: >
+          steps.check.outputs.lift == 'true' &&
+          steps.lift.outputs.result == 'changed'
+        env:
+          GH_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
+          PREV:      ${{ steps.meta.outputs.previous-version }}
+          NEW:       ${{ steps.meta.outputs.new-version }}
+          NEW_MAJOR: ${{ steps.check.outputs.new_major }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="dependabot-cap-lift/${DEP_NAMES//,/-}-gte${NEW_MAJOR}"
+          BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
+
+          git checkout -b "$BRANCH"
+          git add .github/dependabot.yml
+
+          if git diff --cached --quiet; then
+            echo "No staged changes after lift; skipping PR."
+            exit 0
+          fi
+
+          LIFTED=$((NEW_MAJOR + 1))
+          git commit -m "chore(deps): lift cap on ${DEP_NAMES} — remove >=${LIFTED} restriction
+
+          Cap '>=${LIFTED}' was written to route a multi-major Dependabot bump
+          one step at a time. Dependabot now proposes the single-major bump to
+          ${NEW_MAJOR}.x, so the cap is no longer needed."
+          git push origin "$BRANCH"
+
+          LIFT_PR_URL=$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "chore(deps): lift \`>=${LIFTED}\` cap on ${DEP_NAMES}" \
+            --body "$(cat <<BODY
+          Dependabot PR #${PR_NUMBER} proposes the single-major bump \`${DEP_NAMES}\` \`${PREV}\` → \`${NEW}\`.
+
+          An existing \`ignore\` rule (\`>= ${LIFTED}\`) was written by the cap workflow to route a larger version jump one step at a time. That bump is now landing, so the cap is no longer needed.
+
+          Merge this alongside (or before) the Dependabot bump so the next single-major upgrade can proceed.
+          BODY
+          )")
+
+          gh pr comment "$PR_NUMBER" \
+            --repo "$GITHUB_REPOSITORY" \
+            --body "This single-major bump will land \`${DEP_NAMES}\` at \`${NEW_MAJOR}.x\`. An existing version cap (\`>= ${LIFTED}\`) has been removed in ${LIFT_PR_URL} so the next cycle can continue."
