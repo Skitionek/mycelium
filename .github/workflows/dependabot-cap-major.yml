@@ -11,6 +11,9 @@ name: Cap Dependabot major bumps
 #      closes it; once the patch PR merges, Dependabot will re-open it for
 #      the single-major bump on its next scheduled run.
 #
+# When a capped major lands (e.g. ng-bootstrap 16 merges while cap is >=17),
+# this workflow also advances the cap so Dependabot can propose the next major.
+#
 # No special credentials are required — GITHUB_TOKEN with contents:write and
 # pull-requests:write is sufficient because this workflow only pushes to a
 # new branch, not directly to the protected default branch.
@@ -21,10 +24,17 @@ name: Cap Dependabot major bumps
 # cannot read Actions secrets. `pull_request_target` runs in the base repo's
 # context instead. This job never checks out or executes code from the PR
 # head, so that is safe.
+#
+# Ecosystem name mapping
+# ----------------------
+# fetch-metadata reports different names than dependabot.yml uses:
+#   npm_and_yarn  →  npm
+#   github_actions  →  github-actions
+# Both the cap and lift jobs apply this mapping before matching entries.
 
 on:
   pull_request_target:
-    types: [opened, reopened]
+    types: [opened, reopened, closed]
 
 permissions:
   contents: write
@@ -38,8 +48,9 @@ jobs:
   cap:
     name: Cap if multi-major
     runs-on: ubuntu-latest
-    # Only act on Dependabot PRs; skip drafts (they are never multi-major caps).
+    # Only act on Dependabot PRs that are being opened/reopened (not closed).
     if: >
+      github.event.action != 'closed' &&
       startsWith(github.event.pull_request.user.login, 'dependabot') &&
       !github.event.pull_request.draft
 
@@ -48,7 +59,7 @@ jobs:
       # version delta without needing to inspect lockfiles or manifests.
       - name: Fetch Dependabot metadata
         id: meta
-        uses: dependabot/fetch-metadata@v3
+        uses: dependabot/fetch-metadata@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,6 +121,8 @@ jobs:
 
       # Edit .github/dependabot.yml in-place, preserving all existing comments
       # and formatting, to add (or update) an ignore rule for the dependency.
+      # fetch-metadata reports 'npm_and_yarn' and 'github_actions' but
+      # dependabot.yml uses 'npm' and 'github-actions'; map them before matching.
       - name: Patch .github/dependabot.yml
         if: steps.check.outputs.skip == 'false'
         env:
@@ -123,8 +136,14 @@ jobs:
           from ruamel.yaml import YAML
           from ruamel.yaml.comments import CommentedSeq
 
+          # fetch-metadata ecosystem names differ from dependabot.yml keys.
+          ECOSYSTEM_MAP = {
+              'npm_and_yarn': 'npm',
+              'github_actions': 'github-actions',
+          }
+
           dep_names  = [n.strip() for n in os.environ['DEP_NAMES'].split(',') if n.strip()]
-          ecosystem  = os.environ['ECOSYSTEM']
+          ecosystem  = ECOSYSTEM_MAP.get(os.environ['ECOSYSTEM'], os.environ['ECOSYSTEM'])
           directory  = os.environ['DIRECTORY']
           cap        = int(os.environ['CAP'])
           version_rule = f'>={cap}'
@@ -226,3 +245,173 @@ jobs:
 
           Closing this PR. Dependabot will re-open it at the capped version once that patch merges."
           gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+
+  lift:
+    name: Lift cap on major landing
+    runs-on: ubuntu-latest
+    # Only act on merged Dependabot major-bump PRs.
+    if: >
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.user.login, 'dependabot') &&
+      !github.event.pull_request.draft
+
+    steps:
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # A capped major just landed (e.g. ng-bootstrap 15 → 16 with cap >=17).
+      # Advance the cap by one (>=17 → >=18) so Dependabot can now propose
+      # the next single major. Only major bumps can consume a cap.
+      - name: Determine whether to lift
+        id: check
+        env:
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          NEW: ${{ steps.meta.outputs.new-version }}
+        run: |
+          set -euo pipefail
+
+          if [ "$UPDATE_TYPE" != "version-update:semver-major" ]; then
+            echo "Not a major bump; skipping lift."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          new_major=$(printf '%s' "$NEW" | grep -oP '^\D*\K[0-9]+' || true)
+          if [ -z "$new_major" ]; then
+            echo "::warning::Cannot parse major version from '$NEW'; skipping lift."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # If a cap of >=gate_major was in place, bumping to new_major consumed
+          # it (new_major == gate_major - 1). Advance to >=new_cap.
+          gate_major=$((new_major + 1))
+          new_cap=$((new_major + 2))
+
+          echo "skip=false"           >> "$GITHUB_OUTPUT"
+          echo "new_major=$new_major" >> "$GITHUB_OUTPUT"
+          echo "gate_major=$gate_major" >> "$GITHUB_OUTPUT"
+          echo "new_cap=$new_cap"     >> "$GITHUB_OUTPUT"
+
+      - name: Check out default branch
+        if: steps.check.outputs.skip == 'false'
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Install ruamel.yaml
+        if: steps.check.outputs.skip == 'false'
+        run: pip install --quiet 'ruamel.yaml>=0.18'
+
+      # Advance >=gate_major to >=new_cap for any package in this PR that has
+      # such a rule. If no rule matches, there is nothing to do and the step
+      # sets lifted=false so the PR-open step is skipped.
+      - name: Advance cap in .github/dependabot.yml
+        if: steps.check.outputs.skip == 'false'
+        id: patch
+        env:
+          DEP_NAMES:   ${{ steps.meta.outputs.dependency-names }}
+          ECOSYSTEM:   ${{ steps.meta.outputs.package-ecosystem }}
+          DIRECTORY:   ${{ steps.meta.outputs.directory }}
+          GATE_MAJOR:  ${{ steps.check.outputs.gate_major }}
+          NEW_CAP:     ${{ steps.check.outputs.new_cap }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, sys
+          from ruamel.yaml import YAML
+
+          ECOSYSTEM_MAP = {
+              'npm_and_yarn': 'npm',
+              'github_actions': 'github-actions',
+          }
+
+          dep_names  = [n.strip() for n in os.environ['DEP_NAMES'].split(',') if n.strip()]
+          ecosystem  = ECOSYSTEM_MAP.get(os.environ['ECOSYSTEM'], os.environ['ECOSYSTEM'])
+          directory  = os.environ['DIRECTORY']
+          gate_major = int(os.environ['GATE_MAJOR'])
+          new_cap    = int(os.environ['NEW_CAP'])
+          old_rule   = f'>={gate_major}'
+          new_rule   = f'>={new_cap}'
+
+          path = '.github/dependabot.yml'
+          yaml = YAML()
+          yaml.preserve_quotes = True
+          yaml.width = 4096
+
+          with open(path) as f:
+              doc = yaml.load(f)
+
+          lifted = []
+          for update in doc.get('updates', []):
+              if (update.get('package-ecosystem') == ecosystem and
+                      update.get('directory') == directory):
+                  for rule in update.get('ignore', []):
+                      name = rule.get('dependency-name', '')
+                      versions = rule.get('versions', [])
+                      if name in dep_names and old_rule in versions:
+                          rule['versions'] = [new_rule]
+                          lifted.append(name)
+                          print(f'Advanced cap for {name!r}: {old_rule} → {new_rule}')
+                  break
+
+          if not lifted:
+              print(f'No cap rule matching {old_rule!r} found for {dep_names}; nothing to lift.')
+              sys.exit(0)
+
+          with open(path, 'w') as f:
+              yaml.dump(doc, f)
+          PYEOF
+
+          if git diff --quiet .github/dependabot.yml; then
+            echo "lifted=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "lifted=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a PR advancing the cap
+        if: steps.check.outputs.skip == 'false' && steps.patch.outputs.lifted == 'true'
+        env:
+          GH_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER:   ${{ github.event.pull_request.number }}
+          DEP_NAMES:   ${{ steps.meta.outputs.dependency-names }}
+          NEW:         ${{ steps.meta.outputs.new-version }}
+          GATE_MAJOR:  ${{ steps.check.outputs.gate_major }}
+          NEW_CAP:     ${{ steps.check.outputs.new_cap }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="dependabot-lift/${DEP_NAMES//,/-}-v${GATE_MAJOR}"
+          BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
+
+          git checkout -b "$BRANCH"
+          git add .github/dependabot.yml
+
+          if git diff --cached --quiet; then
+            echo "Nothing staged; exiting."
+            exit 0
+          fi
+
+          git commit -m "chore(deps): advance ${DEP_NAMES} cap to < ${NEW_CAP}
+
+          ${DEP_NAMES} landed at v${NEW} in #${PR_NUMBER}.
+          The previous cap (>=${GATE_MAJOR}) is consumed; advancing it to
+          >=${NEW_CAP} so Dependabot can propose the next major."
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "chore(deps): advance ${DEP_NAMES} cap to < ${NEW_CAP}" \
+            --body "$(cat <<BODY
+          \`${DEP_NAMES}\` was bumped to \`${NEW}\` in #${PR_NUMBER}.
+
+          The old ignore cap \`>=${GATE_MAJOR}\` has been consumed. This PR advances it to \`>=${NEW_CAP}\` so Dependabot can propose the next single-major upgrade.
+          BODY
+          )"
