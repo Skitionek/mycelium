@@ -3,15 +3,14 @@ name: Graph DB Migrate
 on:
   workflow_dispatch:
     inputs:
-      neo4j_host:
-        description: Neo4j target host
-        type: string
+      stage:
+        description: Target stage (determines Neo4j host and data-file prefix via environment vars)
+        type: choice
         required: true
-      neo4j_username:
-        description: Neo4j username
-        type: string
-        required: true
-        default: neo4j
+        default: stage
+        options:
+          - stage
+          - prod
       log_level:
         description: Log level
         type: choice
@@ -27,14 +26,6 @@ on:
         type: boolean
         required: true
         default: true
-      datafiles_prefix:
-        description: Prefix of the datafiles in remote storage (stage/prod)
-        type: choice
-        required: true
-        default: stage
-        options:
-          - stage
-          - prod
       chunk_size:
         description: Liquibase transaction chunk size
         type: string
@@ -65,18 +56,22 @@ jobs:
     name: Migrate Neo4j DB
     runs-on: self-hosted
     timeout-minutes: 360
+    # Environment gates this job to a known stage and scopes its secrets/vars.
+    # NEO4J_HOST, NEO4J_USERNAME, and DATAFILES_PREFIX must be set as environment
+    # variables in the 'stage' and 'prod' GitHub environments respectively.
+    environment: ${{ inputs.stage }}
     permissions:
       contents: read
     container:
       image: ghcr.io/skitionek/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
       options: --user root
       env:
-        NEO4J_HOST: ${{ github.event.inputs.neo4j_host }}
-        NEO4J_USERNAME: ${{ github.event.inputs.neo4j_username }}
+        NEO4J_HOST: ${{ vars.NEO4J_HOST }}
+        NEO4J_USERNAME: ${{ vars.NEO4J_USERNAME }}
         NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         LOG_LEVEL: ${{ github.event.inputs.log_level }}
         CHANGELOG_FILE: ${{ github.event.inputs.changelog }}
-        DATAFILES_PREFIX: ${{ github.event.inputs.datafiles_prefix }}
+        DATAFILES_PREFIX: ${{ vars.DATAFILES_PREFIX }}
         AZURE_ACCOUNT_STORAGE_KEY: ${{ secrets.AZURE_ACCOUNT_STORAGE_KEY }}
         AZURE_ACCOUNT_STORAGE_NAME: ${{ secrets.AZURE_ACCOUNT_STORAGE_NAME }}
         CHUNK_SIZE: ${{ github.event.inputs.chunk_size }}
