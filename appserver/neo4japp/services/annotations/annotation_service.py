@@ -442,6 +442,76 @@ class AnnotationService:
             closest_distance=closest_distance,
             specified_organism_id=specified_organism_id)
 
+    def _collect_gene_tokens(
+        self,
+        matches_list: List[LMDBMatch],
+    ) -> Tuple[List[str], list]:
+        """Flatten LMDBMatches into (gene_names, entity_token_pairs)."""
+        entity_token_pairs = []
+        gene_names: Set[str] = set()
+        for match in matches_list:
+            entities_set = set()
+            for entity in match.entities:
+                gene_names.add(entity['synonym'])
+                entities_set.add(
+                    (entity['synonym'], entity['id_type'], entity.get('hyperlinks', '')))
+            for synonym, datasource, hyperlinks in entities_set:
+                entity_token_pairs.append(
+                    (synonym, datasource, hyperlinks or [], match.token))
+        return list(gene_names), entity_token_pairs
+
+    def _resolve_gene_from_kg_matches(
+        self,
+        entity_synonym: str,
+        token: PDFWord,
+        gene_organism_matches: dict,
+        fallback_gene_organism_matches: dict,
+    ) -> Optional[Tuple[str, str, str]]:
+        """Resolve (gene_id, category, organism_id) from main KG matches, or None."""
+        organisms_to_match: Dict[str, str] = {}
+        try:
+            organisms_to_match = gene_organism_matches[entity_synonym][entity_synonym]
+        except KeyError:
+            for d in gene_organism_matches[entity_synonym].values():
+                organisms_to_match = {**organisms_to_match, **d}
+
+        best_match = self._find_best_organism_match(
+            token=token,
+            entity_synonym=entity_synonym,
+            organisms_to_match=organisms_to_match,
+            fallback_organism_matches=fallback_gene_organism_matches,
+            entity_type=EntityType.GENE.value,
+        )
+
+        if isinf(best_match.closest_distance):
+            return None
+
+        category = (
+            self.specified_organism.category
+            if best_match.specified_organism_id
+            else self.organism_categories[best_match.organism_id]
+        )
+        return best_match.entity_id, category, best_match.organism_id
+
+    def _resolve_gene_from_fallback(
+        self,
+        entity_synonym: str,
+        fallback_gene_organism_matches: dict,
+    ) -> Optional[Tuple[str, str, str]]:
+        """Resolve (gene_id, category, organism_id) from fallback organism, or None."""
+        organisms_to_match: Dict[str, str] = {}
+        organism_id = self.specified_organism.organism_id
+        try:
+            organisms_to_match = fallback_gene_organism_matches[entity_synonym][entity_synonym]
+        except KeyError:
+            for d in fallback_gene_organism_matches[entity_synonym].values():
+                organisms_to_match = {**organisms_to_match, **d}
+        try:
+            gene_id = organisms_to_match[organism_id]
+            return gene_id, self.specified_organism.category, organism_id
+        except KeyError:
+            return None
+
     def _annotate_type_gene(
         self,
         recognized_entities: RecognizedEntities
@@ -469,19 +539,7 @@ class AnnotationService:
 
         entities_to_create: List[CreateAnnotationObjParams] = []
 
-        entity_token_pairs = []
-        gene_names: Set[str] = set()
-        for match in matches_list:
-            entities_set = set()
-            for entity in match.entities:
-                gene_names.add(entity['synonym'])
-                entities_set.add((entity['synonym'], entity['id_type'], entity.get('hyperlinks', '')))  # noqa
-            for synonym, datasource, hyperlinks in entities_set:
-                if hyperlinks == '':
-                    hyperlinks = []
-                entity_token_pairs.append((synonym, datasource, hyperlinks, match.token))
-
-        gene_names_list = list(gene_names)
+        gene_names_list, entity_token_pairs = self._collect_gene_tokens(matches_list)
         organism_ids = list(self.organism_frequency)
 
         gene_match_time = time.time()
@@ -517,66 +575,33 @@ class AnnotationService:
             gene_primary_names.update(fallback_graph_results.primary_names)
 
         for entity_synonym, entity_datasource, entity_hyperlinks, token in entity_token_pairs:
-            gene_id = None
-            category = None
-
-            organisms_to_match: Dict[str, str] = {}
             if entity_synonym in gene_organism_matches:
-                try:
-                    # prioritize common name that is same as synonym
-                    organisms_to_match = gene_organism_matches[entity_synonym][entity_synonym]
-                except KeyError:
-                    # an organism can have multiple different genes w/ same synonym
-                    # since we don't know which to use, doing this is fine
-                    for d in list(gene_organism_matches[entity_synonym].values()):
-                        organisms_to_match = {**organisms_to_match, **d}
-
-                best_match = self._find_best_organism_match(
-                    token=token,
-                    entity_synonym=entity_synonym,
-                    organisms_to_match=organisms_to_match,
-                    fallback_organism_matches=fallback_gene_organism_matches,
-                    entity_type=EntityType.GENE.value)
-
-                if isinf(best_match.closest_distance):
-                    # didn't find a suitable organism in organisms_to_match
-                    continue
-
-                gene_id = best_match.entity_id
-                organism_id = best_match.organism_id
-                specified_organism_id = best_match.specified_organism_id
-                category = self.specified_organism.category if specified_organism_id else self.organism_categories[organism_id]  # noqa
+                resolution = self._resolve_gene_from_kg_matches(
+                    entity_synonym, token, gene_organism_matches, fallback_gene_organism_matches)
             elif entity_synonym in fallback_gene_organism_matches:
-                organism_id = self.specified_organism.organism_id
-                try:
-                    # prioritize common name match over synonym
-                    organisms_to_match = fallback_gene_organism_matches[entity_synonym][entity_synonym]  # noqa
-                except KeyError:
-                    # an organism can have multiple different genes w/ same synonym
-                    # since we don't know which to use, doing this is fine
-                    for d in list(fallback_gene_organism_matches[entity_synonym].values()):
-                        organisms_to_match = {**organisms_to_match, **d}
-                try:
-                    gene_id = organisms_to_match[self.specified_organism.organism_id]  # noqa
-                    category = self.specified_organism.category
-                except KeyError:
-                    continue
+                resolution = self._resolve_gene_from_fallback(
+                    entity_synonym, fallback_gene_organism_matches)
+            else:
+                continue
 
-            if gene_id and category:
-                if entity_datasource != gene_data_sources[f'{entity_synonym}{organism_id}']:
-                    continue
-                entities_to_create.append(
-                    CreateAnnotationObjParams(
-                        token=token,
-                        token_type=EntityType.GENE.value,
-                        entity_synonym=entity_synonym,
-                        entity_name=gene_primary_names[gene_id],
-                        entity_id=gene_id,
-                        entity_datasource=entity_datasource,
-                        entity_hyperlinks=entity_hyperlinks,
-                        entity_category=category
-                    )
+            if resolution is None:
+                continue
+            gene_id, category, organism_id = resolution
+
+            if entity_datasource != gene_data_sources[f'{entity_synonym}{organism_id}']:
+                continue
+            entities_to_create.append(
+                CreateAnnotationObjParams(
+                    token=token,
+                    token_type=EntityType.GENE.value,
+                    entity_synonym=entity_synonym,
+                    entity_name=gene_primary_names[gene_id],
+                    entity_id=gene_id,
+                    entity_datasource=entity_datasource,
+                    entity_hyperlinks=entity_hyperlinks,
+                    entity_category=category
                 )
+            )
         return self._create_annotation_object(entities_to_create)
 
     def _annotate_type_protein(
