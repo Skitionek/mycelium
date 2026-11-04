@@ -281,6 +281,36 @@ class AnnotationService:
                     continue
         return self._create_annotation_object(entities_to_create)
 
+    def _min_distance_to_entity(
+        self,
+        entity_lo: int,
+        entity_hi: int,
+        positions: List[Tuple[int, int]],
+    ) -> float:
+        min_dist = inf
+        for pos_lo, pos_hi in positions:
+            dist = entity_lo - pos_hi if entity_lo > pos_hi else pos_lo - entity_hi
+            if dist < min_dist:
+                min_dist = dist
+        return min_dist
+
+    def _prefer_organism_on_frequency_tie(self, candidate: str, current: str) -> str:
+        """Return the preferred organism when both are equidistant.
+
+        Chooses by document frequency; breaks ties by preferring homo sapiens.
+        Falls back to candidate on KeyError (organism not in frequency table).
+        """
+        try:
+            candidate_freq = self.organism_frequency[candidate]
+            current_freq = self.organism_frequency[current]
+            if candidate_freq > current_freq:
+                return candidate
+            if candidate_freq == current_freq and candidate == HOMO_SAPIENS_TAX_ID:
+                return candidate
+            return current
+        except KeyError:
+            return candidate
+
     def _get_closest_entity_organism_pair(
         self,
         entity: PDFWord,
@@ -305,9 +335,6 @@ class AnnotationService:
             if curr_closest_organism is None:
                 curr_closest_organism = organism
 
-            min_organism_dist = inf
-            new_organism_dist = inf
-
             if organism not in self.organism_locations:
                 current_app.logger.error(
                     f'Organism ID {organism} does not exist in {self.organism_locations}.',
@@ -320,37 +347,15 @@ class AnnotationService:
                 cut_idx = bisect_left(positions_to_check, (entity_location_lo, entity_location_hi))
                 positions_to_check = positions_to_check[:cut_idx]
 
-            # Get the closest instance of this organism
-            for organism_pos in positions_to_check:
-                organism_location_lo = organism_pos[0]
-                organism_location_hi = organism_pos[1]
+            min_organism_dist = self._min_distance_to_entity(
+                entity_location_lo, entity_location_hi, positions_to_check)
 
-                if entity_location_lo > organism_location_hi:
-                    # organism is before entity
-                    new_organism_dist = entity_location_lo - organism_location_hi
-                else:
-                    new_organism_dist = organism_location_lo - entity_location_hi
-
-                if new_organism_dist < min_organism_dist:
-                    min_organism_dist = new_organism_dist
-
-            # If this organism is closer than the current closest, update
             if min_organism_dist < closest_dist:
                 curr_closest_organism = organism
                 closest_dist = min_organism_dist
-            # If this organism is equidistant to the current closest, check frequency instead
             elif min_organism_dist == closest_dist:
-                try:
-                    # If the frequency of this organism is greater, update
-                    if self.organism_frequency[organism] > self.organism_frequency[curr_closest_organism]:  # noqa
-                        curr_closest_organism = organism
-                    elif self.organism_frequency[organism] == self.organism_frequency[curr_closest_organism]:  # noqa
-                        # If the organisms are equidistant and equal frequency,
-                        # check if the new organism is human, and if so update
-                        if organism == HOMO_SAPIENS_TAX_ID:
-                            curr_closest_organism = organism
-                except KeyError:
-                    curr_closest_organism = organism
+                curr_closest_organism = self._prefer_organism_on_frequency_tie(
+                    organism, curr_closest_organism)
 
         if curr_closest_organism is None:
             raise AnnotationError(
