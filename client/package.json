@@ -76,10 +76,10 @@
     "molstar": "5.13.1",
     "ng2-charts": "^11.0.0",
     "ngrx-store-localstorage": "~17.0.0",
-    "pdfjs-dist": "6.4.299",
+    "pdfjs-dist": "6.5.438",
     "plotly.js-dist-min": "4.2.0",
     "route-with-dynamic-outlets": "^1.0.0",
-    "rxjs": "~7.5.0",
+    "rxjs": "~7.8.0",
     "serverless-office-converter": "git+https://github.com/Skitionek/serverless-office-converter.git#cd6c4a13e67f5b03063bc8094c5406b1d7efe1d5",
     "tachyons": "4.12.0",
     "tslib": "^2.3.0",
@@ -101,7 +101,7 @@
     "@babel/core": "^8.1.0",
     "@compodoc/compodoc": "^2.0.0",
     "@fortawesome/fontawesome-free": "7.3.1",
-    "@storybook/angular": "10.6.3",
+    "@storybook/angular": "10.6.5",
     "@storybook/test-runner": "0.26.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/color": "^4.2.1",
@@ -128,7 +128,7 @@
     "lint-staged": "^17.6.0",
     "ng-mocks": "^14.18.5",
     "playwright": "1.64.1",
-    "storybook": "10.6.3",
+    "storybook": "10.6.5",
     "typescript": "~5.4.0",
     "typescript-eslint": "^8.72.0",
     "wait-on": "9.5.1"
@@ -137,9 +137,9 @@
     "@types/d3-array": "2.12.3",
     "codemirror/@codemirror/state": "6.7.6",
     "@codemirror/state": "6.7.6",
-    "jest": "30.4.2",
-    "jest-circus": "30.4.2",
-    "jest-runner": "30.4.2",
-    "jest-environment-node": "30.4.1"
+    "jest": "30.5.2",
+    "jest-circus": "30.5.2",
+    "jest-runner": "30.5.2",
+    "jest-environment-node": "30.5.2"
   }
 }

@@ -46,7 +46,7 @@ export interface ExtractedText {
   pages?: number;
 }
 
-export type TermFrequencies = { [term: string]: number };
+export interface TermFrequencies { [term: string]: number }
 
 export function isTextIndexable(mimeType: string): boolean {
   return mimeType === MimeTypes.Pdf
