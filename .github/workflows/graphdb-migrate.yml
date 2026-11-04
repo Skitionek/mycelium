@@ -3,10 +3,6 @@ name: Graph DB Migrate
 on:
   workflow_dispatch:
     inputs:
-      neo4j_host:
-        description: Neo4j target host
-        type: string
-        required: true
       neo4j_username:
         description: Neo4j username
         type: string
@@ -28,7 +24,7 @@ on:
         required: true
         default: true
       datafiles_prefix:
-        description: Prefix of the datafiles in remote storage (stage/prod)
+        description: Deployment stage — selects the GitHub Environment (and its NEO4J_HOST / NEO4J_PASSWORD) and the datafiles prefix
         type: choice
         required: true
         default: stage
@@ -65,13 +61,14 @@ jobs:
     name: Migrate Neo4j DB
     runs-on: self-hosted
     timeout-minutes: 360
+    environment: ${{ github.event.inputs.datafiles_prefix }}
     permissions:
       contents: read
     container:
       image: ghcr.io/skitionek/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
       options: --user root
       env:
-        NEO4J_HOST: ${{ github.event.inputs.neo4j_host }}
+        NEO4J_HOST: ${{ vars.NEO4J_HOST }}
         NEO4J_USERNAME: ${{ github.event.inputs.neo4j_username }}
         NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
         LOG_LEVEL: ${{ github.event.inputs.log_level }}
