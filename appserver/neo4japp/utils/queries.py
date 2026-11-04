@@ -37,6 +37,16 @@ def parse_query_terms(user_query: str) -> Tuple[List[str], List[str], List[str]]
     return terms, wildcards, phrases
 
 
+def _choose_quote(single_idx: int, double_idx: int) -> Tuple[str, int]:
+    """Return (quote_char, start_idx) for whichever present quote appears first.
+
+    When only one is present (the other is -1), returns that one.
+    """
+    if single_idx >= 0 and (double_idx == -1 or single_idx < double_idx):
+        return "'", single_idx
+    return '"', double_idx
+
+
 def _find_start_end_quote(query_string: str, start=0) -> Tuple[int, int]:
     """
     find valid start quote location in given string
@@ -48,12 +58,7 @@ def _find_start_end_quote(query_string: str, start=0) -> Tuple[int, int]:
     if single_quote_idx == -1 and double_quote_idx == -1:
         return -1, -1
     elif single_quote_idx == -1 or double_quote_idx == -1:
-        if single_quote_idx >= 0:
-            start_idx = single_quote_idx
-            quote = "'"
-        else:
-            start_idx = double_quote_idx
-            quote = '"'
+        quote, start_idx = _choose_quote(single_quote_idx, double_quote_idx)
         if (start_idx == 0 or query_string[start_idx - 1] in string.whitespace) and \
                 start_idx < len(query_string) - 1:
             end_idx = query_string.find(quote, start_idx + 1)
@@ -63,13 +68,7 @@ def _find_start_end_quote(query_string: str, start=0) -> Tuple[int, int]:
                 return start_idx, end_idx
         return -1, -1
     else:
-        if single_quote_idx < double_quote_idx:
-            quote = "'"
-            start_idx = single_quote_idx
-        else:
-            quote = '"'
-            start_idx = double_quote_idx
-
+        quote, start_idx = _choose_quote(single_quote_idx, double_quote_idx)
         if start_idx == 0 or query_string[start_idx - 1] in string.whitespace:
             end_idx = query_string.find(quote, start_idx + 1)
             if end_idx > 0:
