@@ -3,7 +3,7 @@ import time
 
 from bisect import bisect_left
 from math import inf, isinf
-from typing import cast, Dict, List, Set, Tuple
+from typing import cast, Dict, List, Optional, Set, Tuple
 from urllib.parse import quote as uri_encode
 from uuid import uuid4
 
@@ -42,6 +42,26 @@ from neo4japp.util import normalize_str
 from neo4japp.utils.logger import EventLog
 
 
+# Ordered list of (param_name, EntityType, EntityIdStr) for get_entities_to_annotate.
+# Species must remain before Genes and Proteins — the order here is preserved in output.
+_ENTITY_ANNOTATION_ORDER: List[Tuple[str, EntityType, EntityIdStr]] = [
+    ('anatomy', EntityType.ANATOMY, EntityIdStr.ANATOMY),
+    ('chemical', EntityType.CHEMICAL, EntityIdStr.CHEMICAL),
+    ('compound', EntityType.COMPOUND, EntityIdStr.COMPOUND),
+    ('disease', EntityType.DISEASE, EntityIdStr.DISEASE),
+    ('food', EntityType.FOOD, EntityIdStr.FOOD),
+    ('phenomena', EntityType.PHENOMENA, EntityIdStr.PHENOMENA),
+    ('phenotype', EntityType.PHENOTYPE, EntityIdStr.PHENOTYPE),
+    ('species', EntityType.SPECIES, EntityIdStr.SPECIES),
+    ('protein', EntityType.PROTEIN, EntityIdStr.PROTEIN),
+    ('gene', EntityType.GENE, EntityIdStr.GENE),
+    ('company', EntityType.COMPANY, EntityIdStr.COMPANY),
+    ('entity', EntityType.ENTITY, EntityIdStr.ENTITY),
+    ('lab_sample', EntityType.LAB_SAMPLE, EntityIdStr.LAB_SAMPLE),
+    ('lab_strain', EntityType.LAB_STRAIN, EntityIdStr.LAB_STRAIN),
+]
+
+
 class AnnotationService:
     def __init__(
         self,
@@ -72,67 +92,18 @@ class AnnotationService:
         lab_sample: bool = True,
         lab_strain: bool = True
     ) -> List[Tuple[str, str]]:
-        entity_type_and_id_pairs: List[Tuple[str, str]] = []
-
-        if anatomy:
-            entity_type_and_id_pairs.append(
-                (EntityType.ANATOMY.value, EntityIdStr.ANATOMY.value))
-
-        if chemical:
-            entity_type_and_id_pairs.append(
-                (EntityType.CHEMICAL.value, EntityIdStr.CHEMICAL.value))
-
-        if compound:
-            entity_type_and_id_pairs.append(
-                (EntityType.COMPOUND.value, EntityIdStr.COMPOUND.value))
-
-        if disease:
-            entity_type_and_id_pairs.append(
-                (EntityType.DISEASE.value, EntityIdStr.DISEASE.value))
-
-        if food:
-            entity_type_and_id_pairs.append(
-                (EntityType.FOOD.value, EntityIdStr.FOOD.value))
-
-        if phenomena:
-            entity_type_and_id_pairs.append(
-                (EntityType.PHENOMENA.value, EntityIdStr.PHENOMENA.value))
-
-        if phenotype:
-            entity_type_and_id_pairs.append(
-                (EntityType.PHENOTYPE.value, EntityIdStr.PHENOTYPE.value))
-
-        if species:
-            # Order is IMPORTANT here
-            # Species should always be annotated before Genes and Proteins
-            entity_type_and_id_pairs.append(
-                (EntityType.SPECIES.value, EntityIdStr.SPECIES.value))
-
-        if protein:
-            entity_type_and_id_pairs.append(
-                (EntityType.PROTEIN.value, EntityIdStr.PROTEIN.value))
-
-        if gene:
-            entity_type_and_id_pairs.append(
-                (EntityType.GENE.value, EntityIdStr.GENE.value))
-
-        if company:
-            entity_type_and_id_pairs.append(
-                (EntityType.COMPANY.value, EntityIdStr.COMPANY.value))
-
-        if entity:
-            entity_type_and_id_pairs.append(
-                (EntityType.ENTITY.value, EntityIdStr.ENTITY.value))
-
-        if lab_sample:
-            entity_type_and_id_pairs.append(
-                (EntityType.LAB_SAMPLE.value, EntityIdStr.LAB_SAMPLE.value))
-
-        if lab_strain:
-            entity_type_and_id_pairs.append(
-                (EntityType.LAB_STRAIN.value, EntityIdStr.LAB_STRAIN.value))
-
-        return entity_type_and_id_pairs
+        flags = dict(
+            anatomy=anatomy, chemical=chemical, compound=compound,
+            disease=disease, food=food, gene=gene, phenomena=phenomena,
+            phenotype=phenotype, protein=protein, species=species,
+            company=company, entity=entity, lab_sample=lab_sample,
+            lab_strain=lab_strain,
+        )
+        return [
+            (etype.value, eid.value)
+            for param_name, etype, eid in _ENTITY_ANNOTATION_ORDER
+            if flags[param_name]
+        ]
 
     def _create_annotation_object(
         self,
@@ -1030,6 +1001,30 @@ class AnnotationService:
 
         return updated_unified_annotations
 
+    def _gene_protein_precedence(
+        self,
+        anno1: Annotation,
+        anno2: Annotation,
+        key1: int,
+        key2: int,
+    ) -> Optional[Annotation]:
+        """Decide between overlapping gene and protein annotations.
+
+        Protein has a capital first letter (CysB), gene has lowercase (cysB).
+        Prefer the annotation whose text_in_document exactly matches its keyword,
+        then fall back to same word-count match. Returns None when undecidable.
+        """
+        higher, lower = (anno1, anno2) if key1 > key2 else (anno2, anno1)
+        if higher.text_in_document == higher.keyword:
+            return higher
+        if lower.text_in_document == lower.keyword:
+            return lower
+        if len(higher.text_in_document.split(' ')) == len(higher.keyword.split(' ')):
+            return higher
+        if len(lower.text_in_document.split(' ')) == len(lower.keyword.split(' ')):
+            return lower
+        return None
+
     def determine_entity_precedence(
         self,
         anno1: Annotation,
@@ -1038,66 +1033,20 @@ class AnnotationService:
         key1 = ENTITY_TYPE_PRECEDENCE[anno1.meta.type]
         key2 = ENTITY_TYPE_PRECEDENCE[anno2.meta.type]
 
-        # only do special gene vs protein comparison if they have
-        # exact intervals
-        # because that means the same normalized text was matched
-        # to both
-        if ((anno1.meta.type == EntityType.PROTEIN.value or
-                anno1.meta.type == EntityType.GENE.value) and
-            (anno2.meta.type == EntityType.PROTEIN.value or
-                anno2.meta.type == EntityType.GENE.value) and
-            (anno1.lo_location_offset == anno2.lo_location_offset and
-                anno1.hi_location_offset == anno2.hi_location_offset)):  # noqa
-            if anno1.meta.type != anno2.meta.type:
-                # protein vs gene
-                # protein has capital first letter: CysB
-                # gene has lowercase: cysB
-                # also cases like gene SerpinA1 vs protein Serpin A1
-
-                """First check for exact match
-                if no exact match then check substrings
-                e.g `Serpin A1` matched to `serpin A1`
-                e.g `SerpinA1` matched to `serpin A1`
-                We take the first case will not count hyphens separated
-                because hard to infer if it was used as a space
-                need to consider precedence in case gene and protein
-                have the exact spelling correct annotated word
-                """
-                gene_protein_precedence_result = None
-                if key1 > key2:
-                    if anno1.text_in_document == anno1.keyword:
-                        gene_protein_precedence_result = anno1
-                    elif anno2.text_in_document == anno2.keyword:
-                        gene_protein_precedence_result = anno2
-
-                    # no match so far
-                    if gene_protein_precedence_result is None:
-                        if len(anno1.text_in_document.split(' ')) == len(anno1.keyword.split(' ')):
-                            gene_protein_precedence_result = anno1
-                        elif len(anno2.text_in_document.split(' ')) == len(anno2.keyword.split(' ')):  # noqa
-                            gene_protein_precedence_result = anno2
-                else:
-                    if anno2.text_in_document == anno2.keyword:
-                        gene_protein_precedence_result = anno2
-                    elif anno1.text_in_document == anno1.keyword:
-                        gene_protein_precedence_result = anno1
-
-                    # no match so far
-                    if gene_protein_precedence_result is None:
-                        if len(anno2.text_in_document.split(' ')) == len(anno2.keyword.split(' ')):
-                            gene_protein_precedence_result = anno2
-                        elif len(anno1.text_in_document.split(' ')) == len(anno1.keyword.split(' ')):  # noqa
-                            gene_protein_precedence_result = anno1
-
-                if gene_protein_precedence_result is not None:
-                    return gene_protein_precedence_result
+        gene_or_protein = {EntityType.GENE.value, EntityType.PROTEIN.value}
+        # Only do special gene-vs-protein comparison when they share exact offsets,
+        # meaning the same normalised text was matched to both.
+        if (anno1.meta.type in gene_or_protein and
+                anno2.meta.type in gene_or_protein and
+                anno1.meta.type != anno2.meta.type and
+                anno1.lo_location_offset == anno2.lo_location_offset and
+                anno1.hi_location_offset == anno2.hi_location_offset):
+            result = self._gene_protein_precedence(anno1, anno2, key1, key2)
+            if result is not None:
+                return result
 
         if key1 > key2:
             return anno1
-        elif key2 > key1:
+        if key2 > key1:
             return anno2
-        else:
-            if anno1.keyword_length > anno2.keyword_length:
-                return anno1
-            else:
-                return anno2
+        return anno1 if anno1.keyword_length > anno2.keyword_length else anno2
