@@ -604,6 +604,25 @@ class AnnotationService:
             )
         return self._create_annotation_object(entities_to_create)
 
+    def _collect_protein_tokens(
+        self,
+        matches_list: List[LMDBMatch],
+    ) -> Tuple[List[str], list]:
+        """Flatten LMDBMatches into (protein_names, entity_token_pairs)."""
+        entity_token_pairs = []
+        protein_names: Set[str] = set()
+        for match in matches_list:
+            entities_set = set()
+            for entity in match.entities:
+                protein_names.add(entity['synonym'])
+                entities_set.add((
+                    entity['synonym'], entity.get('category', ''),
+                    entity['id_type'], entity.get('hyperlinks', '')))
+            for synonym, category, datasource, hyperlinks in entities_set:
+                entity_token_pairs.append(
+                    (synonym, category, datasource, hyperlinks or [], match.token))
+        return list(protein_names), entity_token_pairs
+
     def _annotate_type_protein(
         self,
         recognized_entities: RecognizedEntities
@@ -617,19 +636,7 @@ class AnnotationService:
 
         entities_to_create: List[CreateAnnotationObjParams] = []
 
-        entity_token_pairs = []
-        protein_names: Set[str] = set()
-        for match in matches_list:
-            entities_set = set()
-            for entity in match.entities:
-                protein_names.add(entity['synonym'])
-                entities_set.add((entity['synonym'], entity.get('category', ''), entity['id_type'], entity.get('hyperlinks', '')))  # noqa
-            for synonym, category, datasource, hyperlinks in entities_set:
-                if hyperlinks == '':
-                    hyperlinks = []
-                entity_token_pairs.append((synonym, category, datasource, hyperlinks, match.token))
-
-        protein_names_list = list(protein_names)
+        protein_names_list, entity_token_pairs = self._collect_protein_tokens(matches_list)
 
         protein_match_time = time.time()
         graph_results = self.graph.get_proteins_to_organisms(
