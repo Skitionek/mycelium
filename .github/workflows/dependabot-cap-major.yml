@@ -59,7 +59,7 @@ jobs:
       # Decide what to do:
       #   cap  — multi-major bump; write a new ignore rule.
       #   lift — single-major bump; check whether an existing cap should advance.
-      #   skip — not a semver-major bump; nothing to do.
+      #   (skip=true) — not a semver-major bump; nothing to do.
       - name: Determine action
         id: check
         env:
@@ -120,12 +120,11 @@ jobs:
         if: steps.check.outputs.skip == 'false'
         run: pip install --quiet 'ruamel.yaml>=0.18'
 
-      # Edit .github/dependabot.yml via the standalone script, which handles:
-      #   cap  — adds / updates an ignore rule so only the next single major is proposed.
-      #   lift — advances an existing cap by one major now that the allowed bump landed.
+      # Edit .github/dependabot.yml in-place, preserving all existing comments
+      # and formatting, to add (or update) an ignore rule for the dependency.
       #
       # Note: fetch-metadata reports 'npm_and_yarn' and 'github_actions', but
-      # dependabot.yml uses 'npm' and 'github-actions'.  The script maps these.
+      # dependabot.yml uses 'npm' and 'github-actions'. ECOSYSTEM_MAP translates.
       - name: Patch .github/dependabot.yml
         if: steps.check.outputs.skip == 'false'
         id: patch
@@ -136,9 +135,98 @@ jobs:
           ACTION:    ${{ steps.check.outputs.action }}
           CAP:       ${{ steps.check.outputs.cap }}
           NEW_MAJOR: ${{ steps.check.outputs.new_major }}
-        run: python3 .github/scripts/patch_dependabot.py
+        run: |
+          python3 - <<'PYEOF'
+          import os, sys
+          from ruamel.yaml import YAML
+          from ruamel.yaml.comments import CommentedSeq
 
-      - name: Open a PR with the config change
+          # fetch-metadata uses different ecosystem identifiers than dependabot.yml.
+          ECOSYSTEM_MAP = {'npm_and_yarn': 'npm', 'github_actions': 'github-actions'}
+
+          dep_names = [n.strip() for n in os.environ['DEP_NAMES'].split(',') if n.strip()]
+          ecosystem = ECOSYSTEM_MAP.get(os.environ['ECOSYSTEM'], os.environ['ECOSYSTEM'])
+          directory = os.environ['DIRECTORY']
+          action    = os.environ['ACTION']
+
+          path = '.github/dependabot.yml'
+          yaml = YAML()
+          yaml.preserve_quotes = True
+          yaml.width = 4096
+
+          with open(path) as f:
+              doc = yaml.load(f)
+
+          changed = False
+          new_cap = None
+
+          for update in doc.get('updates', []):
+              if (update.get('package-ecosystem') == ecosystem and
+                      update.get('directory') == directory):
+                  if 'ignore' not in update:
+                      update['ignore'] = CommentedSeq()
+                  ignore = update['ignore']
+
+                  if action == 'cap':
+                      cap = int(os.environ['CAP'])
+                      version_rule = f'>={cap}'
+                      for dep_name in dep_names:
+                          existing = next(
+                              (r for r in ignore if r.get('dependency-name') == dep_name),
+                              None)
+                          if existing is not None:
+                              existing['versions'] = [version_rule]
+                              print(f'Updated cap for {dep_name!r}: versions {version_rule}')
+                          else:
+                              ignore.append({
+                                  'dependency-name': dep_name,
+                                  'versions': [version_rule],
+                              })
+                              print(f'Added cap for {dep_name!r}: versions {version_rule}')
+                      changed = True
+
+                  elif action == 'lift':
+                      # The previously-written cap that locked the dependency was
+                      # >=new_major+1.  Advance it to >=new_major+2.
+                      new_major = int(os.environ['NEW_MAJOR'])
+                      old_rule  = f'>={new_major + 1}'
+                      new_rule  = f'>={new_major + 2}'
+                      for dep_name in dep_names:
+                          existing = next(
+                              (r for r in ignore if r.get('dependency-name') == dep_name),
+                              None)
+                          if existing is not None and old_rule in existing.get('versions', []):
+                              existing['versions'] = [new_rule]
+                              print(f'Lifted cap for {dep_name!r}: {old_rule} → {new_rule}')
+                              changed = True
+                              new_cap = new_major + 2
+                          else:
+                              print(f'No cap found for {dep_name!r} at {old_rule}; skipping.')
+                  break
+          else:
+              if action == 'cap':
+                  print(
+                      f'::error::No updates entry found for '
+                      f'ecosystem={ecosystem!r} directory={directory!r}',
+                      file=sys.stderr,
+                  )
+                  sys.exit(1)
+              else:
+                  print(f'No updates entry for ecosystem={ecosystem!r} directory={directory!r}.')
+
+          if changed:
+              with open(path, 'w') as f:
+                  yaml.dump(doc, f)
+
+          gha_out = os.environ.get('GITHUB_OUTPUT', '')
+          if gha_out:
+              with open(gha_out, 'a') as f:
+                  print(f'changed={"true" if changed else "false"}', file=f)
+                  if new_cap is not None:
+                      print(f'new_cap={new_cap}', file=f)
+          PYEOF
+
+      - name: Open a PR with the ignore rule
         if: >
           steps.check.outputs.skip == 'false' &&
           steps.patch.outputs.changed == 'true'
@@ -161,59 +249,60 @@ jobs:
           if [ "$ACTION" = "cap" ]; then
             BRANCH="dependabot-cap/${DEP_NAMES//,/-}-lt${CAP}"
             BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
-            COMMIT_MSG="chore(deps): cap ${DEP_NAMES} at major < ${CAP}
+            git checkout -b "$BRANCH"
+            git add .github/dependabot.yml
+            if git diff --cached --quiet; then
+              echo "No changes to .github/dependabot.yml (ignore rule already in place)."
+              exit 0
+            fi
+            git commit -m "chore(deps): cap ${DEP_NAMES} at major < ${CAP}
 
           Dependabot proposed a multi-major version jump.
           Added an ignore rule so it only proposes one major at a time."
-            PR_TITLE="chore(deps): cap ${DEP_NAMES} upgrades to one major at a time"
-            PR_BODY="Dependabot PR #${PR_NUMBER} proposes jumping \`${DEP_NAMES}\` from \`${PREV}\` to \`${NEW}\`, which skips more than one major version at a time.
+            git push origin "$BRANCH"
+            PATCH_PR_URL=$(gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base "${{ github.event.repository.default_branch }}" \
+              --head "$BRANCH" \
+              --title "chore(deps): cap ${DEP_NAMES} upgrades to one major at a time" \
+              --body "Dependabot PR #${PR_NUMBER} proposes jumping \`${DEP_NAMES}\` from \`${PREV}\` to \`${NEW}\`, which skips more than one major version at a time.
 
           This PR adds an \`ignore\` rule to \`.github/dependabot.yml\` that caps versions at \`>= ${CAP}\`, so Dependabot will only propose the next single-major upgrade (\`${NEXT_MAJOR}.x\`) from now on.
 
-          Merge this first, then Dependabot will re-open #${PR_NUMBER} at the capped version on its next scheduled run."
-          else
-            # lift: advance the existing cap by one major.
-            OLD_CAP=$(( NEW_MAJOR + 1 ))
-            BRANCH="dependabot-cap/${DEP_NAMES//,/-}-lift${NEW_MAJOR}"
-            BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
-            COMMIT_MSG="chore(deps): advance cap for ${DEP_NAMES} to major < ${NEW_CAP}
-
-          Dependabot proposed the previously-capped single-major bump to ${NEW_MAJOR}.x.
-          Advanced the ignore rule (>=${OLD_CAP} → >=${NEW_CAP}) so the next major can be proposed in turn."
-            PR_TITLE="chore(deps): advance ${DEP_NAMES} cap to allow ${NEW_MAJOR}.x"
-            PR_BODY="Dependabot PR #${PR_NUMBER} proposes the previously-capped upgrade \`${PREV}\` → \`${NEW}\`.
-
-          This PR advances the \`ignore\` rule in \`.github/dependabot.yml\` from \`>=${OLD_CAP}\` to \`>=${NEW_CAP}\`, so Dependabot can propose the next single-major upgrade (\`${NEW_MAJOR}.x → $((NEW_MAJOR + 1)).x\`) in turn.
-
-          Merge this alongside PR #${PR_NUMBER} so the dependency keeps advancing one major at a time."
-          fi
-
-          git checkout -b "$BRANCH"
-          git add .github/dependabot.yml
-
-          if git diff --cached --quiet; then
-            echo "No changes to .github/dependabot.yml (rule already in place)."
-            exit 0
-          fi
-
-          git commit -m "$COMMIT_MSG"
-          git push origin "$BRANCH"
-
-          PATCH_PR_URL=$(gh pr create \
-            --repo "$GITHUB_REPOSITORY" \
-            --base "${{ github.event.repository.default_branch }}" \
-            --head "$BRANCH" \
-            --title "$PR_TITLE" \
-            --body "$PR_BODY")
-
-          if [ "$ACTION" = "cap" ]; then
+          Merge this first, then Dependabot will re-open #${PR_NUMBER} at the capped version on its next scheduled run.")
             gh pr comment "$PR_NUMBER" \
               --repo "$GITHUB_REPOSITORY" \
               --body "This PR skips more than one major version (\`${PREV}\` → \`${NEW}\`). A patch PR has been opened to cap \`.github/dependabot.yml\` at \`${NEXT_MAJOR}.x\`: ${PATCH_PR_URL}
 
           Closing this PR. Dependabot will re-open it at the capped version once that patch merges."
             gh pr close "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+
           else
+            # lift: advance the cap by one major
+            OLD_CAP=$(( NEW_MAJOR + 1 ))
+            BRANCH="dependabot-cap/${DEP_NAMES//,/-}-lift${NEW_MAJOR}"
+            BRANCH=$(printf '%s' "$BRANCH" | tr -cs 'A-Za-z0-9/_.-' '-')
+            git checkout -b "$BRANCH"
+            git add .github/dependabot.yml
+            if git diff --cached --quiet; then
+              echo "No changes to .github/dependabot.yml (cap already advanced)."
+              exit 0
+            fi
+            git commit -m "chore(deps): advance cap for ${DEP_NAMES} to major < ${NEW_CAP}
+
+          Dependabot proposed the previously-capped single-major bump to ${NEW_MAJOR}.x.
+          Advanced the ignore rule (>=${OLD_CAP} → >=${NEW_CAP}) so the next major can be proposed in turn."
+            git push origin "$BRANCH"
+            PATCH_PR_URL=$(gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base "${{ github.event.repository.default_branch }}" \
+              --head "$BRANCH" \
+              --title "chore(deps): advance ${DEP_NAMES} cap to allow ${NEW_MAJOR}.x" \
+              --body "Dependabot PR #${PR_NUMBER} proposes the previously-capped upgrade \`${PREV}\` → \`${NEW}\`.
+
+          This PR advances the \`ignore\` rule in \`.github/dependabot.yml\` from \`>=${OLD_CAP}\` to \`>=${NEW_CAP}\`, so Dependabot can propose the next single-major upgrade (\`${NEW_MAJOR}.x\`) going forward.
+
+          Merge this alongside PR #${PR_NUMBER} so the dependency keeps advancing one major at a time.")
             gh pr comment "$PR_NUMBER" \
               --repo "$GITHUB_REPOSITORY" \
               --body "The cap in \`.github/dependabot.yml\` for \`${DEP_NAMES}\` has been advanced from \`>=${OLD_CAP}\` to \`>=${NEW_CAP}\` so the next major can be proposed in turn: ${PATCH_PR_URL}"
