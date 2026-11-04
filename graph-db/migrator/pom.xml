@@ -16,13 +16,13 @@
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
-      <version>4.33.0</version>
+      <version>5.0.4</version>
     </dependency>
 
     <dependency>
       <groupId>org.neo4j.driver</groupId>
       <artifactId>neo4j-java-driver</artifactId>
-      <version>4.4.27</version>
+      <version>5.28.0</version>
     </dependency>
 
     <!-- https://azure.github.io/azure-sdk/releases/latest/index.html#java -->
