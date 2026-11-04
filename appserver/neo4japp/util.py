@@ -304,6 +304,17 @@ class FileTransfer():
     status_code: int = attr.ib(validator=attr.validators.instance_of(int))
 
 
+def _jsonify_success_response(success_object: SuccessResponse):
+    result = success_object.result
+    if isinstance(result, CamelDictMixin):
+        result = result.to_dict()
+    elif isinstance(result, list):
+        for index, _ in enumerate(result):
+            if isinstance(result[index], CamelDictMixin):
+                result[index] = result[index].to_dict()
+    return jsonify({'result': result}), success_object.status_code
+
+
 def jsonify_with_class(
         request_class: Optional[Type[CamelDictMixin]] = None,
         has_file: bool = False,
@@ -356,20 +367,7 @@ def jsonify_with_class(
                 success_object = f(*args, **kwargs)
 
             if isinstance(success_object, SuccessResponse):
-                # check type of success object to determine how to get
-                # the actual data it holds
-                result = success_object.result
-                if isinstance(result, CamelDictMixin):
-                    result = result.to_dict()
-                elif (isinstance(result, list)):
-                    for index, _ in enumerate(result):
-                        if isinstance(result[index], CamelDictMixin):
-                            result[index] = result[index].to_dict()  # noqa
-
-                return (
-                    jsonify({'result': result}),
-                    success_object.status_code,
-                )
+                return _jsonify_success_response(success_object)
             elif isinstance(success_object, dict):
                 return jsonify(success_object)
             else:
