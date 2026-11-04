@@ -2,6 +2,7 @@ import json
 import time
 
 from bisect import bisect_left
+from dataclasses import dataclass
 from math import inf, isinf
 from typing import cast, Dict, List, Optional, Set, Tuple
 from urllib.parse import quote as uri_encode
@@ -62,6 +63,24 @@ _ENTITY_ANNOTATION_ORDER: List[Tuple[str, EntityType, EntityIdStr]] = [
 ]
 
 
+@dataclass(frozen=True)
+class EntityAnnotationFlags:
+    anatomy: bool = True
+    chemical: bool = True
+    compound: bool = True
+    disease: bool = True
+    food: bool = True
+    gene: bool = True
+    phenomena: bool = True
+    phenotype: bool = True
+    protein: bool = True
+    species: bool = True
+    company: bool = True
+    entity: bool = True
+    lab_sample: bool = True
+    lab_strain: bool = True
+
+
 class AnnotationService:
     def __init__(
         self,
@@ -77,32 +96,12 @@ class AnnotationService:
 
     def get_entities_to_annotate(
         self,
-        anatomy: bool = True,
-        chemical: bool = True,
-        compound: bool = True,
-        disease: bool = True,
-        food: bool = True,
-        gene: bool = True,
-        phenomena: bool = True,
-        phenotype: bool = True,
-        protein: bool = True,
-        species: bool = True,
-        company: bool = True,
-        entity: bool = True,
-        lab_sample: bool = True,
-        lab_strain: bool = True
+        flags: EntityAnnotationFlags = EntityAnnotationFlags()
     ) -> List[Tuple[str, str]]:
-        flags = dict(
-            anatomy=anatomy, chemical=chemical, compound=compound,
-            disease=disease, food=food, gene=gene, phenomena=phenomena,
-            phenotype=phenotype, protein=protein, species=species,
-            company=company, entity=entity, lab_sample=lab_sample,
-            lab_strain=lab_strain,
-        )
         return [
             (etype.value, eid.value)
             for param_name, etype, eid in _ENTITY_ANNOTATION_ORDER
-            if flags[param_name]
+            if getattr(flags, param_name)
         ]
 
     def _create_annotation_object(
@@ -365,6 +364,27 @@ class AnnotationService:
         # Return the gene id of the organism with the highest priority
         return organism_matches[curr_closest_organism], curr_closest_organism, closest_dist
 
+    def _resolve_fallback_organisms(
+        self,
+        entity_synonym: str,
+        entity_type: str,
+        fallback_organism_matches: dict,
+    ) -> Dict[str, str]:
+        """Return organism_id→entity_id mapping from fallback KG matches."""
+        result: Dict[str, str] = {}
+        if entity_type == EntityType.PROTEIN.value:
+            try:
+                result = fallback_organism_matches[entity_synonym]
+            except KeyError:
+                pass
+        else:
+            try:
+                result = fallback_organism_matches[entity_synonym][entity_synonym]
+            except KeyError:
+                for d in fallback_organism_matches[entity_synonym].values():
+                    result = {**result, **d}
+        return result
+
     def _find_best_organism_match(
         self,
         token,
@@ -395,24 +415,8 @@ class AnnotationService:
             find_organism_above = True
 
             if self.specified_organism.synonym and has_fallback_match:
-                fallback_organisms_to_match: Dict[str, str] = {}
-
-                if entity_type == EntityType.PROTEIN.value:
-                    try:
-                        fallback_organisms_to_match = fallback_organism_matches[entity_synonym]
-                    except KeyError:
-                        # pass here to let it be handled below
-                        pass
-                else:
-                    # for genes
-                    try:
-                        # prioritize common name that is same as synonym
-                        fallback_organisms_to_match = fallback_organism_matches[entity_synonym][entity_synonym]  # noqa
-                    except KeyError:
-                        # an organism can have multiple different genes w/ same synonym
-                        # since we don't know which to use, doing this is fine
-                        for d in list(fallback_organism_matches[entity_synonym].values()):
-                            fallback_organisms_to_match = {**fallback_organisms_to_match, **d}
+                fallback_organisms_to_match = self._resolve_fallback_organisms(
+                    entity_synonym, entity_type, fallback_organism_matches)
 
                 # if matched in KG then set to fallback strain
                 if fallback_organisms_to_match.get(self.specified_organism.organism_id, None):  # noqa
