@@ -170,7 +170,7 @@ def create_app(name='neo4japp', config='config.Config'):
     register_blueprints(app, BLUEPRINT_PACKAGE)
 
     cache_config = {
-        'CACHE_TYPE': 'simple',
+        'CACHE_TYPE': 'SimpleCache',
         'CACHE_THRESHOLD': 10,
     }
 
