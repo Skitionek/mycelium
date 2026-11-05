@@ -4,7 +4,8 @@ import { SankeySearchService } from '../../services/search.service';
 
 @Component({
   selector: 'app-sankey-search-control',
-  templateUrl: './search-control.component.html'
+  templateUrl: './search-control.component.html',
+  standalone: false
 })
 export class SankeySearchControlComponent {
   constructor(

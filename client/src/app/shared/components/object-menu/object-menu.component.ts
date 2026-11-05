@@ -27,6 +27,7 @@ import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 @Component({
   selector: 'app-object-menu',
   templateUrl: './object-menu.component.html',
+  standalone: false,
 })
 export class ObjectMenuComponent implements AfterViewInit, OnChanges {
 

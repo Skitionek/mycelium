@@ -19,6 +19,7 @@ import { describeRootStatus } from './status-text';
 @Component({
   selector: 'app-local-folder-list',
   templateUrl: './local-folder-list.component.html',
+  standalone: false,
 })
 export class LocalFolderListComponent {
   readonly supported = this.registry.supported;

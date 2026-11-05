@@ -30,6 +30,7 @@ import { ContextMenuControlService } from '../../services/context-menu-control.s
     selector: 'app-context-menu',
     templateUrl: './context-menu.component.html',
     styleUrls: ['./context-menu.component.scss'],
+    standalone: false,
 })
 export class ContextMenuComponent extends TooltipComponent implements AfterViewInit, OnDestroy, OnChanges {
     @Input() selectedNodeIds: IdType[];

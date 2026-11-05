@@ -21,6 +21,7 @@ import { FilesystemService } from '../services/filesystem.service';
     useExisting: ObjectVersionHistoryComponent,
     multi: true,
   }],
+  standalone: false,
 })
 export class ObjectVersionHistoryComponent implements ControlValueAccessor {
 

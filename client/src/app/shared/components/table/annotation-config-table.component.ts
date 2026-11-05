@@ -4,7 +4,8 @@ import { FormGroup } from '@angular/forms';
 @Component({
   selector: 'app-annotation-config-table',
   templateUrl: './annotation-config-table.component.html',
-  styleUrls: ['./annotation-config-table.component.scss']
+  styleUrls: ['./annotation-config-table.component.scss'],
+  standalone: false
 })
 export class AnnotationConfigurationTableComponent {
   @Input() headers: string[];

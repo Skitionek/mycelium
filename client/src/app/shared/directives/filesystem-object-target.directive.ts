@@ -27,6 +27,7 @@ import {
 
 @Directive({
   selector: '[appFSObjectTarget]',
+  standalone: false,
 })
 export class FilesystemObjectTargetDirective {
 

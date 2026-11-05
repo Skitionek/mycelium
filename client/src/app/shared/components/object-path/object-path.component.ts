@@ -6,6 +6,7 @@ import { WorkspaceManager } from 'app/shared/workspace-manager';
 @Component({
   selector: 'app-object-path',
   templateUrl: './object-path.component.html',
+  standalone: false,
 })
 export class ObjectPathComponent {
 

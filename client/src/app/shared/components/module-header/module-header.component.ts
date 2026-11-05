@@ -5,7 +5,8 @@ import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 
 @Component({
   selector: 'app-module-header',
-  templateUrl: './module-header.component.html'
+  templateUrl: './module-header.component.html',
+  standalone: false
 })
 export class ModuleHeaderComponent {
   @Input() object!: FilesystemObject;

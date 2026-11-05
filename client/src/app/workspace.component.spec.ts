@@ -26,7 +26,7 @@ describe('WorkspaceComponent', () => {
     });
 });
 
-@Component({template: 'Stub file view'})
+@Component({template: 'Stub file view', standalone: false})
 class StubFileViewComponent implements OnInit {
     modulePropertiesChange = new EventEmitter<ModuleProperties>();
 

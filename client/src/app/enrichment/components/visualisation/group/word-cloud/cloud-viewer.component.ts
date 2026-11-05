@@ -12,7 +12,8 @@ import { paramsToEnrichmentTableLink, triggerSearchOnShouldReplaceTab } from '..
 
 @Component({
   selector: 'app-cloud-viewer',
-  templateUrl: './cloud-viewer.component.html'
+  templateUrl: './cloud-viewer.component.html',
+  standalone: false
 })
 export class CloudViewerComponent implements OnChanges {
   @Input() data: EnrichWithGOTermsResult[];

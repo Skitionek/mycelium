@@ -15,6 +15,7 @@ declare type PlacementArray = Placement | Array<Placement> | string;
   styleUrls: [
     './color-chooser.component.scss',
   ],
+  standalone: false,
 })
 export class ColorChooserComponent {
   @ViewChild('dropdown', {static: true, read: NgbDropdown}) dropdownComponent: NgbDropdown;

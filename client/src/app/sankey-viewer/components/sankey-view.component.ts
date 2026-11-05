@@ -42,7 +42,8 @@ import { SearchEntity } from '../services/search-match';
     SankeyControllerService,
     WarningControllerService,
     SankeySearchService
-  ]
+  ],
+  standalone: false
 })
 export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, AfterContentInit {
 

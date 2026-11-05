@@ -17,7 +17,8 @@ import { VisualizationService } from 'app/visualization/services/visualization.s
 @Component({
     selector: 'app-sidenav-type-view',
     templateUrl: './sidenav-type-view.component.html',
-    styleUrls: ['./sidenav-type-view.component.scss']
+    styleUrls: ['./sidenav-type-view.component.scss'],
+    standalone: false
 })
 export class SidenavTypeViewComponent {
   @Input() legend: Map<string, string[]>;

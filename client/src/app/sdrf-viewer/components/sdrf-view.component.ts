@@ -26,6 +26,7 @@ import { SdrfDocument } from '../models/sdrf-document';
   selector: 'app-sdrf-view',
   templateUrl: './sdrf-view.component.html',
   styleUrls: ['./sdrf-view.component.scss'],
+  standalone: false,
 })
 export class SdrfViewComponent implements OnInit, OnDestroy {
 

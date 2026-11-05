@@ -10,7 +10,8 @@ declare const Plotly: any;
 @Component({
   selector: 'app-plotly-sankey-diagram',
   templateUrl: './plotly-sankey-diagram.component.html',
-  styleUrls: ['./plotly-sankey-diagram.component.scss']
+  styleUrls: ['./plotly-sankey-diagram.component.scss'],
+  standalone: false
 })
 export class PlotlySankeyDiagramComponent implements AfterViewInit {
   @Input() config: any;

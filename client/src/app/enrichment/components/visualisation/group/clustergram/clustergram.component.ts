@@ -19,7 +19,8 @@ class GeneRow {
 @Component({
   selector: 'app-clustergram',
   templateUrl: './clustergram.component.html',
-  styleUrls: ['./clustergram.component.scss']
+  styleUrls: ['./clustergram.component.scss'],
+  standalone: false
 })
 export class ClustergramComponent implements OnChanges {
   @Input() data: EnrichWithGOTermsResult[];

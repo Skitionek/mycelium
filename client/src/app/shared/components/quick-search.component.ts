@@ -9,6 +9,7 @@ import { SEARCH_LINKS } from '../links';
 @Component({
   selector: 'app-quick-search',
   templateUrl: './quick-search.component.html',
+  standalone: false,
 })
 export class QuickSearchComponent implements OnChanges {
   @Input() query: string | undefined;

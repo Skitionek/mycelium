@@ -19,6 +19,7 @@ const mapSingularOfTootipItems = func => {
   selector: 'app-chart',
   templateUrl: './chart.component.html',
   styleUrls: ['./chart.component.scss'],
+  standalone: false,
 })
 export class ChartComponent implements OnChanges {
   public options: ChartOptions = ({

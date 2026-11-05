@@ -16,6 +16,7 @@ import { FilesystemObject, ProjectImpl } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-tile-deck',
   templateUrl: './object-tile-deck.component.html',
+  standalone: false,
 })
 export class ObjectTileDeckComponent extends ObjectListComponent {
 

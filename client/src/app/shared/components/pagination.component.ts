@@ -5,6 +5,7 @@ import { PaginatedRequestOptions } from '../schemas/common';
 @Component({
   selector: 'app-pagination',
   templateUrl: './pagination.component.html',
+  standalone: false,
 })
 export class PaginationComponent<T extends PaginatedRequestOptions = PaginatedRequestOptions> {
 

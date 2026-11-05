@@ -18,6 +18,7 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-community-browser',
   templateUrl: './community-browser.component.html',
+  standalone: false,
 })
 export class CommunityBrowserComponent implements OnInit, OnDestroy {
   private readonly defaultLocator: StandardRequestOptions = {

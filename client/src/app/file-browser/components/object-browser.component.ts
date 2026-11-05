@@ -26,6 +26,7 @@ import { ProjectsService } from '../services/projects.service';
 @Component({
   selector: 'app-object-browser',
   templateUrl: './object-browser.component.html',
+  standalone: false,
 })
 export class ObjectBrowserComponent implements OnInit, OnDestroy {
   @Output() modulePropertiesChange = new EventEmitter<ModuleProperties>();

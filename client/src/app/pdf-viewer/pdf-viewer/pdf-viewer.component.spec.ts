@@ -7,7 +7,8 @@ import { PdfViewerModule } from './pdf-viewer.module';
 @Component({
   template: `
     <app-pdf-viewer-lib></app-pdf-viewer-lib>
-  `
+  `,
+  standalone: false
 })
 class TestComponent {}
 

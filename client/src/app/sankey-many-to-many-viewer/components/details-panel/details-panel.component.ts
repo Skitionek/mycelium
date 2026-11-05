@@ -8,7 +8,8 @@ import { SankeyManyToManySelection } from '../interfaces';
   selector: 'app-sankey-many-to-many-details-panel',
   templateUrl: './details-panel.component.html',
   styleUrls: ['./details-panel.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class SankeyManyToManyDetailsPanelComponent extends SankeyDetailsPanelComponent {
   // @ts-ignore

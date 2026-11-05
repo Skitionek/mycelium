@@ -10,6 +10,7 @@ import { SankeyManyToManyState, SankeyManyToManyOptions } from '../interfaces';
   selector: 'app-sankey-advanced-panel',
   templateUrl: './advanced-panel.component.html',
   styleUrls: ['./advanced-panel.component.scss'],
+  standalone: false,
 })
 export class SankeyManyToManyAdvancedPanelComponent {
   uuid: string;

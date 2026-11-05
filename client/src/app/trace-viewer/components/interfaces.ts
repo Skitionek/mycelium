@@ -1,4 +1,4 @@
-import visNetwork from 'vis-network';
+import * as visNetwork from 'vis-network';
 
 import { GraphLink, GraphNode } from 'app/shared/providers/graph-type/interfaces';
 

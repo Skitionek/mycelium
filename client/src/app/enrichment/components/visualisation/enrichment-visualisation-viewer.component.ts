@@ -15,7 +15,8 @@ import { EnrichmentService } from '../../services/enrichment.service';
   selector: 'app-enrichment-visualisation-viewer',
   templateUrl: './enrichment-visualisation-viewer.component.html',
   styleUrls: ['./enrichment-visualisation-viewer.component.scss'],
-  providers: [EnrichmentVisualisationService, EnrichmentService]
+  providers: [EnrichmentVisualisationService, EnrichmentService],
+  standalone: false
 })
 export class EnrichmentVisualisationViewerComponent implements OnInit, ModuleAwareComponent {
 

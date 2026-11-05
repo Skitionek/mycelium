@@ -14,6 +14,7 @@ import { AccountService } from 'app/users/services/account.service';
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
+  standalone: false,
 })
 export class ResetPasswordComponent {
   // Kept in sync with MIN_PASSWORD_LENGTH on the backend, which rejects

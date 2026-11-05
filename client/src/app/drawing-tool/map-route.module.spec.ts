@@ -6,7 +6,7 @@ import { AppModule } from 'app/app.module';
 
 import { MapRouteModule } from './map-route.module';
 
-@Component({template: ''})
+@Component({template: '', standalone: false})
 class WorkspaceStubComponent {
 }
 

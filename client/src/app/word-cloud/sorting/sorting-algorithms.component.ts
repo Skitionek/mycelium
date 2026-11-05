@@ -8,6 +8,7 @@ import { SortingAlgorithm } from './sorting-algorithms';
   templateUrl: './sorting-algorithms.component.html',
   styleUrls: ['./sorting-algorithms.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class SortingAlgorithmsComponent {
   @Output() changeSorting = new EventEmitter<SortingAlgorithm>();

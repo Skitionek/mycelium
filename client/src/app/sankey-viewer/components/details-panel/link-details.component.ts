@@ -6,7 +6,8 @@ import { SankeyDetailsComponent } from './details.component';
 
 @Component({
   selector: 'app-sankey-link-details',
-  templateUrl: './link-details.component.html'
+  templateUrl: './link-details.component.html',
+  standalone: false
 })
 export class SankeyLinkDetailsComponent extends SankeyDetailsComponent {
   @Input() entity: SankeyLink;

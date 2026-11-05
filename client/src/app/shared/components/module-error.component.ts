@@ -13,6 +13,7 @@ import { ErrorHandler } from '../services/error-handler.service';
   styleUrls: [
     './module-error.component.scss'
   ],
+  standalone: false,
 })
 export class ModuleErrorComponent {
   @HostBinding('class') @Input() class = 'position-absolute w-100 h-100 bg-white p-4';

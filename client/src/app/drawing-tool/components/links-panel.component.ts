@@ -30,6 +30,7 @@ import { LinkEditDialogComponent } from './map-editor/dialog/link-edit-dialog.co
     useExisting: LinksPanelComponent,
     multi: true,
   }],
+  standalone: false,
 })
 export class LinksPanelComponent extends AbstractControlValueAccessor<(Source | Hyperlink)[]> {
 

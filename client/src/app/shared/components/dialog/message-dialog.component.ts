@@ -11,6 +11,7 @@ import { MessageType } from 'app/interfaces/message-dialog.interface';
   selector: 'app-message-dialog',
   templateUrl: './message-dialog.component.html',
   styleUrls: ['./message-dialog.component.scss'],
+  standalone: false,
 })
 export class MessageDialogComponent {
   @Input() title: string;

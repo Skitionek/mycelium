@@ -6,7 +6,8 @@ import { SankeyDetailsComponent } from './details.component';
 
 @Component({
   selector: 'app-sankey-node-details',
-  templateUrl: './node-details.component.html'
+  templateUrl: './node-details.component.html',
+  standalone: false
 })
 // @ts-ignore
 export class SankeyNodeDetailsComponent extends SankeyDetailsComponent {

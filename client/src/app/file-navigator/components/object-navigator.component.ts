@@ -19,6 +19,7 @@ import { MimeTypes } from 'app/shared/constants';
 @Component({
   selector: 'app-object-navigator',
   templateUrl: './object-navigator.component.html',
+  standalone: false,
 })
 export class ObjectNavigatorComponent implements ModuleAwareComponent {
 

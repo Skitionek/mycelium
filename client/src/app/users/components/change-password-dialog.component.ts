@@ -15,7 +15,8 @@ import { UserEffects } from '../store/effects';
 
 @Component({
   selector: 'app-change-password-dialog',
-  templateUrl: './change-password-dialog.component.html'
+  templateUrl: './change-password-dialog.component.html',
+  standalone: false
 })
 export class ChangePasswordDialogComponent extends CommonDialogComponent {
   user: PrivateAppUser;

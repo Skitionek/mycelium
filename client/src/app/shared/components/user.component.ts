@@ -23,6 +23,7 @@ import { AppUser } from 'app/interfaces';
       <strong>Username:</strong> {{ user.username }}
     </ng-template>
   `,
+  standalone: false,
 })
 export class UserComponent {
 

@@ -6,7 +6,8 @@ import { SelectionEntity } from 'app/shared-sankey/interfaces';
   selector: 'app-sankey-details-panel',
   templateUrl: './details-panel.component.html',
   styleUrls: ['./details-panel.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class SankeyDetailsPanelComponent {
   @Input() details: Array<SelectionEntity>;

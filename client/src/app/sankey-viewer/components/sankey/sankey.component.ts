@@ -33,6 +33,7 @@ import { SankeyLayoutService } from './sankey-layout.service';
   templateUrl: './sankey.component.svg',
   styleUrls: ['./sankey.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   constructor(

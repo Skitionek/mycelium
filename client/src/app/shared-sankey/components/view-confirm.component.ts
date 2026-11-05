@@ -16,7 +16,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Cancel</button>
     <button type="button" ngbAutofocus class="btn btn-danger ms-2" (click)="modal.close()">Ok</button>
   </div>
-  `
+  `,
+  standalone: false
 })
 export class SankeyViewConfirmComponent {
   constructor(public modal: NgbActiveModal) {}

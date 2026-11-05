@@ -8,6 +8,7 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
 @Component({
   selector: 'app-terms-of-service-dialog',
   templateUrl: './terms-of-service-dialog.component.html',
+  standalone: false,
 })
 export class TermsOfServiceDialogComponent extends CommonDialogComponent {
   constructor(modal: NgbActiveModal, messageDialog: MessageDialog) {

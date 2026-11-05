@@ -10,6 +10,7 @@ import { SankeyControllerService, customisedMultiValueAccessorId } from '../../s
   selector: 'app-sankey-advanced-panel',
   templateUrl: './advanced-panel.component.html',
   styleUrls: ['./advanced-panel.component.scss'],
+  standalone: false,
 })
 export class SankeyAdvancedPanelComponent {
   uuid: string;

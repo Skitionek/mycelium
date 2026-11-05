@@ -9,6 +9,7 @@ import { hslToRgb } from 'app/shared/utils/colors';
   styleUrls: [
     './project-icon.component.scss',
   ],
+  standalone: false,
 })
 export class ProjectIconComponent {
 

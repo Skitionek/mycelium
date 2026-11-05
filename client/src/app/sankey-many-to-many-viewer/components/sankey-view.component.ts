@@ -32,7 +32,8 @@ import { SankeyManyToManySelection, SankeyManyToManyState } from './interfaces';
     },
     WarningControllerService,
     SankeySearchService
-  ]
+  ],
+  standalone: false
 })
 export class SankeyManyToManyViewComponent extends SankeyViewComponent implements OnDestroy, ModuleAwareComponent {
 

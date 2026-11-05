@@ -48,6 +48,7 @@ declare let bootstrap: any;
   templateUrl: './pdf-viewer-lib.component.html',
   styleUrls: ['./pdf-viewer-lib.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class PdfViewerLibComponent implements OnInit, OnDestroy {
 

@@ -23,6 +23,7 @@ import { ResetPasswordDialogComponent } from './reset-password-dialog.component'
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  standalone: false,
 })
 export class LoginComponent {
   readonly form = new FormGroup({

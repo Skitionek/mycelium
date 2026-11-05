@@ -4,7 +4,8 @@ import { WarningControllerService } from 'app/shared/services/warning-controller
 
 @Component({
   selector: 'app-warning-list',
-  templateUrl: 'warning-list.component.html'
+  templateUrl: 'warning-list.component.html',
+  standalone: false
 })
 
 export class WarningListComponent {

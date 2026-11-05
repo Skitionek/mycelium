@@ -10,6 +10,7 @@ import { ContentSearchOptions } from '../content-search';
 @Component({
   selector: 'app-content-search-form',
   templateUrl: './content-search-form.component.html',
+  standalone: false,
 })
 export class ContentSearchFormComponent extends FormComponent<ContentSearchOptions> {
   @Input() queryString: string;
