@@ -11609,10 +11609,10 @@ neotraverse@^1.0.1:
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-1.0.1.tgz#7c89b43f6504ef85928c718f578c68621576d194"
   integrity sha512-WmmLty1YWwJl9yZi77v2dVIV6X2kuYV8YYBI/G3LWGKdGHmHUvL1z7FW0iDvEvGAwNEoc5x1tOOOyDnf5jJw/w==
 
-ng-mocks@^14.18.4:
-  version "14.18.4"
-  resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.4.tgz#eb29caf01c3722482c781e23eaa7e34c87eecceb"
-  integrity sha512-qh/1JKztkaog5Jw0cPpUxvWcFyXiE+W0Whtn+f/0q6aK2oSl05UyTQozDAA+ikXZ5gecGh78jVq0Eo/hCYQk2w==
+ng-mocks@^14.18.5:
+  version "14.18.5"
+  resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.5.tgz#7c4ff033ddf803d9e3530762c329998730a3b091"
+  integrity sha512-adq2kXCvaRx/Bk4tFUohhmEawJLukX0kddPzszAHt3V5hBwpU+AUEcUlofSgOg/3b7I8ByBTcDMMer/LiReMMg==
 
 ng2-charts@^11.0.0:
   version "11.0.0"
@@ -12402,10 +12402,10 @@ playwright@1.64.1, playwright@^1.14.0:
   dependencies:
     playwright-core "1.64.1"
 
-plotly.js-dist-min@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/plotly.js-dist-min/-/plotly.js-dist-min-4.1.2.tgz#6ce58e12a5430c14594e22ebdabbb3d037967acb"
-  integrity sha512-VSmS9KVNun16S8qFYYp9LlL/XBby4ueeGqB+K9AqRCVsup8dSpGULap4UyR1f2mz4pV3qjWp1sR5chwLgIKPoQ==
+plotly.js-dist-min@4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/plotly.js-dist-min/-/plotly.js-dist-min-4.2.0.tgz#d2e57c6b60ee62675fcacbcb7ff9a97f7b849f97"
+  integrity sha512-nxwhTxrRtQAWcZLBplb7xi73o0P2z/zjNuh1RKO4ssmPK7Kh30bQcObnAJhekBogI2rqUMbM0JJZC0TrG5Tq5Q==
 
 pngjs@^3.4.0:
   version "3.4.0"
@@ -14584,10 +14584,10 @@ vis-data@8.0.6:
   resolved "https://registry.yarnpkg.com/vis-data/-/vis-data-8.0.6.tgz#e5a3bc5ebae6a67a0e9fc50e14250c81e5047320"
   integrity sha512-6NjsyqWL18ithgkpPqfYGvwx7JlrxgO0MkMJdZus4eovFl6ebUjNcn/UEzgm5NWvCAz4psUgkvcdLyAXFxeeDg==
 
-vis-network@10.1.3, vis-network@^10.1.0:
-  version "10.1.3"
-  resolved "https://registry.yarnpkg.com/vis-network/-/vis-network-10.1.3.tgz#845de08bc2335ce20b058addc2590a5ecb4e955b"
-  integrity sha512-Bij2tZzNESltPIzt/X04NY7t9S8BtHLDi4qOGb/4t7Nleh51yKGTh1w21DzLse1ECdi4AlcGYKnKJdcyPKMMUA==
+vis-network@10.1.4, vis-network@^10.1.0:
+  version "10.1.4"
+  resolved "https://registry.yarnpkg.com/vis-network/-/vis-network-10.1.4.tgz#e427a7625ca7353d25e4058c16356798840027cd"
+  integrity sha512-WWt7Sjenxt7dJL54gty7AUtkW2UugRt+4TFoONubMGFDHD2cer2thDOPTpM9KKLRSvAoZ42FwWN3lvv0I02SKw==
 
 vis-util@6.0.3:
   version "6.0.3"
