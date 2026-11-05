@@ -35,7 +35,7 @@ class Config():
     AZURE_ACCOUNT_STORAGE_KEY = os.environ.get('AZURE_ACCOUNT_STORAGE_KEY')
     AZURE_BLOB_STORAGE_URL = os.environ.get('AZURE_BLOB_STORAGE_URL')
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://%s:%s@%s:%s/%s' % (
         # Escaped, or a character such as @ in a password would end it early
         quote(POSTGRES_USER, safe=''),
         quote(POSTGRES_PASSWORD, safe=''),

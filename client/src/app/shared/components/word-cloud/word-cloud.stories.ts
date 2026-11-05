@@ -48,7 +48,9 @@ const meta: Meta<WordCloudComponent> = {
   parameters: {
     // The layout runs off requestAnimationFrame after the view initialises, and
     // the resize observer triggers further passes, so wait for it to go quiet.
-    imageSnapshot: { waitFor: 'svg g text', settle: 500 },
+    // settle must exceed the 1 s D3 transition duration in the component, or
+    // screenshots are taken mid-animation and differ across D3 minor versions.
+    imageSnapshot: { waitFor: 'svg g text', settle: 1200 },
   },
 };
 

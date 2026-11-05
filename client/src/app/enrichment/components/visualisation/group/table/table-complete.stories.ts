@@ -42,6 +42,13 @@ const meta: Meta<TableCompleteComponent> = {
       providers: [DataService, DecimalPipe],
     }),
   ],
+  parameters: {
+    // DataService has debounceTime(200) + delay(200) before data$ emits.
+    // The settle mechanism resets on each DOM mutation burst (initial render,
+    // then again when rows arrive), so the screenshot is always taken after
+    // the table is fully populated — no flicker, no empty-header shots.
+    imageSnapshot: { settle: 600 },
+  },
 };
 
 export default meta;
