@@ -77,7 +77,7 @@
     "ng2-charts": "^11.0.0",
     "ngrx-store-localstorage": "~17.0.0",
     "pdfjs-dist": "6.4.299",
-    "plotly.js-dist-min": "4.1.2",
+    "plotly.js-dist-min": "4.2.0",
     "route-with-dynamic-outlets": "^1.0.0",
     "rxjs": "~7.5.0",
     "serverless-office-converter": "git+https://github.com/Skitionek/serverless-office-converter.git#cd6c4a13e67f5b03063bc8094c5406b1d7efe1d5",
