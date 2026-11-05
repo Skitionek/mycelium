@@ -36,7 +36,7 @@ class TransactionContext(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __exit__(self, exc_type, exc_val, exc_traceback):
+    def __exit__(self, _exc_type, _exc_val, _exc_traceback):
         raise NotImplementedError
 
 
@@ -74,7 +74,7 @@ class GraphConnection(DatabaseConnection):
             self.session = self.conn.session()
             return self.session
 
-        def __exit__(self, exc_type, exc_val, exc_traceback):
+        def __exit__(self, _exc_type, _exc_val, _exc_traceback):
             self.session.close()
 
     def convert_datetime(self, graph_date):
