@@ -43,9 +43,11 @@ const meta: Meta<TableCompleteComponent> = {
     }),
   ],
   parameters: {
-    // data$ is async; wait for a row to appear so the screenshot is taken
-    // after the observable resolves, not before.
-    imageSnapshot: { waitFor: 'table tbody tr' },
+    // DataService has debounceTime(200) + delay(200) before data$ emits.
+    // The settle mechanism resets on each DOM mutation burst (initial render,
+    // then again when rows arrive), so the screenshot is always taken after
+    // the table is fully populated — no flicker, no empty-header shots.
+    imageSnapshot: { settle: 600 },
   },
 };
 
