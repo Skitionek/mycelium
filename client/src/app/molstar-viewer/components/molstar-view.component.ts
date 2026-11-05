@@ -7,9 +7,10 @@ import {
   Input,
   OnDestroy,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  DOCUMENT
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+
 import { ActivatedRoute } from '@angular/router';
 
 import { combineLatest, Subscription } from 'rxjs';
