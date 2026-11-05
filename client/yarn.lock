@@ -4668,10 +4668,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/d3-array@*", "@types/d3-array@2.12.3":
-  version "2.12.3"
-  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-2.12.3.tgz#8d16d51fb04ad5a5a8ebe14eb8263a579f1efdd1"
-  integrity sha512-hN879HLPTVqZV3FQEXy7ptt083UXwguNbnxdTGzVW4y4KjX5uyNKljrQixZcSJfLyFirbpUokxpXtvR+N5+KIg==
+"@types/d3-array@*", "@types/d3-array@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-3.2.2.tgz#e02151464d02d4a1b44646d0fcdb93faf88fde8c"
+  integrity sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==
 
 "@types/d3-axis@*":
   version "3.0.6"
@@ -11673,7 +11673,7 @@ neotraverse@^1.0.1:
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-1.0.1.tgz#7c89b43f6504ef85928c718f578c68621576d194"
   integrity sha512-WmmLty1YWwJl9yZi77v2dVIV6X2kuYV8YYBI/G3LWGKdGHmHUvL1z7FW0iDvEvGAwNEoc5x1tOOOyDnf5jJw/w==
 
-ng-mocks@^14.18.4:
+ng-mocks@^14.18.5:
   version "14.18.5"
   resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.5.tgz#7c4ff033ddf803d9e3530762c329998730a3b091"
   integrity sha512-adq2kXCvaRx/Bk4tFUohhmEawJLukX0kddPzszAHt3V5hBwpU+AUEcUlofSgOg/3b7I8ByBTcDMMer/LiReMMg==
@@ -15225,7 +15225,7 @@ yoctocolors@^2.1.1:
   resolved "https://registry.yarnpkg.com/yoctocolors/-/yoctocolors-2.2.0.tgz#c4b68ee477f3982c33e4de24a5aa4a354be506d3"
   integrity sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==
 
-zone.js@~0.14.0:
+zone.js@~0.14.10:
   version "0.14.10"
   resolved "https://registry.yarnpkg.com/zone.js/-/zone.js-0.14.10.tgz#23b8b29687c6bffece996e5ee5b854050e7775c8"
   integrity sha512-YGAhaO7J5ywOXW6InXNlLmfU194F8lVgu7bRntUF3TiG8Y3nBK0x1UJJuHUP/e8IyihkjCYqhCScpSwnlaSRkQ==

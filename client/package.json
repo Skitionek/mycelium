@@ -87,7 +87,7 @@
     "vis-network": "10.1.4",
     "vis-util": "6.0.3",
     "webcola": "^3.4.0",
-    "zone.js": "~0.14.0"
+    "zone.js": "~0.14.10"
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "~17.0.0",
