@@ -248,9 +248,10 @@ updates:
         patterns:
           - plotly.js*
     ignore:
-      # Fix angular version until refactor is done. The rest of the `angular`
-      # group is ignored too, otherwise the CLI/devkit/TypeScript halves would
-      # still be bumped on their own and break the build against Angular 16.
+      # Angular is upgraded by hand, one major at a time (currently Angular 18).
+      # The rest of the `angular` group is ignored too, otherwise the
+      # CLI/devkit/TypeScript halves would still be bumped on their own and
+      # break the build against Angular 18.
       - dependency-name: '@angular/*'
       - dependency-name: '@angular-devkit/*'
       - dependency-name: '@angular-builders/*'
@@ -258,21 +259,21 @@ updates:
       - dependency-name: 'zone.js'
       # jasmine-core 7.x makes properties zone.js patches (e.g. `describe`)
       # read-only, breaking zone-testing's monkeypatch. zone.js is pinned to
-      # 0.13.x above until the Angular 16 refactor, so jasmine-core must stay
-      # on 6.x until that unblocks a compatible zone.js.
+      # the 0.14.x line Angular 18 supports above, so jasmine-core must stay
+      # on 6.x until an Angular upgrade unblocks a compatible zone.js.
       - dependency-name: 'jasmine-core'
         versions: ['>=7.0.0']
-      # ng-bootstrap majors track the Angular major; 15.x is the last that
-      # supports Angular 16. Cap at one major at a time until the Angular
-      # upgrade unblocks it. (PR #585 jumped 15 → 21.)
+      # ng-bootstrap majors track the Angular major; 17.x is the last that
+      # supports Angular 18 (18.x needs Angular 19). Cap at one major at a time
+      # until the next Angular upgrade unblocks it. (PR #585 jumped 15 → 21.)
       - dependency-name: '@ng-bootstrap/ng-bootstrap'
-        versions: ['>=17']
-      # ngrx majors also track the Angular major; 16.x is the last that
-      # supports Angular 16. Cap at one major at a time. (PR #569 jumped 16 → 22.)
+        versions: ['>=18']
+      # ngrx majors also track the Angular major; 18.x is the last that
+      # supports Angular 18. Cap at one major at a time. (PR #569 jumped 16 → 22.)
       - dependency-name: '@ngrx/*'
-        versions: ['>=18']
+        versions: ['>=19']
       - dependency-name: ngrx-store-localstorage
-        versions: ['>=18']
+        versions: ['>=19']
 
   # End-to-end suite (tests/e2e). Independent of the client's pinned
   # `playwright`: the e2e job installs whichever browser build its
