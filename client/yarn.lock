@@ -11609,10 +11609,10 @@ neotraverse@^1.0.1:
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-1.0.1.tgz#7c89b43f6504ef85928c718f578c68621576d194"
   integrity sha512-WmmLty1YWwJl9yZi77v2dVIV6X2kuYV8YYBI/G3LWGKdGHmHUvL1z7FW0iDvEvGAwNEoc5x1tOOOyDnf5jJw/w==
 
-ng-mocks@^14.18.4:
-  version "14.18.4"
-  resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.4.tgz#eb29caf01c3722482c781e23eaa7e34c87eecceb"
-  integrity sha512-qh/1JKztkaog5Jw0cPpUxvWcFyXiE+W0Whtn+f/0q6aK2oSl05UyTQozDAA+ikXZ5gecGh78jVq0Eo/hCYQk2w==
+ng-mocks@^14.18.5:
+  version "14.18.5"
+  resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.5.tgz#7c4ff033ddf803d9e3530762c329998730a3b091"
+  integrity sha512-adq2kXCvaRx/Bk4tFUohhmEawJLukX0kddPzszAHt3V5hBwpU+AUEcUlofSgOg/3b7I8ByBTcDMMer/LiReMMg==
 
 ng2-charts@^11.0.0:
   version "11.0.0"
