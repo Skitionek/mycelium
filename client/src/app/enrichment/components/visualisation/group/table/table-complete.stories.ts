@@ -42,6 +42,11 @@ const meta: Meta<TableCompleteComponent> = {
       providers: [DataService, DecimalPipe],
     }),
   ],
+  parameters: {
+    // data$ is async; wait for a row to appear so the screenshot is taken
+    // after the observable resolves, not before.
+    imageSnapshot: { waitFor: 'table tbody tr' },
+  },
 };
 
 export default meta;
