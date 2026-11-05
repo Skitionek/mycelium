@@ -3560,44 +3560,36 @@
   dependencies:
     tslib "^2.3.0"
 
-"@ngrx/effects@~17.2.0":
-  version "17.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-17.2.0.tgz#37cec0b696cd7b14600f64e2ed0d9e47f5de10f1"
-  integrity sha512-tXDJNsuBtbvI/7+vYnkDKKpUvLbopw1U5G6LoPnKNrbTPsPcUGmCqF5Su/ZoRN3BhXjt2j+eoeVdpBkxdxMRgg==
-  dependencies:
-    "@ngrx/operators" "17.0.0-beta.0"
-    tslib "^2.0.0"
-
-"@ngrx/entity@~17.2.0":
-  version "17.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/entity/-/entity-17.2.0.tgz#5b9a01bd237f247a9901824824352c7e09c1bbeb"
-  integrity sha512-epXgojGXCrVMNrFdv60704iRUU+pYkE1qHBppP/wqKbZZIZHaagsg2jy8/ptDP7U3udvVq0z9suc1s+zpmL2EA==
+"@ngrx/effects@~18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-18.1.1.tgz#df51cc2874e2470bfe073aa3e01f317977d8fd49"
+  integrity sha512-XXob8kYEvYMaZwgHtrrTW0XZargbu5PloEpNHLnzB8jPk0yWEw6keryxaF09Ylws1779MWvMmF/YP2rPl04nHQ==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/operators@17.0.0-beta.0":
-  version "17.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/operators/-/operators-17.0.0-beta.0.tgz#030486f3a610fa919d2b155aad3bc7b4c708550d"
-  integrity sha512-EbO8AONuQ6zo2v/mPyBOi4y0CTAp1x4Z+bx7ZF+Pd8BL5ma53BTCL1TmzaeK5zPUe0yApudLk9/ZbHXPnVox5A==
-  dependencies:
-    tslib "^2.3.0"
-
-"@ngrx/schematics@~17.2.0":
-  version "17.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-17.2.0.tgz#2b35f4962f08d32a9904a468ec4353d6a40c9496"
-  integrity sha512-7YQyPWaadxY2+Fe0oFIkClMpEKsC2HaxdjJY8SRTLnFOHj070r3Kp6mxGee46MVdfDNK47bUYnMPQi9A25EcVQ==
-
-"@ngrx/store-devtools@~17.2.0":
-  version "17.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-17.2.0.tgz#cb05dc997d7836a6aa8408ac9e04f3b1419fc3bc"
-  integrity sha512-ig0qr6hMexZGnrlxfHvZmu5CanRjH7hhx60XUbB5BdBvWJIIRaWKPLcsniiDUhljAD87gvzrrilbCTiML38+CA==
+"@ngrx/entity@~18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/entity/-/entity-18.1.1.tgz#9ca089080a2e684fd4955d3a6ad90047539b97ba"
+  integrity sha512-oRt/wG+szR4lMvMut16uWfbMD2CnOMscnQIbU+lcOs5+UDOzr4aHGBVpErzcoVWSTp/sl7x02j+2dto5NQZWoA==
   dependencies:
     tslib "^2.0.0"
 
-"@ngrx/store@~17.2.0":
-  version "17.2.0"
-  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-17.2.0.tgz#d1a588cd8bae18a190bb71582f07e992406a76fa"
-  integrity sha512-7wKgZ59B/6yQSvvsU0DQXipDqpkAXv7LwcXLD5Ww7nvqN0fQoRPThMh4+Wv55DCJhE0bQc1NEMciLA47uRt7Wg==
+"@ngrx/schematics@~18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-18.1.1.tgz#4f811aae1e7c601e2407e99bef091afe94d01058"
+  integrity sha512-6EexKNoTNzwHf8AIXcioOm11l6rTZ8WUpGYiPTSW2I/Pn5CsjCBDwbBDEHJZ1RqGoCXpunZn6adH63A2V8V4Sg==
+
+"@ngrx/store-devtools@~18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-18.1.1.tgz#0a62949a73885728d1a1908f66779c13be307eaf"
+  integrity sha512-tfn9Ms1q2bl7VDWwHyj7dUbwmGiiVzIpOKZs39rsms8tG8hbvsxoczyQAp2w5erVtoJb8ltIh1/birKkS7HmuQ==
+  dependencies:
+    tslib "^2.0.0"
+
+"@ngrx/store@~18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-18.1.1.tgz#e189967bd8d385ea48e14a7d96542cbf062e8382"
+  integrity sha512-K0v1akJ2sEnIeb1AUA064+ksgRgbMgVG9HbSsLBxENbFjK2ZvKRxo1bpOw6WHW9+hyDTlhZGl7+gUtjmo3497g==
   dependencies:
     tslib "^2.0.0"
 
@@ -4668,10 +4660,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/d3-array@*", "@types/d3-array@2.12.3":
-  version "2.12.3"
-  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-2.12.3.tgz#8d16d51fb04ad5a5a8ebe14eb8263a579f1efdd1"
-  integrity sha512-hN879HLPTVqZV3FQEXy7ptt083UXwguNbnxdTGzVW4y4KjX5uyNKljrQixZcSJfLyFirbpUokxpXtvR+N5+KIg==
+"@types/d3-array@*", "@types/d3-array@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@types/d3-array/-/d3-array-3.2.2.tgz#e02151464d02d4a1b44646d0fcdb93faf88fde8c"
+  integrity sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==
 
 "@types/d3-axis@*":
   version "3.0.6"
@@ -11673,7 +11665,7 @@ neotraverse@^1.0.1:
   resolved "https://registry.yarnpkg.com/neotraverse/-/neotraverse-1.0.1.tgz#7c89b43f6504ef85928c718f578c68621576d194"
   integrity sha512-WmmLty1YWwJl9yZi77v2dVIV6X2kuYV8YYBI/G3LWGKdGHmHUvL1z7FW0iDvEvGAwNEoc5x1tOOOyDnf5jJw/w==
 
-ng-mocks@^14.18.4:
+ng-mocks@^14.18.5:
   version "14.18.5"
   resolved "https://registry.yarnpkg.com/ng-mocks/-/ng-mocks-14.18.5.tgz#7c4ff033ddf803d9e3530762c329998730a3b091"
   integrity sha512-adq2kXCvaRx/Bk4tFUohhmEawJLukX0kddPzszAHt3V5hBwpU+AUEcUlofSgOg/3b7I8ByBTcDMMer/LiReMMg==
