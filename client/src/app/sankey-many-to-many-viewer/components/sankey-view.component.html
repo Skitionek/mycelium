@@ -158,7 +158,7 @@
                       direction="horizontal"
                       unit="pixel"
             >
-                <as-split-area [order]="0">
+                <as-split-area>
                     <app-sankey-many-to-many #sankey
                                              *ngIf="renderData"
                                              [data]="renderData"
@@ -179,7 +179,6 @@
                                 'as-split-area',
                                 detailsPanel ? 'border' : 'as-hidden'
                                ].join(' ')"
-                               [order]="1"
                                [visible]="detailsPanel"
                                size="340">
                     <div class="w-100 h-100 p-3">
@@ -204,7 +203,6 @@
                                 'as-split-area',
                                 searchPanel ? 'border' : 'as-hidden'
                                ].join(' ')"
-                               [order]="1"
                                [visible]="searchPanel"
                                size="340">
                     <div class="w-100 h-100 p-3 d-flex flex-column">
@@ -227,7 +225,6 @@
                                     'as-split-area',
                                     advancedPanel ? 'border' : 'as-hidden'
                                ].join(' ')"
-                               [order]="2"
                                [visible]="advancedPanel"
                                size="340">
                     <div class="w-100 h-100 p-3">

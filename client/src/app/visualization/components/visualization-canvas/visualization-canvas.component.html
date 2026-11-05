@@ -1,5 +1,5 @@
 <as-split unit="pixel" direction="horizontal" [gutterSize]="5">
-  <as-split-area [order]="0">
+  <as-split-area>
     <div class="h-100 position-relative">
       <div class="viz-canvas-legend-wrapper">
         <app-legend [legend]="legend"></app-legend>
@@ -32,7 +32,7 @@
       ></app-context-menu>
     </div>
   </as-split-area>
-  <as-split-area *ngIf="sidenavOpened" size="640" [order]="1">
+  <as-split-area *ngIf="sidenavOpened" size="640">
     <div id="sidenav-container">
       <div id="sidenav-panel-btns-container">
         <button id="sidenav-panel-close-btn"

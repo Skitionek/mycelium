@@ -71,7 +71,7 @@
     <as-split unit="pixel"
               direction="horizontal"
               [gutterSize]="5">
-        <as-split-area [order]="0">
+        <as-split-area>
             <ng-container *ngIf="annotationData.length === 0">
                 <ngb-alert [dismissible]="false">
                     No entities (annotations) found.
@@ -87,7 +87,6 @@
         </as-split-area>
         <as-split-area [visible]="filtersPanelOpened"
                        size="340"
-                       [order]="1"
                        [class]="filtersPanelOpened ? 'as-split-area border' : 'as-split-area as-hidden'">
             <div class="w-100 h-100 p-3">
                 <div class="annotation-filter-btns-container">
