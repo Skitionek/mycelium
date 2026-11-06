@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -25,6 +25,7 @@ import { MissingRolesDialogComponent } from './missing-roles-dialog.component';
 @Component({
   selector: 'app-users-view',
   templateUrl: 'user-browser.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UserBrowserComponent implements OnInit, OnDestroy {

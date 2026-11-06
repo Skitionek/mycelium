@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { transform, pick, omitBy, isNil, mapValues, defer, omit } from 'lodash-es';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -32,6 +32,7 @@ import { SankeyLink, SankeyNode } from '../pure_interfaces';
   selector: 'app-sankey-view-dropdown',
   templateUrl: 'view-dropdown.component.html',
   styleUrls: ['./view-dropdown.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SankeyViewDropdownComponent implements OnChanges {

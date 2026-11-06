@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -8,6 +8,7 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
 @Component({
   selector: 'app-terms-of-service-dialog',
   templateUrl: './terms-of-service-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class TermsOfServiceDialogComponent extends CommonDialogComponent {

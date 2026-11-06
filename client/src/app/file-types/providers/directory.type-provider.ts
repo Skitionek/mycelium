@@ -1,6 +1,6 @@
 import {
-  ComponentFactory,
-  ComponentFactoryResolver,
+  createComponent,
+  EnvironmentInjector,
   Injectable,
   Injector,
 } from '@angular/core';
@@ -31,7 +31,7 @@ export class DirectoryTypeProvider extends AbstractObjectTypeProvider {
               protected readonly filesystemService: FilesystemService,
               protected readonly injector: Injector,
               protected readonly objectCreationService: ObjectCreationService,
-              protected readonly componentFactoryResolver: ComponentFactoryResolver) {
+              protected readonly environmentInjector: EnvironmentInjector) {
     super(abstractObjectTypeProviderHelper);
   }
 
@@ -42,9 +42,10 @@ export class DirectoryTypeProvider extends AbstractObjectTypeProvider {
   createPreviewComponent(object: FilesystemObject, contentValue$: Observable<Blob>,
                          options?: PreviewOptions) {
     return this.filesystemService.get(object.hashId).pipe(map(newObject => {
-      const factory: ComponentFactory<DirectoryPreviewComponent> =
-        this.componentFactoryResolver.resolveComponentFactory(DirectoryPreviewComponent);
-      const componentRef = factory.create(this.injector);
+      const componentRef = createComponent(DirectoryPreviewComponent, {
+        environmentInjector: this.environmentInjector,
+        elementInjector: this.injector,
+      });
       const instance: DirectoryPreviewComponent = componentRef.instance;
       instance.objects = newObject.children;
       return componentRef;

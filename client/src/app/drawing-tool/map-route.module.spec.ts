@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router } from '@angular/router';
 
@@ -6,7 +6,7 @@ import { AppModule } from 'app/app.module';
 
 import { MapRouteModule } from './map-route.module';
 
-@Component({template: '', standalone: false})
+@Component({template: '', changeDetection: ChangeDetectionStrategy.Eager, standalone: false})
 class WorkspaceStubComponent {
 }
 

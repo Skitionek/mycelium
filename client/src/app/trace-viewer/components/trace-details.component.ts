@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation, SimpleChanges, OnChanges, } from '@angular/core';
+import { Component, Input, ViewEncapsulation, SimpleChanges, OnChanges, ChangeDetectionStrategy, } from '@angular/core';
 
 
 import { isNil } from 'lodash-es';
@@ -12,6 +12,7 @@ import { networkEdgeSmoothers } from 'app/shared/components/vis-js-network/vis-j
   templateUrl: './trace-details.component.html',
   styleUrls: ['./trace-details.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class TraceDetailsComponent implements OnChanges {

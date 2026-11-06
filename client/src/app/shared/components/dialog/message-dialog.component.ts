@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -11,6 +11,7 @@ import { MessageType } from 'app/interfaces/message-dialog.interface';
   selector: 'app-message-dialog',
   templateUrl: './message-dialog.component.html',
   styleUrls: ['./message-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MessageDialogComponent {

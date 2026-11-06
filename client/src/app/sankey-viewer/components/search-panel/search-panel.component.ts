@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, ViewChildren, ElementRef } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChildren, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 import { combineLatest } from 'rxjs';
 
@@ -9,6 +9,7 @@ import { SankeySearchService } from '../../services/search.service';
   templateUrl: './search-panel.component.html',
   styleUrls: ['./search-panel.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SankeySearchPanelComponent {

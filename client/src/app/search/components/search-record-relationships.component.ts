@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { isNil } from 'lodash-es';
 
@@ -15,6 +15,7 @@ import { GraphSearchParameters } from '../graph-search';
   selector: 'app-search-record-relationships',
   templateUrl: './search-record-relationships.component.html',
   styleUrls: ['./search-record-relationships.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SearchRecordRelationshipsComponent {

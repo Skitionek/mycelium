@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import * as visNetwork from 'vis-network';
@@ -27,6 +27,7 @@ import { TraceNode } from './interfaces';
     TruncatePipe,
     WarningControllerService
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class TraceViewComponent implements OnDestroy, ModuleAwareComponent {

@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { isArray, isNil } from 'lodash-es';
@@ -35,6 +35,7 @@ import { VisualizationService } from '../../services/visualization.service';
 @Component({
   selector: 'app-visualization',
   templateUrl: './visualization.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class VisualizationComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { ProjectImpl } from 'app/file-browser/models/filesystem-object';
 import { hslToRgb } from 'app/shared/utils/colors';
@@ -9,6 +9,7 @@ import { hslToRgb } from 'app/shared/utils/colors';
   styleUrls: [
     './project-icon.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ProjectIconComponent {

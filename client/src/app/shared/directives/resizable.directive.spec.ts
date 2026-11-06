@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HostListener, Component, ElementRef } from '@angular/core';
+import { HostListener, Component, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 
 import { ResizableDirective } from './resizable.directive';
@@ -7,6 +7,7 @@ import { ResizableDirective } from './resizable.directive';
 // Simple test component that will not in the actual app
 @Component({
   template: '<p id="hello">Testing Directives is awesome!</p>',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 class TestComponent {

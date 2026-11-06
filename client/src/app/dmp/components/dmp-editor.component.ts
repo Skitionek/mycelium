@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -18,6 +18,7 @@ import { DMPDocument } from '../models/dmp.interface';
   selector: 'app-dmp-editor',
   templateUrl: './dmp-editor.component.html',
   styleUrls: ['./dmp-editor.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class DMPEditorComponent implements OnInit {

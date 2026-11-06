@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -12,6 +12,7 @@ import {AnnotationGenerationResultData } from '../../schema';
 @Component({
   selector: 'app-object-reannotate-results-dialog',
   templateUrl: './object-reannotate-results-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectReannotateResultsDialogComponent extends ConfirmDialogComponent {

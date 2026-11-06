@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -15,6 +15,7 @@ import { SynonymData } from '../shared';
   selector: 'app-synonym-search',
   templateUrl: './synonym-search.component.html',
   styleUrls: ['./synonym-search.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SynonymSearchComponent {

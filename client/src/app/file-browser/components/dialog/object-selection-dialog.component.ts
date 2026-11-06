@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,6 +13,7 @@ import { ObjectSelectService } from '../../services/object-select.service';
   selector: 'app-object-selection-dialog',
   templateUrl: './object-selection-dialog.component.html',
   providers: [ObjectSelectService],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectSelectionDialogComponent

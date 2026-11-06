@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { escapeRegExp } from 'lodash-es';
@@ -19,6 +19,7 @@ import { MimeTypes } from 'app/shared/constants';
 @Component({
   selector: 'app-object-navigator',
   templateUrl: './object-navigator.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectNavigatorComponent implements ModuleAwareComponent {

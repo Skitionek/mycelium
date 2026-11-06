@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Observable } from 'rxjs';
@@ -19,6 +19,7 @@ import { describeRootStatus } from './status-text';
 @Component({
   selector: 'app-local-folder-list',
   templateUrl: './local-folder-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class LocalFolderListComponent {

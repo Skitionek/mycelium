@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { AfterViewInit, Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import * as d3 from 'd3';
 
@@ -11,6 +11,7 @@ declare const Plotly: any;
   selector: 'app-plotly-sankey-diagram',
   templateUrl: './plotly-sankey-diagram.component.html',
   styleUrls: ['./plotly-sankey-diagram.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class PlotlySankeyDiagramComponent implements AfterViewInit {

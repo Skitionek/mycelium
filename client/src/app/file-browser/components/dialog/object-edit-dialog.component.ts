@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -24,6 +24,7 @@ import { ObjectSelectionDialogComponent } from './object-selection-dialog.compon
 @Component({
   selector: 'app-object-edit-dialog',
   templateUrl: './object-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectEditDialogValue> {
