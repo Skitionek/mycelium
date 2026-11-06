@@ -14,14 +14,20 @@ if (typeof (Promise as any).withResolvers !== 'function') {
 
 import 'zone.js/testing';
 
+import { NgModule, provideZoneChangeDetection } from '@angular/core';
 import { getTestBed } from '@angular/core/testing';
 import {
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 
+// Angular 21 runs TestBed zoneless (with automatic change detection) unless told otherwise. The
+// application keeps zone.js (see main.ts), so the specs run the same way.
+@NgModule({providers: [provideZoneChangeDetection()]})
+class ZoneChangeDetectionTestingModule {}
+
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
+  [BrowserDynamicTestingModule, ZoneChangeDetectionTestingModule],
   platformBrowserDynamicTesting()
 );
