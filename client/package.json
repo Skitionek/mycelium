@@ -57,7 +57,7 @@
     "@ngrx/store-devtools": "~22.0.0",
     "@noble/hashes": "^2.4.0",
     "@popperjs/core": "^2.11.8",
-    "angular-split": "^17.2.0",
+    "angular-split": "^20.0.0",
     "bootstrap": "^5.3.8",
     "canvas-plus": "^1.0.3",
     "chart.js": "^4.6.1",
