@@ -5,7 +5,6 @@ import requests
 from neo4japp.constants import FILE_MIME_TYPE_PDF
 from neo4japp.exceptions import ServerException
 
-from ....constants import APPSERVER_URL
 from ..constants import (
     MAX_ABBREVIATION_WORD_LENGTH,
     PDFPARSER_URL,
@@ -52,45 +51,51 @@ def process_parsed_content(resp: dict) -> Tuple[str, List[PDFWord]]:
 
 
 def parse_content(content_type=FILE_MIME_TYPE_PDF, **kwargs) -> Tuple[str, List[PDFWord]]:
-    parserPath = (
-        '/token/rect/json/' if content_type == FILE_MIME_TYPE_PDF else '/token/rect/text/json'
-    )
-    url = f'{PDFPARSER_URL}{parserPath}'
-
-    if 'exclude_references' in kwargs:
-        # The parser pulls the PDF from a URL: either a stored file's, or one serving
-        # content that is only held for as long as it is being annotated
-        file_url = kwargs.get('file_url')
-        try:
-            if file_url is None:
-                file_url = f'{APPSERVER_URL}/annotations/files/{kwargs["file_id"]}'
-            exclude_references = kwargs['exclude_references']
-        except KeyError:
+    if content_type == FILE_MIME_TYPE_PDF:
+        pdf_bytes = kwargs.get('pdf_bytes')
+        if not pdf_bytes:
             raise ServerException(
                 'Parsing Error',
-                'Cannot parse the PDF file, the file id is missing or data is corrupted.')
-        data = {
-            'fileUrl': file_url,
-            'excludeReferences': exclude_references
-        }
+                'Cannot parse the PDF file: no content provided.')
+        url = f'{PDFPARSER_URL}/token/rect/json/'
+        try:
+            req = requests.post(
+                url,
+                files={'file': ('document.pdf', pdf_bytes, 'application/pdf')},
+                timeout=REQUEST_TIMEOUT,
+            )
+            resp = req.json()
+            req.close()
+        except requests.exceptions.ConnectTimeout:
+            raise ServerException(
+                'Parsing Error',
+                'The request timed out while trying to connect to the parsing service.')
+        except requests.exceptions.Timeout:
+            raise ServerException(
+                'Parsing Error',
+                'The request to the parsing service timed out.')
+        except (requests.exceptions.RequestException, Exception):
+            raise ServerException(
+                'Parsing Error',
+                'An unexpected error occurred with the parsing service.')
     else:
-        data = {'text': kwargs['text']}
-
-    try:
-        req = requests.post(url, data=data, timeout=REQUEST_TIMEOUT)
-        resp = req.json()
-        req.close()
-    except requests.exceptions.ConnectTimeout:
-        raise ServerException(
-            'Parsing Error',
-            'The request timed out while trying to connect to the parsing service.')
-    except requests.exceptions.Timeout:
-        raise ServerException(
-            'Parsing Error',
-            'The request to the parsing service timed out.')
-    except (requests.exceptions.RequestException, Exception):
-        raise ServerException(
-            'Parsing Error',
-            'An unexpected error occurred with the parsing service.')
+        text = kwargs.get('text', '')
+        url = f'{PDFPARSER_URL}/token/rect/text/json'
+        try:
+            req = requests.post(url, data={'text': text}, timeout=REQUEST_TIMEOUT)
+            resp = req.json()
+            req.close()
+        except requests.exceptions.ConnectTimeout:
+            raise ServerException(
+                'Parsing Error',
+                'The request timed out while trying to connect to the parsing service.')
+        except requests.exceptions.Timeout:
+            raise ServerException(
+                'Parsing Error',
+                'The request to the parsing service timed out.')
+        except (requests.exceptions.RequestException, Exception):
+            raise ServerException(
+                'Parsing Error',
+                'An unexpected error occurred with the parsing service.')
 
     return process_parsed_content(resp)

@@ -5,6 +5,7 @@ import {
     OnInit,
     Output,
     AfterViewInit,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { isNil } from 'lodash-es';
@@ -60,6 +61,8 @@ import { VisualizationService } from 'app/visualization/services/visualization.s
     templateUrl: './visualization-canvas.component.html',
     styleUrls: ['./visualization-canvas.component.scss'],
     providers: [ContextMenuControlService],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class VisualizationCanvasComponent implements OnInit, AfterViewInit {
     @Output() expandNode = new EventEmitter<ExpandNodeRequest>();

@@ -20,7 +20,7 @@ browser cannot connect folders.
    | Files | Viewer |
    |---|---|
    | PDF | PDF viewer, with entity annotations once annotated |
-   | Office documents (`.docx`, `.xlsx`, `.pptx`, `.odt`, ...) | PDF viewer, converted to PDF on the server |
+   | Office documents (`.docx`, `.xlsx`, `.pptx`, `.odt`, ...) | PDF viewer, converted to PDF in the browser (on the server where the browser cannot) |
    | Text, code, CSV, Markdown, JSON, XML | Code viewer |
    | `.pdb`, `.cif`, `.mmcif` | Protein structure viewer |
    | `.bioc` | BioC viewer |
@@ -160,7 +160,8 @@ which is why viewers need no changes to open local files; `EnrichmentTableServic
 the same for annotated enrichment tables. The appserver adds three stateless endpoints:
 `POST /filesystem/annotations/transient` (annotate a PDF without storing it),
 `POST /filesystem/annotations/transient/enrichment-table` (the same for an enrichment
-table) and `POST /filesystem/convert/pdf` (convert an office document without storing it).
+table) and `POST /filesystem/convert/pdf` (convert an office document without storing it,
+used only where the browser cannot convert it itself, see `OfficeConverterService`).
 
 `real-filesystem.spec.ts` runs the main flows against the browser's own implementation of
 the API, using the origin private file system.

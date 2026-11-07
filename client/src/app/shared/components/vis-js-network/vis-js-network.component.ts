@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ContentChild, Output, EventEmitter } from '@angular/core';
+import { AfterViewInit, Component, Input, ContentChild, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 
 import { isNil } from 'lodash-es';
@@ -18,7 +18,9 @@ import { FindOptions, compileFind, tokenizeQuery } from '../../utils/find';
 @Component({
   selector: 'app-vis-js-network',
   templateUrl: './vis-js-network.component.html',
-  styleUrls: ['./vis-js-network.component.scss']
+  styleUrls: ['./vis-js-network.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class VisJsNetworkComponent implements AfterViewInit {
   @Input() set config(config: Options) {

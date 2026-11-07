@@ -4,6 +4,8 @@ files are never stored, so they are annotated and converted to PDF on request, s
 """
 import io
 import json
+import shutil
+import subprocess
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -12,12 +14,16 @@ from flask import Flask, g
 
 from neo4japp.blueprints import annotations as annotations_blueprint
 from neo4japp.blueprints.auth import auth
-from neo4japp.blueprints.filesystem import bp as filesystem_bp
+from neo4japp.blueprints.filesystem import FilesystemBaseView, bp as filesystem_bp
 from neo4japp.factory import register_error_handlers
 from neo4japp.services import transient_files
 from neo4japp.services.annotations import transient_annotation
 from neo4japp.services.enrichment.enrichment_table import EnrichmentTableService
-from neo4japp.services.libreoffice import mime_type_for_filename
+from neo4japp.services.libreoffice import (
+    ConversionFailedError,
+    convert_to_pdf,
+    mime_type_for_filename,
+)
 
 PDF = b'%PDF-1.7\n% a tiny pdf\n'
 DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -125,17 +131,17 @@ def test_transient_annotation_needs_a_pdf(client, logged_in):
     annotate.assert_not_called()
 
 
-def test_transient_pdf_is_served_to_the_parser_only_while_annotating(app, client, redis):
+def test_transient_pdf_passes_bytes_directly_to_parser(app, client):
     """
-    The PDF parser fetches the PDF from a URL; the content must be there while it does,
-    and gone afterwards.
+    Given a PDF in memory
+    When annotate_transient_pdf is called
+    Then parse_content receives the raw bytes — no intermediate URL or temp-file store
     """
-    fetched = {}
+    received = {}
 
-    def parse_content(content_type, file_url, exclude_references):
-        token = file_url.rsplit('/', 1)[1]
-        fetched['response'] = client.get(f'/annotations/transient/{token}')
-        fetched['token'] = token
+    def parse_content(content_type, *, pdf_bytes):
+        received['content_type'] = content_type
+        received['pdf_bytes'] = pdf_bytes
         return 'text', []
 
     class FakePipeline:
@@ -156,34 +162,21 @@ def test_transient_pdf_is_served_to_the_parser_only_while_annotating(app, client
         result = transient_annotation.annotate_transient_pdf(PDF, 'paper.pdf')
 
     assert result == [{'keyword': 'x'}]
-    assert fetched['response'].status_code == 200
-    assert fetched['response'].data == PDF
-    assert fetched['response'].headers['Content-Type'] == 'application/pdf'
-    assert fetched['response'].headers['Cache-Control'] == 'no-store'
-    # Discarded once parsed, and set to expire even if it had not been
-    assert redis.store == {}
-    assert list(redis.expiries.values()) == [transient_files.TRANSIENT_FILE_TTL]
-    assert client.get(f'/annotations/transient/{fetched["token"]}').status_code == 404
+    assert received['pdf_bytes'] == PDF
 
 
-def test_transient_pdf_is_discarded_when_parsing_fails(redis):
-    def failing_parse(content_type, file_url, exclude_references):
+def test_transient_pdf_parse_error_propagates():
+    """
+    Given a parser that raises
+    When annotate_transient_pdf is called
+    Then the exception is not swallowed
+    """
+    def failing_parse(content_type, *, pdf_bytes):
         raise RuntimeError('parser down')
 
     with patch.object(transient_annotation, 'parse_content', failing_parse):
         with pytest.raises(RuntimeError):
             transient_annotation.annotate_transient_pdf(PDF, 'paper.pdf')
-
-    assert redis.store == {}
-
-
-def test_transient_pdf_url_rejects_unknown_and_malformed_tokens(client, redis):
-    token = transient_files.stash_transient_file(PDF)
-
-    assert client.get('/annotations/transient/' + 'x' * 43).status_code == 404
-    assert client.get('/annotations/transient/short').status_code == 404
-    assert transient_files.read_transient_file('../../etc/passwd') is None
-    assert client.get(f'/annotations/transient/{token}').data == PDF
 
 
 def enrichment_table():
@@ -344,6 +337,60 @@ def test_conversion_reports_missing_libreoffice(client, logged_in):
             '/filesystem/convert/pdf', data=upload(b'doc', 'a.docx'), headers=AUTH)
 
     assert response.status_code == 503
+
+
+def test_conversion_reports_an_unconvertible_document(client, logged_in):
+    """LibreOffice is there but makes nothing of the file: the file is at fault."""
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf',
+               side_effect=ConversionFailedError('no PDF in /tmp/mycelium_lo_x')):
+        response = client.post(
+            '/filesystem/convert/pdf', data=upload(b'PK\x03\x04', 'a.docx'), headers=AUTH)
+
+    assert response.status_code == 422
+    assert b'/tmp/' not in response.data
+
+
+@pytest.fixture
+def stored_docx():
+    """A Word document stored in Mycelium, which the user may read."""
+    file = SimpleNamespace(
+        filename='Report v2.docx', mime_type=DOCX, content=SimpleNamespace(raw_file=b'PK\x03\x04'))
+    with patch.object(FilesystemBaseView, 'get_nondeleted_recycled_file', return_value=file), \
+            patch.object(FilesystemBaseView, 'check_file_permissions'):
+        yield file
+
+
+def test_stored_document_is_served_as_pdf(client, logged_in, stored_docx):
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf',
+               return_value=io.BytesIO(b'%PDF-converted')) as convert:
+        response = client.get('/filesystem/objects/abc/content/pdf', headers=AUTH)
+
+    assert response.status_code == 200
+    assert response.data == b'%PDF-converted'
+    assert 'Report v2.pdf' in response.headers['Content-Disposition']
+    convert.assert_called_once_with(b'PK\x03\x04', DOCX)
+
+
+@pytest.mark.parametrize('error, status_code', [
+    (RuntimeError('LibreOffice is not installed'), 503),
+    (ConversionFailedError('no PDF in /tmp/mycelium_lo_x'), 422),
+    (subprocess.CalledProcessError(1, ['soffice', '/tmp/mycelium_lo_x/input.docx']), 422),
+    (subprocess.TimeoutExpired(['soffice', '/tmp/mycelium_lo_x/input.docx'], 120), 422),
+])
+def test_stored_document_conversion_reports_errors(
+        client, logged_in, stored_docx, error, status_code):
+    with patch('neo4japp.blueprints.filesystem.convert_to_pdf', side_effect=error):
+        response = client.get('/filesystem/objects/abc/content/pdf', headers=AUTH)
+
+    assert response.status_code == status_code
+    assert b'/tmp/' not in response.data
+
+
+@pytest.mark.skipif(shutil.which('soffice') is None, reason='LibreOffice is not installed')
+def test_libreoffice_fails_to_convert_a_corrupt_document():
+    """soffice exits cleanly for a damaged .docx, but writes no PDF."""
+    with pytest.raises(ConversionFailedError):
+        convert_to_pdf(b'PK\x03\x04garbage', DOCX)
 
 
 def test_conversion_needs_login(client):

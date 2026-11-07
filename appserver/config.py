@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 
 class Config():
@@ -47,8 +48,9 @@ class Config():
     FILE_STORAGE_SECRET = os.environ.get('FILE_STORAGE_SECRET', '')
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
-        POSTGRES_USER,
-        POSTGRES_PASSWORD,
+        # Escaped, or a character such as @ in a password would end it early
+        quote(POSTGRES_USER, safe=''),
+        quote(POSTGRES_PASSWORD, safe=''),
         POSTGRES_HOST,
         POSTGRES_PORT,
         POSTGRES_DB

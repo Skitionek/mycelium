@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -13,6 +13,8 @@ import { ProjectCreateRequest } from '../../schema';
 @Component({
   selector: 'app-project-edit-dialog',
   templateUrl: './project-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ProjectEditDialogComponent extends CommonFormDialogComponent<ProjectEditDialogValue> {
   @Input() title = 'Edit Project';

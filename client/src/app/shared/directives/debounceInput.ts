@@ -23,6 +23,7 @@ import { map, debounceTime } from 'rxjs/operators';
 
 @Directive({
     selector: '[appVisDebounce]',
+    standalone: false,
 })
 export class DebounceInputDirective implements OnInit, OnDestroy {
     @Input() delay = 500;

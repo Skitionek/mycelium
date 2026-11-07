@@ -29,6 +29,13 @@ from .utils.parsing import parse_content
 from .utils.graph_queries import *
 
 
+# Labels that may appear on a node and need removal when no longer backed by a relationship.
+_REMOVABLE_NODE_LABELS = frozenset({
+    'Anatomy', 'Chemical', 'Compound', 'Disease', 'Food',
+    'Gene', 'Phenomena', 'Phenotype', 'Protein', 'Taxonomy',
+})
+
+
 class ManualAnnotationService:
     def __init__(
         self,
@@ -55,6 +62,24 @@ class ManualAnnotationService:
                 if all_rects_match:
                     return True
         return False
+
+    def _remove_mismatched_node_labels(self, results) -> None:
+        """Remove node labels that no longer match any backing relationship entity type."""
+        for result in results:
+            mismatch = set(result['node_labels']) - set(result['rel_entity_types'])
+            if EntityType.SPECIES.value in result['rel_entity_types']:
+                mismatch.discard('Taxonomy')
+
+            labels_to_remove = [
+                f':{label}' for label in mismatch
+                if label not in result['valid_entity_types'] and label in _REMOVABLE_NODE_LABELS
+            ]
+            if labels_to_remove:
+                removal_expr = ''.join(labels_to_remove)
+                query = query_builder([
+                    'MATCH (n) WHERE id(n) = $node_id', f'REMOVE n{removal_expr}'])
+                self.graph.exec_write_query_with_params(
+                    query, {'node_id': result['node_id']})
 
     def add_inclusions(self, file: Files, user: AppUser, custom_annotation, annotate_all):
         """Adds custom annotation to a given file.
@@ -106,7 +131,7 @@ class ManualAnnotationService:
         term = custom_annotation['meta']['allText'].strip()
 
         if annotate_all:
-            _, parsed = parse_content(file_id=file.id, exclude_references=False)
+            _, parsed = parse_content(file.mime_type, pdf_bytes=file.content.raw_file)
             is_case_insensitive = custom_annotation['meta']['isCaseInsensitive']
 
             if custom_annotation['meta']['type'] == EntityType.GENE.value:
@@ -264,55 +289,18 @@ class ManualAnnotationService:
                         'we are working on a solution. Please try again later.',
                 code=500)
 
+        # a global could've been added with the wrong entity type, so clean up
+        # stale labels to prevent incorrect synonym results
+        query = get_node_labels_and_relationship_query()
+        params = {'node_ids': [gid for gid, _ in inclusion_ids]}
         try:
-            # we need to do some cleaning up
-            # a global could've been added with the wrong entity type
-            # so we need to remove those bad labels to prevent
-            # incorrect results coming back as synonyms
-            results = self.graph.exec_read_query_with_params(
-                get_node_labels_and_relationship_query(),
-                {'node_ids': [gid for gid, _ in inclusion_ids]})
-
-            for result in results:
-                mismatch = set(result['node_labels']) - set(result['rel_entity_types'])
-                # remove Taxonomy because there is inconsistency between graph and annotations
-                # annotation uses Species instead
-                if EntityType.SPECIES.value in result['rel_entity_types']:
-                    mismatch.remove('Taxonomy')
-
-                s = ''
-                for label in list(mismatch):
-                    if label not in result['valid_entity_types']:
-                        if label == 'Anatomy':
-                            s += ':Anatomy'
-                        elif label == 'Chemical':
-                            s += ':Chemical'
-                        elif label == 'Compound':
-                            s += ':Compound'
-                        elif label == 'Disease':
-                            s += ':Disease'
-                        elif label == 'Food':
-                            s += ':Food'
-                        elif label == 'Gene':
-                            s += ':Gene'
-                        elif label == 'Phenomena':
-                            s += ':Phenomena'
-                        elif label == 'Phenotype':
-                            s += ':Phenotype'
-                        elif label == 'Protein':
-                            s += ':Protein'
-                        elif label == 'Taxonomy':
-                            s += ':Taxonomy'
-                if s:
-                    self.graph.exec_write_query_with_params(
-                        query_builder(['MATCH (n) WHERE id(n) = $node_id', f'REMOVE n{s}']),
-                        {'node_id': result['node_id']})
+            results = self.graph.exec_read_query_with_params(query, params)
+            self._remove_mismatched_node_labels(results)
         except (BrokenPipeError, ServiceUnavailable):
             raise
         except Exception:
             current_app.logger.error(
-                f'Failed executing cypher: {query_builder(["MATCH (n) WHERE id(n) = $node_id", f"REMOVE n{s}"])}.\n' +  # noqa
-                f'PARAMETERS: <node_id: {result["node_id"]}>.',
+                f'Failed executing cypher: {query}.\nPARAMETERS: {params}.',
                 extra=EventLog(event_type=LogEventType.ANNOTATION.value).to_dict()
             )
             raise AnnotationError(

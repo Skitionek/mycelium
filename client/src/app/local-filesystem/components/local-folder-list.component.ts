@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Observable } from 'rxjs';
 
@@ -19,6 +19,8 @@ import { describeRootStatus } from './status-text';
 @Component({
   selector: 'app-local-folder-list',
   templateUrl: './local-folder-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LocalFolderListComponent {
   readonly supported = this.registry.supported;
@@ -30,7 +32,7 @@ export class LocalFolderListComponent {
               protected readonly indexer: LocalIndexerService,
               protected readonly workspaceManager: WorkspaceManager,
               protected readonly errorHandler: ErrorHandler,
-              protected readonly snackBar: MatLegacySnackBar) {
+              protected readonly snackBar: MatSnackBar) {
   }
 
   rootHashId(root: LocalRoot): string {

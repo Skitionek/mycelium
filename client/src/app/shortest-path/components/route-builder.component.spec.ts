@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, async } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RootStoreModule } from 'app/root-store';
 import { SharedModule } from 'app/shared/shared.module';
@@ -9,7 +9,7 @@ describe('RouteBuilderComponent', () => {
   let component: RouteBuilderComponent;
   let fixture: ComponentFixture<RouteBuilderComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         RootStoreModule,

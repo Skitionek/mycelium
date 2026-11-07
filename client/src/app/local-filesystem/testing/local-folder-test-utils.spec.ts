@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { ApiService } from 'app/shared/services/api.service';
 
@@ -10,8 +11,9 @@ import { LOCAL_ROOT_STORE, LocalRootStore, MemoryLocalRootStore } from '../local
  */
 export function configureLocalFolderTestBed(store: LocalRootStore = new MemoryLocalRootStore()) {
   TestBed.configureTestingModule({
-    imports: [HttpClientTestingModule],
     providers: [
+      provideHttpClient(withInterceptorsFromDi()),
+      provideHttpClientTesting(),
       {provide: LOCAL_ROOT_STORE, useValue: store},
       {provide: ApiService, useValue: {getHttpOptions: () => ({})}},
     ],

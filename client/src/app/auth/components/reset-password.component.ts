@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AccountService } from 'app/users/services/account.service';
 
@@ -14,6 +14,8 @@ import { AccountService } from 'app/users/services/account.service';
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ResetPasswordComponent {
   // Kept in sync with MIN_PASSWORD_LENGTH on the backend, which rejects
@@ -35,7 +37,7 @@ export class ResetPasswordComponent {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly snackBar: MatLegacySnackBar,
+    private readonly snackBar: MatSnackBar,
     private readonly accountService: AccountService
   ) {}
 

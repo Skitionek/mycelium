@@ -172,3 +172,182 @@ def test_get_kg_statistics_omits_zero_counts(main_module, neo4j_session):
 
     assert result["Human"]["Gene"] == 10
     assert "Disease" not in result.get("Human", {})
+
+
+# ---------------------------------------------------------------------------
+# session lifetime
+# ---------------------------------------------------------------------------
+
+def test_get_kg_statistics_closes_the_session_when_a_query_fails(
+    main_module, neo4j_session
+):
+    """A failed run must not leak its session; the loop retries forever."""
+    module, _, _ = main_module
+    neo4j_session.execute_read.side_effect = RuntimeError("database unavailable")
+
+    with pytest.raises(RuntimeError):
+        module.get_kg_statistics()
+
+    neo4j_session.close.assert_called_once()
+
+
+def test_precalculate_go_closes_the_session_when_a_query_fails(
+    main_module, neo4j_session
+):
+    module, _, _ = main_module
+    neo4j_session.execute_read.side_effect = RuntimeError("database unavailable")
+
+    with pytest.raises(RuntimeError):
+        module.precalculateGO()
+
+    neo4j_session.close.assert_called_once()
+
+
+def test_precalculate_go_caches_each_organism(main_module, neo4j_session):
+    module, mock_redis, _ = main_module
+    terms = [{"goId": "GO:1", "goTerm": "t", "goLabel": [], "geneNames": ["A"]}]
+    neo4j_session.execute_read.side_effect = [
+        [{"id": "9606", "name": "Homo sapiens"}, {"id": "10090", "name": "Mus musculus"}],
+        terms,
+        terms,
+    ]
+
+    module.precalculateGO()
+
+    cached = {call.args[0]: json.loads(call.args[1]) for call in mock_redis.set.call_args_list}
+    assert cached == {"GO_for_9606": terms, "GO_for_10090": terms}
+
+
+# ---------------------------------------------------------------------------
+# main loop scheduling
+# ---------------------------------------------------------------------------
+
+class StopLoop(Exception):
+    pass
+
+
+def run_main(module, iterations):
+    """Run ``main`` until it has slept ``iterations`` times; return the sleeps."""
+    sleeps = []
+
+    def sleep(seconds):
+        sleeps.append(seconds)
+        if len(sleeps) >= iterations:
+            raise StopLoop
+
+    with patch.object(module.time, "sleep", side_effect=sleep):
+        with pytest.raises(StopLoop):
+            module.main()
+    return sleeps
+
+
+def test_main_backs_off_while_statistics_keep_failing(main_module):
+    """Each consecutive failure doubles the wait before the next attempt."""
+    module, _, _ = main_module
+    module.MOZG_URL = "http://mozg.test/graphql"
+
+    with patch.object(module, "get_kg_statistics", side_effect=RuntimeError("down")):
+        sleeps = run_main(module, 4)
+
+    initial = module.ERROR_INITIAL_SLEEP_TIME
+    factor = module.ERROR_SLEEP_TIME_MULTIPLIER
+    assert sleeps == [initial, initial * factor, initial * factor ** 2, initial * factor ** 3]
+
+
+def test_main_backs_off_while_go_precalculation_keeps_failing(main_module):
+    module, _, _ = main_module
+    module.MOZG_URL = ""
+
+    with (
+        patch.object(module, "get_kg_statistics", return_value={}),
+        patch.object(module, "cache_data"),
+        patch.object(module, "precalculateGO", side_effect=RuntimeError("down")),
+    ):
+        sleeps = run_main(module, 3)
+
+    initial = module.ERROR_INITIAL_SLEEP_TIME
+    factor = module.ERROR_SLEEP_TIME_MULTIPLIER
+    assert sleeps == [initial, initial * factor, initial * factor ** 2]
+
+
+def test_main_backoff_is_capped(main_module):
+    module, _, _ = main_module
+    module.MOZG_URL = "http://mozg.test/graphql"
+    module.ERROR_MAX_SLEEP_TIME = module.ERROR_INITIAL_SLEEP_TIME * 3
+
+    with patch.object(module, "get_kg_statistics", side_effect=RuntimeError("down")):
+        sleeps = run_main(module, 4)
+
+    assert max(sleeps) == module.ERROR_MAX_SLEEP_TIME
+
+
+def test_main_sleeps_once_per_successful_round(main_module):
+    module, _, _ = main_module
+    module.MOZG_URL = ""
+
+    with (
+        patch.object(module, "get_kg_statistics", return_value={}),
+        patch.object(module, "cache_data"),
+        patch.object(module, "precalculateGO"),
+    ):
+        sleeps = run_main(module, 2)
+
+    assert sleeps == [module.SUCCESSFUL_SLEEP_TIME] * 2
+
+
+def test_main_skips_go_precalculation_with_mozg(main_module):
+    module, _, _ = main_module
+    module.MOZG_URL = "http://mozg.test/graphql"
+
+    with (
+        patch.object(module, "get_kg_statistics", return_value={}),
+        patch.object(module, "cache_data") as cache_data,
+        patch.object(module, "precalculateGO") as precalculate_go,
+    ):
+        run_main(module, 1)
+
+    precalculate_go.assert_not_called()
+    cache_data.assert_called_once_with("kg_statistics", {})
+
+
+def test_main_resets_backoff_after_a_successful_round(main_module):
+    module, _, _ = main_module
+    module.MOZG_URL = "http://mozg.test/graphql"
+
+    with (
+        patch.object(
+            module,
+            "get_kg_statistics",
+            side_effect=[RuntimeError("down"), RuntimeError("down"), {}, RuntimeError("down")],
+        ),
+        patch.object(module, "cache_data"),
+    ):
+        sleeps = run_main(module, 4)
+
+    initial = module.ERROR_INITIAL_SLEEP_TIME
+    assert sleeps == [
+        initial,
+        initial * module.ERROR_SLEEP_TIME_MULTIPLIER,
+        module.SUCCESSFUL_SLEEP_TIME,
+        initial,
+    ]
+
+
+# ---------------------------------------------------------------------------
+# connection settings
+# ---------------------------------------------------------------------------
+
+
+def test_redis_connection_keeps_a_password_with_url_characters(monkeypatch):
+    """Azure's access keys contain characters that mean something in a URL."""
+    password = "p@ss/w#r?d%41+="
+    monkeypatch.setenv("REDIS_PASSWORD", password)
+    monkeypatch.setenv("REDIS_HOST", "cache.example")
+
+    with patch("neo4j.GraphDatabase.driver", return_value=MagicMock()):
+        sys.modules.pop("main", None)
+        module = importlib.import_module("main")
+    sys.modules.pop("main", None)
+
+    settings = module.redis_server.connection_pool.connection_kwargs
+    assert (settings["host"], settings["password"]) == ("cache.example", password)

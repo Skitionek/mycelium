@@ -20,15 +20,18 @@ export const getGraphQueryParams: (params: Partial<GraphSearchParameters>) => Gr
     q: query,
     domains: domains?.join(';'),
     entities: entities?.join(';'),
-    page: '' + page,
+    // The search form leaves the page out, as a new search starts on the first
+    page: '' + (page ?? 1),
     ...rest
   });
 
 export const createGraphSearchParamsFromQuery: (params: GraphQueryParameters) => GraphSearchParameters =
-  ({q, domains, entities, page, ...rest}) => ({
+  ({q, domains, entities, organism, page}) => ({
     query: q,
-    domains: domains?.split(';') ?? [],
-    entities: entities?.split(';') ?? [],
+    // ''.split(';') is [''], not []
+    domains: domains ? domains.split(';') : [],
+    entities: entities ? entities.split(';') : [],
+    organism,
     page: parseInt(page, 10) || 1,
     limit: VIZ_SEARCH_LIMIT,
   });
@@ -64,7 +67,8 @@ export const getContentSearchQueryParams = ({q = '', ...params}, restartPaginati
 const createContentSearchAdvancedParamsFromQuery =
   ({types, folders, phrase, wildcards}: ContentSearchQueryParameters, searchTypesMap: Map<string, SearchType>) => omitBy({
     types: types ? getChoicesFromQuery({types}, 'types', searchTypesMap) : [],
-    folders: folders?.split(';') ?? [],
+    // ''.split(';') is [''], not []
+    folders: folders ? folders.split(';') : [],
     phrase,
     wildcards
   }, isNil);
