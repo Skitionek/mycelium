@@ -2,7 +2,7 @@ import os.path
 import re
 from typing import Optional, Dict
 
-from marshmallow import fields, ValidationError
+from marshmallow import fields, missing, ValidationError
 
 from neo4japp.utils.request import parse_sort
 from neo4japp.utils.string import stripped_characters, is_nice_filename_char
@@ -20,7 +20,9 @@ class NiceFilenameString(fields.String):
     }
 
     def validate_ext(self, filename):
-        name, ext = os.path.splitext(filename)
+        # Windows drops trailing dots and spaces when saving, so 'x.exe. '
+        # lands on disk as 'x.exe'
+        name, ext = os.path.splitext(filename.rstrip('. '))
         if ext.lower() in self.extension_blacklist:
             raise ValidationError(f"Files of type {ext} are not supported")
 
@@ -38,11 +40,11 @@ class StringIntegerField(fields.Integer):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if value == '':
-            if self.load_default is not None:
+            if self.load_default is not missing:
                 value = self.load_default() if callable(self.load_default) \
                     else self.load_default
             elif not self.allow_none:
-                self.fail('null')
+                raise self.make_error('null')
             else:
                 return None
         return super()._deserialize(value, attr, data)

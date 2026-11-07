@@ -55,7 +55,7 @@
 
       <fieldset class="fieldset-properties mt-4">
         <legend>Search External <i class="fas fa-external-link-alt ms-1"></i></legend>
-        <app-quick-search [query]="name" [links]="selected.entity.data?.search"></app-quick-search>
+        <app-quick-search [query]="name" [links]="$safeNavigationMigration(selected.entity.data?.search)"></app-quick-search>
       </fieldset>
     </div>
   </div>

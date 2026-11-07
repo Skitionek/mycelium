@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -15,7 +15,9 @@ import { SearchType } from '../shared';
 @Component({
   selector: 'app-advanced-search-dialog',
   templateUrl: './advanced-search-dialog.component.html',
-  styleUrls: ['./advanced-search-dialog.component.scss']
+  styleUrls: ['./advanced-search-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class AdvancedSearchDialogComponent implements OnInit {
   @Input() set params(params: ContentSearchOptions) {

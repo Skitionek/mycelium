@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnDestroy, Output, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, EventEmitter, OnDestroy, Output, ViewChild, HostListener, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import { NgbDropdown, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -28,6 +28,8 @@ import { FilesystemObjectActions } from 'app/file-browser/services/filesystem-ob
   selector: 'app-bioc-viewer',
   templateUrl: './bioc-view.component.html',
   styleUrls: ['./bioc-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
   @ViewChild('dropdown', { static: false, read: NgbDropdown }) dropdownComponent: NgbDropdown;
@@ -89,7 +91,7 @@ export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
   constructor(
     protected readonly filesystemService: FilesystemService,
     protected readonly fileObjectActions: FilesystemObjectActions,
-    protected readonly snackBar: MatLegacySnackBar,
+    protected readonly snackBar: MatSnackBar,
     protected readonly modalService: NgbModal,
     protected readonly route: ActivatedRoute,
     protected readonly errorHandler: ErrorHandler,

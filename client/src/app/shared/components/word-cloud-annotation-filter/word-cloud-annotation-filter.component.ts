@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { WordCloudAnnotationFilterEntity } from 'app/interfaces/annotation-filter.interface';
 
@@ -7,7 +7,9 @@ import { AnnotationFilterComponent } from '../annotation-filter/annotation-filte
 @Component({
   selector: 'app-word-cloud-annotation-filter',
   templateUrl: './word-cloud-annotation-filter.component.html',
-  styleUrls: ['./word-cloud-annotation-filter.component.scss']
+  styleUrls: ['./word-cloud-annotation-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class WordCloudAnnotationFilterComponent extends AnnotationFilterComponent<WordCloudAnnotationFilterEntity> implements OnInit {
   @Input() clickableWords = false;

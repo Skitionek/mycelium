@@ -1,0 +1,12 @@
+// The host element is inline by default, so without a height here the
+// module's `height: 100%` collapses and the body grows instead of scrolling.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+// A flex child will not shrink below its content unless min-height is 0.
+.module-body {
+  min-height: 0;
+}

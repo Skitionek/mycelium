@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { cloneDeep } from 'lodash-es';
 
@@ -9,6 +9,8 @@ import { SEARCH_LINKS } from '../links';
 @Component({
   selector: 'app-quick-search',
   templateUrl: './quick-search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class QuickSearchComponent implements OnChanges {
   @Input() query: string | undefined;
@@ -23,7 +25,8 @@ export class QuickSearchComponent implements OnChanges {
     if (this.links != null && this.links.length) {
       // links should be sorted in the order that they appear in SEARCH_LINKS
       const sortOrder = SEARCH_LINKS.map(link => link.domain.toLowerCase());
-      this.shownLinks = this.links.sort((linkA, linkB) => sortOrder.indexOf(linkA.domain) - sortOrder.indexOf(linkB.domain));
+      this.shownLinks = this.links.sort((linkA, linkB) =>
+        sortOrder.indexOf(linkA.domain.toLowerCase()) - sortOrder.indexOf(linkB.domain.toLowerCase()));
       this.generated = false;
       if (this.normalizeDomains) {
         const normalizedMapping = new Map<string, string>();

@@ -6,9 +6,10 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { BehaviorSubject, from, Observable, Subject, Subscription } from 'rxjs';
 import { finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
@@ -26,6 +27,8 @@ import { SdrfDocument } from '../models/sdrf-document';
   selector: 'app-sdrf-view',
   templateUrl: './sdrf-view.component.html',
   styleUrls: ['./sdrf-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SdrfViewComponent implements OnInit, OnDestroy {
 
@@ -42,7 +45,7 @@ export class SdrfViewComponent implements OnInit, OnDestroy {
   constructor(
     protected readonly route: ActivatedRoute,
     protected readonly filesystemService: FilesystemService,
-    protected readonly snackBar: MatLegacySnackBar,
+    protected readonly snackBar: MatSnackBar,
     protected readonly errorHandler: ErrorHandler,
     protected readonly progressDialog: ProgressDialog,
     protected readonly changeDetectorRef: ChangeDetectorRef,

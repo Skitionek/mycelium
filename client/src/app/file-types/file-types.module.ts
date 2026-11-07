@@ -6,6 +6,7 @@ import { BiocTypeProvider } from './providers/bioc.type-provider';
 import { CodemirrorTypeProvider } from './providers/codemirror.type-provider';
 import { DirectoryTypeProvider } from './providers/directory.type-provider';
 import { EnrichmentTableTypeProvider } from './providers/enrichment-table.type-provider';
+import { DmpTypeProvider } from './providers/dmp.type-provider';
 import { MapTypeProvider } from './providers/map.type-provider';
 import { DefaultObjectTypeProvider } from './providers/default.type-provider';
 import { PdfTypeProvider } from './providers/pdf.type-provider';
@@ -44,6 +45,11 @@ import { SdrfTypeProvider } from './providers/sdrf.type-provider';
     {
       provide: TYPE_PROVIDER,
       useClass: EnrichmentTableTypeProvider,
+      multi: true,
+    },
+    {
+      provide: TYPE_PROVIDER,
+      useClass: DmpTypeProvider,
       multi: true,
     },
     {

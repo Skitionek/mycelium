@@ -90,8 +90,12 @@ export enum MimeTypes {
   BioC = 'vnd.mycelium.document/bioc',
   Pdb = 'chemical/x-pdb',
   Cif = 'chemical/x-cif',
-  Sdrf = 'vnd.mycelium.document/sdrf'
+  Sdrf = 'vnd.mycelium.document/sdrf',
+  Dmp = 'vnd.mycelium.document/dmp'
 }
+
+/** The pdf.js worker, copied from pdfjs-dist into the build (see angular.json). */
+export const PDF_WORKER_PATH = 'assets/vendor/pdfjs/pdf.worker.min.mjs';
 
 export const PROTEIN_STRUCTURE_MIME_TYPES: ReadonlySet<string> = new Set([
   MimeTypes.Pdb,
@@ -163,6 +167,7 @@ export enum FAClass {
   Word = 'fak fa-word-solid',
   Cytoscape = 'fak fa-cytoscape-solid',
   Sdrf = 'fa fa-table',
+  Dmp = 'fa fa-clipboard-list',
 
 }
 
@@ -182,6 +187,7 @@ export enum Unicodes {
   Excel = '\ue001',
   Word = '\ue002',
   PowerPoint = '\ue003',
+  Dmp = '\uf46d',
   Cytoscape = '\ue004'
 }
 // Colors used to render microsoft icons - they should not change

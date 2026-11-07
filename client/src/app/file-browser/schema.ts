@@ -167,7 +167,7 @@ export interface BulkObjectUpdateRequest extends Partial<ContentValue> {
  * Update request.
  */
 
-// tslint:disable-next-line:no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ObjectUpdateRequest extends BulkObjectUpdateRequest {
 }
 
@@ -289,7 +289,7 @@ export interface PDFAnnotationGenerationRequest {
   annotationConfigs?: AnnotationConfigurations;
 }
 
-/* tslint:disable-next-line */
+/* eslint-disable-next-line */
 export interface TextAnnotationGenerationRequest extends PDFAnnotationGenerationRequest {
   //
 }

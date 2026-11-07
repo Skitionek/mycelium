@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -25,6 +25,8 @@ import { GoogleDrivePickerService } from '../../services/google-drive-picker.ser
 @Component({
   selector: 'app-object-edit-dialog',
   templateUrl: './object-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectEditDialogComponent extends CommonFormDialogComponent<ObjectEditDialogValue> {
   @ViewChild('fileInput', {static: false})

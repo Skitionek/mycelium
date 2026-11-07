@@ -6,9 +6,10 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { cloneDeep } from 'lodash-es';
@@ -27,6 +28,8 @@ import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 @Component({
   selector: 'app-object-menu',
   templateUrl: './object-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectMenuComponent implements AfterViewInit, OnChanges {
 
@@ -47,7 +50,7 @@ export class ObjectMenuComponent implements AfterViewInit, OnChanges {
   openInOptions: OpenInOption[] = [];
 
   constructor(readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly errorHandler: ErrorHandler,
               protected readonly route: ActivatedRoute,

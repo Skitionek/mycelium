@@ -17,13 +17,12 @@ RUN pip install uv
 FROM base as build-deps
 
 # Copy dependency files
-COPY requirements.txt requirements-dev.txt ./
+COPY pyproject.toml uv.lock ./
 
-# Install Python dependencies
+# Install Python dependencies from the lockfile
 ARG DEV
-RUN uv venv /.venv \
-    && uv pip install --python /.venv/bin/python -r requirements.txt \
-    && if [ -n "$DEV" ]; then uv pip install --python /.venv/bin/python -r requirements-dev.txt; fi
+ENV UV_PROJECT_ENVIRONMENT=/.venv UV_PYTHON_DOWNLOADS=never
+RUN uv sync --locked --no-install-project $([ -n "$DEV" ] || echo --no-dev)
 
 
 # ========================================

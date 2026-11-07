@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild, HostListener, } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  HostListener,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { cloneDeep, isNil, startCase } from 'lodash-es';
 
@@ -18,6 +28,8 @@ import { InfoPanel } from '../../models/info-panel';
   selector: 'app-node-form',
   styleUrls: ['./node-form.component.scss'],
   templateUrl: './node-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NodeFormComponent implements AfterViewInit {
   @ViewChild('displayName', {static: false}) displayNameRef: ElementRef;
@@ -102,7 +114,7 @@ export class NodeFormComponent implements AfterViewInit {
     return isNil(this.node.data.hyperlinks) ? [] : this.node.data.hyperlinks;
   }
 
-  // tslint:disable-next-line: adjacent-overload-signatures
+  // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
   @Input()
   set node(node) {
     this.previousLabel = node.label;

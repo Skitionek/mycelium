@@ -17,7 +17,6 @@ services:
     ports:
       - 5000:5000
     environment:
-      - APPSERVER_URL=http://appserver:5000
       - PDFPARSER_URL=http://pdfparser:7600
       - STATISTICAL_ENRICHMENT_URL=http://statistical-enrichment:5000
       - INITIAL_ADMIN_EMAIL=admin@example.com
@@ -26,15 +25,14 @@ services:
       - statistical-enrichment
       - pdfparser
 
-  ## PDF parsing service
+  ## PDF parsing service (pdf.js-based, built from source)
   pdfparser:
-    image: lifelike.azurecr.io/kg-pdfparser:${PDFPARSER_IMAGE_TAG:-latest}
+    build: ../pdfparser
     restart: unless-stopped
-    tty: true
     ports:
       - 7600
     healthcheck:
-      test: ["CMD", "curl", "-f", "localhost:7600"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:7600/"]
 
   ## Statistical enrichment service
   statistical-enrichment:

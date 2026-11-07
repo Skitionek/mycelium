@@ -22,6 +22,7 @@ import { DropdownController } from '../utils/dom/dropdown-controller';
  */
 @Directive({
   selector: '[appContextMenuBody]',
+  standalone: false,
 })
 export class ContextMenuBodyDirective {
   /**
@@ -44,6 +45,7 @@ export class ContextMenuBodyDirective {
  */
 @Directive({
   selector: '[appContextMenu]',
+  standalone: false,
 })
 export class ContextMenuDirective implements AfterViewInit, OnDestroy {
   @ContentChild(ContextMenuBodyDirective, {static: false, read: ElementRef})

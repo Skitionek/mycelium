@@ -23,6 +23,9 @@ services:
       - FRONTEND_URL=http://localhost:4200
       # Unset to use the default LMDB data directory
       - LMDB_DATA_DIR=
+      # Auto-logs the frontend in as the seeded admin user so the
+      # dev/demo stack doesn't require a manual login.
+      - DEV_AUTO_LOGIN_EMAIL=admin@example.com
     volumes:
       - type: bind
         source: ${HOST_WORKSPACE_PATH:-..}/appserver
@@ -56,10 +59,32 @@ services:
         target: /app
     user: root
 
+  mozg:
+    build:
+      context: ../mozg
+    environment:
+      - NODE_ENV=development
+
+  # Publish the backing services on fixed host ports so an appserver started
+  # from .vscode/launch.json can reach them at localhost.
   solr:
     image: solr:9
     command:
       - solr-precreate
       - file
+    ports:
+      - 8983:8983
     healthcheck:
       start_period: 45s
+
+  postgres:
+    ports:
+      - 5432:5432
+
+  redis:
+    ports:
+      - 6379:6379
+
+  elasticsearch:
+    ports:
+      - 9200:9200
