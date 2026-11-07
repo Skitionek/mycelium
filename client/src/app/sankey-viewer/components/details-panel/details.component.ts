@@ -1,4 +1,4 @@
-import { Component, Input, } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { md5Hex } from 'app/shared/utils/identifiers';
@@ -10,7 +10,9 @@ import { SankeyControllerService } from '../../services/sankey-controller.servic
 
 @Component({
   selector: 'app-sankey-details',
-  template: ''
+  template: '',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class SankeyDetailsComponent {
   constructor(

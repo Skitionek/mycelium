@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { Subscription } from 'rxjs';
 
@@ -10,6 +10,8 @@ import { FilesystemService } from '../../services/filesystem.service';
 @Component({
   selector: 'app-browser-community-list',
   templateUrl: './browser-community-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class BrowserCommunityListComponent implements OnInit, OnDestroy {
 

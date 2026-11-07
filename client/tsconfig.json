@@ -1,28 +1,26 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    // TypeScript 6 turns `strict` on by default; this code base was written without it.
+    "strict": false,
+    // `baseUrl` (absolute `app/...` imports) is deprecated in TypeScript 6 and removed in 7.
+    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "src",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "es2020",
-    "typeRoots": [
-      "src/typings",
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "typeRoots": ["src/typings", "node_modules/@types"],
     "paths": {
-      "route-with-dynamic-outlets": ["../node_modules/route-with-dynamic-outlets/lib/src"]
+      "route-with-dynamic-outlets": [
+        "../node_modules/route-with-dynamic-outlets/lib/src"
+      ]
     }
   },
   "angularCompilerOptions": {

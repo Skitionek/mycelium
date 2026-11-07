@@ -1,9 +1,11 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-collapsible-window',
   templateUrl: './collapsible-window-component.html',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class CollapsibleWindowComponent {
   @Input() title = 'Window';

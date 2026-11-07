@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
@@ -10,6 +10,8 @@ import { ContentSearchOptions } from '../content-search';
 @Component({
   selector: 'app-content-search-form',
   templateUrl: './content-search-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ContentSearchFormComponent extends FormComponent<ContentSearchOptions> {
   @Input() queryString: string;

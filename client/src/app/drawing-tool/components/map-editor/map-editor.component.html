@@ -101,7 +101,7 @@
             <as-split-area size="256"
                            #infoPanelSidebar>
                 <ng-container
-                        *ngIf="(graphCanvas?.selection.changeObservable | async) as selected; else graphInfo">
+                        *ngIf="($safeNavigationMigration(graphCanvas?.selection.changeObservable) | async) as selected; else graphInfo">
                     <div class="info-panel" *ngIf="selected[0].length === 1; else graphInfo">
                         <app-info-panel [infoPanel]="infoPanel" [selected]="selected[0][0]"
                                         (actionCreated)="graphCanvas.execute($event)">

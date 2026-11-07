@@ -26,6 +26,7 @@ import { HighlightTextService } from '../services/highlight-text.service';
   ],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class HighlightTextComponent implements OnInit, OnDestroy, OnChanges, AfterViewChecked {
   @ViewChild('container', {read: ElementRef, static: false}) containerRef: ElementRef;

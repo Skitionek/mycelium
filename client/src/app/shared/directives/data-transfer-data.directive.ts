@@ -4,6 +4,7 @@ import { URIData, GenericDataProvider } from '../providers/data-transfer-data/ge
 
 @Directive({
   selector: '[appDataTransferData]',
+  standalone: false,
 })
 export class DataTransferDataDirective {
 
