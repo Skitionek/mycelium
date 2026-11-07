@@ -248,10 +248,10 @@ updates:
         patterns:
           - plotly.js*
     ignore:
-      # Angular is upgraded by hand, one major at a time (currently Angular 20).
+      # Angular is upgraded by hand, one major at a time (currently Angular 21).
       # The rest of the `angular` group is ignored too, otherwise the
       # CLI/devkit/TypeScript halves would still be bumped on their own and
-      # break the build against Angular 20.
+      # break the build against Angular 21.
       - dependency-name: '@angular/*'
       - dependency-name: '@angular-devkit/*'
       - dependency-name: '@angular-builders/*'
@@ -259,21 +259,21 @@ updates:
       - dependency-name: 'zone.js'
       # jasmine-core 7.x makes properties zone.js patches (e.g. `describe`)
       # read-only, breaking zone-testing's monkeypatch. zone.js is pinned to
-      # the 0.15.x line Angular 20 supports above, so jasmine-core must stay
+      # the 0.15.x line (Angular 21 also accepts 0.16.x) above, so jasmine-core must stay
       # on 6.x until an Angular upgrade unblocks a compatible zone.js.
       - dependency-name: 'jasmine-core'
         versions: ['>=7.0.0']
-      # ng-bootstrap majors track the Angular major; 19.x is the last that
-      # supports Angular 20 (20.x needs Angular 21). Cap at one major at a time
+      # ng-bootstrap majors track the Angular major; 20.x is the last that
+      # supports Angular 21 (21.x needs Angular 22). Cap at one major at a time
       # until the next Angular upgrade unblocks it. (PR #585 jumped 15 → 21.)
       - dependency-name: '@ng-bootstrap/ng-bootstrap'
-        versions: ['>=20']
-      # ngrx majors also track the Angular major; 20.x is the last that
-      # supports Angular 20. Cap at one major at a time. (PR #569 jumped 16 → 22.)
+        versions: ['>=21']
+      # ngrx majors also track the Angular major; 21.x is the last that
+      # supports Angular 21. Cap at one major at a time. (PR #569 jumped 16 → 22.)
       - dependency-name: '@ngrx/*'
-        versions: ['>=21']
+        versions: ['>=22']
       - dependency-name: ngrx-store-localstorage
-        versions: ['>=21']
+        versions: ['>=22']
 
   # End-to-end suite (tests/e2e). Independent of the client's pinned
   # `playwright`: the e2e job installs whichever browser build its
