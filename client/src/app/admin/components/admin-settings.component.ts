@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -18,6 +18,8 @@ import { EnrichmentDocument } from 'app/enrichment/models/enrichment-document';
 @Component({
     selector: 'app-admin-settings-view',
     templateUrl: 'admin-settings.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class AdminSettingsComponent {
 

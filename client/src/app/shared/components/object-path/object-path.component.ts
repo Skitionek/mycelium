@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 import { WorkspaceManager } from 'app/shared/workspace-manager';
@@ -6,6 +6,8 @@ import { WorkspaceManager } from 'app/shared/workspace-manager';
 @Component({
   selector: 'app-object-path',
   templateUrl: './object-path.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectPathComponent {
 

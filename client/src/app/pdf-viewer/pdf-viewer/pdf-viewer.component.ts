@@ -10,7 +10,8 @@ import {
   HostListener,
   OnDestroy,
   ViewChild,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 import * as pdfjsLib from 'pdfjs-dist';
@@ -49,7 +50,9 @@ Object.freeze(DEFAULT_DOCUMENT_INIT_PARAMETERS);
           <div class="pdfViewer"></div>
       </div>
   `,
-  styleUrls: ['./pdf-viewer.component.scss']
+  styleUrls: ['./pdf-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class PdfViewerComponent
   implements OnChanges, OnInit, OnDestroy {

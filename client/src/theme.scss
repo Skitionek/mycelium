@@ -1,6 +1,7 @@
 @use '@angular/material' as mat;
 
-@include mat.core();
+@include mat.elevation-classes();
+@include mat.app-background();
 
 $light-primary-text: white;
 $dark-primary-text: black;
@@ -74,9 +75,9 @@ $lifelike-secondary-colors: (
 );
 
 
-$lifelike-primary: mat.define-palette($lifelike-primary-colors);
-$lifelike-accent: mat.define-palette($lifelike-secondary-colors, 500, A100, 900);
-$lifelike-theme: mat.define-light-theme((
+$lifelike-primary: mat.m2-define-palette($lifelike-primary-colors);
+$lifelike-accent: mat.m2-define-palette($lifelike-secondary-colors, 500, A100, 900);
+$lifelike-theme: mat.m2-define-light-theme((
   color: (
     primary: $lifelike-primary,
     accent: $lifelike-accent,

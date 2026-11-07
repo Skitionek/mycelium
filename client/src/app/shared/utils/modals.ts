@@ -1,6 +1,4 @@
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap/modal/modal-config';
-import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap/modal/modal-ref';
+import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 /**
  * Opens a modal in a more type-safe manner because the return value is better typed.

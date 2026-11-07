@@ -20,7 +20,8 @@ export interface SortEvent {
 }
 
 @Directive({
-  selector: 'th[appSortable]'
+  selector: 'th[appSortable]',
+  standalone: false
 })
 export class SortableTableHeaderDirective {
   @Input() sortable: any;
