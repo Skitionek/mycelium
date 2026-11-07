@@ -100,6 +100,10 @@ export interface FilesystemObjectData {
   // as a helper for getting the real name of a root file.
   trueFilename: string;
   filePath: string;
+  /** Set when this item was indexed from Google Drive. */
+  googleDriveId?: string;
+  /** RFC-3339 modification time of the Drive item at last sync. */
+  googleDriveModifiedTime?: string;
 }
 
 interface ContentValue {
@@ -115,15 +119,21 @@ interface ContentObject {
   contentHashId: string;
 }
 
-type AllContent = ContentValue & ContentUrl & ContentObject;
+export interface ContentGoogleDrive {
+  googleDriveFileId: string;
+  googleDriveAccessToken: string;
+}
 
-// This type just means that you can only define either contentValue, contentUrl, OR
-// contentHashId but not a combination of any of those.
+type AllContent = ContentValue & ContentUrl & ContentObject & ContentGoogleDrive;
+
+// This type just means that you can only define either contentValue, contentUrl,
+// contentHashId, OR googleDriveFileId but not a combination of any of those.
 // We use Record<T, never> to make all the keys of T to 'never', then we use
 // Partial<T> to make the keys optional so the end result is { wantThis: any, dontWant?: never, ... }
 export type ObjectContentSource = (ContentValue & Partial<Record<keyof Omit<AllContent, keyof ContentValue>, never>>)
   | (ContentUrl & Partial<Record<keyof Omit<AllContent, keyof ContentUrl>, never>>)
-  | (ContentObject & Partial<Record<keyof Omit<AllContent, keyof ContentObject>, never>>);
+  | (ContentObject & Partial<Record<keyof Omit<AllContent, keyof ContentObject>, never>>)
+  | (ContentGoogleDrive & Partial<Record<keyof Omit<AllContent, keyof ContentGoogleDrive>, never>>);
 
 // Requests
 // ----------------------------------------
@@ -172,6 +182,29 @@ type BaseObjectCreateRequest = Required<Pick<BulkObjectUpdateRequest, RequiredOb
 export type ObjectCreateRequest = BaseObjectCreateRequest & Partial<ObjectContentSource> & {
   mimeType?: string;
 };
+
+/**
+ * Google Drive import request — sent to POST /api/google-drive/import.
+ */
+export interface GoogleDriveImportRequest {
+  googleDriveFileId: string;
+  googleDriveAccessToken: string;
+  parentHashId: string;
+  filename?: string;
+  description?: string;
+  public?: boolean;
+  mimeType?: string;
+  fallbackOrganism?: OrganismAutocomplete;
+  annotationConfigs?: AnnotationConfigurations;
+}
+
+/**
+ * Google Drive sync request — sent to POST /api/google-drive/sync/<hashId>.
+ * Updates the local index metadata for a Drive-indexed item.
+ */
+export interface GoogleDriveSyncRequest {
+  googleDriveAccessToken: string;
+}
 
 /**
  * Export request.
