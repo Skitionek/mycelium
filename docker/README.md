@@ -55,6 +55,32 @@ The stack definition is divided into three Docker Compose files:
 
 You may combine them as you need and/or add your own `docker-compose.override.yml` to override any configuration. (this file will be ignored by Git)
 
+## Office file thumbnails
+
+The frontend shows thumbnails of Word, Excel, PowerPoint and OpenDocument files, in the
+file tiles and the file preview panel. They are rendered in the visitor's browser by
+[serverless-office-converter](https://github.com/Skitionek/serverless-office-converter)
+(LibreOffice compiled to WebAssembly), the same engine that previews office documents, so the
+server does no extra work. The engine is installed with the client's dependencies and served
+under `/assets/vendor/office-converter/`.
+
+It needs a cross-origin isolated page, which nginx provides by sending
+`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: credentialless`.
+Where the page is not isolated, or the engine is missing, file type icons are shown as before.
+
+Thumbnails are rendered so that they don't slow down the rest of Mycelium:
+
+- Nothing is loaded until a thumbnail is on screen that hasn't been rendered yet. Only then
+  does the browser load the converter (about 45 MB the first time, then from its cache).
+- Files are downloaded and converted one at a time, when the browser is idle. Thumbnails use
+  at most one of the browser's connections to the server, and conversions run in a Web Worker,
+  off the page's main thread.
+- Thumbnails that leave the screen are dropped from the queue, and a download in progress is
+  stopped. Files larger than 25 MB are skipped.
+- The converter is stopped after a minute without work, releasing its memory (up to about
+  1 GB). Each version of a file is converted at most once while the page is open, and a file
+  that can't be converted isn't tried again.
+
 ## Other Docker operations
 
 You can run `make help` to see other available common operation:

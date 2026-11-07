@@ -5,7 +5,9 @@
       <div class="flex-fill d-flex justify-content-center align-items-center my-2">
         <a [appLink]="o.getCommands(forEditing)" [newTab]="newTabObject"
            class="text-muted">
-          <i class="fa-2x {{ o.fontAwesomeIcon }}"></i>
+          <app-object-thumbnail [object]="o" width="2.75rem">
+            <i class="fa-2x {{ o.fontAwesomeIcon }}"></i>
+          </app-object-thumbnail>
         </a>
       </div>
       <div class="text-truncate text-center">

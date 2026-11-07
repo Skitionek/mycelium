@@ -27,6 +27,7 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 - **Mycelium SVG logo**: Minimalist mycelium-network icon added to the left navigation bar (`assets/icons/mycelium-logo.svg`) ([#245]).
 - **File context menu "Open in" options**: context menus now include an "Open in" section so users can choose a specific viewer (for example Default, PDF, Code, BioC, or Protein Structure) when multiple viewers are applicable ([#257]).
 - **SDRF routing**: files of the SDRF type open in the SDRF editor and offer it under **Open in**; nothing routed them there before ([#679]).
+- **Office file thumbnails**: file tiles and the file preview panel show thumbnails of Word, Excel, PowerPoint and OpenDocument files, rendered in the browser by the same in-browser LibreOffice that previews office documents. The engine is loaded only when a thumbnail has to be rendered, works on one file at a time when the browser is idle, and is stopped when idle (see `docker/README.md`).
 - **Codespaces prebuild-friendly devcontainer flow**: `.devcontainer/devcontainer.json` now runs `.devcontainer/post-create.sh` during container creation, allowing GitHub Codespaces prebuilds to pre-run stack build/start work and reduce first-start latency.
 
 ### Changed
