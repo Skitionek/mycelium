@@ -19,7 +19,8 @@ import { createResizeObservable } from '../rxjs/resize-observable';
  */
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '.text-truncate'
+  selector: '.text-truncate',
+  standalone: false
 })
 // @ts-ignore
 export class TextTruncateDirective extends NgbTooltip implements OnInit, OnDestroy, AfterContentChecked {

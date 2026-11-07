@@ -82,7 +82,7 @@ jobs:
       - name: Copy changelog files
         run: cp -rp graph-db/changelog/* /liquibase/changelog/
       - name: Release previous lock
-        if: ${{ github.event.inputs.release_lock }}
+        if: ${{ inputs.release_lock }}
         run: /docker-entrypoint.sh releaseLocks
       - name: Run Liquibase migrations
         run: /docker-entrypoint.sh update

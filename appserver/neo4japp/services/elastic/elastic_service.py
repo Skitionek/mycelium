@@ -66,7 +66,7 @@ class SearchIndexService(SearchIndexConnection, GraphConnection):
             ) from e
         self.reindex_all_documents()
 
-    def update_or_create_pipeline(self, pipeline_id, pipeline_definition_file):
+    def update_or_create_pipeline(self, _pipeline_id, _pipeline_definition_file):
         # Solr uses the extract handler (Tika) directly and does not require ingest pipelines.
         return 'done'
 

@@ -14,6 +14,7 @@ import { getTopParent } from '../utils/forms';
  */
 @Directive({
   selector: '[appFormInput]',
+  standalone: false,
 })
 export class FormInputDirective implements AfterContentChecked {
   @Input() appFormInput: AbstractControl | undefined;

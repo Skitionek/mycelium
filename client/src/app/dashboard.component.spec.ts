@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { of } from 'rxjs';
 
@@ -26,9 +27,11 @@ describe('DashboardComponent', () => {
 
         TestBed.configureTestingModule({
             declarations: [DashboardComponent],
-            imports: [CommonModule, HttpClientTestingModule],
+            imports: [CommonModule],
             providers: [
                 { provide: MetaDataService, useValue: metaDataServiceSpy },
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
             ],
         }).compileComponents();
     }));

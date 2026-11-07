@@ -15,6 +15,7 @@ import {
  */
 @Directive({
   selector: '[appMouseNavigableItem]',
+  standalone: false,
 })
 export class MouseNavigableItemDirective {
   constructor(@Inject(forwardRef(() => MouseNavigableDirective))
@@ -39,6 +40,7 @@ export class MouseNavigableItemDirective {
  */
 @Directive({
   selector: '[appMouseNavigable]',
+  standalone: false,
 })
 export class MouseNavigableDirective implements AfterViewInit, OnDestroy {
   @Input() navigationWrap = true;

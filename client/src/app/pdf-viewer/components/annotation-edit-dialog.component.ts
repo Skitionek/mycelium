@@ -16,7 +16,8 @@ import { Annotation } from '../annotation-type';
   selector: 'app-annotation-panel',
   templateUrl: './annotation-edit-dialog.component.html',
   // needed to make links inside *ngFor to work and be clickable
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false
 })
 export class AnnotationEditDialogComponent extends CommonFormDialogComponent {
   @Input() pageNumber: number;

@@ -8,6 +8,7 @@ import {
   SimpleChanges,
   ViewChild,
   ViewContainerRef,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -22,6 +23,8 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-object-preview',
   templateUrl: './object-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectPreviewComponent implements OnChanges {
 
@@ -64,6 +67,8 @@ export class ObjectPreviewComponent implements OnChanges {
   template: `
     <ng-container #child></ng-container>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectPreviewOutletComponent implements AfterViewInit {
 

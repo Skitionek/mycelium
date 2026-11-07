@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { cloneDeep, isNil } from 'lodash-es';
 
@@ -15,6 +15,8 @@ import { InfoPanel } from '../../models/info-panel';
 @Component({
   selector: 'app-edge-form',
   templateUrl: './edge-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class EdgeFormComponent implements AfterViewInit {
 

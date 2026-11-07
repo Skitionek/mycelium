@@ -1,4 +1,4 @@
-import { TestBed, async } from '@angular/core/testing';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 
 import { Observable, of } from 'rxjs';
 
@@ -13,7 +13,7 @@ import { RecentFilesService } from './recent-files.service';
 import { FilesystemObject } from '../models/filesystem-object';
 
 describe('RecentFileService', () => {
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       providers: [
         // overwrite RecentFilesService provider to not use singleton
