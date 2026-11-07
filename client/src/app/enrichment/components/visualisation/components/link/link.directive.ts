@@ -33,7 +33,8 @@ export function triggerSearchOnShouldReplaceTab(text) {
  * enrichment table.
  */
 @Directive({
-  selector: ':not(a):not(area)[appSELink]'
+  selector: ':not(a):not(area)[appSELink]',
+  standalone: false
 })
 export class SELinkDirective extends LinkWithoutHrefDirective {
   @HostBinding('style.cursor') cursor = 'pointer';

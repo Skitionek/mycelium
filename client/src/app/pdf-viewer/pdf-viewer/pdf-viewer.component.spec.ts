@@ -1,5 +1,5 @@
-import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { TestBed, waitForAsync, ComponentFixture } from '@angular/core/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { PdfViewerComponent } from './pdf-viewer.component';
 import { PdfViewerModule } from './pdf-viewer.module';
@@ -7,7 +7,9 @@ import { PdfViewerModule } from './pdf-viewer.module';
 @Component({
   template: `
     <app-pdf-viewer-lib></app-pdf-viewer-lib>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 class TestComponent {}
 
@@ -24,7 +26,7 @@ describe('PDFViewerComponent', () => {
     };
   }
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TestComponent],
       imports: [PdfViewerModule]

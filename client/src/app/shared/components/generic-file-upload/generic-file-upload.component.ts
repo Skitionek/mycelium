@@ -1,11 +1,13 @@
-import { Component, Output, EventEmitter, Input, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnInit, ViewChild, ElementRef, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { Subject, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-generic-file-upload',
     templateUrl: './generic-file-upload.component.html',
-    styleUrls: ['./generic-file-upload.component.scss']
+    styleUrls: ['./generic-file-upload.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class GenericFileUploadComponent implements OnInit, OnDestroy {
     @ViewChild('fileInput', {static: true}) fileInputRef: ElementRef;

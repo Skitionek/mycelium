@@ -19,6 +19,22 @@ class EnrichmentTableService(KgService):
     def __init__(self, graph: Neo4jSession, session: SQLAlchemySession):
         super().__init__(graph=graph, session=session)
 
+    @staticmethod
+    def _collect_domain_cell_texts(gene_index: int, domains: dict) -> list:
+        """Return cell-text dicts for each domain entry within one gene row."""
+        result = []
+        for k, v in domains.items():
+            if k == EnrichmentDomain.REGULON.value:
+                for k2, v2 in v.items():
+                    result.append({'text': v2['text'], 'index': gene_index, 'domain': k, 'label': k2})  # noqa
+            elif k == EnrichmentDomain.BIOCYC.value:
+                result.append({'text': v['Pathways']['text'], 'index': gene_index, 'domain': k, 'label': 'Pathways'})  # noqa
+            elif k in (EnrichmentDomain.GO.value, EnrichmentDomain.STRING.value):
+                result.append({'text': v['Annotation']['text'], 'index': gene_index, 'domain': k, 'label': 'Annotation'})  # noqa
+            elif k == EnrichmentDomain.UNIPROT.value:
+                result.append({'text': v['Function']['text'], 'index': gene_index, 'domain': k, 'label': 'Function'})  # noqa
+        return result
+
     def create_annotation_mappings(self, enrichment: dict) -> EnrichmentCellTextMapping:
         try:
             validate_enrichment_table(enrichment)
@@ -53,16 +69,8 @@ class EnrichmentTableService(KgService):
                 cell_texts.append({'text': gene['fullName'], 'index': i, 'domain': 'Full Name', 'label': 'Full Name'})  # noqa
 
                 if gene.get('domains'):
-                    for k, v in gene['domains'].items():
-                        if k == EnrichmentDomain.REGULON.value:
-                            for k2, v2 in v.items():
-                                cell_texts.append({'text': v2['text'], 'index': i, 'domain': k, 'label': k2})  # noqa
-                        elif k == EnrichmentDomain.BIOCYC.value:
-                            cell_texts.append({'text': v['Pathways']['text'], 'index': i, 'domain': k, 'label': 'Pathways'})  # noqa
-                        elif k == EnrichmentDomain.GO.value or k == EnrichmentDomain.STRING.value:
-                            cell_texts.append({'text': v['Annotation']['text'], 'index': i, 'domain': k, 'label': 'Annotation'})  # noqa
-                        elif k == EnrichmentDomain.UNIPROT.value:
-                            cell_texts.append({'text': v['Function']['text'], 'index': i, 'domain': k, 'label': 'Function'})  # noqa
+                    cell_texts.extend(
+                        EnrichmentTableService._collect_domain_cell_texts(i, gene['domains']))
             except KeyError:
                 current_app.logger.error(
                     'Missing key when creating enrichment table text row/column mapping.',

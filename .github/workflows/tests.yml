@@ -364,3 +364,25 @@ jobs:
       - name: Run tests
         working-directory: cache-invalidator
         run: pytest tests/ -v
+
+  helm-image-names:
+    name: Helm Image Names Lowercase
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Verify all image references are lowercase
+        run: |
+          # OCI image names must be lowercase (RFC 3986 / OCI Distribution spec).
+          # grep exits 1 (no match) when the pattern is absent, which is success here.
+          if grep -rn 'ghcr\.io/[A-Z]' \
+              helm/ \
+              .github/workflows/; then
+            echo "ERROR: uppercase characters found in ghcr.io image references above."
+            exit 1
+          fi
+          echo "All ghcr.io image references are lowercase."

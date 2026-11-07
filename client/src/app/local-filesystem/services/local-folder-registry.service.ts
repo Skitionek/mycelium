@@ -18,7 +18,7 @@ import {
   readOnlyError,
   unavailableError,
 } from '../local-folder-errors';
-import { LOCAL_ROOT_STORE, LocalRootStore, StoredLocalRoot } from '../local-root-store';
+import { LOCAL_ROOT_STORE, type LocalRootStore, type StoredLocalRoot } from '../local-root-store';
 
 /**
  * - granted: Mycelium can read the folder (and write to it if {@link LocalRoot.writable})

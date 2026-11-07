@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -24,6 +24,8 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-object-list',
   templateUrl: './object-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectListComponent {
   id = uniqueId('FileListComponent-');

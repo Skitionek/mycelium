@@ -14,6 +14,7 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -33,6 +34,8 @@ import { MouseNavigableDirective } from '../../directives/mouse-navigable.direct
     useExisting: SelectInputComponent,
     multi: true,
   }],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SelectInputComponent<T extends { label?: string }>
   implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, ControlValueAccessor {

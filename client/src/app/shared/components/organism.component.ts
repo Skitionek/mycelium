@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { OrganismAutocomplete } from 'app/interfaces';
 
@@ -23,6 +23,8 @@ import { OrganismAutocomplete } from 'app/interfaces';
       <strong>Synonym:</strong> {{ organism.synonym }}
     </ng-template>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class OrganismComponent {
 

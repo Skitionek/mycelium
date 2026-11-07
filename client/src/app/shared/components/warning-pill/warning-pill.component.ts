@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -6,7 +6,9 @@ import { WarningControllerService } from 'app/shared/services/warning-controller
 
 @Component({
   selector: 'app-warning-pill',
-  templateUrl: './warning-pill.component.html'
+  templateUrl: './warning-pill.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class WarningPillComponent {
   constructor(

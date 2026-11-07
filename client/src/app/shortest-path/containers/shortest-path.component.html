@@ -1,4 +1,4 @@
-<div *ngIf="(loadTask?.status$ | async) as status" class="h-100 w-100">
+<div *ngIf="($safeNavigationMigration(loadTask?.status$) | async) as status" class="h-100 w-100">
   <app-route-builder
     (loadNewQuery)="loadNewQuery($event)"
     (changeDisplayType)="changeDisplayType($event)"

@@ -33,6 +33,7 @@ interface IndicatorView {
       </a>
     </ng-container>
   `,
+  standalone: false,
 })
 export class LocalIndexIndicatorComponent {
   readonly view$: Observable<IndicatorView> = combineLatest([this.registry.roots$, this.indexer.summary$]).pipe(

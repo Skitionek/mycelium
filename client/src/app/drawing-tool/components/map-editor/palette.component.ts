@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AnnotationStyle, annotationTypes } from 'app/shared/annotation-styles';
@@ -10,6 +10,8 @@ import { createNodeDragImage } from '../../utils/drag';
   selector: 'app-palette',
   templateUrl: './palette.component.html',
   styleUrls: ['./palette.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class PaletteComponent {
   nodeTemplates = annotationTypes;
