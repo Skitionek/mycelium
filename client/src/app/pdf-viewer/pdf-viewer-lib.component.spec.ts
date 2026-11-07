@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -10,7 +10,7 @@ import { PdfViewerLibComponent } from './pdf-viewer-lib.component';
 import { PdfViewerLibModule } from './pdf-viewer-lib.module';
 
 describe('PdfViewerLibComponent', () => {
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
@@ -22,7 +22,7 @@ describe('PdfViewerLibComponent', () => {
       ]
     }).compileComponents();
   }));
-  it('should create the app', async(() => {
+  it('should create the app', waitForAsync(() => {
     const fixture = TestBed.createComponent(PdfViewerLibComponent);
     const app = fixture.debugElement.componentInstance;
     expect(app).toBeTruthy();

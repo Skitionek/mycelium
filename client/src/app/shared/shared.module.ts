@@ -3,7 +3,7 @@
  */
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -144,7 +144,6 @@ const components = [
 @NgModule({
   imports: [
     CommonModule,
-    HttpClientModule,
     AngularMaterialModule,
     FormsModule,
     ReactiveFormsModule,
@@ -192,12 +191,14 @@ const components = [
       useClass: HighlightTagHandler,
       multi: true,
     },
+    // Replaces the deprecated HttpClientModule. withInterceptorsFromDi keeps the
+    // class-based interceptors registered through HTTP_INTERCEPTORS working.
+    provideHttpClient(withInterceptorsFromDi()),
   ],
   // exported modules are visible to modules that import this one
   exports: [
     // Modules
     CommonModule,
-    HttpClientModule,
     AngularMaterialModule,
     FormsModule,
     ReactiveFormsModule,
