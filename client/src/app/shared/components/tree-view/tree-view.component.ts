@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, OnChanges, SimpleChanges, ViewEncapsulation, } from '@angular/core';
+import { Component, Input, TemplateRef, OnChanges, SimpleChanges, ViewEncapsulation, ChangeDetectionStrategy, } from '@angular/core';
 import { NestedTreeControl } from '@angular/cdk/tree';
 
 interface TreeNode {
@@ -12,6 +12,7 @@ interface TreeNode {
   templateUrl: './tree-view.component.html',
   styleUrls: ['./tree-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class TreeViewComponent implements OnChanges {

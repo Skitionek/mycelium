@@ -10,7 +10,8 @@ import {
   ViewEncapsulation,
   SimpleChanges,
   OnChanges,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -33,6 +34,7 @@ import { SankeyLayoutService } from './sankey-layout.service';
   templateUrl: './sankey.component.svg',
   styleUrls: ['./sankey.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {

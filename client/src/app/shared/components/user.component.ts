@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { AppUser } from 'app/interfaces';
 
@@ -23,6 +23,7 @@ import { AppUser } from 'app/interfaces';
       <strong>Username:</strong> {{ user.username }}
     </ng-template>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UserComponent {

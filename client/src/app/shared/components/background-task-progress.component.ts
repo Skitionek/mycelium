@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { TaskStatus } from '../rxjs/background-task';
 
 @Component({
   selector: 'app-background-task-progress',
   templateUrl: './background-task-progress.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class BackgroundTaskProgressComponent {

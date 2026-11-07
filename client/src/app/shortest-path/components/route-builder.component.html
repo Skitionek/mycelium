@@ -22,7 +22,7 @@
         </button>
       </div>
     </div>
-    <div *ngIf="(loadShortestPathQueries?.status$ | async) as status">
+    <div *ngIf="($safeNavigationMigration(loadShortestPathQueries?.status$) | async) as status">
       <div *ngIf="status.placeholdersShown" class="d-flex justify-content-start">
         <div class="d-flex justify-content-center align-items-center me-2">
           <i class="fa fa-spinner fa-spin text-white"></i>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { select, Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
@@ -10,6 +10,7 @@ import { AppUser } from 'app/interfaces';
 @Component({
   selector: 'app-user-settings',
   templateUrl: './user-settings.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UserSettingsComponent {

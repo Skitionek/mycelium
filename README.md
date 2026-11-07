@@ -22,7 +22,7 @@ Roadmap:
 | Feature / Improvement | [SBRG/lifelike](https://github.com/SBRG/lifelike) | Mycelium |
 |---|:---:|:---:|
 | **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
-| **Angular version** | v9 | v21 |
+| **Angular version** | v9 | v22 |
 | **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
 | **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 4.2.67 (CVE-2024-4367 fixed) |
 | **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |

@@ -1,4 +1,4 @@
-<div class="module" *ngIf="(loadTask?.status$ | async) as status">
+<div class="module" *ngIf="($safeNavigationMigration(loadTask?.status$) | async) as status">
     <app-module-progress *ngIf="status.running">
         Downloading file...
     </app-module-progress>

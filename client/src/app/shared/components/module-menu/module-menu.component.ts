@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnChanges, } from '@angular/core';
+import { AfterViewInit, Component, OnChanges, ChangeDetectionStrategy, } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -22,6 +22,7 @@ import { ModuleAwareComponent } from '../../modules';
 @Component({
   selector: 'app-module-menu',
   templateUrl: '../object-menu/object-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ModuleMenuComponent extends ObjectMenuComponent implements AfterViewInit, OnChanges {

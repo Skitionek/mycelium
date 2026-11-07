@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { EnrichWithGOTermsResult } from 'app/enrichment/services/enrichment-visualisation.service';
 
@@ -6,6 +6,7 @@ import { EnrichWithGOTermsResult } from 'app/enrichment/services/enrichment-visu
   selector: 'app-group',
   templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class GroupComponent {

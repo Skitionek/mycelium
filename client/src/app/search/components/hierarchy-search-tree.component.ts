@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 import { ChecklistFlatTreeComponent } from 'app/shared/components/checklist-flat-tree/checklist-flat-tree.component';
@@ -8,6 +8,7 @@ import { FlatNode } from 'app/shared/schemas/common';
   selector: 'app-hierarchy-search-tree',
   templateUrl: './hierarchy-search-tree.component.html',
   styleUrls: ['./hierarchy-search-tree.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class HierarchySearchTreeComponent extends ChecklistFlatTreeComponent<FilesystemObject> {

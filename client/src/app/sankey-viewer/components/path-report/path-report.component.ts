@@ -1,4 +1,4 @@
-import { Component, } from '@angular/core';
+import { Component, ChangeDetectionStrategy, } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { groupBy, values } from 'lodash-es';
@@ -9,6 +9,7 @@ import { SankeyPathReport } from 'app/shared-sankey/interfaces';
   selector: 'app-sankey-path-report',
   templateUrl: './path-report.component.html',
   styleUrls: ['./path-report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PathReportComponent {

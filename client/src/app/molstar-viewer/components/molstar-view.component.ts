@@ -8,7 +8,8 @@ import {
   OnDestroy,
   ViewChild,
   ViewEncapsulation,
-  DOCUMENT
+  DOCUMENT,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 import { ActivatedRoute } from '@angular/router';
@@ -31,6 +32,7 @@ type ProteinStructureFormat = 'pdb' | 'mmcif';
   templateUrl: './molstar-view.component.html',
   styleUrls: ['./molstar-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwareComponent {

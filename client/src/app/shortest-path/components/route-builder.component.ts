@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { combineLatest, Subscription } from 'rxjs';
 
@@ -11,6 +11,7 @@ import { DisplayType } from './route-display.component';
   selector: 'app-route-builder',
   templateUrl: './route-builder.component.html',
   styleUrls: ['./route-builder.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class RouteBuilderComponent implements OnInit, OnDestroy {

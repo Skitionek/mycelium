@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { WarningControllerService } from 'app/shared/services/warning-controller.service';
 
 @Component({
   selector: 'app-warning-list',
   templateUrl: 'warning-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 

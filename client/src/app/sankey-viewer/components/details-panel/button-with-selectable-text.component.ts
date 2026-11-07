@@ -1,4 +1,4 @@
-import { Component, Input, } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, } from '@angular/core';
 
 import { SankeyDetailsComponent } from './details.component';
 
@@ -6,6 +6,7 @@ import { SankeyDetailsComponent } from './details.component';
   selector: 'app-button-with-selectable-text',
   templateUrl: './button-with-selectable-text.component.html',
   styleUrls: ['./button-with-selectable-text.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 // @ts-ignore

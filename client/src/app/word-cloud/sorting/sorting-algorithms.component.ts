@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Output, Input, ViewEncapsulation, ChangeDetectionStrategy } from '@angular/core';
 
 import { SortingAlgorithm } from './sorting-algorithms';
 
@@ -8,6 +8,7 @@ import { SortingAlgorithm } from './sorting-algorithms';
   templateUrl: './sorting-algorithms.component.html',
   styleUrls: ['./sorting-algorithms.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SortingAlgorithmsComponent {

@@ -1,6 +1,6 @@
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TreeViewComponent } from './tree-view.component';
@@ -17,6 +17,7 @@ interface SampleNode {
       <ng-template #leaf let-node>{{ node.label }}</ng-template>
       <ng-template #nested let-node>{{ node.label }}</ng-template>
     </app-tree-view>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 class HostComponent {

@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormArray } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -11,6 +11,7 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
   selector: 'app-enrichment-table-order-dialog',
   templateUrl: './enrichment-table-order-dialog.component.html',
   styleUrls: ['./enrichment-table-order-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class EnrichmentTableOrderDialogComponent extends CommonFormDialogComponent implements OnInit {

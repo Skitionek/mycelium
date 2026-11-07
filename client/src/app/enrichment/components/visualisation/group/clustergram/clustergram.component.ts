@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { KeyValue } from '@angular/common';
 
 import { annotationTypesMap } from 'app/shared/annotation-styles';
@@ -20,6 +20,7 @@ class GeneRow {
   selector: 'app-clustergram',
   templateUrl: './clustergram.component.html',
   styleUrls: ['./clustergram.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ClustergramComponent implements OnChanges {

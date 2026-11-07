@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
@@ -15,6 +15,7 @@ declare type PlacementArray = Placement | Array<Placement> | string;
   styleUrls: [
     './color-chooser.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ColorChooserComponent {

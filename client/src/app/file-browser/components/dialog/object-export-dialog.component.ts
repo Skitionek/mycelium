@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -16,6 +16,7 @@ import { FilesystemObject } from '../../models/filesystem-object';
 @Component({
   selector: 'app-object-export-dialog',
   templateUrl: './object-export-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectExportDialogComponent extends CommonFormDialogComponent {

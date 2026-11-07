@@ -1,4 +1,4 @@
-import { Component, EventEmitter, NgModule, OnInit } from '@angular/core';
+import { Component, EventEmitter, NgModule, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, RouterModule } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
@@ -26,7 +26,7 @@ describe('WorkspaceComponent', () => {
     });
 });
 
-@Component({template: 'Stub file view', standalone: false})
+@Component({template: 'Stub file view', changeDetection: ChangeDetectionStrategy.Eager, standalone: false})
 class StubFileViewComponent implements OnInit {
     modulePropertiesChange = new EventEmitter<ModuleProperties>();
 

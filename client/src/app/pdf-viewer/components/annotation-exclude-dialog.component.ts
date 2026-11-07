@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -10,6 +10,7 @@ import { AnnotationType } from 'app/shared/constants';
 @Component({
   selector: 'app-annotation-exclude-dialog',
   templateUrl: './annotation-exclude-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AnnotationExcludeDialogComponent extends CommonFormDialogComponent {

@@ -10,7 +10,8 @@ import {
   HostListener,
   OnDestroy,
   ViewChild,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 import { PDF_WORKER_PATH } from 'app/shared/constants';
@@ -51,6 +52,7 @@ Object.freeze(DEFAULT_DOCUMENT_INIT_PARAMETERS);
       </div>
   `,
   styleUrls: ['./pdf-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class PdfViewerComponent
