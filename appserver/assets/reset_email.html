@@ -6,10 +6,12 @@
 <body>
     <p>
      Dear {name} {lastname}<br>
-     We received a request to reset your password!<br>
-     Your new secret password is: <strong>{password}</strong><br>
-     This temporary password was generated using secure algorithm, nevertheless
-     we <em>highly</em> recommend you to change it immediately!<br>
+     We received a request to reset your password.<br>
+     To choose a new one, follow this link:
+     <a href="{link}">Reset your password</a><br>
+     The link is valid for {ttl_minutes} minutes and can only be used once.<br>
+     Your current password keeps working until you finish the reset, so if you
+     did not ask for this you can safely ignore this email.<br>
      Best regards,<br>
     Mycelium team.
     </p>

@@ -86,7 +86,8 @@ export function openPotentialInternalLink(workspaceManager: WorkspaceManager,
         extras: {
           newTab: true,
           sideBySide: true,
-          matchExistingTab: `^/+folders/${escapeRegExp(m[2])}.*`,
+          // A folder tab can hold either URL, as the route redirects to /folders/<id>
+          matchExistingTab: `^/+(projects/[^/]+/)?folders/${escapeRegExp(m[1])}([?#].*)?$`,
         }
       });
 
@@ -143,7 +144,7 @@ export function openPotentialInternalLink(workspaceManager: WorkspaceManager,
           newTab: true,
           sideBySide: true,
           // Need the regex end character here so we don't accidentally match a child of this directory
-          matchExistingTab: `^/+projects/${escapeRegExp(m[1])}\\?$`,
+          matchExistingTab: `^/+projects/${escapeRegExp(m[1])}([?#].*)?$`,
         }
       });
 

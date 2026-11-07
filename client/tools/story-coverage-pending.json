@@ -1,0 +1,4 @@
+{
+  "comment": "Components still awaiting a Storybook story. This list may only shrink: check-story-coverage.js fails if an entry here has gained a story (remove it) and never allows a new entry. Tracked in the follow-up to the Storybook rollout.",
+  "pending": []
+}

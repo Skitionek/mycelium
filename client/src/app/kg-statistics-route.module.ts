@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { KgStatisticsComponent } from './kg-statistics.component';
-import { KgStatisticsModule } from './kg-statistics.module';
+import { KgStatisticsComponent } from 'app/kg-statistics.component';
+import { KgStatisticsModule } from 'app/kg-statistics.module';
 
 const routes: Routes = [
   {

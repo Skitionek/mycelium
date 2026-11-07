@@ -7,9 +7,11 @@ import {
   Input,
   OnDestroy,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  DOCUMENT,
+  ChangeDetectionStrategy
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+
 import { ActivatedRoute } from '@angular/router';
 
 import { combineLatest, Subscription } from 'rxjs';
@@ -30,8 +32,12 @@ type ProteinStructureFormat = 'pdb' | 'mmcif';
   templateUrl: './molstar-view.component.html',
   styleUrls: ['./molstar-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwareComponent {
+  private static scriptLoadPromise: Promise<void> | null = null;
+
   @Input() embedded = false;
   @ViewChild('molstarContainer', { static: false }) molstarContainer: ElementRef<HTMLDivElement>;
 
@@ -46,7 +52,6 @@ export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwa
   private structureData: string | undefined;
   private structureFormat: ProteinStructureFormat | undefined;
   private readonly subscriptions = new Subscription();
-  private static scriptLoadPromise: Promise<void> | null = null;
 
   constructor(
     protected readonly filesystemService: FilesystemService,

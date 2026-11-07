@@ -1,0 +1,33 @@
+{
+  "comment": "Components with no story, each with the reason it cannot have one. Anything listed here is skipped by tools/check-story-coverage.js. Keep this list short and justified - it is the only way to avoid writing a story for an in-scope component.",
+  "exempt": [
+    {
+      "path": "src/app/shared/components/base/form.component.ts",
+      "reason": "Abstract base class; has no template of its own."
+    },
+    {
+      "path": "src/app/shared/components/base/result-list.component.ts",
+      "reason": "Abstract base class; has no template of its own."
+    },
+    {
+      "path": "src/app/shared/components/base/paginated-result-list.component.ts",
+      "reason": "Abstract base class; has no template of its own."
+    },
+    {
+      "path": "src/app/shared/components/dialog/common-dialog.component.ts",
+      "reason": "Abstract base class extended by the concrete dialogs, which have stories."
+    },
+    {
+      "path": "src/app/shared/components/dialog/common-form-dialog.component.ts",
+      "reason": "Abstract base class extended by the concrete form dialogs, which have stories."
+    },
+    {
+      "path": "src/app/shared/components/checklist-flat-tree/checklist-flat-tree.component.ts",
+      "reason": "Abstract base class; generic-flat-tree is the concrete subclass."
+    },
+    {
+      "path": "src/app/shared/components/generic-flat-tree/generic-flat-tree.component.ts",
+      "reason": "Abstract base class; consumers subclass it with their own node type."
+    }
+  ]
+}

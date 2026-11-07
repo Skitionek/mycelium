@@ -25,7 +25,8 @@ from jsonlines import Reader as BioCJsonIterReader, Writer as BioCJsonIterWriter
 import os
 import bioc
 from marshmallow import ValidationError
-from PyPDF4 import PdfFileWriter, PdfFileReader
+from pypdf import PdfReader, PdfWriter
+from pypdf.annotations import Link
 from PIL import Image
 from lxml import etree
 
@@ -33,6 +34,7 @@ from neo4japp.models import Files
 from neo4japp.schemas.formats.drawing_tool import validate_map
 from neo4japp.schemas.formats.enrichment_tables import validate_enrichment_table
 from neo4japp.schemas.formats.graph import validate_graph
+from neo4japp.services.dmp_validation import validate_dmp_document, get_dmp_title
 from neo4japp.services.file_types.exports import FileExport, ExportFormatError
 from neo4japp.services.file_types.service import BaseFileTypeProvider
 from neo4japp.utils.logger import EventLog
@@ -55,6 +57,7 @@ from neo4japp.constants import (
     FILE_MIME_TYPE_MAP,
     FILE_MIME_TYPE_GRAPH,
     FILE_MIME_TYPE_ENRICHMENT_TABLE,
+    FILE_MIME_TYPE_DMP,
     ICON_SIZE,
     FRONTEND_URL,
     BYTE_ENCODING,
@@ -103,17 +106,31 @@ extension_mime_types = {
 }
 
 
+# Map sources are user content, so a "DOI" may be any URL at all; only doi.org
+# is ever asked about one.
+DOI_URL_RE = re.compile(r'^https?://((?:dx\.)?doi\.org/10\..*)$', re.IGNORECASE | re.DOTALL)
+DOI_LOOKUP_TIMEOUT = 10
+
+
 def is_valid_doi(doi):
+    match = DOI_URL_RE.match(doi) if isinstance(doi, str) else None
+    if match is None:
+        return False
     try:
+        # doi.org answers a registered DOI with a redirect to the publisher, which
+        # is enough to know; the target is not fetched. Over plain HTTP it
+        # redirects to HTTPS whatever the DOI, so it is always asked over HTTPS.
         # not [bad request, not found] but yes to 403 - no access
-        return requests.get(doi,
+        return requests.get(f'https://{match.group(1)}',
                             headers={
                                 # sometimes request is filtered if there is no user-agent header
                                 "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
                                               "AppleWebKit/537.36 "
                                               "(KHTML, like Gecko) Chrome/51.0.2704.103 "
                                               "Safari/537.36"
-                            }
+                            },
+                            allow_redirects=False,
+                            timeout=DOI_LOOKUP_TIMEOUT,
                             ).status_code not in [400, 404]
     except Exception:
         return False
@@ -582,6 +599,32 @@ def create_detail_node(node, params):
     return params
 
 
+def _get_file_extension_icon(domain: str) -> Optional[str]:
+    """Return icon-type name for a known file extension, or None if unrecognised."""
+    if domain.endswith('.docx') or domain.endswith('.doc'):
+        return 'ms-word'
+    if domain.endswith('.pptx') or domain.endswith('.ppt'):
+        return 'ms-powerpoint'
+    if domain.endswith('.xlsx') or domain.endswith('.xls'):
+        return 'ms-excel'
+    if domain.endswith('.cys'):
+        return 'cytoscape'
+    return None
+
+
+def _handle_document_link(node, link):
+    """Return ('document', url) for a document link, cleaning up internal links."""
+    doi_src = next(
+        (src for src in node['data'].get('sources', []) if src.get('domain') == 'DOI'), None)
+    if doi_src and is_valid_doi(doi_src['url']):
+        return 'document', doi_src['url']
+    if link in node['data'].get('sources', []):
+        node['data']['sources'].remove(link)
+    else:
+        node['data']['hyperlinks'].remove(link)
+    return 'document', None
+
+
 def get_link_icon_type(node):
     """
     Evaluate the icon that link node should have (document, sankey, ET, mail or link)
@@ -599,19 +642,7 @@ def get_link_icon_type(node):
         elif SANKEY_RE.match(link['url']):
             return 'sankey', link['url']
         elif DOCUMENT_RE.match(link['url']):
-            doi_src = next(
-                (src for src in node['data'].get('sources') if src.get(
-                    'domain') == "DOI"), None)
-            # If there is a valid doi, link to DOI
-            if doi_src and is_valid_doi(doi_src['url']):
-                return 'document', doi_src['url']
-            # If the links point to internal document, remove it from the node data so it would
-            # not became exported as node url - as that might violate copyrights
-            if link in node['data'].get('sources', []):
-                node['data']['sources'].remove(link)
-            else:
-                node['data']['hyperlinks'].remove(link)
-            return 'document', None
+            return _handle_document_link(node, link)
         elif PROJECTS_RE.match(link['url']):
             return 'project', link['url']
         elif BIOC_RE.match(link['url']):
@@ -619,17 +650,11 @@ def get_link_icon_type(node):
         elif MAIL_RE.match(link['url']):
             return 'email', link['url']
         elif ANY_FILE_RE.match(link['url']):
+            # Do not return url for files not created on LL
             domain = link.get('domain', "").strip()
-            if domain:
-                # Do not return url, as we are not creating links to files that we not create on LL
-                if domain.endswith('.docx') or domain.endswith('.doc'):
-                    return 'ms-word', None
-                elif domain.endswith('.pptx') or domain.endswith('.ppt'):
-                    return 'ms-powerpoint', None
-                elif domain.endswith('.xlsx') or domain.endswith('.xls'):
-                    return 'ms-excel', None
-                elif domain.endswith('.cys'):
-                    return 'cytoscape', None
+            icon_type = _get_file_extension_icon(domain)
+            if icon_type:
+                return icon_type, None
     return 'link', None
 
 
@@ -1163,12 +1188,13 @@ class MapTypeProvider(BaseFileTypeProvider):
         """
         links = links or []
         final_bytes = io.BytesIO()
-        writer = PdfFileWriter()
+        writer = PdfWriter()
         half_size = int(ICON_SIZE) * DEFAULT_DPI / 2.0
         for i, out_file in enumerate(files):
             out_file = self.get_file_export(out_file, 'pdf')
-            reader = PdfFileReader(out_file, strict=False)
-            writer.appendPagesFromReader(reader)
+            reader = PdfReader(out_file, strict=False)
+            for page in reader.pages:
+                writer.add_page(page)
         for link in links:
             file_index = link['page_origin']
             coord_offset, pixel_offset = get_content_offsets(files[file_index])
@@ -1176,9 +1202,11 @@ class MapTypeProvider(BaseFileTypeProvider):
                 PDF_MARGIN * DEFAULT_DPI + pixel_offset[0]
             y_base = ((-1 * link['y'] - coord_offset[1]) / SCALING_FACTOR * POINT_TO_PIXEL) + \
                 PDF_MARGIN * DEFAULT_DPI - pixel_offset[1]
-            writer.addLink(file_index, link['page_destination'],
-                           [x_base - half_size, y_base - half_size - LABEL_OFFSET,
-                            x_base + half_size, y_base + half_size])
+            writer.add_annotation(file_index, Link(
+                rect=(x_base - half_size, y_base - half_size - LABEL_OFFSET,
+                      x_base + half_size, y_base + half_size),
+                target_page_index=link['page_destination'],
+            ))
         writer.write(final_bytes)
         return final_bytes
 
@@ -1305,6 +1333,44 @@ class EnrichmentTableTypeProvider(BaseFileTypeProvider):
     def handle_content_update(self, file: Files):
         file.enrichment_annotations = None
         file.needs_reannotation = True
+
+
+class DmpTypeProvider(BaseFileTypeProvider):
+    """
+    Provider for Data Management Plan documents conforming to the RDA-DMP-Common
+    maDMP JSON Schema 1.2. Like enrichment tables, a DMP is just a JSON file type
+    stored via the generic filesystem API -- there is no dedicated DMP table.
+    """
+
+    MIME_TYPE = FILE_MIME_TYPE_DMP
+    SHORTHAND = 'dmp'
+    mime_types = (MIME_TYPE,)
+
+    def detect_mime_type(self, buffer: BufferedIOBase) -> List[typing.Tuple[float, str]]:
+        try:
+            self.validate_content(buffer)
+            return [(0, self.MIME_TYPE)]
+        except ValueError:
+            return []
+        finally:
+            buffer.seek(0)
+
+    def can_create(self) -> bool:
+        return True
+
+    def validate_content(self, buffer: BufferedIOBase):
+        data = json.loads(buffer.read())
+        validate_dmp_document(data)
+
+    def to_indexable_content(self, buffer: BufferedIOBase):
+        data = json.load(buffer)
+        title = get_dmp_title(data)
+        return typing.cast(
+            BufferedIOBase, io.BytesIO(title.encode(BYTE_ENCODING))
+        )
+
+    def should_highlight_content_text_matches(self) -> bool:
+        return True
 
 
 class AnnotationsFileTypeProvider(BaseFileTypeProvider):

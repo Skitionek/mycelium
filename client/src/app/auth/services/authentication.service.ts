@@ -57,15 +57,37 @@ export class AuthenticationService implements OnDestroy {
       {email, password},
     ).pipe(
       map((resp: JWTTokenResponse) => {
-        localStorage.setItem('authId', resp.user.id.toString());
-        localStorage.setItem('access_jwt', resp.accessToken.token);
-        localStorage.setItem('expires_at', resp.accessToken.exp);
-        // TODO: Move this out of localStorage
-        localStorage.setItem('refresh_jwt', resp.refreshToken.token);
-        this.scheduleRenewal();
+        this.storeSession(resp);
         return resp;
       })
     );
+  }
+
+  /**
+   * Dev/demo convenience: logs in without credentials. The backend only
+   * honors this when DEV_AUTO_LOGIN_EMAIL is configured (local/codespace
+   * dev stack); it 404s everywhere else, in which case callers should
+   * fall back to the normal login page.
+   */
+  public devAutoLogin(): Observable<JWTTokenResponse> {
+    return this.http.post<JWTTokenResponse>(
+      this.baseUrl + '/dev-auto-login',
+      {},
+    ).pipe(
+      map((resp: JWTTokenResponse) => {
+        this.storeSession(resp);
+        return resp;
+      })
+    );
+  }
+
+  private storeSession(resp: JWTTokenResponse) {
+    localStorage.setItem('authId', resp.user.id.toString());
+    localStorage.setItem('access_jwt', resp.accessToken.token);
+    localStorage.setItem('expires_at', resp.accessToken.exp);
+    // TODO: Move this out of localStorage
+    localStorage.setItem('refresh_jwt', resp.refreshToken.token);
+    this.scheduleRenewal();
   }
 
   /**
@@ -132,7 +154,7 @@ export class AuthenticationService implements OnDestroy {
   getCookie(name) {
     const nameEQ = name + '=';
     const ca = document.cookie.split(';');
-    // tslint:disable-next-line: prefer-for-of
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < ca.length; i++) {
         let c = ca[i];
         while (c.charAt(0) === ' ') { c = c.substring(1, c.length); }

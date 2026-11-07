@@ -1,3 +1,6 @@
+import hashlib
+import secrets
+
 import jwt
 import sentry_sdk
 
@@ -11,7 +14,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from typing_extensions import TypedDict
 
 from neo4japp.database import db
-from neo4japp.constants import LogEventType, MAX_ALLOWED_LOGIN_FAILURES
+from neo4japp.constants import (
+    LogEventType,
+    MAX_ALLOWED_LOGIN_FAILURES,
+    PASSWORD_RESET_TOKEN_TTL_MINUTES,
+)
 from neo4japp.exceptions import (
     JWTTokenException,
     JWTAuthTokenException,
@@ -32,6 +39,79 @@ JWTToken = TypedDict(
 
 JWTResp = TypedDict(
     'JWTResp', {'sub': str, 'iat': str, 'exp': int, 'type': str})
+
+
+class PasswordResetTokenService:
+    """
+    Issues and verifies single-use password reset tokens.
+
+    The token carries a digest of the account's password hash at the time it
+    was issued. Redeeming a token replaces that password, so the digest no
+    longer matches and every outstanding token for the account stops
+    verifying. That buys single use, and invalidation on password change,
+    without a table to store and expire.
+    """
+
+    token_type = 'password-reset'
+
+    def __init__(self, app_secret: str, algorithm: str = 'HS256'):
+        self.app_secret = app_secret
+        self.algorithm = algorithm
+
+    @staticmethod
+    def _credential_digest(user: AppUser) -> str:
+        return hashlib.sha256(user.password_hash.encode('utf-8')).hexdigest()
+
+    def issue(self, user: AppUser) -> str:
+        time_now = datetime.now(timezone.utc)
+        return jwt.encode(
+            {
+                'iat': time_now,
+                'exp': time_now + timedelta(minutes=PASSWORD_RESET_TOKEN_TTL_MINUTES),
+                'sub': user.email,
+                'type': self.token_type,
+                'cred': self._credential_digest(user),
+            },
+            self.app_secret,
+            algorithm=self.algorithm,
+        )
+
+    def verify(self, token: str) -> AppUser:
+        """
+        Return the account a reset token was issued for.
+
+        Every rejection raises the same error. A caller must not be able to
+        tell an expired token from a forged one, or from one naming an
+        address that has no account.
+        """
+        rejected = ServerException(
+            title='Failed to Reset Password',
+            message='This password reset link is invalid or has expired. '
+                    'Please request a new one.',
+            code=400,
+        )
+
+        try:
+            payload = jwt.decode(token, self.app_secret, algorithms=[self.algorithm])
+        except InvalidTokenError:
+            # ExpiredSignatureError is a subclass, so this covers expiry too.
+            raise rejected
+
+        if payload.get('type') != self.token_type:
+            # An access or refresh token must not be spendable as a reset.
+            raise rejected
+
+        try:
+            user = AppUser.query_by_email(payload.get('sub', '')).one()
+        except NoResultFound:
+            raise rejected
+
+        if not secrets.compare_digest(
+            payload.get('cred', ''), self._credential_digest(user)
+        ):
+            raise rejected
+
+        return user
 
 
 class TokenService:
@@ -91,10 +171,17 @@ class TokenService:
 
     def decode_token(self, token: str) -> JWTResp:
         try:
-            payload = jwt.decode(token, self.app_secret, algorithms=[self.algorithm])
+            payload = jwt.decode(
+                token, self.app_secret, algorithms=[self.algorithm],
+                options={'require': ['sub', 'iat', 'exp', 'type']})
             jwt_resp: JWTResp = {
                 'sub': payload['sub'], 'iat': payload['iat'], 'exp': payload['exp'],
                 'type': payload['type']}
+        # ExpiredSignatureError is an InvalidTokenError, so it is caught first
+        except ExpiredSignatureError:
+            raise JWTTokenException(
+                title='Failed to Authenticate',
+                message='The current authentication session has expired, please try logging back in.')  # noqa
         # default to generic error message
         # NOTE: is this better than avoiding to
         # display an error message about
@@ -103,10 +190,6 @@ class TokenService:
             raise JWTTokenException(
                 title='Failed to Authenticate',
                 message='The current authentication session is invalid, please try logging back in.')  # noqa
-        except ExpiredSignatureError:
-            raise JWTTokenException(
-                title='Failed to Authenticate',
-                message='The current authentication session has expired, please try logging back in.')  # noqa
         else:
             return jwt_resp
 
@@ -141,17 +224,21 @@ def verify_token(token):
                         event_type=LogEventType.LAST_ACTIVE.value).to_dict()
                 )
             except NoResultFound:
+                # The token decoded but its subject no longer exists. That is a
+                # rejected credential, not a missing resource.
                 raise ServerException(
                     title='Failed to Authenticate',
                     message='There was a problem authenticating, please try again.',
-                    code=404)
+                    code=401)
             else:
                 g.current_user = user
                 with sentry_sdk.configure_scope() as scope:
                     scope.set_tag('user_email', user.email)
                 return True
     else:
-        raise ServerException(
+        # A refresh or password reset token is a valid credential for something
+        # else, and no reason for a server error
+        raise JWTAuthTokenException(
             title='Failed to Authenticate',
             message='There was a problem authenticating, please try again.')
 
@@ -175,10 +262,12 @@ def refresh():
     try:
         user = AppUser.query.filter_by(email=decoded['sub']).one()
     except NoResultFound:
+        # Same condition as verify_token: a decodable token whose subject is
+        # gone. Rejecting the credential, not reporting a missing resource.
         raise ServerException(
             title='Failed to Authenticate',
             message='There was a problem authenticating, please try again.',
-            code=404)
+            code=401)
     else:
         return jsonify(JWTTokenResponse().dump({
             'access_token': access_jwt,
@@ -195,6 +284,53 @@ def refresh():
         }))
 
 
+def _issue_session(user: AppUser):
+    """ Build the JWT/user response returned by both /login and /dev-auto-login """
+    token_service = TokenService(current_app.config['JWT_SECRET'])
+    access_jwt = token_service.get_access_token(user.email)
+    refresh_jwt = token_service.get_refresh_token(user.email)
+    return jsonify(JWTTokenResponse().dump({
+        'access_token': access_jwt,
+        'refresh_token': refresh_jwt,
+        'user': {
+            'hash_id': user.hash_id,
+            'email': user.email,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'id': user.id,
+            'reset_password': user.forced_password_reset,
+            'roles': [u.name for u in user.roles],
+        },
+    }))
+
+
+@bp.route('/dev-auto-login', methods=['POST'])
+def dev_auto_login():
+    """
+    Dev-only convenience endpoint the frontend uses to skip the login
+    screen when running the local/codespace dev stack. Disabled unless
+    DEV_AUTO_LOGIN_EMAIL is configured, which only happens in
+    docker/docker-compose.dev.yml.
+    """
+    email = current_app.config.get('DEV_AUTO_LOGIN_EMAIL')
+    if not email:
+        raise ServerException(
+            title='Not Found',
+            message='This endpoint is not available.',
+            code=404)
+
+    try:
+        user = AppUser.query.filter_by(email=email).one()
+    except NoResultFound:
+        raise ServerException(
+            title='Failed to Authenticate',
+            message='There was a problem authenticating, please try again.',
+            code=404)
+    else:
+        return _issue_session(user)
+
+
 @bp.route('/login', methods=['POST'])
 def login():
     """
@@ -207,10 +343,13 @@ def login():
     try:
         user = AppUser.query.filter_by(email=data.get('email')).one()
     except NoResultFound:
+        # Deliberately identical to the wrong-password response below, so the
+        # two cases stay indistinguishable and the endpoint cannot be used to
+        # enumerate registered accounts.
         raise ServerException(
             title='Failed to Authenticate',
             message='There was a problem authenticating, please try again.',
-            code=404)
+            code=401)
     else:
         if user.failed_login_count >= MAX_ALLOWED_LOGIN_FAILURES:
             raise ServerException(
@@ -223,24 +362,8 @@ def login():
                 UserEventLog(
                     username=user.username,
                     event_type=LogEventType.AUTHENTICATION.value).to_dict())
-            token_service = TokenService(current_app.config['JWT_SECRET'])
-            access_jwt = token_service.get_access_token(user.email)
-            refresh_jwt = token_service.get_refresh_token(user.email)
             user.failed_login_count = 0
-            return jsonify(JWTTokenResponse().dump({
-                'access_token': access_jwt,
-                'refresh_token': refresh_jwt,
-                'user': {
-                    'hash_id': user.hash_id,
-                    'email': user.email,
-                    'username': user.username,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'id': user.id,
-                    'reset_password': user.forced_password_reset,
-                    'roles': [u.name for u in user.roles],
-                },
-            }))
+            return _issue_session(user)
         else:
             user.failed_login_count += 1
             try:
@@ -253,4 +376,4 @@ def login():
             raise ServerException(
                 title='Failed to Authenticate',
                 message='There was a problem authenticating, please try again.',
-                code=404)
+                code=401)

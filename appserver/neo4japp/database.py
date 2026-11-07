@@ -67,7 +67,7 @@ host = os.getenv('NEO4J_HOST', 'localhost')
 scheme = os.getenv('NEO4J_SCHEME', 'bolt')
 port = os.getenv('NEO4J_PORT', '7687')
 url = f'{scheme}://{host}:{port}'
-username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
 graph = GraphDatabase.driver(url, auth=basic_auth(username, password))
 
 
@@ -125,12 +125,16 @@ not apply to the AnnotationServices (except manual and sorted).
 
 def get_kg_service():
     if 'kg_service' not in g:
-        from neo4japp.services import KgService
-        graph = get_neo4j_db()
-        g.kg_service = KgService(
-            graph=graph,
-            session=db.session,
-        )
+        if os.getenv('MOZG_URL'):
+            from neo4japp.services.mozg_kg_service import MozgKgService
+            g.kg_service = MozgKgService(session=db.session)
+        else:
+            from neo4japp.services import KgService
+            graph = get_neo4j_db()
+            g.kg_service = KgService(
+                graph=graph,
+                session=db.session,
+            )
     return g.kg_service
 
 
@@ -157,7 +161,8 @@ def get_file_type_service():
     from neo4japp.services.file_types.service import FileTypeService, GenericFileTypeProvider
     from neo4japp.services.file_types.providers import EnrichmentTableTypeProvider, \
         PDFTypeProvider, BiocTypeProvider, \
-        DirectoryTypeProvider, MapTypeProvider, GraphTypeProvider, AnnotationsFileTypeProvider
+        DirectoryTypeProvider, MapTypeProvider, GraphTypeProvider, AnnotationsFileTypeProvider, \
+        DmpTypeProvider
     service = FileTypeService()
     service.register(GenericFileTypeProvider())
     service.register(DirectoryTypeProvider())
@@ -167,17 +172,24 @@ def get_file_type_service():
     service.register(EnrichmentTableTypeProvider())
     service.register(GraphTypeProvider())
     service.register(AnnotationsFileTypeProvider())
+    service.register(DmpTypeProvider())
     return service
 
 
 def get_enrichment_table_service():
     if 'enrichment_table_service' not in g:
-        from neo4japp.services import EnrichmentTableService
-        graph = get_neo4j_db()
-        g.enrichment_table_service = EnrichmentTableService(
-            graph=graph,
-            session=db.session,
-        )
+        if os.getenv('MOZG_URL'):
+            from neo4japp.services.mozg_kg_service import MozgEnrichmentTableService
+            g.enrichment_table_service = MozgEnrichmentTableService(
+                session=db.session,
+            )
+        else:
+            from neo4japp.services import EnrichmentTableService
+            graph = get_neo4j_db()
+            g.enrichment_table_service = EnrichmentTableService(
+                graph=graph,
+                session=db.session,
+            )
     return g.enrichment_table_service
 
 

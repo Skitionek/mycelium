@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple, Dict, Iterable
 from flask import jsonify, Blueprint, g
 from flask.views import MethodView
 from marshmallow import EXCLUDE, ValidationError
+from marshmallow.experimental.context import Context
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import raiseload, joinedload
@@ -194,11 +195,10 @@ class ProjectBaseView(MethodView):
         return_project = self.get_nondeleted_project(Projects.hash_id == hash_id)
         self.check_project_permissions([return_project], user, ['readable'])
 
-        return jsonify(ProjectResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'result': return_project,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(ProjectResponseSchema().dump({
+                'result': return_project,
+            }))
 
     def get_bulk_project_response(self, hash_ids: List[str], user: AppUser, *,
                                   missing_hash_ids: Iterable[str] = None):
@@ -211,12 +211,11 @@ class ProjectBaseView(MethodView):
         for project in projects:
             returned_projects[project.hash_id] = project
 
-        return jsonify(MultipleProjectResponseSchema(context={
-            'user_privilege_filter': user.id,
-        }).dump(dict(
-            mapping=returned_projects,
-            missing=list(missing_hash_ids) if missing_hash_ids else [],
-        )))
+        with Context({'user_privilege_filter': user.id}):
+            return jsonify(MultipleProjectResponseSchema().dump(dict(
+                mapping=returned_projects,
+                missing=list(missing_hash_ids) if missing_hash_ids else [],
+            )))
 
     def update_projects(self, hash_ids: List[str], params: Dict, user: AppUser):
         changed_fields = set()
@@ -265,12 +264,11 @@ class ProjectListView(ProjectBaseView):
         # Not necessary (due to accessible_only=True), but check anyway
         self.check_project_permissions(projects, current_user, ['readable'])
 
-        return jsonify(ProjectListSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'total': total,
-            'results': projects,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(ProjectListSchema().dump({
+                'total': total,
+                'results': projects,
+            }))
 
     @use_args(ProjectCreateSchema)
     def post(self, params):
@@ -326,12 +324,11 @@ class ProjectSearchView(ProjectBaseView):
         # Not necessary (due to accessible_only=True), but check anyway
         self.check_project_permissions(projects, current_user, ['readable'])
 
-        return jsonify(ProjectListSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'total': total,
-            'results': projects,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(ProjectListSchema().dump({
+                'total': total,
+                'results': projects,
+            }))
 
 
 class ProjectDetailView(ProjectBaseView):

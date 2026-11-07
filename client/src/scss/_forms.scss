@@ -20,6 +20,10 @@ fieldset.fieldset-properties {
   border-top: 1px solid $gray-400;
 
   legend {
+    // Bootstrap 5's reboot floats every legend left. A floated legend leaves
+    // the fieldset's top border, and with `width: auto` the first row of the
+    // fieldset then wraps up beside it instead of starting below it.
+    float: none;
     width: auto;
     padding-right: 0.5rem;
     font-size: $font-size-base;

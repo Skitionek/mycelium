@@ -7,8 +7,8 @@ APPLY_FIXES_EVENT: pull_request
 APPLY_FIXES_MODE: pull_request
 
 # Linters to enable (subset relevant to this repo: Python + TypeScript/JavaScript + misc)
-# TYPESCRIPT_ES / JAVASCRIPT_ES are disabled: project uses tslint (via fast-lint); eslint
-# was misconfigured here with a tslint.json which is not a valid eslint config.
+# TYPESCRIPT_ES / JAVASCRIPT_ES are disabled: client/ lints with its own pinned ESLint
+# flat config (`yarn lint` in client/), which needs the client's node_modules.
 # PYTHON_MYPY is disabled: cross-package duplicate-module-name issue when scanning
 # appserver/ and statistical-enrichment/ together. Type checking runs via appserver/setup.cfg.
 ENABLE_LINTERS:

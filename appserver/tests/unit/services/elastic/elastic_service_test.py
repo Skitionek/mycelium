@@ -1,4 +1,5 @@
 import pytest
+from flask import Flask
 
 from neo4japp.exceptions import ServerException
 from neo4japp.services.elastic.elastic_service import SearchIndexService
@@ -16,8 +17,53 @@ def make_service() -> SearchIndexService:
 def test_pre_process_query_inserts_and_between_unstacked_terms():
     service = make_service()
 
-    assert service._pre_process_query('alpha beta') == 'alpha and beta'
-    assert service._pre_process_query('"alpha beta" gamma') == '"alpha beta" and gamma'
+    assert service._pre_process_query('alpha beta') == 'alpha AND beta'
+    assert service._pre_process_query('"alpha beta" gamma') == '"alpha beta" AND gamma'
+
+
+def test_pre_process_query_writes_operators_the_way_solr_reads_them():
+    """Solr takes only upper case AND/OR/NOT as operators.
+
+    A lower case one is just one more word to look for, so 'alpha beta' found
+    every file with either word and 'alpha not beta' did not leave out a thing.
+    """
+    service = make_service()
+
+    assert service._pre_process_query('alpha and beta') == 'alpha AND beta'
+    assert service._pre_process_query('alpha not beta') == 'alpha AND NOT beta'
+    assert service._pre_process_query('not alpha or beta') == 'NOT alpha OR beta'
+    assert service._pre_process_query('"alpha and beta" or gamma') == '"alpha and beta" OR gamma'
+
+
+@pytest.fixture
+def app_context():
+    # The file type service is kept on flask.g
+    with Flask(__name__).app_context():
+        yield
+
+
+def test_pre_process_query_matches_type_terms_on_the_mime_type(app_context):
+    """Search by file type adds type:<shorthand> terms, but the index has no type field.
+
+    Solr looked for the text 'type:pdf' instead, so picking a type found nothing.
+    """
+    service = make_service()
+
+    assert service._pre_process_query('tp53 (type:pdf OR type:map)') == (
+        'tp53 AND (mime_type_s:"application/pdf" OR mime_type_s:"vnd.mycelium.document/map")'
+    )
+    assert service._pre_process_query('type:enrichment-table') == (
+        'mime_type_s:"vnd.mycelium.document/enrichment-table"'
+    )
+    assert service._pre_process_query('tp53 not type:pdf') == (
+        'tp53 AND NOT mime_type_s:"application/pdf"'
+    )
+
+
+def test_pre_process_query_keeps_a_quoted_type_term_as_text(app_context):
+    service = make_service()
+
+    assert service._pre_process_query('"type:pdf" tp53') == '"type:pdf" AND tp53'
 
 
 def test_pre_process_query_rejects_malformed_operator_sequence():
@@ -47,6 +93,23 @@ def test_convert_filter_clause_maps_fields_and_bool_values():
 
     assert service._convert_filter_clause(clause) == (
         '(public_b:true AND NOT (mime_type_s:"vnd.lifelike.folder"))'
+    )
+
+
+def test_convert_filter_clause_escapes_backslashes_as_well_as_quotes():
+    """Folder names may hold backslashes.
+
+    Unescaped, Solr read a backslash in a folder path as an escape, so the
+    folder matched nothing, and one at the end escaped the closing quote,
+    so Solr rejected the search.
+    """
+    service = make_service()
+
+    assert service._convert_filter_clause({'term': {'file_path.tree': '/p/a\\b\\'}}) == (
+        'file_path_ss:"/p/a\\\\b\\\\"'
+    )
+    assert service._convert_filter_clause({'term': {'file_path.tree': '/p/say "hi"'}}) == (
+        'file_path_ss:"/p/say \\"hi\\""'
     )
 
 
@@ -112,7 +175,7 @@ def test_search_builds_solr_request_and_maps_results(monkeypatch):
     assert captured['url'] == 'http://solr.example/solr/files/select'
 
     params = captured['kwargs']['params']
-    assert ('q', 'foo and bar') in params
+    assert ('q', 'foo AND bar') in params
     assert ('qf', 'description_txt^1 data_content_txt^1 filename_txt^3') in params
     assert ('start', 2) in params
     assert ('rows', 5) in params

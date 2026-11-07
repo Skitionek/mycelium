@@ -48,3 +48,10 @@ testem.log
 Thumbs.db
 
 .angular/
+
+**/__pycache__/
+
+# Storybook
+storybook-static/
+*storybook.log
+__image_snapshots__/__diff_output__/

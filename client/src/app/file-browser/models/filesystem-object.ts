@@ -1,5 +1,4 @@
 import { isNil } from 'lodash-es';
-import moment from 'moment';
 
 import {
   KnowledgeMap,
@@ -26,6 +25,7 @@ import { CollectionModel } from 'app/shared/utils/collection-model';
 import { DragImage } from 'app/shared/utils/drag';
 import { nullCoalesce, RecursivePartial } from 'app/shared/utils/types';
 import {getSupportedFileCodes} from 'app/shared/utils';
+import { LocalObjectInfo } from 'app/local-filesystem/local-ids';
 
 import { FilePrivileges, ProjectPrivileges } from './privileges';
 import {
@@ -87,7 +87,7 @@ export class ProjectImpl implements Project {
   get colorHue(): number {
     let hash = 3242;
     for (let i = 0; i < this.hashId.length; i++) {
-      // tslint:disable-next-line:no-bitwise
+      // eslint-disable-next-line no-bitwise
       hash = ((hash << 3) + hash) + this.hashId.codePointAt(i);
     }
     return hash % 100 / 100;
@@ -155,10 +155,15 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
   // as a helper for getting the real name of a root file.
   trueFilename: string;
   filePath: string;
+  /**
+   * Set for files and folders in a folder connected from the user's computer rather
+   * than stored on the server.
+   */
+  local?: LocalObjectInfo;
 
   highlight?: string[];
   highlightAnnotated?: boolean[];
-  // tslint:disable-next-line:variable-name
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   annotations_date_tooltip?: string;
   annotationsTooltipContent: string;
 
@@ -168,6 +173,10 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
 
   get isFile() {
     return !this.isDirectory;
+  }
+
+  get isLocal(): boolean {
+    return this.local != null;
   }
 
   get isProteinStructure() {
@@ -198,6 +207,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       case MimeTypes.EnrichmentTable:
       case MimeTypes.Graph:
       case MimeTypes.BioC:
+      case MimeTypes.Dmp:
+      case MimeTypes.Sdrf:
       case 'application/pdf':
         return true;
       default:
@@ -209,13 +220,15 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
 
   get isEditable() {
     // TODO: Move this method to ObjectTypeProvider
-    return !(this.isDirectory && !this.parent);
+    // Local files have no server-side details to edit
+    return !(this.isDirectory && !this.parent) && !this.isLocal;
   }
 
   get isAnnotatable() {
     // TODO: Move this method to ObjectTypeProvider
-    return this.mimeType === 'application/pdf' ||
-      this.mimeType === 'vnd.mycelium.document/enrichment-table';
+    // Local files are annotated by the local indexer instead
+    return !this.isLocal && (this.mimeType === 'application/pdf' ||
+      this.mimeType === 'vnd.mycelium.document/enrichment-table');
   }
 
   get promptOrganism() {
@@ -224,36 +237,42 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
 
   get isMovable() {
     // TODO: Move this method to ObjectTypeProvider
-    return !(this.isDirectory && !this.parent);
+    // Local items are moved by dragging them onto another local folder; the move dialog
+    // only lists project folders
+    return !(this.isDirectory && !this.parent) && !this.isLocal;
   }
 
   get isCloneable() {
     // TODO: Move this method to ObjectTypeProvider
-    return this.isFile;
+    return this.isFile && !this.isLocal;
   }
 
   get isDeletable() {
     // TODO: Move this method to ObjectTypeProvider
-    return true;
+    // A connected folder itself is disconnected, not deleted
+    return !(this.isLocal && !this.parent);
   }
 
   get isVersioned() {
     // TODO: Move this method to ObjectTypeProvider
-    return this.mimeType === MimeTypes.Map;
+    return this.mimeType === MimeTypes.Map && !this.isLocal;
   }
 
   get isNavigable() {
     // TODO: Move this method to ObjectTypeProvider
-    return this.isDirectory || this.mimeType === MimeTypes.Pdf || this.mimeType === MimeTypes.Map
+    // The file navigator is built from server-side annotations and links
+    return !this.isLocal && (this.isDirectory || this.mimeType === MimeTypes.Pdf || this.mimeType === MimeTypes.Map
       || this.mimeType === MimeTypes.EnrichmentTable || this.mimeType === MimeTypes.BioC
+      || this.mimeType === MimeTypes.Dmp
       || this.isProteinStructure
       || isCodemirrorHandledMimeType(this.mimeType)
-      || this.isLibreOfficeConvertible;
+      || this.isLibreOfficeConvertible);
   }
 
   get hasWordCloud() {
     // TODO: Move this method to ObjectTypeProvider
-    return this.isDirectory || this.mimeType === MimeTypes.Pdf || this.mimeType === MimeTypes.EnrichmentTable;
+    return !this.isLocal
+      && (this.isDirectory || this.mimeType === MimeTypes.Pdf || this.mimeType === MimeTypes.EnrichmentTable);
   }
 
   /**
@@ -316,6 +335,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return 'Bioc';
       case MimeTypes.EnrichmentTable:
         return 'Enrichment Table';
+      case MimeTypes.Dmp:
+        return 'Data Management Plan';
       case 'application/pdf':
         return 'Document';
       default:
@@ -346,6 +367,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return FAClass.Graph;
       case MimeTypes.Pdf:
         return FAClass.Pdf;
+      case MimeTypes.Dmp:
+        return FAClass.Dmp;
       default:
         const matchedIcon = getSupportedFileCodes(this.filename);
         if (matchedIcon !== undefined) {
@@ -370,6 +393,8 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return Unicodes.Graph;
       case MimeTypes.Pdf:
         return Unicodes.Pdf;
+      case MimeTypes.Dmp:
+        return Unicodes.Dmp;
       default:
         const matchedIcon = getSupportedFileCodes(this.filename);
         if (matchedIcon !== undefined) {
@@ -532,6 +557,10 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
         return ['/projects', projectName, 'maps', this.hashId];
       case MimeTypes.Graph:
         return ['/projects', projectName, 'sankey', this.hashId];
+      case MimeTypes.Dmp:
+        return ['/projects', projectName, 'dmp', this.hashId];
+      case MimeTypes.Sdrf:
+        return ['/projects', projectName, 'sdrf', this.hashId];
       default:
         if (isCodemirrorHandledMimeType(this.mimeType)) {
           return ['/projects', projectName, 'code', this.hashId];
@@ -651,11 +680,11 @@ export class FilesystemObject implements DirectoryObject, Directory, PdfFile, Kn
       const bDate = nullCoalesce(b.modificationDate, b.creationDate);
 
       if (aDate != null && bDate != null) {
-        const aMoment = moment(aDate);
-        const bMoment = moment(bDate);
-        if (aMoment.isAfter(bMoment)) {
+        const aTime = Date.parse(aDate);
+        const bTime = Date.parse(bDate);
+        if (aTime > bTime) {
           return -1;
-        } else if (aMoment.isBefore(bMoment)) {
+        } else if (aTime < bTime) {
           return 1;
         } else {
           return a.name.localeCompare(b.name);

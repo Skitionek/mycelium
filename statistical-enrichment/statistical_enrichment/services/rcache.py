@@ -1,5 +1,7 @@
 """ Redis Cache """
 import os
+from urllib.parse import quote
+
 import redis
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
@@ -11,7 +13,9 @@ REDIS_SSL = os.getenv("REDIS_SSL", "").lower()
 DEFAULT_CACHE_SETTINGS = {"ex": int(os.getenv("CACHE_TTL", 3600 * 24))}
 
 schema = "rediss" if REDIS_SSL in ["true", "1"] else "redis"
-connection_url = f"{schema}://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
+# Escaped, or a character such as / in a password would end it early
+password = quote(REDIS_PASSWORD, safe="")
+connection_url = f"{schema}://:{password}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
 redis_server = redis.Redis(
     connection_pool=redis.BlockingConnectionPool.from_url(connection_url)
 )
