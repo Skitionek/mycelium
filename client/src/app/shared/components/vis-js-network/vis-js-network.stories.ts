@@ -33,7 +33,7 @@ export const Default: Story = {
         smooth: false,
       },
     },
-    graphData: {
+    data: {
       nodes: [
         { id: 1, label: 'Node A' },
         { id: 2, label: 'Node B' },

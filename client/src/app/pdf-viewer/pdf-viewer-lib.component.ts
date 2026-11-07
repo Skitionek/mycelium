@@ -10,9 +10,9 @@ import {
   Output,
   ViewChild,
   ViewEncapsulation,
-  ComponentFactoryResolver,
   ApplicationRef,
   Injector,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentPortal, DomPortalOutlet } from '@angular/cdk/portal';
@@ -48,6 +48,8 @@ declare let bootstrap: any;
   templateUrl: './pdf-viewer-lib.component.html',
   styleUrls: ['./pdf-viewer-lib.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
@@ -197,7 +199,6 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   constructor(
     protected readonly elementRef: ElementRef,
     protected readonly modalService: NgbModal,
-    private cfr: ComponentFactoryResolver,
     private appRef: ApplicationRef,
     private injector: Injector,
     protected readonly zone: NgZone,
@@ -1198,10 +1199,9 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   textLayerPortalOutlets: Map<number, DomPortalOutlet> = new Map();
 
-  createTextLayerPortalOutlet({pageNumber, textLayerDiv}: TextLayerBuilder) {
+  createTextLayerPortalOutlet({pageNumber, div}: TextLayerBuilder) {
     const portalOutlet = new DomPortalOutlet(
-      textLayerDiv,
-      this.cfr,
+      div,
       this.appRef,
       this.injector
     );

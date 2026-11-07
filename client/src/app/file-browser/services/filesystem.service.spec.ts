@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { AuthenticationService } from 'app/auth/services/authentication.service';
 import { ApiService } from 'app/shared/services/api.service';
@@ -14,7 +14,9 @@ describe('FilesystemService locks', () => {
   let http: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({imports: [HttpClientTestingModule]});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
+    });
     http = TestBed.inject(HttpTestingController);
     const auth = {getAccessToken: () => 'token'} as AuthenticationService;
     const client = TestBed.inject(HttpClient);

@@ -18,6 +18,7 @@ import { HighlightTextService } from '../../services/highlight-text.service';
   templateUrl: './generic-table.component.html',
   styleUrls: ['./generic-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class GenericTableComponent implements OnInit, OnDestroy {
   HEADER: TableHeader[][];

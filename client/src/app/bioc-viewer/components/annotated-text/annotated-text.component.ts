@@ -1,4 +1,4 @@
-import { Component, Input, ViewEncapsulation, SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
+import { Component, Input, ViewEncapsulation, SimpleChanges, OnChanges, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { SEARCH_LINKS } from 'app/shared/links';
 
@@ -9,6 +9,8 @@ import { Annotation } from '../bioc.format';
   templateUrl: './annotated-text.component.html',
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['./annotated-text.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class AnnotatedTextComponent implements OnChanges, OnDestroy {
   @Input() text;

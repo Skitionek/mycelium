@@ -281,7 +281,7 @@ upstream may have moved on.
 | Feature / Improvement | Lifelike (at fork) | Mycelium |
 |---|:---:|:---:|
 | **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
-| **Angular version** | v9 | v17 |
+| **Angular version** | v9 | v22 |
 | **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
 | **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 6.4.299 (well past CVE-2024-4367) |
 | **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |

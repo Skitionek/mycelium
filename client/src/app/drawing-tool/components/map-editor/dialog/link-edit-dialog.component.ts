@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -12,6 +12,8 @@ import { toValidLink } from 'app/shared/utils/browser';
 @Component({
   selector: 'app-link-edit-dialog',
   templateUrl: './link-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LinkEditDialogComponent extends CommonFormDialogComponent<Source | Hyperlink> {
 

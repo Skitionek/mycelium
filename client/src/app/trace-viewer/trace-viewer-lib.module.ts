@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -27,7 +26,6 @@ import { TraceDetailsComponent } from './components/trace-details.component';
   imports: [
     CommonModule,
     FormsModule,
-    BrowserAnimationsModule,
     MatFormFieldModule,
     MatCheckboxModule,
     MatSidenavModule,
@@ -39,7 +37,7 @@ import { TraceDetailsComponent } from './components/trace-details.component';
     MatRadioModule,
     SharedModule,
     FileBrowserModule,
-    RouterModule.forRoot([])
+    RouterModule
   ],
 })
 export class TraceViewerLibModule {

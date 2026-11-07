@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -34,7 +33,6 @@ import { SankeySearchControlModule } from './components/search-control/sankey-se
   imports: [
     CommonModule,
     FormsModule,
-    BrowserAnimationsModule,
     MatFormFieldModule,
     MatCheckboxModule,
     MatSidenavModule,
@@ -46,7 +44,7 @@ import { SankeySearchControlModule } from './components/search-control/sankey-se
     MatRadioModule,
     SharedModule,
     FileBrowserModule,
-    RouterModule.forRoot([]),
+    RouterModule,
     SankeyModule,
     SankeyDetailsPanelModule,
     SankeySearchPanelModule,

@@ -1,4 +1,4 @@
-<div class="module" appContainerBreakpoints *ngIf="(loadTask?.status$ | async) as status">
+<div class="module" appContainerBreakpoints *ngIf="($safeNavigationMigration(loadTask?.status$) | async) as status">
     <app-module-progress *ngIf="status.running">
         Downloading annotations...
     </app-module-progress>

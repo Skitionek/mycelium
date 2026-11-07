@@ -24,6 +24,7 @@ import { describeFileStatus } from './status-text';
       </span>
     </ng-container>
   `,
+  standalone: false,
 })
 export class LocalIndexBadgeComponent implements OnChanges {
   @Input() object: FilesystemObject | undefined;

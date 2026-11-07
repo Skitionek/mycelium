@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, OnChanges, SimpleChanges, ViewEncapsulation, } from '@angular/core';
+import { Component, Input, TemplateRef, OnChanges, SimpleChanges, ViewEncapsulation, ChangeDetectionStrategy, } from '@angular/core';
 import { NestedTreeControl } from '@angular/cdk/tree';
 
 interface TreeNode {
@@ -11,7 +11,9 @@ interface TreeNode {
   selector: 'app-tree-view',
   templateUrl: './tree-view.component.html',
   styleUrls: ['./tree-view.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class TreeViewComponent implements OnChanges {
   /**
@@ -49,7 +51,19 @@ export class TreeViewComponent implements OnChanges {
 
   ngOnChanges({getChildren, hasChild}: SimpleChanges) {
     if (getChildren) {
-      this.treeControl = new NestedTreeControl<TreeNode>(getChildren.currentValue);
+      this.treeControl = new NestedTreeControl<TreeNode>(
+        // The CDK asks the tree control for children while it renders and throws when there
+        // is no accessor, so a missing one means that no node has children.
+        getChildren.currentValue ?? (() => undefined),
+        {
+          // Without this the CDK decides whether a node is a leaf (for aria-expanded, on every
+          // change detection) by walking all of its descendants. That never ends for objects
+          // that refer back to themselves, which this view is meant to show, and is slow for
+          // large ones. hasChild answers the same question without parsing the children, so
+          // it must not depend on the index.
+          isExpandable: node => !!this.hasChild?.(0, node),
+        },
+      );
     }
     if (hasChild) {
       this.hasChild = hasChild.currentValue;

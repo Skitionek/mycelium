@@ -17,7 +17,7 @@ from flask import (
 )
 from flask.views import MethodView
 from json import JSONDecodeError
-from marshmallow import validate, fields
+from marshmallow import EXCLUDE, validate, fields
 from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, List, Dict, Any
@@ -97,7 +97,6 @@ from ..services.annotations.transient_annotation import (
     annotate_transient_pdf,
 )
 from ..services.enrichment.data_transfer_objects import EnrichmentCellTextMapping
-from ..services.transient_files import read_transient_file
 from ..utils.logger import UserEventLog
 from ..utils.http import make_cacheable_file_response
 
@@ -442,8 +441,9 @@ class FileAnnotationGeneCountsView(FileAnnotationCountsView):
 class FileAnnotationsGenerationView(FilesystemBaseView):
     decorators = [auth.login_required]
 
-    @use_args(lambda request: BulkFileRequestSchema())
-    @use_args(lambda request: AnnotationGenerationRequestSchema())
+    # Both schemas read the same JSON body, so each has to ignore the other's fields.
+    @use_args(lambda request: BulkFileRequestSchema(), unknown=EXCLUDE)
+    @use_args(lambda request: AnnotationGenerationRequestSchema(), unknown=EXCLUDE)
     def post(self, targets, params):
         """Generate annotations for one or more files."""
         current_user = g.current_user
@@ -614,7 +614,7 @@ class FileAnnotationsGenerationView(FilesystemBaseView):
         )
 
         text, parsed = Pipeline.parse(
-            file.mime_type, file_id=file.id, exclude_references=configs['exclude_references'])
+            file.mime_type, pdf_bytes=file.content.raw_file)
 
         pipeline = Pipeline(
             {
@@ -1026,26 +1026,6 @@ class GlobalAnnotationListView(MethodView):
         yield jsonify(dict(result='success'))
 
 
-@bp.route('/files/<int:file_id>', methods=['GET'])
-def get_pdf_to_annotate(file_id):
-    """This endpoint is sent by the annotation pipeline to the
-    pdfparse service, and acts as a resource pull.
-    """
-
-    doc = Files.query.get(file_id)
-
-    if not doc:
-        raise AnnotationError(
-            title='Failed to Annotate',
-            message=f'File with file id {file_id} not found.',
-            code=404)
-
-    res = make_response(doc.content.raw_file)
-    res.headers['Content-Type'] = 'application/pdf'
-    res.headers['Content-Disposition'] = f'attachment;filename={doc.filename}.pdf'
-    return res
-
-
 # PDFs larger than this are not annotated without being stored
 TRANSIENT_ANNOTATION_MAX_BYTES = 100 * 1024 * 1024
 # Likewise for enrichment tables, which are JSON
@@ -1137,25 +1117,6 @@ class TransientEnrichmentAnnotationsView(MethodView):
         return jsonify({
             'results': EnrichmentTableSchema().dump(annotated)
         })
-
-
-@bp.route('/transient/<string:token>', methods=['GET'])
-def get_transient_pdf_to_annotate(token):
-    """
-    Like get_pdf_to_annotate, but for a PDF held only while TransientAnnotationsView
-    annotates it. The token is unguessable and the content expires within minutes.
-    """
-    content = read_transient_file(token)
-    if content is None:
-        raise AnnotationError(
-            title='Failed to Annotate',
-            message='The file to annotate is no longer available.',
-            code=404)
-
-    res = make_response(content)
-    res.headers['Content-Type'] = 'application/pdf'
-    res.headers['Cache-Control'] = 'no-store'
-    return res
 
 
 class FilesNeedingReannotationView(MethodView):

@@ -599,6 +599,32 @@ def create_detail_node(node, params):
     return params
 
 
+def _get_file_extension_icon(domain: str) -> Optional[str]:
+    """Return icon-type name for a known file extension, or None if unrecognised."""
+    if domain.endswith('.docx') or domain.endswith('.doc'):
+        return 'ms-word'
+    if domain.endswith('.pptx') or domain.endswith('.ppt'):
+        return 'ms-powerpoint'
+    if domain.endswith('.xlsx') or domain.endswith('.xls'):
+        return 'ms-excel'
+    if domain.endswith('.cys'):
+        return 'cytoscape'
+    return None
+
+
+def _handle_document_link(node, link):
+    """Return ('document', url) for a document link, cleaning up internal links."""
+    doi_src = next(
+        (src for src in node['data'].get('sources', []) if src.get('domain') == 'DOI'), None)
+    if doi_src and is_valid_doi(doi_src['url']):
+        return 'document', doi_src['url']
+    if link in node['data'].get('sources', []):
+        node['data']['sources'].remove(link)
+    else:
+        node['data']['hyperlinks'].remove(link)
+    return 'document', None
+
+
 def get_link_icon_type(node):
     """
     Evaluate the icon that link node should have (document, sankey, ET, mail or link)
@@ -616,19 +642,7 @@ def get_link_icon_type(node):
         elif SANKEY_RE.match(link['url']):
             return 'sankey', link['url']
         elif DOCUMENT_RE.match(link['url']):
-            doi_src = next(
-                (src for src in node['data'].get('sources', []) if src.get(
-                    'domain') == "DOI"), None)
-            # If there is a valid doi, link to DOI
-            if doi_src and is_valid_doi(doi_src['url']):
-                return 'document', doi_src['url']
-            # If the links point to internal document, remove it from the node data so it would
-            # not became exported as node url - as that might violate copyrights
-            if link in node['data'].get('sources', []):
-                node['data']['sources'].remove(link)
-            else:
-                node['data']['hyperlinks'].remove(link)
-            return 'document', None
+            return _handle_document_link(node, link)
         elif PROJECTS_RE.match(link['url']):
             return 'project', link['url']
         elif BIOC_RE.match(link['url']):
@@ -636,17 +650,11 @@ def get_link_icon_type(node):
         elif MAIL_RE.match(link['url']):
             return 'email', link['url']
         elif ANY_FILE_RE.match(link['url']):
+            # Do not return url for files not created on LL
             domain = link.get('domain', "").strip()
-            if domain:
-                # Do not return url, as we are not creating links to files that we not create on LL
-                if domain.endswith('.docx') or domain.endswith('.doc'):
-                    return 'ms-word', None
-                elif domain.endswith('.pptx') or domain.endswith('.ppt'):
-                    return 'ms-powerpoint', None
-                elif domain.endswith('.xlsx') or domain.endswith('.xls'):
-                    return 'ms-excel', None
-                elif domain.endswith('.cys'):
-                    return 'cytoscape', None
+            icon_type = _get_file_extension_icon(domain)
+            if icon_type:
+                return icon_type, None
     return 'link', None
 
 

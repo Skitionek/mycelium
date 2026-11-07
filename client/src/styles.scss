@@ -57,6 +57,9 @@ router-outlet + * {
   display: flex;
   flex: 1 1 0%;
   flex-direction: column;
+  // A flex item will not shrink below its content by default; without this a
+  // routed view nested in another outlet (a workspace pane) outgrows the pane
+  min-height: 0;
 }
 
 .tooltip-newlines {
