@@ -4,7 +4,8 @@ import { isNil } from 'lodash-es';
 
 
 @Directive({
-  selector: '[appResizable]'
+  selector: '[appResizable]',
+  standalone: false
 })
 export class ResizableDirective  implements OnInit {
   // Note: the CSS `resize` property does not support directional handles.

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -12,6 +12,8 @@ import { ObjectVersion } from '../../models/object-version';
 @Component({
   selector: 'app-object-version-history-dialog',
   templateUrl: './object-version-history-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectVersionHistoryDialogComponent extends CommonFormDialogComponent {
   @Input() object: FilesystemObject;

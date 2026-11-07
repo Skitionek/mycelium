@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -32,7 +32,9 @@ import { SankeyManyToManySelection, SankeyManyToManyState } from './interfaces';
     },
     WarningControllerService,
     SankeySearchService
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class SankeyManyToManyViewComponent extends SankeyViewComponent implements OnDestroy, ModuleAwareComponent {
 

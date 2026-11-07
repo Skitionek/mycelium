@@ -2,6 +2,7 @@ import {
     Component,
     EventEmitter,
     Output,
+    ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 
@@ -9,6 +10,8 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
     selector: 'app-visualization-quickbar',
     templateUrl: './visualization-quickbar.component.html',
     styleUrls: ['./visualization-quickbar.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class VisualizationQuickbarComponent {
     @Output() animationStatus = new EventEmitter<boolean>();
