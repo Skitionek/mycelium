@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy, } from '@angular/core';
 import { FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators, } from '@angular/forms';
 
 import { isNil, uniqueId } from 'lodash-es';
@@ -18,6 +18,7 @@ import { SortingAlgorithm } from 'app/word-cloud/sorting/sorting-algorithms';
   selector: 'app-annotation-filter',
   templateUrl: './annotation-filter.component.html',
   styleUrls: ['./annotation-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AnnotationFilterComponent<T extends AnnotationFilterEntity> implements OnInit, OnDestroy {

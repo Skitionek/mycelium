@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { combineLatest, Subscription } from 'rxjs';
 
@@ -12,6 +12,7 @@ import { ShortestPathService } from '../services/shortest-path.service';
   selector: 'app-shortest-path',
   templateUrl: './shortest-path.component.html',
   styleUrls: ['./shortest-path.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ShortestPathComponent implements OnDestroy {

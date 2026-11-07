@@ -1,9 +1,10 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-module-progress',
   templateUrl: './module-progress.component.html',
   styleUrls: ['./module-progress.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ModuleProgressComponent {

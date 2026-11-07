@@ -1,4 +1,4 @@
-import { Component, Input} from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy} from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -12,6 +12,7 @@ import {
 @Component({
   selector: 'app-map-restore-dialog',
   templateUrl: './map-restore-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class MapRestoreDialogComponent extends CommonDialogComponent {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -9,6 +9,7 @@ import { BuildInfo } from 'app/interfaces';
 @Component({
   selector: 'app-version-dialog',
   templateUrl: './app-version-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AppVersionDialogComponent {

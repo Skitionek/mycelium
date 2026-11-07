@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { UniversalGraphNode } from 'app/drawing-tool/services/interfaces';
 import { FTSQueryRecord } from 'app/interfaces';
@@ -14,6 +14,7 @@ import { getGraphQueryParams } from '../utils/search';
   selector: 'app-search-record-node',
   templateUrl: 'search-record-node.component.html',
   styleUrls: ['./search-record-node.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SearchRecordNodeComponent {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
@@ -14,6 +14,7 @@ let nextId = 0;
 @Component({
   selector: 'app-select',
   templateUrl: './select.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class SelectComponent<T = any> {

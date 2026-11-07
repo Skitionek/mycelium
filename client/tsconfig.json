@@ -1,13 +1,16 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    // TypeScript 6 turns `strict` on by default; this code base was written without it.
+    "strict": false,
+    // `baseUrl` (absolute `app/...` imports) is deprecated in TypeScript 6 and removed in 7.
+    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": "src",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "esnext",
     "moduleResolution": "bundler",

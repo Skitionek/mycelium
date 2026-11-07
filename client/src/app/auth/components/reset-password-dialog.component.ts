@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -9,6 +9,7 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
 @Component({
   selector: 'app-reset-password-dialog',
   templateUrl: './reset-password-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class ResetPasswordDialogComponent  extends CommonFormDialogComponent {

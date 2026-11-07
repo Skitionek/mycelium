@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
@@ -14,6 +14,7 @@ import {
   selector: 'app-organism-autocomplete',
   templateUrl: './organism-autocomplete.component.html',
   styleUrls: ['./organism-autocomplete.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class OrganismAutocompleteComponent implements OnInit {

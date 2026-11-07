@@ -8,6 +8,7 @@ import {
   OnInit,
   ViewChild,
   ViewEncapsulation,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { ChildrenOutletContexts, PRIMARY_OUTLET } from '@angular/router';
@@ -26,6 +27,7 @@ import { ViewService } from 'app/file-browser/services/view.service';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class WorkspaceComponent implements OnInit, OnChanges, AfterContentChecked, AfterViewChecked {

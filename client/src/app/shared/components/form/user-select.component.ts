@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { EMPTY, Observable, of, Subject, Subscription, timer } from 'rxjs';
@@ -18,6 +18,7 @@ import { ErrorHandler } from '../../services/error-handler.service';
     useExisting: UserSelectComponent,
     multi: true,
   }],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UserSelectComponent implements ControlValueAccessor, OnInit, OnDestroy {

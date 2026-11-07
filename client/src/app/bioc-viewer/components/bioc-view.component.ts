@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output, ViewChild, HostListener, ElementRef } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, ViewChild, HostListener, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
@@ -28,6 +28,7 @@ import { FilesystemObjectActions } from 'app/file-browser/services/filesystem-ob
   selector: 'app-bioc-viewer',
   templateUrl: './bioc-view.component.html',
   styleUrls: ['./bioc-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {

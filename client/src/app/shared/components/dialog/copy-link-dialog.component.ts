@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -10,6 +10,7 @@ import { MessageArguments, MessageDialog } from '../../services/message-dialog.s
 @Component({
   selector: 'app-share-dialog',
   templateUrl: './copy-link-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class CopyLinkDialogComponent {

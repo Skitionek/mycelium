@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { InternalSearchService } from 'app/shared/services/internal-search.service';
 import { SearchType } from 'app/search/shared';
@@ -8,6 +8,7 @@ import { GraphEntity, GraphEntityType, UniversalGraphEdge, UniversalGraphNode } 
 @Component({
   selector: 'app-info-view-panel',
   templateUrl: './info-view-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class InfoViewPanelComponent {

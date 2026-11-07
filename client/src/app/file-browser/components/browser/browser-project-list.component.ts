@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -17,6 +17,7 @@ import { ProjectImpl } from '../../models/filesystem-object';
 @Component({
   selector: 'app-browser-project-list',
   templateUrl: './browser-project-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class BrowserProjectListComponent implements OnInit, OnDestroy {

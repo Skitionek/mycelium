@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -17,6 +17,7 @@ import { MimeTypes } from 'app/shared/constants';
 @Component({
   selector: 'app-associated-maps',
   templateUrl: './associated-maps.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class AssociatedMapsComponent implements OnInit, OnDestroy {

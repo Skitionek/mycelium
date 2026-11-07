@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { from, Observable } from 'rxjs';
@@ -21,6 +21,7 @@ import { FilesystemService } from '../services/filesystem.service';
     useExisting: ObjectVersionHistoryComponent,
     multi: true,
   }],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class ObjectVersionHistoryComponent implements ControlValueAccessor {

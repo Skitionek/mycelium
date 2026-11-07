@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, ViewChild, AfterContentInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -43,6 +43,7 @@ import { SearchEntity } from '../services/search-match';
     WarningControllerService,
     SankeySearchService
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, AfterContentInit {

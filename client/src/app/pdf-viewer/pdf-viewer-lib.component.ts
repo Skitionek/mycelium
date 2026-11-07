@@ -12,6 +12,7 @@ import {
   ViewEncapsulation,
   ApplicationRef,
   Injector,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentPortal, DomPortalOutlet } from '@angular/cdk/portal';
@@ -47,6 +48,7 @@ declare let bootstrap: any;
   templateUrl: './pdf-viewer-lib.component.html',
   styleUrls: ['./pdf-viewer-lib.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class PdfViewerLibComponent implements OnInit, OnDestroy {

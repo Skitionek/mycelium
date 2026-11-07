@@ -1,4 +1,4 @@
-import { Component, Input, } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, } from '@angular/core';
 
 import { SankeyNode } from 'app/shared-sankey/interfaces';
 
@@ -7,6 +7,7 @@ import { SankeyDetailsComponent } from './details.component';
 @Component({
   selector: 'app-sankey-node-details',
   templateUrl: './node-details.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false
 })
 // @ts-ignore

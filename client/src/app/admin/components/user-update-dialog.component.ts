@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -14,6 +14,7 @@ import { AppUser, UserUpdateRequest } from 'app/interfaces';
 @Component({
   selector: 'app-user-update-dialog',
   templateUrl: './user-update-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: false,
 })
 export class UserUpdateDialogComponent extends CommonFormDialogComponent {
