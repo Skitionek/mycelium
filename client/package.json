@@ -82,7 +82,7 @@
     "rxjs": "~7.5.0",
     "serverless-office-converter": "git+https://github.com/Skitionek/serverless-office-converter.git#cd6c4a13e67f5b03063bc8094c5406b1d7efe1d5",
     "tachyons": "4.12.0",
-    "tslib": "^2.3.0",
+    "tslib": "^2.9.1",
     "vis-data": "8.0.6",
     "vis-network": "10.1.4",
     "vis-util": "6.0.3",
