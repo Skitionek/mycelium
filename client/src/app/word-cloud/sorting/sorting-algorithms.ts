@@ -77,7 +77,7 @@ over similar counts collected from a single source.<br/>
       {
         id: SortingAlgorithmId.count_per_row,
         name: 'Count per row',
-        description: `Number of rows a value occurs in.`,
+        description: 'Number of rows a value occurs in.',
         valueDescription: 'Count per row',
         min: 0,
         step: 1,
