@@ -31,6 +31,8 @@ and this project adheres to [Conventional Commits](https://www.conventionalcommi
 
 ### Changed
 
+- **Mozg bumped to [`c5dfd8c`](https://github.com/Skitionek/Mozg/commit/c5dfd8c2adf89dae0e449ff4fae9e3bc629a34cb)** (from `fd1e9e8`). Mozg now needs Node 22 or later, so `mozg/Dockerfile` builds on `node:26-trixie-slim` like Mozg's own image - sqlite3's prebuilt binding works there, so the Alpine compiler toolchain is gone - and the health checks use Mozg's new `/healthz` endpoint. The REST and KEGG driver behaviour mycelium's queries rely on is unchanged.
+
 - **"Bio-Digital Lab" design system**: Global CSS custom properties introduced (`--color-primary: #004B49`, `--color-accent: #D4FF00`, `--color-bg-main: #F1F5F9`, `--color-text-main: #0F172A`). Bootstrap `$primary` updated to Deep Sea Teal `#004B49`; highlight colour updated to Bioluminescent Lime `#D4FF00` ([#245]).
 - **Typography**: Primary sans-serif font updated to Inter (with Roboto fallback) ([#245]).
 - **Fonts and Plotly bundled**: the Roboto, IBM Plex Sans and Inter fonts and Plotly are bundled from pinned npm packages instead of loaded from Google Fonts and `cdn.plot.ly`. Plotly is pinned to 1.58.5, the build the `plotly-latest` URL served. Font Awesome still loads from its kit: it is Font Awesome 5 Pro with custom icons the app draws by name and code point ([#744]).
