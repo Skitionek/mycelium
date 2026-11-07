@@ -11,7 +11,8 @@ import { WorkspaceManager } from '../workspace-manager';
  * routes in the current workspace.
  */
 @Directive({
-  selector: '[appAbstractLinkDirective]'
+  selector: '[appAbstractLinkDirective]',
+  standalone: false
 })
 export class AbstractLinkDirective {
   @HostBinding('attr.href') @Input() href: string;
@@ -110,6 +111,7 @@ export class AbstractLinkDirective {
 
 @Directive({
   selector: ':not(a):not(area)[appLink]',
+  standalone: false,
 })
 export class LinkWithoutHrefDirective extends AbstractLinkDirective {
   constructor(workspaceManager: WorkspaceManager, router: Router, route: ActivatedRoute) {
@@ -119,6 +121,7 @@ export class LinkWithoutHrefDirective extends AbstractLinkDirective {
 
 @Directive({
   selector: 'a[appLink],area[appLink]',
+  standalone: false,
 })
 export class LinkWithHrefDirective extends AbstractLinkDirective implements OnChanges {
   @HostBinding() href: string;

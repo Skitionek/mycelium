@@ -1,6 +1,7 @@
 import marshmallow.validate
 import marshmallow_dataclass
 from marshmallow import fields, validates_schema, ValidationError
+from marshmallow.experimental.context import Context
 
 from neo4japp.constants import MAX_FILE_DESCRIPTION_LENGTH
 from neo4japp.models import Files, Projects
@@ -35,7 +36,7 @@ class ProjectSchema(CamelCaseSchema):
 
     def get_user_privilege_filter(self):
         try:
-            return self.context['user_privilege_filter']
+            return Context.get({})['user_privilege_filter']
         except KeyError:
             raise RuntimeError('user_privilege_filter context key should be set '
                                'for ProjectSchema to determine what to show')
@@ -43,7 +44,7 @@ class ProjectSchema(CamelCaseSchema):
     def get_privileges(self, obj: Projects):
         privilege_user_id = self.get_user_privilege_filter()
         if privilege_user_id is not None and obj.calculated_privileges:
-            return ProjectPrivilegesSchema(context=self.context) \
+            return ProjectPrivilegesSchema() \
                 .dump(obj.calculated_privileges[privilege_user_id])
         else:
             return None
@@ -148,7 +149,7 @@ class FileSchema(CamelCaseSchema):
 
     def get_user_privilege_filter(self):
         try:
-            return self.context['user_privilege_filter']
+            return Context.get({})['user_privilege_filter']
         except KeyError:
             raise RuntimeError('user_privilege_filter context key should be set '
                                'for FileSchema to determine what to show')
@@ -156,7 +157,7 @@ class FileSchema(CamelCaseSchema):
     def get_privileges(self, obj: Files):
         privilege_user_id = self.get_user_privilege_filter()
         if privilege_user_id is not None and obj.calculated_privileges:
-            return FilePrivilegesSchema(context=self.context) \
+            return FilePrivilegesSchema() \
                 .dump(obj.calculated_privileges[privilege_user_id])
         else:
             return None
@@ -165,7 +166,7 @@ class FileSchema(CamelCaseSchema):
         return obj.calculated_highlight
 
     def get_project(self, obj: Files):
-        return ProjectSchema(context=self.context, exclude=(
+        return ProjectSchema(exclude=(
             'root',
         )).dump(obj.calculated_project)
 
@@ -174,7 +175,7 @@ class FileSchema(CamelCaseSchema):
         if obj.parent is not None and (privilege_user_id is None
                                        or obj.parent.calculated_privileges[
                                            privilege_user_id].readable):
-            return FileSchema(context=self.context, exclude=(
+            return FileSchema(exclude=(
                 'project',
                 'children',
             )).dump(obj.parent)
@@ -189,7 +190,7 @@ class FileSchema(CamelCaseSchema):
                 if
                 privilege_user_id is None or child.calculated_privileges[privilege_user_id].readable
             ]
-            return FileSchema(context=self.context, exclude=(
+            return FileSchema(exclude=(
                 'project',
                 'parent',
             ), many=True).dump(children)
@@ -360,7 +361,7 @@ class FileLockSchema(CamelCaseSchema):
     own = fields.Method('get_own')
 
     def get_own(self, obj: FileLock):
-        return self.context['current_user'].id == obj.user.id
+        return Context.get({})['current_user'].id == obj.user.id
 
 
 # Requests

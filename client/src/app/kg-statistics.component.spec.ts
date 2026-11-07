@@ -1,7 +1,8 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CommonModule } from '@angular/common';
-import { MatLegacySnackBarModule } from '@angular/material/legacy-snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { KgStatisticsComponent } from 'app/kg-statistics.component';
@@ -15,9 +16,12 @@ describe('KgStatisticsComponent', () => {
             declarations: [KgStatisticsComponent],
             imports: [
                 CommonModule,
-                HttpClientTestingModule,
-                MatLegacySnackBarModule,
+                MatSnackBarModule,
                 BrowserAnimationsModule,
+            ],
+            providers: [
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting(),
             ],
         }).compileComponents();
     }));

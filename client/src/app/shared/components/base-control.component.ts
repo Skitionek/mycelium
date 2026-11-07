@@ -1,10 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-base-control',
   templateUrl: './base-control.component.html',
-  styleUrls: ['./base-control.component.scss']
+  styleUrls: ['./base-control.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class BaseControlComponent {
   @Input() disabled = false;

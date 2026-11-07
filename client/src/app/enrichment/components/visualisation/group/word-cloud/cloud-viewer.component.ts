@@ -1,4 +1,4 @@
-import { Component, OnChanges, Input, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, Input, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { map } from 'rxjs/operators';
@@ -12,7 +12,9 @@ import { paramsToEnrichmentTableLink, triggerSearchOnShouldReplaceTab } from '..
 
 @Component({
   selector: 'app-cloud-viewer',
-  templateUrl: './cloud-viewer.component.html'
+  templateUrl: './cloud-viewer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class CloudViewerComponent implements OnChanges {
   @Input() data: EnrichWithGOTermsResult[];

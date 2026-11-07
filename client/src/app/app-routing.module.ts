@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminPanelComponent } from 'app/admin/components/admin-panel.component';
 import { ObjectBrowserComponent } from 'app/file-browser/components/object-browser.component';
 import { LoginComponent } from 'app/auth/components/login.component';
+import { ResetPasswordComponent } from 'app/auth/components/reset-password.component';
 import { DashboardComponent } from 'app/dashboard.component';
 import { AdminGuard } from 'app/admin/services/admin-guard.service';
 import { AuthGuard } from 'app/auth/guards/auth-guard.service';
@@ -61,6 +62,12 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('app/enrichment/enrichment-table-route.module').then((m) => m.EnrichmentTableRouteModule),
+  },
+  {
+    path: 'projects/:project_name/dmp/:file_id',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('app/dmp/dmp-route.module').then((m) => m.DMPRouteModule),
   },
   {
     path: 'projects/:project_name/enrichment-visualisation/:file_id',
@@ -251,13 +258,13 @@ const WORKSPACE_CONTENT_ROUTES: Routes = [
         .then((m) => m.EnrichmentVisualisationRouteModule),
     data: {
       title: 'Enrichment Visualisation',
-      fontAwesomeIcon: 'fas chart-bar',
+      fontAwesomeIcon: 'fas fa-chart-bar',
     },
   },
 ];
 
 // TODO: Add an unprotected home page
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: DashboardComponent,
@@ -283,6 +290,16 @@ const routes: Routes = [
     data: {
       title: 'Login',
       fontAwesomeIcon: 'sign-in-alt',
+    },
+  },
+  {
+    // Reached from a password reset email, so it must not require a session.
+    // The token in the URL is the credential.
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent,
+    data: {
+      title: 'Reset Password',
+      fontAwesomeIcon: 'key',
     },
   },
   {

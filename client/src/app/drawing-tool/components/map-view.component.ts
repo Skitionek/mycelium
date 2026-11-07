@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, Input, NgZone, OnDestroy } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { AfterViewInit, Component, Input, NgZone, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 
 import {Observable, Subscription, forkJoin} from 'rxjs';
@@ -30,6 +30,8 @@ import { MapImageProviderService } from '../services/map-image-provider.service'
   styleUrls: [
     './map.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class MapViewComponent<ExtraResult = void> extends MapComponent<ExtraResult>
   implements OnDestroy, AfterViewInit, ModuleAwareComponent {
@@ -42,7 +44,7 @@ export class MapViewComponent<ExtraResult = void> extends MapComponent<ExtraResu
 
   constructor(filesystemService: FilesystemService,
               objectTypeService: ObjectTypeService,
-              snackBar: MatLegacySnackBar,
+              snackBar: MatSnackBar,
               modalService: NgbModal,
               messageDialog: MessageDialog,
               ngZone: NgZone, route: ActivatedRoute,

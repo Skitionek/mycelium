@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { asyncScheduler, Observable, Subscription } from 'rxjs';
@@ -13,6 +13,8 @@ import { Progress } from 'app/interfaces/common-dialog.interface';
 @Component({
   selector: 'app-progress-dialog',
   templateUrl: './progress-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ProgressDialogComponent implements OnInit, OnDestroy {
   @Input() title: string;

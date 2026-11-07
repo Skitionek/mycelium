@@ -9,10 +9,8 @@
             <button ngbDropdownItem (click)="view = 'Text'">Text</button>
         </div>
     </div>
-    <button (click)="activeModal.dismiss()" aria-label="Close" class="close ms-1"
-            type="button">
-        <span aria-hidden="true">&times;</span>
-    </button>
+    <button (click)="activeModal.dismiss()" aria-label="Close" class="btn-close ms-1"
+            type="button"></button>
 </div>
 <div class="modal-body" [style.whiteSpace]="'pre-line'">
     <div class="report-scroll">

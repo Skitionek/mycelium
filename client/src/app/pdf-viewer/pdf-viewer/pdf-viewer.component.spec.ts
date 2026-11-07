@@ -1,5 +1,5 @@
-import { TestBed, async, ComponentFixture } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { TestBed, waitForAsync, ComponentFixture } from '@angular/core/testing';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { PdfViewerComponent } from './pdf-viewer.component';
 import { PdfViewerModule } from './pdf-viewer.module';
@@ -7,7 +7,9 @@ import { PdfViewerModule } from './pdf-viewer.module';
 @Component({
   template: `
     <app-pdf-viewer-lib></app-pdf-viewer-lib>
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 class TestComponent {}
 
@@ -24,7 +26,7 @@ describe('PDFViewerComponent', () => {
     };
   }
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [TestComponent],
       imports: [PdfViewerModule]
@@ -142,6 +144,23 @@ describe('PDFViewerComponent', () => {
         cMapPacked: true,
         verbosity: 0
       });
+    });
+  });
+
+  describe('updateSize', () => {
+    it('should leave the scale alone while pdf.js has not created the pages yet', async () => {
+      // Given a document that is attached to a viewer which has no pages yet
+      const getPage = jasmine.createSpy('getPage').and.returnValue(Promise.resolve({}));
+      const viewer = {pagesCount: 0, currentPageNumber: 1, currentScale: 'unset'};
+      (pdfViewer as any).internalPdf = {getPage};
+      (pdfViewer as any).pdfSinglePageViewer = viewer;
+      (pdfViewer as any).internalShowAll = false;
+
+      // When the size is updated, as it is right after the document is attached
+      await pdfViewer.updateSize();
+
+      // Then the viewer is not asked to scale pages that do not exist
+      expect(viewer.currentScale).toBe('unset');
     });
   });
 });

@@ -1,6 +1,6 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { from, Observable, Subscription, throwError } from 'rxjs';
@@ -14,6 +14,7 @@ import { WorkspaceManager } from 'app/shared/workspace-manager';
 import { ModuleProperties } from 'app/shared/modules';
 import { MessageArguments, MessageDialog } from 'app/shared/services/message-dialog.service';
 import { RankedItem } from 'app/shared/schemas/common';
+import { CollectionModel } from 'app/shared/utils/collection-model';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
 
 import { FilesystemObject } from '../models/filesystem-object';
@@ -25,6 +26,8 @@ import { ProjectsService } from '../services/projects.service';
 @Component({
   selector: 'app-object-browser',
   templateUrl: './object-browser.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectBrowserComponent implements OnInit, OnDestroy {
   @Output() modulePropertiesChange = new EventEmitter<ModuleProperties>();
@@ -34,9 +37,11 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   protected annotationSubscription: Subscription;
   object$: Observable<FilesystemObject> = from([]);
   createActions$: Observable<CreateDialogAction[]> = from([]);
+  /** Results of searching a local folder's index, shown instead of its contents. */
+  localSearchResults: CollectionModel<FilesystemObject> | null = null;
 
   constructor(protected readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly messageDialog: MessageDialog,
               protected readonly errorHandler: ErrorHandler,
@@ -86,6 +91,9 @@ export class ObjectBrowserComponent implements OnInit, OnDestroy {
   }
 
   load(hashId: string): Observable<any> {
+    if (hashId !== this.hashId) {
+      this.localSearchResults = null;
+    }
     this.hashId = hashId;
     const object$ = this.filesystemService.get(hashId).pipe(map(object => {
       if (this.annotationSubscription) {

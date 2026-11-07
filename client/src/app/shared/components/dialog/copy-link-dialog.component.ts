@@ -1,5 +1,5 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -10,6 +10,8 @@ import { MessageArguments, MessageDialog } from '../../services/message-dialog.s
 @Component({
   selector: 'app-share-dialog',
   templateUrl: './copy-link-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CopyLinkDialogComponent {
 
@@ -18,7 +20,7 @@ export class CopyLinkDialogComponent {
 
   constructor(public readonly modal: NgbActiveModal,
               public readonly messageDialog: MessageDialog,
-              public readonly snackBar: MatLegacySnackBar) {
+              public readonly snackBar: MatSnackBar) {
   }
 
   copyToClipboard() {

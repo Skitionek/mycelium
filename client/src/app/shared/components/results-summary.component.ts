@@ -1,8 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-results-summary',
   templateUrl: './results-summary.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ResultsSummaryComponent {
   @Input() page: number; // pages should be 1-indexed

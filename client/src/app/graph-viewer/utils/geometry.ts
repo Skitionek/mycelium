@@ -1,5 +1,3 @@
-import intersects from 'intersects';
-
 // TODO: Clean up / find an alternative
 export function pointOnRect(x, y, minX, minY, maxX, maxY, validate) {
   if (validate && (minX < x && x < maxX) && (minY < y && y < maxY)) {
@@ -45,16 +43,6 @@ export function pointOnRect(x, y, minX, minY, maxX, maxY, validate) {
 
   // Should never happen :) If it does, please tell me!
   return {x, y};
-}
-
-// TODO: Clean up
-export function getLinePointIntersectionDistance(x, y, x1, x2, y1, y2) {
-  if (!intersects.pointLine(x, y, x1, y1, x2, y2)) {
-    return Infinity;
-  }
-  const expectedSlope = (y2 - y1) / (x2 - x1);
-  const slope = (y - y1) / (x - x1);
-  return Math.abs(slope - expectedSlope);
 }
 
 export function distanceUnsq(x0: number, y0: number, x1: number, y1: number): number {

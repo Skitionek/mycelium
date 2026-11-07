@@ -24,7 +24,7 @@ function attachDOMEventsToEventBus(eventBus: any) {
     event.initCustomEvent('textlayerrendered', true, true, {
       pageNumber: evt.pageNumber
     });
-    evt.source.textLayerDiv.dispatchEvent(event);
+    evt.source.textLayer.div.dispatchEvent(event);
   });
   eventBus.on('pagechanging', evt => {
     const event = document.createEvent('UIEvents');

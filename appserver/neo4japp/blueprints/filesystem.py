@@ -7,10 +7,10 @@ import urllib.request
 import zipfile
 from collections import defaultdict
 from datetime import datetime, timedelta
-from deepdiff import DeepDiff
 from flask import Blueprint, current_app, g, jsonify, make_response, request
 from flask.views import MethodView
 from marshmallow import EXCLUDE, ValidationError
+from marshmallow.experimental.context import Context
 from sqlalchemy import and_, desc, or_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -25,7 +25,7 @@ from neo4japp.blueprints.auth import auth
 from neo4japp.constants import LogEventType
 from neo4japp.database import db, get_file_type_service, get_authorization_service
 from neo4japp.exceptions import AccessRequestRequiredError, RecordNotFound, NotAuthorized, \
-    ServerException
+    ServerException, InvalidArgument
 from neo4japp.models import (
     Projects,
     Files,
@@ -62,7 +62,11 @@ from neo4japp.schemas.filesystem import (
 )
 from neo4japp.services.file_types.exports import ExportFormatError
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
-from neo4japp.services.libreoffice import convert_to_pdf
+from neo4japp.services.libreoffice import (
+    ConversionFailedError,
+    convert_to_pdf,
+    mime_type_for_filename,
+)
 from neo4japp.storage.adapters.postgres import PostgresAdapter
 from neo4japp.utils.collections import window
 from neo4japp.utils.http import make_cacheable_file_response
@@ -71,6 +75,7 @@ from neo4japp.utils.logger import UserEventLog
 from neo4japp.services.file_types.providers import BiocTypeProvider, PDFTypeProvider, \
     EnrichmentTableTypeProvider
 import os
+import subprocess
 
 bp = Blueprint('filesystem', __name__, url_prefix='/filesystem')
 
@@ -468,13 +473,12 @@ class FilesystemBaseView(MethodView):
         # Note: We don't check permissions here, but there are no negate permissions
         return_file.calculated_children = children
 
-        return jsonify(FileResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }, exclude=(
-            'result.children.children',  # We aren't loading sub-children
-        )).dump({
-            'result': return_file,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileResponseSchema(exclude=(
+                'result.children.children',  # We aren't loading sub-children
+            )).dump({
+                'result': return_file,
+            }))
 
     def get_bulk_file_response(
             self,
@@ -502,21 +506,19 @@ class FilesystemBaseView(MethodView):
             if file.calculated_privileges[user.id].readable:
                 returned_files[file.hash_id] = file
 
-        return jsonify(
-            MultipleFileResponseSchema(
-                context={
-                    'user_privilege_filter': user.id,
-                },
-                exclude=(
-                    'mapping.children',
-                )
-            ).dump(
-                dict(
-                    mapping=returned_files,
-                    missing=list(missing_hash_ids) if missing_hash_ids is not None else [],
+        with Context({'user_privilege_filter': user.id}):
+            return jsonify(
+                MultipleFileResponseSchema(
+                    exclude=(
+                        'mapping.children',
+                    )
+                ).dump(
+                    dict(
+                        mapping=returned_files,
+                        missing=list(missing_hash_ids) if missing_hash_ids is not None else [],
+                    )
                 )
             )
-        )
 
     def get_missing_hash_ids(self, expected_hash_ids: Iterable[str], files: Iterable[Files]):
         found_hash_ids = set(file.hash_id for file in files)
@@ -625,11 +627,10 @@ class FileHierarchyView(FilesystemBaseView):
                 event_type=LogEventType.FILESYSTEM.value
             ).to_dict()
         )
-        return jsonify(FileHierarchyResponseSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'results': results,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileHierarchyResponseSchema().dump({
+                'results': results,
+            }))
 
 
 class FileListView(FilesystemBaseView):
@@ -996,8 +997,10 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            file_ids = [file_id for (file_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(file_ids))
             total = result.total
 
         elif params['type'] == 'linked':
@@ -1015,21 +1018,22 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            map_ids = [map_id for (map_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(map_ids))
             total = len(files)
 
         else:
             raise NotImplementedError()
 
-        return jsonify(FileListSchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }, exclude=(
-            'results.children',
-        )).dump({
-            'total': total,
-            'results': files,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileListSchema(exclude=(
+                'results.children',
+            )).dump({
+                'total': total,
+                'results': files,
+            }))
 
 
 class FileDetailView(FilesystemBaseView):
@@ -1078,6 +1082,24 @@ class FileContentView(FilesystemBaseView):
         )
 
 
+def convert_document_to_pdf(content: bytes, mime_type: str, filename: str) -> bytes:
+    """Convert a document with LibreOffice, answering a failure as a client or server error."""
+    try:
+        return convert_to_pdf(content, mime_type).read()
+    except RuntimeError as e:
+        raise ServerException(
+            title='Conversion Unavailable',
+            message=str(e),
+            code=503,
+        )
+    except (ConversionFailedError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        raise ServerException(
+            title='Conversion Failed',
+            message=f"'{filename}' could not be converted to PDF.",
+            code=422,
+        )
+
+
 class FileContentPdfView(FilesystemBaseView):
     """Serve a file's content as PDF, converting on-the-fly via LibreOffice if needed."""
 
@@ -1116,8 +1138,7 @@ class FileContentPdfView(FilesystemBaseView):
                 code=415,
             )
 
-        pdf_buffer = convert_to_pdf(raw, file.mime_type)
-        pdf_bytes = pdf_buffer.read()
+        pdf_bytes = convert_document_to_pdf(raw, file.mime_type, file.filename)
         # Hash the actual PDF output for a reliable ETag that reflects conversion output.
         pdf_etag = hashlib.sha256(pdf_bytes).hexdigest()
 
@@ -1130,6 +1151,49 @@ class FileContentPdfView(FilesystemBaseView):
             filename=pdf_filename,
             mime_type=FILE_MIME_TYPE_PDF,
         )
+
+
+class PdfConversionView(MethodView):
+    """
+    Convert an uploaded document to PDF and return it, storing nothing. Lets office files
+    that are not in Mycelium, such as files in a connected local folder, open in the PDF
+    viewer like stored ones do (see FileContentPdfView).
+    """
+
+    decorators = [auth.login_required]
+
+    def post(self):
+        upload = request.files.get('file')
+        if upload is None:
+            raise InvalidArgument(
+                title='No File',
+                message='Send the document to convert in the "file" field.')
+        content = upload.read()
+        filename = upload.filename or 'document'
+        pdf_filename = os.path.splitext(filename)[0] + '.pdf'
+
+        # Only ever returns LibreOffice's output, never the request body: PDFs need no
+        # conversion and are opened directly by the client
+        mime_type = request.form.get('mimeType') or mime_type_for_filename(filename)
+        if mime_type not in LIBREOFFICE_CONVERTIBLE_MIME_TYPES:
+            raise ServerException(
+                title='Unsupported File Type',
+                message=f"'{filename}' cannot be converted to PDF.",
+                code=415,
+            )
+
+        pdf_bytes = convert_document_to_pdf(content, mime_type, filename)
+        return self._pdf_response(pdf_bytes, pdf_filename)
+
+    @staticmethod
+    def _pdf_response(content: bytes, filename: str):
+        res = make_response(content)
+        res.headers['Content-Type'] = FILE_MIME_TYPE_PDF
+        safe_filename = filename.replace('"', '').replace('\r', '').replace('\n', '')
+        res.headers['Content-Disposition'] = f'inline; filename="{safe_filename}"'
+        res.headers['Cache-Control'] = 'no-store'
+        res.headers['X-Content-Type-Options'] = 'nosniff'
+        return res
 
 
 class MapContentView(FilesystemBaseView):
@@ -1352,13 +1416,12 @@ class FileVersionListView(FilesystemBaseView):
             per_page=pagination['limit'],
         )
 
-        return jsonify(FileVersionHistorySchema(context={
-            'user_privilege_filter': g.current_user.id,
-        }).dump({
-            'object': file,
-            'total': result.total,
-            'results': result.items,
-        }))
+        with Context({'user_privilege_filter': g.current_user.id}):
+            return jsonify(FileVersionHistorySchema().dump({
+                'object': file,
+                'total': result.total,
+                'results': result.items,
+            }))
 
 
 class FileVersionContentView(FilesystemBaseView):
@@ -1404,11 +1467,10 @@ class FileLockBaseView(FilesystemBaseView):
 
         results = query.all()
 
-        return jsonify(FileLockListResponse(context={
-            'current_user': current_user,
-        }).dump({
-            'results': results,
-        }))
+        with Context({'current_user': current_user}):
+            return jsonify(FileLockListResponse().dump({
+                'results': results,
+            }))
 
 
 class FileLockListView(FileLockBaseView):
@@ -1538,11 +1600,15 @@ class FileAnnotationHistoryView(FilesystemBaseView):
             for annotation in older:
                 self._add_change(changes, 'removed', annotation, type)
         elif older is not None and newer is not None:
-            ddiff = DeepDiff(older, newer, ignore_order=True)
-            for action in ('added', 'removed'):
-                for key, annotation in ddiff.get(f'iterable_item_{action}', {}).items():
-                    if key.startswith('root['):  # Only care about root changes right now
-                        self._add_change(changes, action, annotation, type)
+            older_keys = {json.dumps(annotation, sort_keys=True) for annotation in older}
+            newer_keys = {json.dumps(annotation, sort_keys=True) for annotation in newer}
+
+            for annotation in newer:
+                if json.dumps(annotation, sort_keys=True) not in older_keys:
+                    self._add_change(changes, 'added', annotation, type)
+            for annotation in older:
+                if json.dumps(annotation, sort_keys=True) not in newer_keys:
+                    self._add_change(changes, 'removed', annotation, type)
 
         return changes.values()
 
@@ -1575,6 +1641,7 @@ bp.add_url_rule('objects/<string:hash_id>/content',
                 view_func=FileContentView.as_view('file_content'))
 bp.add_url_rule('objects/<string:hash_id>/content/pdf',
                 view_func=FileContentPdfView.as_view('file_content_pdf'))
+bp.add_url_rule('convert/pdf', view_func=PdfConversionView.as_view('pdf_conversion'))
 bp.add_url_rule('objects/<string:hash_id>/map-content',
                 view_func=MapContentView.as_view('map_content'))
 bp.add_url_rule('objects/<string:hash_id>/export', view_func=FileExportView.as_view('file_export'))

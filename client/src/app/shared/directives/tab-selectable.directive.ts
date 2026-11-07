@@ -6,6 +6,7 @@ import { Directive, EventEmitter, HostBinding, HostListener, Output } from '@ang
  */
 @Directive({
   selector: '[appTabSelectable]',
+  standalone: false,
 })
 export class TabSelectableDirective {
   @Output() appTabSelectable = new EventEmitter<void>();

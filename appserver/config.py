@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 
 class Config():
@@ -35,8 +36,9 @@ class Config():
     AZURE_BLOB_STORAGE_URL = os.environ.get('AZURE_BLOB_STORAGE_URL')
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (
-        POSTGRES_USER,
-        POSTGRES_PASSWORD,
+        # Escaped, or a character such as @ in a password would end it early
+        quote(POSTGRES_USER, safe=''),
+        quote(POSTGRES_PASSWORD, safe=''),
         POSTGRES_HOST,
         POSTGRES_PORT,
         POSTGRES_DB
@@ -46,6 +48,12 @@ class Config():
 
     WTF_CSRF_ENABLED = False
     SUPPORTED_LOCALES = ['en']
+
+    # Dev-only auto-login: when set, POST /auth/dev-auto-login issues a
+    # session for this user without credentials. Only set in
+    # docker/docker-compose.dev.yml - must stay unset in production,
+    # staging, qa and demo deployments.
+    DEV_AUTO_LOGIN_EMAIL = os.environ.get('DEV_AUTO_LOGIN_EMAIL')
 
 
 class Testing(Config):
