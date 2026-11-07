@@ -531,7 +531,9 @@ class FileAnnotationsGenerationView(FilesystemBaseView):
                     }
             elif file.mime_type == 'vnd.mycelium.document/enrichment-table':
                 try:
-                    enrichment = json.loads(file.content.raw_file_utf8)
+                    enrichment = json.loads(
+                        file.content.get_bytes(path=file.hash_id).decode('utf-8')
+                    )
                 except JSONDecodeError:
                     current_app.logger.error(
                         f'Cannot annotate file with invalid content: {file.hash_id}, {file.filename}')  # noqa
