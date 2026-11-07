@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators, ValidationErrors } from '@angular/forms';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -9,7 +9,9 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
 
 @Component({
   selector: 'app-sankey-view-confirm',
-  templateUrl: './view-create.component.html'
+  templateUrl: './view-create.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class SankeyViewCreateComponent extends CommonFormDialogComponent<ObjectEditDialogValue> {
   constructor(

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { from, Observable, Subscription } from 'rxjs';
 
@@ -11,6 +11,8 @@ import { FilesystemObject } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-annotation-history',
   templateUrl: './object-annotation-history.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectAnnotationHistoryComponent {
 

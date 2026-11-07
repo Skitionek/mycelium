@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormControl, Validators } from '@angular/forms';
 
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -13,6 +13,8 @@ import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
 @Component({
   selector: 'app-enrichment-table-edit-dialog',
   templateUrl: './enrichment-table-edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class EnrichmentTableEditDialogComponent extends ObjectEditDialogComponent {
   private _document: EnrichmentDocument;

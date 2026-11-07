@@ -1,7 +1,7 @@
-import { Component, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import visNetwork from 'vis-network';
+import * as visNetwork from 'vis-network';
 import { combineLatest, Subscription, Observable } from 'rxjs';
 
 import { FilesystemService } from 'app/file-browser/services/filesystem.service';
@@ -26,7 +26,9 @@ import { TraceNode } from './interfaces';
   providers: [
     TruncatePipe,
     WarningControllerService
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class TraceViewComponent implements OnDestroy, ModuleAwareComponent {
   loadTask: BackgroundTask<string, [FilesystemObject, GraphFile]>;
