@@ -31,7 +31,8 @@ descriptors, which mirror the matching entries in Mozg's own catalog
 | KEGG | KEGG REST | `kegg` | `/conv/genes`, `/link/pathway`, `/list/pathway` |
 | GO | EBI QuickGO | `rest` | `/annotation/stats`, `/annotation/search` |
 
-QuickGO has no Mozg catalog entry and is reached as a plain REST source. Mozg
+QuickGO is reached as a plain REST source rather than through Mozg's `quickgo`
+catalog entry, so rows keep QuickGO's own field names. Mozg
 does catalogue `api.geneontology.org` as `geneontology`, but that API has no
 organism-wide annotation search and exposes no gene symbols, both of which the
 enrichment table and the statistical-enrichment background need. QuickGO is

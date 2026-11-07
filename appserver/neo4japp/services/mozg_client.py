@@ -64,7 +64,8 @@ KEGG_CONNECTION: Dict[str, Any] = {
     'database': 'https://rest.kegg.jp',
 }
 
-# QuickGO has no Mozg catalog entry and is reached as a plain REST source.
+# QuickGO is reached as a plain REST source rather than through Mozg's
+# "quickgo" catalog entry, so rows keep QuickGO's own field names.
 # Mozg does catalogue api.geneontology.org as "geneontology", but that API
 # has no organism-wide annotation search and exposes no gene symbols, both of
 # which the enrichment table needs. QuickGO was also where graph-db sourced

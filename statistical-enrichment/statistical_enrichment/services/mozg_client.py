@@ -26,7 +26,8 @@ UNIPROT_CONNECTION: Dict[str, Any] = {
     "headers": {"Accept": "application/json"},
 }
 
-# QuickGO has no Mozg catalog entry and is reached as a plain REST source. It
+# QuickGO is reached as a plain REST source rather than through Mozg's
+# "quickgo" catalog entry, so rows keep QuickGO's own field names. It
 # is where graph-db sourced the GO annotations this service used to read out of
 # Neo4j.
 QUICKGO_CONNECTION: Dict[str, Any] = {
