@@ -10,7 +10,8 @@ export enum MatchPriority {
 
 export function prioritisedCompileFind(terms, options) {
   const standardMatcher = compileFind(terms, options);
-  const pattern = standardMatcher.termPatterns.join('|');
+  // Grouped, or the anchors would bind only to the first and last terms
+  const pattern = `(?:${standardMatcher.termPatterns.join('|')})`;
 
   const exact = new RegExp(`^${pattern}$`, 'i');
   const starts = new RegExp(`^${pattern}`, 'i');

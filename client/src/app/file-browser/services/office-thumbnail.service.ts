@@ -6,9 +6,9 @@ import { FilesystemObject } from '../models/filesystem-object';
 import { FilesystemService } from './filesystem.service';
 
 /**
- * Where the server bundles serverless-office-converter (see client/Dockerfile).
+ * Where angular.json serves serverless-office-converter (see OfficeConverterService).
  */
-export const OFFICE_CONVERTER_PATH = 'office-converter/';
+export const OFFICE_CONVERTER_PATH = 'assets/vendor/office-converter/';
 
 /**
  * Largest office file that is downloaded to render a thumbnail.
@@ -58,9 +58,9 @@ function whenIdle(): Promise<void> {
  * Optional thumbnails of office files, rendered in the browser by serverless-office-converter
  * (LibreOffice compiled to WebAssembly, running in a Web Worker).
  *
- * They are switched on by the server (OFFICE_THUMBNAILS=on, see client/nginx.conf), which
- * bundles the converter and makes the page cross-origin isolated. Otherwise nothing changes:
- * file type icons are shown and nothing is loaded.
+ * They are shown where the converter can run: the page is cross-origin isolated (see
+ * client/nginx.conf) and its engine is installed. Otherwise nothing changes: file type icons
+ * are shown and nothing is loaded.
  *
  * Thumbnails must never hold up the rest of the application:
  * - Nothing is loaded until a thumbnail that has not been rendered yet is on screen. Only then

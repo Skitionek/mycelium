@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { BehaviorSubject, throwError, zip, of, EMPTY } from 'rxjs';
 import { concatMap, mergeMap, catchError, delay } from 'rxjs/operators';
@@ -18,6 +18,8 @@ import { EnrichmentDocument } from 'app/enrichment/models/enrichment-document';
 @Component({
     selector: 'app-admin-settings-view',
     templateUrl: 'admin-settings.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class AdminSettingsComponent {
 
@@ -28,7 +30,7 @@ export class AdminSettingsComponent {
     constructor(
         private readonly progressDialog: ProgressDialog,
         private readonly errorHandler: ErrorHandler,
-        private readonly snackBar: MatLegacySnackBar,
+        private readonly snackBar: MatSnackBar,
         private storage: StorageService,
         private filesystemService: FilesystemService,
         private worksheetViewerService: EnrichmentTableService,

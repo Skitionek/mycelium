@@ -11,7 +11,13 @@ class ExcelExportService:
     def get_bytes(self, data: List[Dict[str, str]]) -> bytes:
         output = BytesIO()
         dataframe = DataFrame(data)
-        with ExcelWriter(output, engine='xlsxwriter') as writer:
+        # The rows carry text that users typed, so a value starting with '='
+        # must stay text rather than become a formula in the reader's spreadsheet
+        with ExcelWriter(
+            output,
+            engine='xlsxwriter',
+            engine_kwargs={'options': {'strings_to_formulas': False}},
+        ) as writer:
             dataframe.to_excel(writer, sheet_name='Sheet1', index=False)
 
             # adapt width of the columns

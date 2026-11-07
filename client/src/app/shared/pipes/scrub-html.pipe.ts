@@ -2,7 +2,8 @@ import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Pipe({
-  name: 'scrubHtml'
+  name: 'scrubHtml',
+  standalone: false
 })
 export class ScrubHtmlPipe implements PipeTransform {
   constructor(

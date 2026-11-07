@@ -1,4 +1,15 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation, EventEmitter, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  ViewChild,
+  ViewEncapsulation,
+  EventEmitter,
+  Output,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import * as d3 from 'd3';
 import * as cloud from 'd3.layout.cloud';
@@ -102,6 +113,8 @@ const createResizeObserver = (callback, container) => {
   templateUrl: './word-cloud.component.html',
   styleUrls: ['./word-cloud.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class WordCloudComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cloudWrapper', {static: false}) cloudWrapper!: ElementRef;
@@ -145,12 +158,12 @@ export class WordCloudComponent implements AfterViewInit, OnDestroy {
       .timeInterval(this.timeInterval)
       // ~~ faster substitute for Math.floor() for positive numbers
       // http://rocha.la/JavaScript-bitwise-operators-in-practice
-      // tslint:disable-next-line:no-bitwise
+      // eslint-disable-next-line no-bitwise
       // .rotate(d => d.rotate || (~~(Math.random() * 6) - 3) * 30);
       .rotate(_ => 0);
   }
 
-  @Input('data') set data(data) {
+  @Input() set data(data) {
     const count: any = {};
     if (Array.isArray(data) && data.every(d => typeof d === 'string' && (count[d] = (count[d] || 0) + 1))) {
       this._data = Object.entries(count).map(([text, frequency]) => ({text, frequency}));

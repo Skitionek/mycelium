@@ -55,26 +55,18 @@ The stack definition is divided into three Docker Compose files:
 
 You may combine them as you need and/or add your own `docker-compose.override.yml` to override any configuration. (this file will be ignored by Git)
 
-## Office file thumbnails (optional)
+## Office file thumbnails
 
-The frontend can show thumbnails of Word, Excel, PowerPoint and OpenDocument files, in the
+The frontend shows thumbnails of Word, Excel, PowerPoint and OpenDocument files, in the
 file tiles and the file preview panel. They are rendered in the visitor's browser by
 [serverless-office-converter](https://github.com/Skitionek/serverless-office-converter)
-(LibreOffice compiled to WebAssembly), so the server does no extra work. They are off by
-default. To switch them on, build the frontend image with the converter:
+(LibreOffice compiled to WebAssembly), the same engine that previews office documents, so the
+server does no extra work. The engine is installed with the client's dependencies and served
+under `/assets/vendor/office-converter/`.
 
-```shell
-docker build client --build-arg OFFICE_CONVERTER_REF=main -t mycelium-frontend
-```
-
-`OFFICE_CONVERTER_REF` is a branch, tag or commit of the converter. It adds about 45 MB to the
-image and turns on `OFFICE_THUMBNAILS`. Set `OFFICE_THUMBNAILS=off` on the container (with
-Helm, `frontend.extraEnv`) to switch thumbnails off again without rebuilding.
-
-With thumbnails on, nginx sends `Cross-Origin-Opener-Policy: same-origin` and
-`Cross-Origin-Embedder-Policy: credentialless`, because the converter needs a cross-origin
-isolated page. Windows Mycelium opens on other sites lose their link to it (`window.opener`).
-Browsers that don't support `credentialless` show file type icons as before.
+It needs a cross-origin isolated page, which nginx provides by sending
+`Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: credentialless`.
+Where the page is not isolated, or the engine is missing, file type icons are shown as before.
 
 Thumbnails are rendered so that they don't slow down the rest of Mycelium:
 

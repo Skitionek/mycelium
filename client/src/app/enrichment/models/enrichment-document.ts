@@ -4,6 +4,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { mapBlobToBuffer } from 'app/shared/utils/files';
 import { nullCoalesce } from 'app/shared/utils/types';
 import { TextAnnotationGenerationRequest } from 'app/file-browser/schema';
+import { isLocalHashId } from 'app/local-filesystem/local-ids';
 
 import { DomainWrapper, EnrichmentTableService, EnrichmentWrapper, NCBINode, NCBIWrapper, } from '../services/enrichment-table.service';
 
@@ -93,10 +94,14 @@ export class BaseEnrichmentDocument {
           try {
             return JSON.parse(s) as EnrichmentData;
           } catch (e) {
-            // Old enrichment table format was just a string for the data
+            // Old enrichment table format was just a string for the data:
+            // genes/taxId/organism/sources, where the organism name may hold slashes
             const split = s.split('/');
+            const [genes, taxId] = split;
+            const organism = split.slice(2, -1).join('/');
+            const sources = split[split.length - 1].split(',');
             return {
-              data: {genes: split[0], taxId: split[1], organism: split[2], sources: split[3].split(',')},
+              data: {genes, taxId, organism, sources},
             };
           }
         }),
@@ -122,7 +127,8 @@ export class BaseEnrichmentDocument {
     const importGenes = data.genes.split(',');
     const taxID = data.taxId;
     const organism = data.organism;
-    const domains = data.sources.filter(domain => domain.length);
+    // Sources are optional in the format; parseParameters defaults them
+    const domains = data.sources?.filter(domain => domain.length);
     return {
       importGenes, taxID, organism, domains, ...rest
     };
@@ -155,8 +161,9 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
 
   refreshData(): Observable<this> {
     this.result = null;
-    if (this.fileId === '') {
-      // file was just created
+    // The server re-annotates stored tables; local ones are annotated again once saved
+    if (this.fileId === '' || isLocalHashId(this.fileId)) {
+      // file was just created, or lives in a local folder
       return this.generateEnrichmentResults(this.domains, this.importGenes, this.taxID).pipe(
         map((result: EnrichmentResult) => {
           this.result = result;
@@ -183,6 +190,17 @@ export class EnrichmentDocument extends BaseEnrichmentDocument {
   }
 
   private annotate(): Observable<this> {
+    if (isLocalHashId(this.fileId)) {
+      // Annotated by the local indexer; shown as stored in the file if annotation is off
+      return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
+        map((annotated: EnrichmentParsedData) => {
+          if (annotated.result != null) {
+            this.result = annotated.result;
+          }
+          return this;
+        }),
+      );
+    }
     // retrieve annotated enrichment snippets if they exist
     return this.worksheetViewerService.getAnnotatedEnrichment(this.fileId).pipe(
       mergeMap((enriched: EnrichmentParsedData) => {

@@ -10,6 +10,8 @@ import shutil
 import subprocess
 import tempfile
 from io import BytesIO, BufferedIOBase
+from pathlib import Path
+from typing import Optional
 
 
 # Extension mapping for MIME types that LibreOffice can convert to PDF.
@@ -30,6 +32,19 @@ _MIME_TO_EXTENSION: dict[str, str] = {
     'text/html': '.html',
     'text/csv': '.csv',
 }
+
+
+def mime_type_for_filename(filename: str) -> Optional[str]:
+    """The convertible MIME type matching a file name's extension, if any."""
+    extension = os.path.splitext(filename or '')[1].lower()
+    for mime_type, mime_extension in _MIME_TO_EXTENSION.items():
+        if mime_extension == extension:
+            return mime_type
+    return None
+
+
+class ConversionFailedError(Exception):
+    """LibreOffice ran, but could not make a PDF of the document."""
 
 
 def _find_soffice() -> str:
@@ -56,6 +71,8 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
     :raises ValueError: If the MIME type is not supported.
     :raises subprocess.CalledProcessError: If LibreOffice exits with a non-zero
         status code.
+    :raises ConversionFailedError: If LibreOffice exits cleanly without a PDF, as
+        it does for a damaged document.
     """
     extension = _MIME_TO_EXTENSION.get(mime_type.lower())
     if extension is None:
@@ -69,27 +86,40 @@ def convert_to_pdf(content: bytes, mime_type: str) -> BufferedIOBase:
         with open(src_path, 'wb') as fh:
             fh.write(content)
 
-        # Run conversion; output PDF lands in the same temp directory.
-        subprocess.run(
-            [
-                soffice,
-                '--headless',
-                '--norestore',
-                '--nofirststartwizard',
-                '--convert-to', 'pdf',
-                '--outdir', tmpdir,
-                src_path,
-            ],
-            check=True,
-            timeout=120,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
+        # Run conversion; output PDF lands in the same temp directory. Each run gets
+        # its own profile: runs sharing one collide, and all but the first exit
+        # without converting anything.
+        profile = Path(tmpdir, 'profile').as_uri()
+        try:
+            subprocess.run(
+                [
+                    soffice,
+                    f'-env:UserInstallation={profile}',
+                    '--headless',
+                    '--norestore',
+                    '--nofirststartwizard',
+                    '--convert-to', 'pdf',
+                    '--outdir', tmpdir,
+                    src_path,
+                ],
+                check=True,
+                timeout=120,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+        except subprocess.CalledProcessError as exc:
+            # Some soffice versions exit non-zero for corrupt input instead of
+            # exiting cleanly and writing no file; treat either outcome as a
+            # failed conversion so callers only need to handle one error type.
+            raise ConversionFailedError(
+                f'LibreOffice exited with status {exc.returncode} '
+                f'while converting {src_path!r}.'
+            ) from exc
 
         # LibreOffice names the output file after the input stem.
         pdf_path = os.path.join(tmpdir, 'input.pdf')
         if not os.path.exists(pdf_path):
-            raise RuntimeError(
+            raise ConversionFailedError(
                 f'LibreOffice did not produce a PDF at {pdf_path!r}. '
                 'The conversion may have failed silently.'
             )

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { hexToRGBA } from 'app/shared/utils';
@@ -6,7 +6,9 @@ import { hexToRGBA } from 'app/shared/utils';
 @Component({
   selector: 'app-highlight-snippet',
   templateUrl: './highlight-snippet.component.html',
-  styleUrls: ['./highlight-snippet.component.scss']
+  styleUrls: ['./highlight-snippet.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class HighlightSnippetComponent implements OnChanges {
     @Input() snippet = '';

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -23,6 +24,8 @@ import { OfficeThumbnailService } from '../services/office-thumbnail.service';
  */
 @Component({
   selector: 'app-object-thumbnail',
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <img *ngIf="url; else fallback" [src]="url" alt="" class="object-thumbnail"
          [style.max-width]="width" [style.max-height]="'calc(1.25 * ' + width + ')'">

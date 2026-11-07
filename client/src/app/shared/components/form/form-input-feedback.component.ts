@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 import { getTopParent } from '../../utils/forms';
@@ -6,6 +6,8 @@ import { getTopParent } from '../../utils/forms';
 @Component({
   selector: 'app-form-input-feedback',
   templateUrl: './form-input-feedback.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class FormInputFeedbackComponent {
   @Input() control: AbstractControl | undefined;

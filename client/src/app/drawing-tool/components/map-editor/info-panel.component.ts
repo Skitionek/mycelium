@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { GraphEntityUpdate } from 'app/graph-viewer/actions/graph';
 import { EdgeDeletion } from 'app/graph-viewer/actions/edges';
@@ -13,6 +13,8 @@ import { InfoPanel } from '../../models/info-panel';
 @Component({
   selector: 'app-info-panel',
   templateUrl: './info-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class InfoPanelComponent {
   @Input() infoPanel: InfoPanel = new InfoPanel();

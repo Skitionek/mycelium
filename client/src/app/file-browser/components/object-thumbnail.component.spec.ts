@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Subject } from 'rxjs';
@@ -8,6 +8,8 @@ import { OfficeThumbnailService } from '../services/office-thumbnail.service';
 import { ObjectThumbnailComponent } from './object-thumbnail.component';
 
 @Component({
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [style.margin-top]="offscreen ? '5000px' : '0'">
       <app-object-thumbnail [object]="object" width="3rem">

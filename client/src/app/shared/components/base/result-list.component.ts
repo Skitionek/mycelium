@@ -10,7 +10,7 @@ import { WorkspaceManager } from '../../workspace-manager';
 import { ResultList, ResultQuery } from '../../schemas/common';
 
 @Directive()
-// tslint:disable-next-line:directive-class-suffix
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export abstract class ResultListComponent<O, R, RL extends ResultList<R> = ResultList<R>> implements OnInit, OnDestroy {
   public loadTask: BackgroundTask<O, RL> = new BackgroundTask(params => this.getResults(params));
 

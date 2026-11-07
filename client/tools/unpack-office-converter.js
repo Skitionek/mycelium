@@ -1,41 +1,65 @@
 #!/usr/bin/env node
 /**
- * Prepares the LibreOffice runtime of serverless-office-converter to be served by nginx.
+ * Unpacks the engine of the in-browser LibreOffice converter that previews office documents
+ * as PDFs (serverless-office-converter, installed from GitHub; see package.json). Run after
+ * every install.
  *
- * The package ships lo/soffice.* compressed and split into parts (described by
- * lo/manifest.json); its own service worker reassembles them in the browser. Mycelium
- * serves them directly instead: each file is reassembled here and stored as
- * lo/<name>.gz, which nginx sends as is (gzip_static).
- *
- * Usage: node unpack-office-converter.js <path to office-converter/lo>
+ * The package ships its engine as xz-compressed parts, meant to be unpacked in the browser
+ * by its service worker. Mycelium sends the headers the engine needs itself (see nginx.conf),
+ * so the parts are decompressed here, with the package's own decoder, into the plain files
+ * the engine loads. angular.json serves them under /assets/vendor/office-converter.
  */
 
-const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const zlib = require('zlib');
+const {Readable} = require('stream');
+const {pipeline} = require('stream/promises');
+const vm = require('vm');
 
-const loDir = process.argv[2];
-if (!loDir) {
-  console.error('Usage: unpack-office-converter.js <path to office-converter/lo>');
-  process.exit(2);
+const packageDir = path.join(__dirname, '..', 'node_modules', 'serverless-office-converter',
+  'web', 'office-converter');
+const runtimeDir = path.join(packageDir, 'lo');
+
+/** The decoder is a UMD script, but its package is an ES module one: run it as CommonJS. */
+function loadDecoder() {
+  const file = path.join(packageDir, 'vendor', 'xz-decompress.min.js');
+  const module = {exports: {}};
+  vm.runInThisContext(`(function (module, exports, require) {${fs.readFileSync(file, 'utf8')}\n})`,
+    {filename: file})(module, module.exports, require);
+  return module.exports;
 }
 
-const manifest = JSON.parse(fs.readFileSync(path.join(loDir, 'manifest.json'), 'utf8'));
-
-for (const [name, entry] of Object.entries(manifest.files)) {
-  const partPaths = entry.parts.map(part => path.join(loDir, part));
-  const packed = Buffer.concat(partPaths.map(partPath => fs.readFileSync(partPath)));
-  let gzipped;
-  if (entry.encoding === 'gzip') {
-    gzipped = packed;
-  } else if (entry.encoding === 'xz') {
-    const raw = execFileSync('xz', ['--decompress', '--stdout'], {input: packed, maxBuffer: 2 * entry.size});
-    gzipped = zlib.gzipSync(raw, {level: 9});
-  } else {
-    throw new Error(`${name}: unknown encoding ${entry.encoding}`);
+async function unpack(name, entry) {
+  const target = path.join(runtimeDir, name);
+  if (fs.existsSync(target) && fs.statSync(target).size === entry.size) {
+    return;
   }
-  fs.writeFileSync(path.join(loDir, name + '.gz'), gzipped);
-  partPaths.forEach(partPath => fs.unlinkSync(partPath));
-  console.log(`${name}: ${(entry.size / 1e6).toFixed(1)} MB, ${(gzipped.length / 1e6).toFixed(1)} MB gzipped`);
+  if (entry.encoding !== 'xz') {
+    throw new Error(`${name}: unsupported encoding ${entry.encoding}`);
+  }
+  const {XzReadableStream} = loadDecoder();
+  const parts = Readable.toWeb(Readable.from((async function* () {
+    for (const part of entry.parts) {
+      yield* fs.createReadStream(path.join(runtimeDir, part));
+    }
+  })()));
+  const partial = target + '.partial';
+  await pipeline(Readable.fromWeb(new XzReadableStream(parts)), fs.createWriteStream(partial));
+  const size = fs.statSync(partial).size;
+  if (size !== entry.size) {
+    throw new Error(`${name}: expected ${entry.size} bytes, got ${size}`);
+  }
+  fs.renameSync(partial, target);
 }
+
+async function main() {
+  const manifest = JSON.parse(fs.readFileSync(path.join(runtimeDir, 'manifest.json'), 'utf8'));
+  for (const [name, entry] of Object.entries(manifest.files)) {
+    await unpack(name, entry);
+  }
+}
+
+main().catch(e => {
+  // Without the engine, the client converts office documents on the server instead
+  console.warn(`Could not unpack the office converter: ${e.message}`);
+});

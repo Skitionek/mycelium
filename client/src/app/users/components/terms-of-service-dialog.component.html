@@ -1,9 +1,9 @@
-<form (ngSubmit)="submit()">
+<form class="d-flex flex-column overflow-hidden" (ngSubmit)="submit()">
   <app-modal-header (cancel)="cancel()">
     Terms of Service
   </app-modal-header>
 
-  <app-modal-body>
+  <app-modal-body class="d-flex flex-column overflow-hidden">
     <app-terms-of-service-text></app-terms-of-service-text>
   </app-modal-body>
 

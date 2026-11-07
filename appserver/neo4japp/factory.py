@@ -95,7 +95,7 @@ def load_mixed_form_json(request, schema):
     return data
 
 
-def filter_to_sentry(event, hint):
+def filter_to_sentry(event, _hint):
     """filter_to_sentry is used for filtering what
     to return or manipulating the exception before sending
     it off to Sentry (sentry.io)

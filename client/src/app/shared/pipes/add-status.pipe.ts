@@ -5,6 +5,7 @@ import { catchError, map, startWith } from 'rxjs/operators';
 
 @Pipe({
   name: 'addStatus',
+  standalone: false,
 })
 export class AddStatusPipe implements PipeTransform {
   transform<T>(observable: Observable<T>): Observable<PipeStatus<T>> {

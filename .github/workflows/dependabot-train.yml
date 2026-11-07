@@ -36,7 +36,7 @@ name: Dependabot train
 # instruction. Those are listed in the log and skipped -- commenting at them
 # only collects refusals.
 #   * DIRTY -- bumps in one ecosystem edit the same lockfile
-#     (a yarn.lock, a requirements.txt, a uv.lock), so one landing can
+#     (a yarn.lock, a uv.lock), so one landing can
 #     conflict the rest. Dependabot re-resolves those, but only on its next
 #     scheduled run, which is weekly for most ecosystems here.
 #

@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, ComponentRef, Injectable, Injector } from '@angular/core';
+import { ComponentRef, createComponent, EnvironmentInjector, Injectable, Injector } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -20,7 +20,7 @@ export class DefaultObjectTypeProvider extends AbstractObjectTypeProvider {
               protected readonly filesystemService: FilesystemService,
               protected readonly officeThumbnailService: OfficeThumbnailService,
               protected readonly injector: Injector,
-              protected readonly componentFactoryResolver: ComponentFactoryResolver) {
+              protected readonly environmentInjector: EnvironmentInjector) {
     super(abstractObjectTypeProviderHelper);
   }
 
@@ -36,8 +36,10 @@ export class DefaultObjectTypeProvider extends AbstractObjectTypeProvider {
     if (!this.officeThumbnailService.handles(object)) {
       return of(null);
     }
-    const componentRef = this.componentFactoryResolver.resolveComponentFactory(ObjectThumbnailComponent)
-      .create(this.injector);
+    const componentRef = createComponent(ObjectThumbnailComponent, {
+      environmentInjector: this.environmentInjector,
+      elementInjector: this.injector,
+    });
     componentRef.location.nativeElement.classList.add('d-flex', 'justify-content-center', 'p-4');
     componentRef.setInput('width', '12rem');
     // The file the user is looking at goes before the thumbnails of file lists.

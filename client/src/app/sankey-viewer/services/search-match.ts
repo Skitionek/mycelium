@@ -17,7 +17,7 @@ import { omit, slice, transform, isObject, flatMapDeep } from 'lodash-es';
      "window is undefined"
      "alert is undefined"
 */
-import { ExtendedWeakMap, LazyLoadedMap } from 'app/shared/utils/types';
+import { LazyLoadedMap, LazyLoadedWeakMap } from 'app/shared/utils/types';
 import { prioritisedCompileFind, MatchPriority } from 'app/shared/utils/find/prioritised-find';
 import { SankeyTrace, SankeyLink, SankeyNode } from 'app/shared-sankey/pure_interfaces';
 
@@ -72,9 +72,11 @@ export class SankeySearch {
     'edges'
   ];
 
-  private matchedTraces: ExtendedWeakMap<SankeyTrace & any, Match[]>;
-  private matchedNodes: LazyLoadedMap<SankeyNode['_id'], Generator<Match>>;
-  private matchedLink: LazyLoadedMap<SankeyLink['_id'], Generator<Match>>;
+  // Matches are cached as arrays: a generator is spent after its first reader, and
+  // the same node, link or trace is reached many times over
+  private matchedTraces: LazyLoadedWeakMap<SankeyTrace & any, Match[]>;
+  private matchedNodes: LazyLoadedMap<SankeyNode['_id'], Match[]>;
+  private matchedLink: LazyLoadedMap<SankeyLink['_id'], Match[]>;
   private nodeById: Map<string, SankeyNode>;
 
   _traceNetworksMapping;
@@ -82,7 +84,7 @@ export class SankeySearch {
   traceNetwork = new WeakMap();
 
   cleanCache() {
-    this.matchedTraces = new ExtendedWeakMap();
+    this.matchedTraces = new LazyLoadedWeakMap();
     this.matchedLink = new LazyLoadedMap();
     this.matchedNodes = new LazyLoadedMap();
   }
@@ -146,23 +148,25 @@ export class SankeySearch {
     }
   }
 
-  matchNode(node: SankeyNode, _context): Generator<Match> {
+  matchNode(node: SankeyNode, _context): Match[] {
     return this.matchedNodes.getSet(
       node._id,
-      () => this.matchObject(
+      () => [...this.matchObject(
         omit(node, this.nodePropertiesContainingEntities)
-      )
+      )]
     );
   }
 
   * matchLink(link: (SankeyLink & any), {layers}): Generator<Match> {
     const matches = this.matchedLink.getSet(
       link._id,
-      () => this.matchObject(
+      () => [...this.matchObject(
         omit(link, this.linkPropertiesContainingEntities)
-      )
+      )]
     );
-    yield* matches;
+    for (const match of matches) {
+      yield match;
+    }
     const context = {
       layers: {
         ...layers,
@@ -172,10 +176,7 @@ export class SankeySearch {
     if (!layers[LAYERS.link]) {
       const {_trace, _traces} = link;
       for (const trace of (_traces || _trace && [_trace] || [])) {
-        const matchedTrace = this.matchedTraces.getSet(trace, []);
-        for (const mt of this.matchTrace(trace, context)) {
-          matchedTrace.push(mt);
-        }
+        const matchedTrace = this.matchedTraces.getSet(trace, () => [...this.matchTrace(trace, context)]);
         for (const mm of matchedTrace) {
           yield {
             term: mm.term,
