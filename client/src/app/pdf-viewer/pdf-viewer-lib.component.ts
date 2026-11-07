@@ -10,7 +10,6 @@ import {
   Output,
   ViewChild,
   ViewEncapsulation,
-  ComponentFactoryResolver,
   ApplicationRef,
   Injector,
 } from '@angular/core';
@@ -198,7 +197,6 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   constructor(
     protected readonly elementRef: ElementRef,
     protected readonly modalService: NgbModal,
-    private cfr: ComponentFactoryResolver,
     private appRef: ApplicationRef,
     private injector: Injector,
     protected readonly zone: NgZone,
@@ -1202,7 +1200,6 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   createTextLayerPortalOutlet({pageNumber, div}: TextLayerBuilder) {
     const portalOutlet = new DomPortalOutlet(
       div,
-      this.cfr,
       this.appRef,
       this.injector
     );
