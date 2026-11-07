@@ -10,6 +10,7 @@ import { AnnotationType } from 'app/shared/constants';
 @Component({
   selector: 'app-annotation-exclude-dialog',
   templateUrl: './annotation-exclude-dialog.component.html',
+  standalone: false,
 })
 export class AnnotationExcludeDialogComponent extends CommonFormDialogComponent {
   @Input() text: string;

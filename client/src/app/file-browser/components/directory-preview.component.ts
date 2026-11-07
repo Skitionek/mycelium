@@ -7,6 +7,7 @@ import { FilesystemObject } from '../models/filesystem-object';
 @Component({
   selector: 'app-directory-preview',
   templateUrl: './directory-preview.component.html',
+  standalone: false,
 })
 export class DirectoryPreviewComponent {
 

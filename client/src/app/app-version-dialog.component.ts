@@ -9,6 +9,7 @@ import { BuildInfo } from 'app/interfaces';
 @Component({
   selector: 'app-version-dialog',
   templateUrl: './app-version-dialog.component.html',
+  standalone: false,
 })
 export class AppVersionDialogComponent {
 

@@ -17,6 +17,7 @@ import { ProjectImpl } from '../../models/filesystem-object';
 @Component({
   selector: 'app-browser-project-list',
   templateUrl: './browser-project-list.component.html',
+  standalone: false,
 })
 export class BrowserProjectListComponent implements OnInit, OnDestroy {
   protected readonly subscriptions = new Subscription();

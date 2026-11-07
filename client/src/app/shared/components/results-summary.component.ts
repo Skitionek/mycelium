@@ -3,6 +3,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'app-results-summary',
   templateUrl: './results-summary.component.html',
+  standalone: false,
 })
 export class ResultsSummaryComponent {
   @Input() page: number; // pages should be 1-indexed

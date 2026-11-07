@@ -14,6 +14,7 @@ import { AppUser, UserUpdateRequest } from 'app/interfaces';
 @Component({
   selector: 'app-user-update-dialog',
   templateUrl: './user-update-dialog.component.html',
+  standalone: false,
 })
 export class UserUpdateDialogComponent extends CommonFormDialogComponent {
   @Input() isSelf: boolean;

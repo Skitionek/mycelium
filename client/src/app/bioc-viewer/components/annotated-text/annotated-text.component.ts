@@ -9,6 +9,7 @@ import { Annotation } from '../bioc.format';
   templateUrl: './annotated-text.component.html',
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['./annotated-text.component.scss'],
+  standalone: false,
 })
 export class AnnotatedTextComponent implements OnChanges, OnDestroy {
   @Input() text;

@@ -26,6 +26,7 @@ import { ViewService } from 'app/file-browser/services/view.service';
   templateUrl: './workspace.component.html',
   styleUrls: ['./workspace.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class WorkspaceComponent implements OnInit, OnChanges, AfterContentChecked, AfterViewChecked {
   @ViewChild('container', {static: true, read: ElementRef}) container: ElementRef;

@@ -14,6 +14,7 @@ let nextId = 0;
 @Component({
   selector: 'app-select',
   templateUrl: './select.component.html',
+  standalone: false,
 })
 export class SelectComponent<T = any> {
   componentId = nextId++;

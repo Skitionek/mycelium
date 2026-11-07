@@ -17,6 +17,7 @@ interface SampleNode {
       <ng-template #leaf let-node>{{ node.label }}</ng-template>
       <ng-template #nested let-node>{{ node.label }}</ng-template>
     </app-tree-view>`,
+  standalone: false,
 })
 class HostComponent {
   dataSource: SampleNode[] = [

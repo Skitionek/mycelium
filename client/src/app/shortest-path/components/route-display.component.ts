@@ -13,7 +13,8 @@ export enum DisplayType {
 @Component({
   selector: 'app-route-display',
   templateUrl: './route-display.component.html',
-  styleUrls: ['./route-display.component.scss']
+  styleUrls: ['./route-display.component.scss'],
+  standalone: false
 })
 export class RouteDisplayComponent {
   @Input() set displayType(displayType: DisplayType) {

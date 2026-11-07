@@ -13,6 +13,7 @@ import { FilesystemObject } from '../../models/filesystem-object';
 @Component({
   selector: 'app-object-annotation-history-dialog',
   templateUrl: './file-annotation-history-dialog.component.html',
+  standalone: false,
 })
 export class FileAnnotationHistoryDialogComponent extends CommonDialogComponent {
 

@@ -16,6 +16,7 @@ import { FilesystemObject } from '../../models/filesystem-object';
 @Component({
   selector: 'app-object-export-dialog',
   templateUrl: './object-export-dialog.component.html',
+  standalone: false,
 })
 export class ObjectExportDialogComponent extends CommonFormDialogComponent {
   @Input() title = 'Export';

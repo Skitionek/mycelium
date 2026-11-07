@@ -24,6 +24,7 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-object-list',
   templateUrl: './object-list.component.html',
+  standalone: false,
 })
 export class ObjectListComponent {
   id = uniqueId('FileListComponent-');

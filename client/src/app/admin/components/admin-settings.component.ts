@@ -18,6 +18,7 @@ import { EnrichmentDocument } from 'app/enrichment/models/enrichment-document';
 @Component({
     selector: 'app-admin-settings-view',
     templateUrl: 'admin-settings.component.html',
+    standalone: false,
 })
 export class AdminSettingsComponent {
 

@@ -8,6 +8,7 @@ import { BuildInfo } from 'app/interfaces';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
+  standalone: false,
 })
 export class DashboardComponent {
   readonly buildInfo$: Observable<BuildInfo>;

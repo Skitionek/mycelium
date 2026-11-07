@@ -9,6 +9,7 @@ import { SankeyPathReport } from 'app/shared-sankey/interfaces';
   selector: 'app-sankey-path-report',
   templateUrl: './path-report.component.html',
   styleUrls: ['./path-report.component.scss'],
+  standalone: false,
 })
 export class PathReportComponent {
   pathReport: SankeyPathReport;

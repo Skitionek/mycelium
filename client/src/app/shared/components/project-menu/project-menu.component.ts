@@ -6,6 +6,7 @@ import { ProjectActions } from 'app/file-browser/services/project-actions';
 @Component({
   selector: 'app-project-menu',
   templateUrl: './project-menu.component.html',
+  standalone: false,
 })
 export class ProjectMenuComponent {
 

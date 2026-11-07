@@ -3,7 +3,8 @@ import { Component, OnInit, Input } from '@angular/core';
 @Component({
   selector: 'app-bioc-table-view',
   templateUrl: './bioc-table-view.component.html',
-  styleUrls: ['./bioc-table-view.component.scss']
+  styleUrls: ['./bioc-table-view.component.scss'],
+  standalone: false
 })
 export class BiocTableViewComponent implements OnInit {
   @Input() passage;

@@ -35,6 +35,7 @@ import { VisualizationService } from '../../services/visualization.service';
 @Component({
   selector: 'app-visualization',
   templateUrl: './visualization.component.html',
+  standalone: false,
 })
 export class VisualizationComponent implements OnInit, OnDestroy {
 

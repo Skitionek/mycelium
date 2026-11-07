@@ -9,6 +9,7 @@ import { DirectoryObject } from 'app/interfaces/projects.interface';
 @Component({
   selector: 'app-deletion-result-dialog',
   templateUrl: './object-deletion-result-dialog.component.html',
+  standalone: false,
 })
 export class ObjectDeletionResultDialogComponent extends CommonDialogComponent {
   @Input() failed: { object: DirectoryObject, message: string }[];

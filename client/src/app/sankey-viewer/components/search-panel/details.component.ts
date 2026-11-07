@@ -10,7 +10,8 @@ import { SankeyControllerService } from '../../services/sankey-controller.servic
 
 @Component({
   selector: 'app-sankey-search',
-  template: ''
+  template: '',
+  standalone: false
 })
 export class SankeySearchComponent {
   constructor(

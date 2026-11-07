@@ -6,7 +6,8 @@ import { hexToRGBA } from 'app/shared/utils';
 @Component({
   selector: 'app-highlight-snippet',
   templateUrl: './highlight-snippet.component.html',
-  styleUrls: ['./highlight-snippet.component.scss']
+  styleUrls: ['./highlight-snippet.component.scss'],
+  standalone: false
 })
 export class HighlightSnippetComponent implements OnChanges {
     @Input() snippet = '';

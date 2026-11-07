@@ -14,6 +14,7 @@ import { getGraphQueryParams } from '../utils/search';
   selector: 'app-search-record-node',
   templateUrl: 'search-record-node.component.html',
   styleUrls: ['./search-record-node.component.scss'],
+  standalone: false,
 })
 export class SearchRecordNodeComponent {
 

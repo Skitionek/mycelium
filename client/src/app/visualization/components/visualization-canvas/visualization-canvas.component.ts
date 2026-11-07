@@ -60,6 +60,7 @@ import { VisualizationService } from 'app/visualization/services/visualization.s
     templateUrl: './visualization-canvas.component.html',
     styleUrls: ['./visualization-canvas.component.scss'],
     providers: [ContextMenuControlService],
+    standalone: false,
 })
 export class VisualizationCanvasComponent implements OnInit, AfterViewInit {
     @Output() expandNode = new EventEmitter<ExpandNodeRequest>();

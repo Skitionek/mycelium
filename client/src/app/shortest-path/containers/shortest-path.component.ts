@@ -11,7 +11,8 @@ import { ShortestPathService } from '../services/shortest-path.service';
 @Component({
   selector: 'app-shortest-path',
   templateUrl: './shortest-path.component.html',
-  styleUrls: ['./shortest-path.component.scss']
+  styleUrls: ['./shortest-path.component.scss'],
+  standalone: false
 })
 export class ShortestPathComponent implements OnDestroy {
 

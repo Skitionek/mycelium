@@ -6,6 +6,7 @@ import { getTopParent } from '../../utils/forms';
 @Component({
   selector: 'app-form-input-feedback',
   templateUrl: './form-input-feedback.component.html',
+  standalone: false,
 })
 export class FormInputFeedbackComponent {
   @Input() control: AbstractControl | undefined;

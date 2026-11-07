@@ -13,6 +13,7 @@ import { ProgressDialog } from 'app/shared/services/progress-dialog.service';
 @Component({
   selector: 'app-enrichment-table-edit-dialog',
   templateUrl: './enrichment-table-edit-dialog.component.html',
+  standalone: false,
 })
 export class EnrichmentTableEditDialogComponent extends ObjectEditDialogComponent {
   private _document: EnrichmentDocument;

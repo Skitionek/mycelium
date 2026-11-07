@@ -11,7 +11,8 @@ interface TreeNode {
 
 @Component({
   selector: 'app-object-explorer',
-  templateUrl: './object-explorer.component.html'
+  templateUrl: './object-explorer.component.html',
+  standalone: false
 })
 export class ObjectExplorerComponent {
   _dataSource;

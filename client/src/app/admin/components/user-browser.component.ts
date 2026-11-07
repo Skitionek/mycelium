@@ -25,6 +25,7 @@ import { MissingRolesDialogComponent } from './missing-roles-dialog.component';
 @Component({
   selector: 'app-users-view',
   templateUrl: 'user-browser.component.html',
+  standalone: false,
 })
 export class UserBrowserComponent implements OnInit, OnDestroy {
   currentUser: AppUser;

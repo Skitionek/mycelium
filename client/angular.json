@@ -139,7 +139,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "client:build",
+            "buildTarget": "client:build",
             "headers": {
               "Cross-Origin-Opener-Policy": "same-origin",
               "Cross-Origin-Embedder-Policy": "credentialless"
@@ -147,23 +147,23 @@
           },
           "configurations": {
             "production": {
-              "browserTarget": "client:build:production"
+              "buildTarget": "client:build:production"
             },
             "staging": {
-              "browserTarget": "client:build:production,staging"
+              "buildTarget": "client:build:production,staging"
             },
             "qa": {
-              "browserTarget": "client:build:production,qa"
+              "buildTarget": "client:build:production,qa"
             },
             "demo": {
-              "browserTarget": "client:build:production,demo"
+              "buildTarget": "client:build:production,demo"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "client:build"
+            "buildTarget": "client:build"
           }
         },
         "test": {

@@ -30,6 +30,7 @@ type ProteinStructureFormat = 'pdb' | 'mmcif';
   templateUrl: './molstar-view.component.html',
   styleUrls: ['./molstar-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class MolstarViewComponent implements AfterViewInit, OnDestroy, ModuleAwareComponent {
   private static scriptLoadPromise: Promise<void> | null = null;

@@ -13,6 +13,7 @@ import { ProjectCreateRequest } from '../../schema';
 @Component({
   selector: 'app-project-edit-dialog',
   templateUrl: './project-edit-dialog.component.html',
+  standalone: false,
 })
 export class ProjectEditDialogComponent extends CommonFormDialogComponent<ProjectEditDialogValue> {
   @Input() title = 'Edit Project';

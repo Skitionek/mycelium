@@ -48,7 +48,8 @@ interface AnnotationData {
   selector: 'app-enrichment-table-viewer',
   templateUrl: './enrichment-table-viewer.component.html',
   styleUrls: ['./enrichment-table-viewer.component.scss'],
-  providers: [EnrichmentService]
+  providers: [EnrichmentService],
+  standalone: false
 })
 export class EnrichmentTableViewerComponent implements OnInit, OnDestroy, AfterViewInit {
 

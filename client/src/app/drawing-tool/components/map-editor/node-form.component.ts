@@ -18,6 +18,7 @@ import { InfoPanel } from '../../models/info-panel';
   selector: 'app-node-form',
   styleUrls: ['./node-form.component.scss'],
   templateUrl: './node-form.component.html',
+  standalone: false,
 })
 export class NodeFormComponent implements AfterViewInit {
   @ViewChild('displayName', {static: false}) displayNameRef: ElementRef;

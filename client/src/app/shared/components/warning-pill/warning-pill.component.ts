@@ -6,7 +6,8 @@ import { WarningControllerService } from 'app/shared/services/warning-controller
 
 @Component({
   selector: 'app-warning-pill',
-  templateUrl: './warning-pill.component.html'
+  templateUrl: './warning-pill.component.html',
+  standalone: false
 })
 export class WarningPillComponent {
   constructor(

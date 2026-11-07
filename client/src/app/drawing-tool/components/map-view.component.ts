@@ -30,6 +30,7 @@ import { MapImageProviderService } from '../services/map-image-provider.service'
   styleUrls: [
     './map.component.scss',
   ],
+  standalone: false,
 })
 export class MapViewComponent<ExtraResult = void> extends MapComponent<ExtraResult>
   implements OnDestroy, AfterViewInit, ModuleAwareComponent {

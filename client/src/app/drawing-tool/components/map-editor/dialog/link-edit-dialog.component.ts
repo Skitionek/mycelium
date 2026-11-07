@@ -12,6 +12,7 @@ import { toValidLink } from 'app/shared/utils/browser';
 @Component({
   selector: 'app-link-edit-dialog',
   templateUrl: './link-edit-dialog.component.html',
+  standalone: false,
 })
 export class LinkEditDialogComponent extends CommonFormDialogComponent<Source | Hyperlink> {
 

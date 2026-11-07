@@ -10,6 +10,7 @@ import { MessageArguments, MessageDialog } from '../../services/message-dialog.s
 @Component({
   selector: 'app-share-dialog',
   templateUrl: './copy-link-dialog.component.html',
+  standalone: false,
 })
 export class CopyLinkDialogComponent {
 

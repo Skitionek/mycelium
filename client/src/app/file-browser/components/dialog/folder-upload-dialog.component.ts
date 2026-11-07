@@ -10,6 +10,7 @@ import { FilesystemObject } from '../../models/filesystem-object';
 @Component({
   selector: 'app-folder-upload-dialog',
   templateUrl: './folder-upload-dialog.component.html',
+  standalone: false,
 })
 export class FolderUploadDialogComponent extends CommonFormDialogComponent<FolderUploadDialogValue> {
   @ViewChild('folderInput', {static: false})

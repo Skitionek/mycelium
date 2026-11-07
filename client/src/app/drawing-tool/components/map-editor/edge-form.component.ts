@@ -15,6 +15,7 @@ import { InfoPanel } from '../../models/info-panel';
 @Component({
   selector: 'app-edge-form',
   templateUrl: './edge-form.component.html',
+  standalone: false,
 })
 export class EdgeFormComponent implements AfterViewInit {
 

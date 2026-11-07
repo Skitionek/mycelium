@@ -48,6 +48,7 @@ import {
   selector: 'app-content-search',
   templateUrl: './content-search.component.html',
   styleUrls: ['./content-search.component.scss'],
+  standalone: false,
 })
 export class ContentSearchComponent extends PaginatedResultListComponent<ContentSearchParameters,
   RankedItem<FilesystemObject>> implements OnInit, OnDestroy {

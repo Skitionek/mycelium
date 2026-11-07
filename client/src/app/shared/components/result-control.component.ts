@@ -5,6 +5,7 @@ import { hexToRGBA } from '../utils';
 @Component({
   selector: 'app-result-control',
   templateUrl: './result-control.component.html',
+  standalone: false,
 })
 export class ResultControlComponent {
 

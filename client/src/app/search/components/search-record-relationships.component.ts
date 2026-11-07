@@ -15,6 +15,7 @@ import { GraphSearchParameters } from '../graph-search';
   selector: 'app-search-record-relationships',
   templateUrl: './search-record-relationships.component.html',
   styleUrls: ['./search-record-relationships.component.scss'],
+  standalone: false,
 })
 export class SearchRecordRelationshipsComponent {
 
