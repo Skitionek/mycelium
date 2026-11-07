@@ -17,10 +17,6 @@
       "src/typings",
       "node_modules/@types"
     ],
-    "lib": [
-      "es2020",
-      "dom"
-    ],
     "paths": {
       "route-with-dynamic-outlets": ["../node_modules/route-with-dynamic-outlets/lib/src"]
     }
