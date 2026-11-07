@@ -14,12 +14,11 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 
-import { PDF_WORKER_PATH } from 'app/shared/constants';
-
 import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+import { PDF_WORKER_PATH } from 'app/shared/constants';
 import { PDFProgressData, PDFViewerParams, PDFSource } from './interfaces';
 import { createEventBus } from '../utils/event-bus-utils';
 import { FindState, RenderTextMode } from '../utils/constants';
