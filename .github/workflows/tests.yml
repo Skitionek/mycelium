@@ -171,6 +171,30 @@ jobs:
         env:
           NODE_OPTIONS: --openssl-legacy-provider
 
+  client-lint:
+    name: Client Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: client
+        run: yarn install --frozen-lockfile
+
+      # Fails on any error (MegaLinter leaves client/ to this job, see .mega-linter.yml)
+      - name: Run eslint
+        working-directory: client
+        run: yarn lint
+
   client-storybook:
     name: Client Storybook Snapshots
     runs-on: ubuntu-latest

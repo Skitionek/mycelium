@@ -146,7 +146,7 @@ export class AdminSettingsComponent {
                 }
               } else if (event.type === HttpEventType.Response) {
                 progressDialogRef.close();
-                this.snackBar.open(`User manual uploaded`, 'Close', {
+                this.snackBar.open('User manual uploaded', 'Close', {
                   duration: 5000,
                 });
               }
