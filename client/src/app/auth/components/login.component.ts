@@ -1,7 +1,7 @@
 import { Platform } from '@angular/cdk/platform';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { Store } from '@ngrx/store';
@@ -23,6 +23,8 @@ import { ResetPasswordDialogComponent } from './reset-password-dialog.component'
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LoginComponent {
   readonly form = new FormGroup({
@@ -38,7 +40,7 @@ export class LoginComponent {
     private readonly platform: Platform,
     private readonly modalService: NgbModal,
     private readonly progressDialog: ProgressDialog,
-    private readonly snackBar: MatLegacySnackBar,
+    private readonly snackBar: MatSnackBar,
     private readonly errorHandler: ErrorHandler,
     private readonly accountService: AccountService
   ) {

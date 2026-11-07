@@ -17,7 +17,8 @@ function formatDate(dateStr) {
 }
 
 @Pipe({
-  name: 'friendlyDateStr'
+  name: 'friendlyDateStr',
+  standalone: false
 })
 export class FriendlyDateStrPipe implements PipeTransform {
 

@@ -1,28 +1,34 @@
-<label class="w-100 text-start m-0 checkpoint" ngbButtonLabel>
-    <input [(ngModel)]="state.colorLinkByType" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Color link by type
+<div class="form-check checkpoint">
+    <label class="form-check-label w-100 text-start m-0">
+        <input [(ngModel)]="state.colorLinkByType" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Color link by type
+    </label>
     <ul class="color-link-legend">
         <li *ngFor="let typemap of options.colorLinkTypes | keyvalue"
             [attr.data-type]="typemap.key.toLowerCase()">{{typemap.key}}</li>
     </ul>
-</label>
-<label class="w-100 text-start m-0 checkpoint" ngbButtonLabel>
-    <input [(ngModel)]="state.highlightCircular" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Highlight circular
-</label>
+</div>
+<div class="form-check checkpoint">
+    <label class="form-check-label w-100 text-start m-0">
+        <input [(ngModel)]="state.highlightCircular" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Highlight circular
+    </label>
+</div>
 <div class="dropdown-divider"></div>
-<label class="w-100 text-start m-0 checkpoint" ngbButtonLabel>
-    <input [(ngModel)]="state.normalizeLinks" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Normalize links
-</label>
+<div class="form-check checkpoint">
+    <label class="form-check-label w-100 text-start m-0">
+        <input [(ngModel)]="state.normalizeLinks" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Normalize links
+    </label>
+</div>
 <div class="dropdown-divider"></div>
-<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
+<div class="w-100 text-start m-0 scrollbar-with-value">
     <div class="d-flex align-items-center mx-0">
         <label for="font-size" class="my-0 me-2" ngbTooltip="Font size" container="body">
             Font Size
@@ -37,80 +43,110 @@
         ></app-percent-input>
         %
     </div>
-</label>
-<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
-    <input [(ngModel)]="state.nodeHeight.min.enabled" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Min node height
+</div>
+<div class="w-100 text-start m-0 scrollbar-with-value">
+    <label class="form-check-label">
+        <input [(ngModel)]="state.nodeHeight.min.enabled" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Min node height
+    </label>
     <input [(ngModel)]="state.nodeHeight.min.value" (ngModelChange)="update()"
            [disabled]="!state.nodeHeight.min.enabled"
+           class="form-range"
            max="20" min="0"
-           ngbButton
            type="range">
     {{state.nodeHeight.min.value}}
-</label>
-<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
-    <input [(ngModel)]="state.nodeHeight.max.enabled" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Max node ratio
+</div>
+<div class="w-100 text-start m-0 scrollbar-with-value">
+    <label class="form-check-label">
+        <input [(ngModel)]="state.nodeHeight.max.enabled" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Max node ratio
+    </label>
     <input [(ngModel)]="state.nodeHeight.max.ratio" (ngModelChange)="update()"
            [disabled]="!state.nodeHeight.max.enabled"
+           class="form-range"
            max="60" min="1"
-           ngbButton
            type="range">
     {{state.nodeHeight.max.ratio}}
-</label>
-<label class="w-100 text-start m-0 scrollbar-with-value" ngbButtonLabel>
-    <input [(ngModel)]="state.labelEllipsis.enabled" (ngModelChange)="update()"
-           ngbButton
-           type="checkbox">
-    Max shown label characters
+</div>
+<div class="w-100 text-start m-0 scrollbar-with-value">
+    <label class="form-check-label">
+        <input [(ngModel)]="state.labelEllipsis.enabled" (ngModelChange)="update()"
+               class="form-check-input"
+               type="checkbox">
+        Max shown label characters
+    </label>
     <input [(ngModel)]="state.labelEllipsis.value" (ngModelChange)="update()"
            [disabled]="!state.labelEllipsis.enabled"
+           class="form-range"
            max="50" min="0"
-           ngbButton
            type="range">
     {{state.labelEllipsis.value}}
-</label>
+</div>
 <div class="dropdown-divider"></div>
-<div class="w-100 text-start m-0" ngbButtonLabel ngbRadioGroup [name]="'link' + uuid"
-     [(ngModel)]="state.linkValueAccessorId" (ngModelChange)="customSizingUpdate()" title="Link size">
+<div class="w-100 text-start m-0" title="Link size">
     <div class="mb-1">Link Value Accessor:</div>
-    <label ngbButtonLabel class="mb-0"
-           *ngFor="let valueAccessor of options.linkValueGenerators | keyvalue">
-        <input ngbButton type="radio" [value]="valueAccessor.value"
-               [disabled]="valueAccessor.value.disabled && valueAccessor.value.disabled()"> {{valueAccessor.value.description}}
-    </label>
-    <label ngbButtonLabel class="mb-0"
-           *ngFor="let valueAccessor of options.linkValueAccessors | keyvalue">
-        <input ngbButton type="radio"
-               [value]="valueAccessor.key"> {{valueAccessor.value.description}}
-    </label>
+    <div class="form-check" *ngFor="let valueAccessor of options.linkValueGenerators | keyvalue">
+        <label class="form-check-label">
+            <input [(ngModel)]="state.linkValueAccessorId" (ngModelChange)="customSizingUpdate()"
+                   [disabled]="valueAccessor.value.disabled && valueAccessor.value.disabled()"
+                   [name]="'link' + uuid"
+                   [value]="valueAccessor.value"
+                   class="form-check-input"
+                   type="radio">
+            {{valueAccessor.value.description}}
+        </label>
+    </div>
+    <div class="form-check" *ngFor="let valueAccessor of options.linkValueAccessors | keyvalue">
+        <label class="form-check-label">
+            <input [(ngModel)]="state.linkValueAccessorId" (ngModelChange)="customSizingUpdate()"
+                   [name]="'link' + uuid"
+                   [value]="valueAccessor.key"
+                   class="form-check-input"
+                   type="radio">
+            {{valueAccessor.value.description}}
+        </label>
+    </div>
 </div>
 <div class="dropdown-divider"></div>
-<div class="form-check" ngbRadioGroup [name]="'node' + uuid"
-     [(ngModel)]="state.nodeValueAccessorId" (ngModelChange)="customSizingUpdate()" title="Node fixed size">
+<div class="w-100 text-start m-0" title="Node fixed size">
     <div class="mb-1">Node Value Accessor:</div>
-    <label ngbButtonLabel class="mb-0"
-           *ngFor="let valueAccessor of options.nodeValueGenerators | keyvalue">
-        <input ngbButton type="radio" [value]="valueAccessor.value"
-               [disabled]="valueAccessor.value.disabled && valueAccessor.value.disabled()"> {{valueAccessor.value.description}}
-    </label>
-    <label ngbButtonLabel class="mb-0"
-           *ngFor="let valueAccessor of options.nodeValueAccessors | keyvalue">
-        <input ngbButton type="radio"
-               [value]="valueAccessor.key"> {{valueAccessor.value.description}}
-    </label>
+    <div class="form-check" *ngFor="let valueAccessor of options.nodeValueGenerators | keyvalue">
+        <label class="form-check-label">
+            <input [(ngModel)]="state.nodeValueAccessorId" (ngModelChange)="customSizingUpdate()"
+                   [disabled]="valueAccessor.value.disabled && valueAccessor.value.disabled()"
+                   [name]="'node' + uuid"
+                   [value]="valueAccessor.value"
+                   class="form-check-input"
+                   type="radio">
+            {{valueAccessor.value.description}}
+        </label>
+    </div>
+    <div class="form-check" *ngFor="let valueAccessor of options.nodeValueAccessors | keyvalue">
+        <label class="form-check-label">
+            <input [(ngModel)]="state.nodeValueAccessorId" (ngModelChange)="customSizingUpdate()"
+                   [name]="'node' + uuid"
+                   [value]="valueAccessor.key"
+                   class="form-check-input"
+                   type="radio">
+            {{valueAccessor.value.description}}
+        </label>
+    </div>
 </div>
 <div class="dropdown-divider"></div>
-<div class="form-check" ngbRadioGroup [name]="'prescaler' + uuid"
-     [(ngModel)]="state.prescalerId" (ngModelChange)="update()" title="Prescaler">
+<div class="w-100 text-start m-0" title="Prescaler">
     <div class="mb-1">Prescaler:</div>
-    <label ngbButtonLabel *ngFor="let prescaler of options.prescalers | keyvalue" [title]="prescaler.value.description"
-           class="mb-0">
-        <input ngbButton type="radio" [value]="prescaler.key"> {{prescaler.value.name}}
-    </label>
+    <div class="form-check" *ngFor="let prescaler of options.prescalers | keyvalue">
+        <label class="form-check-label" [title]="prescaler.value.description">
+            <input [(ngModel)]="state.prescalerId" (ngModelChange)="update()"
+                   [name]="'prescaler' + uuid"
+                   [value]="prescaler.key"
+                   class="form-check-input"
+                   type="radio">
+            {{prescaler.value.name}}
+        </label>
+    </div>
 </div>
-

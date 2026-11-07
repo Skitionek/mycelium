@@ -239,7 +239,7 @@
                             </div>
 
                             <div ngbDropdown class="d-inline-block ms-2" container="body"
-                                 ngbTooltip="Entity Cloud">
+                                 ngbTooltip="Entity Cloud" *ngIf="!result.value.isLocal">
                                 <button class="btn btn-secondary" ngbDropdownToggle>
                                     <i class="fa fa-fw fa-cloud"></i>
                                 </button>
@@ -260,7 +260,8 @@
                         </div>
 
                         <div class="ms-auto d-flex">
-                            <div class="input-group" [class.bg-highlight]="result.value.children.filter != null">
+                            <div class="input-group" [class.bg-highlight]="result.value.children.filter != null"
+                                 *ngIf="!localSearchResults">
                                 <span class="input-group-text bg-transparent border-end-0">
                                     <i class="fa fa-search"></i>
                                 </span>
@@ -279,12 +280,17 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Local folder: indexing status and content search -->
+                <app-local-folder-status *ngIf="result.value.isLocal" [object]="result.value"
+                                         (searchResults)="localSearchResults = $event"></app-local-folder-status>
             </div>
 
             <!-- Body -->
             <div class="flex-fill overflow-auto">
-                <app-object-list [objects]="result.value.children" [appLinks]="true"
+                <app-object-list [objects]="localSearchResults || result.value.children" [appLinks]="true"
                                  [parent]="result.value" [showDescription]="false"
+                                 [emptyDirectoryMessage]="localSearchResults ? 'No indexed files match.' : 'There are no items in this folder.'"
                                  (refreshRequest)="load(result.value.hashId)"></app-object-list>
             </div>
 

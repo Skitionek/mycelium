@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -15,6 +15,8 @@ import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from 'app/shared/constants';
 @Component({
   selector: 'app-user-create-dialog',
   templateUrl: 'user-create-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class UserCreateDialogComponent extends CommonFormDialogComponent {
   readonly form: FormGroup = new FormGroup({
@@ -35,8 +37,11 @@ export class UserCreateDialogComponent extends CommonFormDialogComponent {
   }
 
   getValue(): UserCreationRequest {
+    const {roles, ...value} = this.form.value;
     return {
-      ...this.form.value,
+      ...value,
+      // The form picks one role, the API takes a list of them
+      roles: [roles],
       createdByAdmin: true,
     };
   }

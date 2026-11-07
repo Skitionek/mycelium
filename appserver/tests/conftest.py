@@ -1,6 +1,7 @@
 import pytest
 import os
 
+from flask_sqlalchemy.session import Session as FlaskSession
 from neo4j import GraphDatabase, Session, Transaction, basic_auth
 from neo4j.graph import Node, Relationship
 from pathlib import Path
@@ -53,59 +54,30 @@ def app(request):
 
 @pytest.fixture(scope='function')
 def session(app, request):
-    """
-    A database session whose writes are undone when the test ends.
-
-    Opens one connection, begins a transaction on it, and rolls that
-    transaction back on teardown.
-
-    Passing ``bind`` is not enough to keep the session on that connection.
-    Flask-SQLAlchemy's Session overrides ``get_bind`` to resolve a bind key
-    against ``db.engines`` and returns the default *engine* before it ever
-    consults the session's own bind:
-
-        if None in engines:
-            return engines[None]
-
-    So every flush checked out a second connection from the pool and
-    committed there, where the rollback below could never reach it -- which
-    is why tests whose service layer calls ``commit`` itself leaked rows into
-    the next test. It is also why setting ``join_transaction_mode`` alone
-    changed nothing: the session was not using this connection at all.
-
-    Subclassing the configured session class to pin ``get_bind`` is the
-    documented way to customise this ("To customize the session class,
-    subclass Session and pass it as the ``class_`` key").
-    """
+    """ Creates a new database session, whose changes are all rolled back after the test """
     connection = db.engine.connect()
     transaction = connection.begin()
 
-    class ConnectionBoundSession(db.session.session_factory.class_):
-        """Keeps every operation on the connection this fixture rolls back."""
-
+    class TestSession(FlaskSession):
         def get_bind(self, *args, **kwargs):
+            # Flask-SQLAlchemy's get_bind picks the app's engine over the session's
+            # bind, so every query ran outside the transaction rolled back below
             return connection
 
-    options = {
+    session = db._make_scoped_session(options={
         'bind': connection,
         'binds': {},
-        'class_': ConnectionBoundSession,
-        # Make the session's own commits SAVEPOINTs inside the enclosing
-        # transaction, so a service that commits does not end the transaction
-        # this fixture is going to roll back.
+        'class_': TestSession,
+        # A commit or rollback in the code under test ends a savepoint, not the
+        # transaction rolled back below
         'join_transaction_mode': 'create_savepoint',
-    }
-    if hasattr(db, 'create_scoped_session'):
-        session = db.create_scoped_session(options=options)
-    else:
-        # Flask-SQLAlchemy >=3 removed create_scoped_session.
-        session = db._make_scoped_session(options=options)
+    })
     db.session = session
 
     def teardown():
+        session.remove()
         transaction.rollback()
         connection.close()
-        session.remove()
         reset_dao()
 
     request.addfinalizer(teardown)
@@ -122,7 +94,7 @@ def graph(request, app) -> Session:
     scheme = os.getenv('NEO4J_SCHEME', 'bolt')
     port = os.getenv('NEO4J_PORT', '7687')
     url = f'{scheme}://{host}:{port}'
-    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
     driver = GraphDatabase.driver(url, auth=basic_auth(username, password))
 
     graph = driver.session()
@@ -143,7 +115,7 @@ def graph_driver(request, app):
     scheme = os.getenv('NEO4J_SCHEME', 'bolt')
     port = os.getenv('NEO4J_PORT', '7687')
     url = f'{scheme}://{host}:{port}'
-    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+    username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
     return GraphDatabase.driver(url, auth=basic_auth(username, password))
 
 

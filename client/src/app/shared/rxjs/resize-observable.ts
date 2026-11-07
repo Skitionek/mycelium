@@ -2,7 +2,7 @@ import { Observable, animationFrameScheduler } from 'rxjs';
 import { throttleTime, distinctUntilChanged, filter } from 'rxjs/operators';
 import { isEqual } from 'lodash-es';
 
-/**Returns observable of native element size
+/** Returns observable of native element size
  * The sizing value is:
  * + throttled with animation frames
  * + updates only upon change

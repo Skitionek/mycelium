@@ -59,6 +59,12 @@ services:
         target: /app
     user: root
 
+  mozg:
+    build:
+      context: ../mozg
+    environment:
+      - NODE_ENV=development
+
   # Publish the backing services on fixed host ports so an appserver started
   # from .vscode/launch.json can reach them at localhost.
   solr:

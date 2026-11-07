@@ -45,7 +45,7 @@ export function mapBufferToJsons<T>(encoding = 'utf-8'): OperatorFunction<ArrayB
     const jsonLines = text.split('\n');
     // @ts-ignore
     return jsonLines.reduce((o, n) => {
-      if (n) {
+      if (n.trim()) {
         o.push(JSON.parse(n));
       }
       return o;

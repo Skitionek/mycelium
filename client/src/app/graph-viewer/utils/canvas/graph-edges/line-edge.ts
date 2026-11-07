@@ -1,6 +1,6 @@
 import { PlacedEdge } from 'app/graph-viewer/styles/styles';
 
-import { distanceUnsq, getLinePointIntersectionDistance } from '../../geometry';
+import { distanceUnsq } from '../../geometry';
 import { TextElement } from '../text-element';
 import { LineHead } from '../line-heads/line-heads';
 import { Line } from '../lines/lines';
@@ -81,11 +81,7 @@ export class LineEdge extends PlacedEdge {
       return true;
     }
 
-    const x1 = Math.min(this.source.x, this.target.x);
-    const x2 = Math.max(this.source.x, this.target.x);
-    const y1 = Math.min(this.source.y, this.target.y);
-    const y2 = Math.max(this.source.y, this.target.y);
-    return getLinePointIntersectionDistance(x, y, x1, x2, y1, y2) <= 2;
+    return this.getPointDistanceUnsq(x, y) <= 2 * 2;
   }
 
   private isPointIntersectingTextbox(x: number, y: number): boolean {

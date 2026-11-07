@@ -51,6 +51,20 @@ $form-group-margin-bottom: 0.5rem;
 // Modal (Bootstrap 5 default: 500px)
 $modal-md: 600px;
 
+// Modal: borderless with custom padding and shadow. These must be set before
+// Bootstrap's variables are imported, which derive $modal-header-padding from them.
+$modal-content-border-width:             0;
+$modal-content-box-shadow-xs:            0 0 10px rgba(0, 0, 0, 0.2);
+$modal-content-box-shadow-sm-up:         0 0 10px rgba(0, 0, 0, 0.2);
+$modal-header-border-width:              0;
+$modal-header-padding-y:                 1.5rem;
+$modal-header-padding-x:                 1.5rem;
+$modal-inner-padding:                    1.5rem;
+$modal-footer-border-width:              0;
+// Needs a unit: the footer padding is calc(padding - gap * .5), and a unitless 0
+// makes that calc() invalid, dropping the footer padding entirely.
+$modal-footer-margin-between:            .5rem;
+
 // Breadcrumb chevron divider (Bootstrap 5 default: "/")
 $breadcrumb-divider: quote(">");
 
@@ -136,17 +150,6 @@ $floating-toolbar-border-radius:         $border-radius;
 
 $dropdown-menu-box-shadow:               0 1px 0 #e2e8f0;
 $popover-box-shadow:                     0 1px 0 #e2e8f0;
-
-// Modal: borderless with custom padding and shadow
-$modal-content-border-width:             0;
-$modal-content-box-shadow-xs:            0 0 10px rgba(0, 0, 0, 0.2);
-$modal-content-box-shadow-sm-up:         0 0 10px rgba(0, 0, 0, 0.2);
-$modal-header-border-width:              0;
-$modal-header-padding-y:                 1.5rem;
-$modal-header-padding-x:                 1.5rem;
-$modal-inner-padding:                    1.5rem;
-$modal-footer-border-width:              0;
-$modal-footer-margin-between:            0;
 
 $btn-border-radius-xs: $border-radius-sm;
 $btn-padding-y-xs:     0.1rem;

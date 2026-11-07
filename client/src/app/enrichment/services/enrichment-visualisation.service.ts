@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { Observable, combineLatest } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
@@ -15,9 +15,9 @@ import { EnrichmentService } from './enrichment.service';
 
 export interface EnrichWithGOTermsResult {
   'p-value': any;
-  'goLabel': string[];
-  'geneNames': string[];
-  'gene': string;
+  goLabel: string[];
+  geneNames: string[];
+  gene: string;
 }
 
 const MIN_REPRESENTED_NUMBER = 0.0000000001;
@@ -33,7 +33,7 @@ export class EnrichmentVisualisationService {
   constructor(protected readonly http: HttpClient,
               protected readonly apiService: ApiService,
               protected readonly errorHandler: ErrorHandler,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly enrichmentService: EnrichmentService) {
   }
 

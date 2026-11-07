@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { isNil } from 'lodash-es';
 import { Options } from 'vis-network';
@@ -13,7 +13,9 @@ export enum DisplayType {
 @Component({
   selector: 'app-route-display',
   templateUrl: './route-display.component.html',
-  styleUrls: ['./route-display.component.scss']
+  styleUrls: ['./route-display.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class RouteDisplayComponent {
   @Input() set displayType(displayType: DisplayType) {

@@ -10,9 +10,10 @@ import {
   ViewEncapsulation,
   SimpleChanges,
   OnChanges,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { zoom as d3_zoom, zoomIdentity as d3_zoomIdentity } from 'd3-zoom';
 import { select as d3_select, ValueFn as d3_ValueFn, Selection as d3_Selection } from 'd3-selection';
@@ -33,11 +34,13 @@ import { SankeyLayoutService } from './sankey-layout.service';
   templateUrl: './sankey.component.svg',
   styleUrls: ['./sankey.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   constructor(
     readonly clipboard: ClipboardService,
-    readonly snackBar: MatLegacySnackBar,
+    readonly snackBar: MatSnackBar,
     readonly sankey: SankeyLayoutService,
     readonly wrapper: ElementRef,
     private zone: NgZone
@@ -511,7 +514,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
    * @param nodes set of node data objects to use for selection
    */
   selectNodes(nodes: Set<object>) {
-    // tslint:disable-next-line:no-unused-expression
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.nodeSelection
       .attr('selected', n => nodes.has(n));
   }
@@ -521,7 +524,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
    * @param links set of link data objects to use for selection
    */
   selectLinks(links: Set<object>) {
-    // tslint:disable-next-line:no-unused-expression
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.linkSelection
       .attr('selected', l => links.has(l));
   }
@@ -587,7 +590,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   stopSearchNodes() {
-    // tslint:disable-next-line:no-unused-expression
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.nodeSelection
       .attr('searched', undefined);
   }
@@ -600,7 +603,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   stopSearchLinks() {
-    // tslint:disable-next-line:no-unused-expression
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.linkSelection
       .attr('searched', undefined);
   }
@@ -611,7 +614,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   focusNode(nodeId: SankeyId) {
     const {nodeLabel} = this.sankey;
     const selection = this.nodeSelection
-      // tslint:disable-next-line:triple-equals
+      // eslint-disable-next-line eqeqeq
       .filter(({_id}) => _id == nodeId)
       .raise()
       .attr('focused', true)
@@ -633,7 +636,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
     const {nodeLabelShort} = this.sankey;
     const selection = this.nodeSelection
       .attr('focused', undefined)
-      // tslint:disable-next-line:triple-equals
+      // eslint-disable-next-line eqeqeq
       .filter(({_id}) => _id == nodeId)
       .select('g')
       .call(textGroup => {
@@ -651,7 +654,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   focusLink(linkId: SankeyId) {
     this.linkSelection
-      // tslint:disable-next-line:triple-equals
+      // eslint-disable-next-line eqeqeq
       .filter(({_id}) => _id == linkId)
       .raise()
       .attr('focused', true);
@@ -783,7 +786,7 @@ export class SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   updateNodeRect = rects => rects
     .attr('height', ({_y1, _y0}) => representativePositiveNumber(_y1 - _y0))
     .attr('width', ({_x1, _x0}) => _x1 - _x0)
-    .attr('width', ({_x1, _x0}) => _x1 - _x0)
+    .attr('width', ({_x1, _x0}) => _x1 - _x0);
 
   get updateNodeText() {
     // noinspection JSUnusedLocalSymbols

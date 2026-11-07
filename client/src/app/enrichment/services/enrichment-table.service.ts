@@ -1,18 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { defer, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiService } from 'app/shared/services/api.service';
 import { TextAnnotationGenerationRequest } from 'app/file-browser/schema';
+import { isLocalHashId } from 'app/local-filesystem/local-ids';
+import { LocalIndexerService } from 'app/local-filesystem/services/local-indexer.service';
 
 import { EnrichmentParsedData } from '../models/enrichment-document';
 
 @Injectable()
 export class EnrichmentTableService {
   constructor(protected readonly http: HttpClient,
-              protected readonly apiService: ApiService) {
+              protected readonly apiService: ApiService,
+              protected readonly localIndexer: LocalIndexerService) {
   }
 
   /**
@@ -66,6 +69,12 @@ export class EnrichmentTableService {
   }
 
   getAnnotatedEnrichment(hashId: string): Observable<EnrichmentParsedData> {
+    if (isLocalHashId(hashId)) {
+      // Annotated by the local indexer, which keeps the result in the folder's index
+      return defer(() => this.localIndexer.getEnrichmentAnnotations(hashId)).pipe(
+        map(annotated => (annotated || {}) as EnrichmentParsedData),
+      );
+    }
     return this.http.get<{results: EnrichmentParsedData}>(
       `/api/filesystem/objects/${encodeURIComponent(hashId)}/enrichment/annotations`,
       this.apiService.getHttpOptions(true),

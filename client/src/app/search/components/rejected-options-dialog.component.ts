@@ -1,11 +1,13 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-rejected-options-dialog',
   templateUrl: './rejected-options-dialog.component.html',
-  styleUrls: ['./rejected-options-dialog.component.scss']
+  styleUrls: ['./rejected-options-dialog.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class RejectedOptionsDialogComponent {
   @Input() rejectedFolders: string[] = [];

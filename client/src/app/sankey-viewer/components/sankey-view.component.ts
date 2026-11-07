@@ -1,6 +1,6 @@
-import { Component, EventEmitter, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, ViewChild, AfterContentInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map, delay, catchError, tap, switchMap } from 'rxjs/operators';
@@ -42,7 +42,9 @@ import { SearchEntity } from '../services/search-match';
     SankeyControllerService,
     WarningControllerService,
     SankeySearchService
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, AfterContentInit {
 
@@ -62,7 +64,7 @@ export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, Aft
     protected readonly filesystemService: FilesystemService,
     protected readonly route: ActivatedRoute,
     readonly modalService: NgbModal,
-    readonly snackBar: MatLegacySnackBar,
+    readonly snackBar: MatSnackBar,
     protected readonly workSpaceManager: WorkspaceManager,
     readonly router: Router,
     readonly sessionStorage: SessionStorageService,
@@ -220,12 +222,12 @@ export class SankeyViewComponent implements OnDestroy, ModuleAwareComponent, Aft
     const {nodes, links} = this.sankeyController.dataToRender.value;
     if (!isNil(nodeId)) {
       // allow string == number match interpolation ("58" == 58 -> true)
-      // tslint:disable-next-line:triple-equals
+      // eslint-disable-next-line eqeqeq
       return nodes.find(({_id}) => _id == nodeId);
     }
     if (!isNil(linkId)) {
       // allow string == number match interpolation ("58" == 58 -> true)
-      // tslint:disable-next-line:triple-equals
+      // eslint-disable-next-line eqeqeq
       return links.find(({_id}) => _id == linkId);
     }
   }

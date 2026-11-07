@@ -23,6 +23,7 @@
       <a appLink="/projects" placement="right" ngbTooltip="File Browser" [forceWorkbench]="true" [newTab]="true" preferPane="left">
         <i class="fa fa-folder"></i>
       </a>
+      <app-local-index-indicator></app-local-index-indicator>
       <a appLink="/search/graph" placement="right" ngbTooltip="Knowledge Graph" [forceWorkbench]="true" [newTab]="true" preferPane="left">
         <i class="fas fa-chart-network"></i>
       </a>
@@ -65,7 +66,7 @@
             <a class="dropdown-item" (click)="downloadManual()" placement="right">
               User Guide
             </a>
-            <a class="dropdown-item" [routerLink]="['/users', (appUser$ | async)?.username]" placement="right">
+            <a class="dropdown-item" [routerLink]="['/users', $safeNavigationMigration((appUser$ | async)?.username)]" placement="right">
               Account
             </a>
             <a class="dropdown-item" (click)="logout()" placement="right">

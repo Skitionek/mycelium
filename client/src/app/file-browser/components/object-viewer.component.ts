@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -16,6 +16,8 @@ import { getObjectLabel } from '../utils/objects';
 @Component({
   selector: 'app-object-viewer',
   templateUrl: 'object-viewer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectViewerComponent implements OnDestroy {
 
