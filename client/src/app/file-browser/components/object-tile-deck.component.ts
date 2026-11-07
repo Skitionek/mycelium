@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input } from '@angular/core';
+import { Component, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -16,6 +16,8 @@ import { FilesystemObject, ProjectImpl } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-tile-deck',
   templateUrl: './object-tile-deck.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectTileDeckComponent extends ObjectListComponent {
 

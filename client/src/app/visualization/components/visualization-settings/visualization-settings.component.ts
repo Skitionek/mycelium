@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { Subscription } from 'rxjs';
@@ -10,7 +10,9 @@ import { uuidv4 } from 'app/shared/utils';
 @Component({
   selector: 'app-visualization-settings',
   templateUrl: './visualization-settings.component.html',
-  styleUrls: ['./visualization-settings.component.scss']
+  styleUrls: ['./visualization-settings.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class VisualizationSettingsComponent implements OnInit {
     @Input() legendLabels: string[];

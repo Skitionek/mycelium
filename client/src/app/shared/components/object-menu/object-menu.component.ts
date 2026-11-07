@@ -6,6 +6,7 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -27,6 +28,8 @@ import { ObjectTypeService } from 'app/file-types/services/object-type.service';
 @Component({
   selector: 'app-object-menu',
   templateUrl: './object-menu.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectMenuComponent implements AfterViewInit, OnChanges {
 

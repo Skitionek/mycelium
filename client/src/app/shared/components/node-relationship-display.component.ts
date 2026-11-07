@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { Source, UniversalGraphNode, UniversalGraphRelationship } from 'app/drawing-tool/services/interfaces';
 import { AssociationSnippet } from 'app/interfaces';
@@ -12,6 +12,8 @@ import { getDTCompatibleLabel } from '../utils/drawing-tool';
   selector: 'app-node-relationship',
   templateUrl: 'node-relationship-display.component.html',
   styleUrls: ['./node-relationship-display.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NodeRelationshipComponent {
   @Input() leftNodeName: string;

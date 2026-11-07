@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { cloneDeep } from 'lodash-es';
@@ -47,6 +48,8 @@ import { extractGraphEntityActions } from '../../utils/data';
     '../map.component.scss',
     './map-editor.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class MapEditorComponent extends MapViewComponent<UniversalGraph | undefined> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('infoPanelSidebar', {static: false}) infoPanelSidebarElementRef: ElementRef;

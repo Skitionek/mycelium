@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 export const TERMS_OF_SERVICE = {
   // ISO-8601 Timestamp update
@@ -8,6 +8,8 @@ export const TERMS_OF_SERVICE = {
 @Component({
   selector: 'app-terms-of-service-text',
   templateUrl: './terms-of-service-text.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class TermsOfServiceTextComponent {
 }

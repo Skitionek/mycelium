@@ -1,7 +1,7 @@
 import re
 
 from string import ascii_letters, digits, punctuation, whitespace
-from typing import List, Set
+from typing import List, Set, Tuple
 
 from .constants import (
     ABBREVIATION_WORD_LENGTH,
@@ -16,6 +16,19 @@ class Tokenizer:
     def __init__(self) -> None:
         self.abbreviations: Set[str] = set()
         self.token_word_check_regex = re.compile(r'[\d{}]+$'.format(re.escape(punctuation)))
+
+    def _first_char_contributions(self, word: str) -> str:
+        """Return first-letter contributions for one word when building an abbreviation.
+
+        Words containing '-' or '/' are split on that separator; each non-empty
+        part contributes its uppercase first letter (reversed so the caller can
+        simply prepend the whole string to build left-to-right order).
+        """
+        for sep in ('-', '/'):
+            if sep in word:
+                parts = [p for p in word.split(sep) if p]
+                return ''.join(p[0].upper() for p in reversed(parts))
+        return word[0].upper()
 
     def _is_abbrev(self, token: PDFWord) -> bool:
         """Determine if a word is an abbreviation.
@@ -43,24 +56,52 @@ class Tokenizer:
         len_of_word = len(token.keyword)
         previous_words = token.previous_words.split(' ')
         for w in reversed(previous_words):
-            if '-' in w:
-                split = w.split('-')
-                for w2 in reversed(split):
-                    if w2:
-                        abbrev = w2[0].upper() + abbrev
-            elif '/' in w:
-                split = w.split('/')
-                for w2 in reversed(split):
-                    if w2:
-                        abbrev = w2[0].upper() + abbrev
-            else:
-                abbrev = w[0].upper() + abbrev
+            abbrev = self._first_char_contributions(w) + abbrev
         abbrev = abbrev[-len_of_word:]
 
         if abbrev == token.keyword:
             self.abbreviations.add(token.keyword)
             return True
         return False
+
+    def _merge_coordinates(
+        self,
+        words_subset: List[PDFWord],
+    ) -> Tuple[List[List[float]], List[float], List[float]]:
+        """Merge coordinate rectangles from multiple words into a span, splitting on new lines."""
+        coordinates = []
+        heights: List[float] = []
+        widths: List[float] = []
+        start_lower_x = start_lower_y = end_upper_x = end_upper_y = prev_height = 0.0
+
+        for word in words_subset:
+            for j, coords in enumerate(word.coordinates):
+                lower_x, lower_y, upper_x, upper_y = coords
+
+                if start_lower_x == 0.0 and start_lower_y == 0.0 and end_upper_x == 0.0 and end_upper_y == 0.0:  # noqa
+                    start_lower_x, start_lower_y = lower_x, lower_y
+                    end_upper_x, end_upper_y = upper_x, upper_y
+                    prev_height = word.heights[j]
+                elif lower_y != start_lower_y:
+                    diff = abs(lower_y - start_lower_y)
+                    if diff > prev_height * PDF_NEW_LINE_THRESHOLD:
+                        coordinates.append(
+                            [start_lower_x, start_lower_y, end_upper_x, end_upper_y])
+                        start_lower_x, start_lower_y = lower_x, lower_y
+                        end_upper_x, end_upper_y = upper_x, upper_y
+                        prev_height = word.heights[j]
+                    else:
+                        end_upper_y = max(end_upper_y, upper_y)
+                        end_upper_x = max(end_upper_x, upper_x)
+                else:
+                    end_upper_y = max(end_upper_y, upper_y)
+                    end_upper_x = max(end_upper_x, upper_x)
+
+            heights += word.heights
+            widths += word.widths
+
+        coordinates.append([start_lower_x, start_lower_y, end_upper_x, end_upper_y])
+        return coordinates, heights, widths
 
     def _create(self, words: List[PDFWord]) -> List[PDFWord]:
         prev_token = None
@@ -89,62 +130,7 @@ class Tokenizer:
             else:
                 words_subset = [prev_token, word]
                 curr_keyword = ' '.join([word.keyword for word in words_subset])
-                coordinates = []
-                heights = []
-                widths = []
-
-                start_lower_x = 0.0
-                start_lower_y = 0.0
-                end_upper_x = 0.0
-                end_upper_y = 0.0
-                prev_height = 0.0
-                for word in words_subset:
-                    # when combining sequential words
-                    # need to merge their coordinates together
-                    # while also keeping in mind words on new lines
-                    for j, coords in enumerate(word.coordinates):
-                        lower_x, lower_y, upper_x, upper_y = coords
-
-                        if (start_lower_x == 0.0 and
-                                start_lower_y == 0.0 and
-                                end_upper_x == 0.0 and
-                                end_upper_y == 0.0):
-                            start_lower_x = lower_x
-                            start_lower_y = lower_y
-                            end_upper_x = upper_x
-                            end_upper_y = upper_y
-                            prev_height = word.heights[j]
-                        else:
-                            if lower_y != start_lower_y:
-                                diff = abs(lower_y - start_lower_y)
-
-                                # if diff is greater than height ratio
-                                # then part of keyword is on a new line
-                                if diff > prev_height * PDF_NEW_LINE_THRESHOLD:
-                                    coordinates.append(
-                                        [start_lower_x, start_lower_y, end_upper_x, end_upper_y])
-
-                                    start_lower_x = lower_x
-                                    start_lower_y = lower_y
-                                    end_upper_x = upper_x
-                                    end_upper_y = upper_y
-                                    prev_height = word.heights[j]
-                                else:
-                                    if upper_y > end_upper_y:
-                                        end_upper_y = upper_y
-
-                                    if upper_x > end_upper_x:
-                                        end_upper_x = upper_x
-                            else:
-                                if upper_y > end_upper_y:
-                                    end_upper_y = upper_y
-
-                                if upper_x > end_upper_x:
-                                    end_upper_x = upper_x
-
-                    heights += word.heights
-                    widths += word.widths
-                coordinates.append([start_lower_x, start_lower_y, end_upper_x, end_upper_y])
+                coordinates, heights, widths = self._merge_coordinates(words_subset)
 
                 # copied from def normalize_str
                 # to avoid function calls, ~7-10 sec faster

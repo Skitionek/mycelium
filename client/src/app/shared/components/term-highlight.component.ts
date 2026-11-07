@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { escape, escapeRegExp, isNil } from 'lodash-es';
 
@@ -7,6 +7,8 @@ import { FindOptions } from 'app/shared/utils/find';
 @Component({
   selector: 'app-term-highlight',
   templateUrl: 'term-highlight.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class TermHighlightComponent implements OnChanges {
   @Input() text = '';

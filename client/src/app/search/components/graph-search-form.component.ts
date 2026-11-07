@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 
 import { OrganismAutocomplete } from 'app/interfaces';
@@ -11,6 +11,8 @@ import { GraphSearchParameters } from '../graph-search';
 @Component({
   selector: 'app-graph-search-form',
   templateUrl: './graph-search-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class GraphSearchFormComponent {
   @Output() search = new EventEmitter<GraphSearchParameters>();
