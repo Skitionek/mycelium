@@ -1,14 +1,30 @@
 # Mycelium Contribution Guide
 
-`Mycelium` community welcomes your contribution. To make the process as seamless as possible, we recommend you read this contribution guide.
+Bug reports and discussion are welcome. **Outside code contributions are not**,
+because the license does not permit them — fork-specific modifications in this
+repository are proprietary and all rights are reserved, so there are no terms
+under which an external pull request could be accepted. See
+[Licensing](#licensing) below.
+
+The most useful thing you can do is open an issue:
+
+- Report a bug — include repro steps, what you expected, and what happened.
+- Report a documentation error.
+- Ask a question about how something works.
+
+<https://github.com/Skitionek/mycelium/issues>
 
 ## Development Workflow
 
-Start by forking the Mycelium GitHub repository, make changes in a branch and then send a pull request. We encourage pull requests to discuss code changes.
+For those with commit access.
 
-### Create a Pull Request
+Branch off `main`, keep each branch to one goal, and open a pull request for
+review. Branch names are prefixed with the issue number, then type and a short
+description — `621-fix-show-uploaded-files-during-upload`.
 
-Pull requests can be created via GitHub. Refer to [this document](https://help.github.com/articles/creating-a-pull-request/) for detailed steps on how to create a pull request. After a Pull Request gets peer reviewed and approved, it will be merged.
+Open pull requests as drafts and mark them ready once CI is green and the
+description explains the change. Commit messages follow
+[Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Before you push
 
