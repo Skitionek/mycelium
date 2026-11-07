@@ -79,7 +79,7 @@ export class RecentFileHashesService implements OnDestroy {
       if (strValue) {
         const value = JSON.parse(strValue);
         if (Array.isArray(value)) {
-          return value.filter(v => typeof v === 'string' || v instanceof String);
+          return value.filter((v): v is string => typeof v === 'string' || v instanceof String);
         } else {
           this.errorHandler.logError(new Error('Recent files list has been corrupted - refreshing'));
         }

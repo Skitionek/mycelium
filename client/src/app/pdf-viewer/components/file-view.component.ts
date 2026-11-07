@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, EventEmitter, OnDestroy, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -59,6 +59,8 @@ class EntityTypeEntry {
   selector: 'app-pdf-viewer',
   templateUrl: './file-view.component.html',
   styleUrls: ['./file-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 
 export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
@@ -133,7 +135,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     protected readonly filesystemService: FilesystemService,
     protected readonly fileObjectActions: FilesystemObjectActions,
     protected readonly pdfAnnService: AnnotationsService,
-    protected readonly snackBar: MatLegacySnackBar,
+    protected readonly snackBar: MatSnackBar,
     protected readonly modalService: NgbModal,
     protected readonly route: ActivatedRoute,
     protected readonly errorHandler: ErrorHandler,
@@ -143,8 +145,8 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     this.loadTask = new BackgroundTask(([hashId, loc]) => {
       return combineLatest(
         this.filesystemService.get(hashId),
-        // Use the /content/pdf endpoint so non-PDF files are converted server-side
-        // before the PDF viewer receives them.
+        // Non-PDF files are converted (in the browser where possible) before the PDF
+        // viewer receives them.
         this.filesystemService.getContentAsPdf(hashId).pipe(
           mapBlobToBuffer(),
         ),

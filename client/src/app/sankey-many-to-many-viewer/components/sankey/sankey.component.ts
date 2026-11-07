@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, OnDestroy, ViewEncapsulation, SimpleChanges, OnChanges, Input } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  ViewEncapsulation,
+  SimpleChanges,
+  OnChanges,
+  Input,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { select as d3_select } from 'd3-selection';
 import { isNil, compact } from 'lodash-es';
@@ -16,6 +25,8 @@ import { SankeyManyToManyLink, SankeyManyToManyNode } from '../interfaces';
   templateUrl: './sankey.component.svg',
   styleUrls: ['./sankey.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SankeyManyToManyComponent extends SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() highlightCircular;

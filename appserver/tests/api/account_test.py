@@ -35,7 +35,7 @@ def test_admin_can_create_user(client, fix_admin_user):
             'email': 'babyyodes858@mycelium.bio',
             'firstName': 'baby',
             'lastName': 'yoda',
-            'roles': 'admin',
+            'roles': ['admin'],
             'password': 'iluvmando',
             'createdByAdmin': True
         }),
@@ -57,7 +57,7 @@ def test_nonadmin_cannot_create_user(client, test_user):
             'email': 'babyyodes858@mycelium.bio',
             'firstName': 'baby',
             'lastName': 'yoda',
-            'roles': 'admin',
+            'roles': ['admin'],
             'password': 'iluvmando',
         }),
         content_type='application/json'
@@ -146,7 +146,8 @@ def test_can_update_only_allowed_attributes(client, test_user, attribute, value,
         content_type='application/json'
     )
 
-    assert response.status_code == 204
+    # A field that cannot be edited is rejected as unknown
+    assert response.status_code == (204 if is_editable else 400)
 
     response = client.get(
         f'/accounts/{test_user.hash_id}', headers=headers, content_type='application/json')

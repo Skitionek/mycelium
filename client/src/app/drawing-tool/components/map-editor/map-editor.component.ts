@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 
 import { cloneDeep } from 'lodash-es';
@@ -47,6 +48,8 @@ import { extractGraphEntityActions } from '../../utils/data';
     '../map.component.scss',
     './map-editor.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class MapEditorComponent extends MapViewComponent<UniversalGraph | undefined> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('infoPanelSidebar', {static: false}) infoPanelSidebarElementRef: ElementRef;
@@ -283,6 +286,12 @@ export class MapEditorComponent extends MapViewComponent<UniversalGraph | undefi
   }
 
   acquireLock() {
+    // The locator is assigned after ngOnInit has started the lock check, and
+    // asking for the locks of a missing file only raises an error dialog
+    if (this.locator == null) {
+      return;
+    }
+
     const monotonicNow = window.performance.now();
 
     if (monotonicNow - this.lastActivityTime > this.veryInactiveDuration) {

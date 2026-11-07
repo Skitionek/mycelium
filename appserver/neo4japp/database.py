@@ -67,7 +67,7 @@ host = os.getenv('NEO4J_HOST', 'localhost')
 scheme = os.getenv('NEO4J_SCHEME', 'bolt')
 port = os.getenv('NEO4J_PORT', '7687')
 url = f'{scheme}://{host}:{port}'
-username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/')
+username, password = os.getenv('NEO4J_AUTH', 'neo4j/password').split('/', 1)
 graph = GraphDatabase.driver(url, auth=basic_auth(username, password))
 
 

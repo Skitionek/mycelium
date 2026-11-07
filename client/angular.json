@@ -39,19 +39,51 @@
                 "glob": "pdf.worker.min.mjs",
                 "input": "node_modules/pdfjs-dist/build",
                 "output": "/assets/vendor/pdfjs"
+              },
+              {
+                "glob": "plotly.min.js",
+                "input": "node_modules/plotly.js-dist-min",
+                "output": "/assets/vendor/plotly"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/serverless-office-converter/web/office-converter",
+                "ignore": [
+                  "lo/*.xz.*",
+                  "vendor/**",
+                  "service-worker.js",
+                  "package.json"
+                ],
+                "output": "/assets/vendor/office-converter"
               }
             ],
             "styles": [
               "node_modules/tachyons/css/tachyons.css",
               "src/theme.scss",
               "src/scss/bootstrap.scss",
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/@fontsource/roboto/300.css",
+              "node_modules/@fontsource/roboto/300-italic.css",
+              "node_modules/@fontsource/roboto/400.css",
+              "node_modules/@fontsource/roboto/400-italic.css",
+              "node_modules/@fontsource/roboto/700.css",
+              "node_modules/@fontsource/roboto/700-italic.css",
+              "node_modules/@fontsource/ibm-plex-sans/300.css",
+              "node_modules/@fontsource/ibm-plex-sans/400.css",
+              "node_modules/@fontsource/ibm-plex-sans/600.css",
+              "node_modules/@fontsource/inter/300.css",
+              "node_modules/@fontsource/inter/400.css",
+              "node_modules/@fontsource/inter/600.css",
+              "node_modules/@fontsource/inter/700.css"
             ],
             "scripts": [
               "node_modules/vis-network/dist/vis-network.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json",
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "customWebpackConfig": {
               "path": "./webpack.config.js"
             }
@@ -107,27 +139,31 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "client:build"
+            "buildTarget": "client:build",
+            "headers": {
+              "Cross-Origin-Opener-Policy": "same-origin",
+              "Cross-Origin-Embedder-Policy": "credentialless"
+            }
           },
           "configurations": {
             "production": {
-              "browserTarget": "client:build:production"
+              "buildTarget": "client:build:production"
             },
             "staging": {
-              "browserTarget": "client:build:production,staging"
+              "buildTarget": "client:build:production,staging"
             },
             "qa": {
-              "browserTarget": "client:build:production,qa"
+              "buildTarget": "client:build:production,qa"
             },
             "demo": {
-              "browserTarget": "client:build:production,demo"
+              "buildTarget": "client:build:production,demo"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "client:build"
+            "buildTarget": "client:build"
           }
         },
         "test": {
@@ -145,35 +181,11 @@
             ],
             "include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
             "scripts": ["node_modules/molstar/build/viewer/molstar.js"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["."]
+            },
             "customWebpackConfig": {
               "path": "./webpack.config.js"
-            }
-          }
-        },
-        "lint": {
-          "builder": "@angular-eslint/builder:lint",
-          "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "client:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "client:serve:production"
-            },
-            "staging": {
-              "devServerTarget": "client:serve:production,staging"
-            },
-            "qa": {
-              "devServerTarget": "client:serve:production,qa"
-            },
-            "demo": {
-              "devServerTarget": "client:serve:production,demo"
             }
           }
         },
@@ -225,7 +237,29 @@
   "defaultProject": "client",
   "schematics": {
     "@schematics/angular:component": {
-      "style": "scss"
+      "style": "scss",
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
     }
   },
   "cli": {

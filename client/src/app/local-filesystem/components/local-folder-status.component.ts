@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
@@ -26,6 +26,8 @@ interface StatusView {
 @Component({
   selector: 'app-local-folder-status',
   templateUrl: './local-folder-status.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LocalFolderStatusComponent implements OnChanges, OnDestroy {
   @Input() object: FilesystemObject;

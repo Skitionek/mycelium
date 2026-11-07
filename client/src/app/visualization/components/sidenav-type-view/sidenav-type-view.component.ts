@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { VisNode } from 'app/interfaces';
 import {
@@ -17,7 +17,9 @@ import { VisualizationService } from 'app/visualization/services/visualization.s
 @Component({
     selector: 'app-sidenav-type-view',
     templateUrl: './sidenav-type-view.component.html',
-    styleUrls: ['./sidenav-type-view.component.scss']
+    styleUrls: ['./sidenav-type-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class SidenavTypeViewComponent {
   @Input() legend: Map<string, string[]>;

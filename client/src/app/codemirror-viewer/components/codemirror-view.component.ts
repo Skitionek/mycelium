@@ -4,6 +4,7 @@ import {
   EventEmitter,
   OnDestroy,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -25,6 +26,8 @@ import { getLanguageExtension } from '../codemirror-language';
   selector: 'app-codemirror-viewer',
   templateUrl: './codemirror-view.component.html',
   styleUrls: ['./codemirror-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CodemirrorViewComponent implements OnDestroy, ModuleAwareComponent {
   // The container is rendered once the file has loaded

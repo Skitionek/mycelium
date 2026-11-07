@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, QueryList, ViewChildren, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, QueryList, ViewChildren, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
@@ -12,7 +12,9 @@ import { EnrichWithGOTermsResult } from 'app/enrichment/services/enrichment-visu
   selector: 'app-table-complete',
   templateUrl: './table-complete.component.html',
   styleUrls: ['./table-complete.component.scss'],
-  providers: [DataService, DecimalPipe]
+  providers: [DataService, DecimalPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class TableCompleteComponent implements OnChanges {
   data$: Observable<EnrichWithGOTermsResult[]>;

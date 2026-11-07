@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
 
@@ -18,6 +18,8 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-community-browser',
   templateUrl: './community-browser.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class CommunityBrowserComponent implements OnInit, OnDestroy {
   private readonly defaultLocator: StandardRequestOptions = {

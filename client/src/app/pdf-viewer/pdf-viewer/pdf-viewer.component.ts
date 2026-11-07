@@ -10,15 +10,15 @@ import {
   HostListener,
   OnDestroy,
   ViewChild,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
-
-import { PDF_WORKER_PATH } from 'app/shared/constants';
 
 import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+import { PDF_WORKER_PATH } from 'app/shared/constants';
 
 import { PDFProgressData, PDFViewerParams, PDFSource } from './interfaces';
 import { createEventBus } from '../utils/event-bus-utils';
@@ -51,7 +51,9 @@ Object.freeze(DEFAULT_DOCUMENT_INIT_PARAMETERS);
           <div class="pdfViewer"></div>
       </div>
   `,
-  styleUrls: ['./pdf-viewer.component.scss']
+  styleUrls: ['./pdf-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class PdfViewerComponent
   implements OnChanges, OnInit, OnDestroy {
@@ -360,6 +362,11 @@ export class PdfViewerComponent
 
   public updateSize() {
     const currentViewer = this.getCurrentViewer();
+    // pdf.js creates its pages some time after the document is attached and then fires
+    // pagesinit; scaling before that only logs an invalid pageNumber error
+    if (!currentViewer.pagesCount) {
+      return Promise.resolve();
+    }
     return this.internalPdf
       .getPage(currentViewer.currentPageNumber)
       .then((page: PDFPageProxy) => {
@@ -416,6 +423,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagechanging', e => {
@@ -497,6 +505,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagerendered', e => {

@@ -1,9 +1,8 @@
-import { Component, ElementRef, Input } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, ElementRef, Input, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { element } from 'protractor';
 
 import { WorkspaceManager } from 'app/shared/workspace-manager';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
@@ -17,6 +16,8 @@ import { FilesystemObject, ProjectImpl } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-tile-deck',
   templateUrl: './object-tile-deck.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectTileDeckComponent extends ObjectListComponent {
 
@@ -28,7 +29,7 @@ export class ObjectTileDeckComponent extends ObjectListComponent {
   @Input() moreButtonText = 'View more...';
 
   constructor(router: Router,
-              snackBar: MatLegacySnackBar,
+              snackBar: MatSnackBar,
               modalService: NgbModal,
               errorHandler: ErrorHandler,
               route: ActivatedRoute,

@@ -1,16 +1,17 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { MessageDialog } from 'app/shared/services/message-dialog.service';
 import { CommonFormDialogComponent } from 'app/shared/components/dialog/common-form-dialog.component';
-
 import { FilesystemObject } from '../../models/filesystem-object';
 
 @Component({
   selector: 'app-folder-upload-dialog',
   templateUrl: './folder-upload-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class FolderUploadDialogComponent extends CommonFormDialogComponent<FolderUploadDialogValue> {
   @ViewChild('folderInput', {static: false})

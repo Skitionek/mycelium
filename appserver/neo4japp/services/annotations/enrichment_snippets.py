@@ -12,7 +12,8 @@ from neo4japp.services.enrichment.data_transfer_objects import EnrichmentCellTex
 def highlight_annotations(original_text: str, annotations: List[dict]) -> str:
     # If done right, we would parse the XML but the built-in XML libraries in Python
     # are susceptible to some security vulns, but because this is an internal API,
-    # we can accept that it can be janky
+    # we can accept that it can be janky. The client parses the result as XML, so
+    # the cell text must be escaped
 
     texts = []
     prev_ending_index = -1
@@ -24,24 +25,25 @@ def highlight_annotations(original_text: str, annotations: List[dict]) -> str:
         lo_location_offset = annotation['loLocationOffset']
         hi_location_offset = annotation['hiLocationOffset']
 
-        text = f'<annotation type="{meta_type}" meta="{html.escape(json.dumps(meta))}">{term}</annotation>'  # noqa
+        text = f'<annotation type="{meta_type}" meta="{html.escape(json.dumps(meta))}">{html.escape(term, quote=False)}</annotation>'  # noqa
 
         if lo_location_offset == 0:
             prev_ending_index = hi_location_offset
             texts.append(text)
         else:
             if not texts:
-                texts.append(original_text[:lo_location_offset])
+                texts.append(html.escape(original_text[:lo_location_offset], quote=False))
                 prev_ending_index = hi_location_offset
                 texts.append(text)
             else:
                 # TODO: would lo_location_offset == prev_ending_index ever happen?
                 # if yes, need to handle it
-                texts.append(original_text[prev_ending_index + 1:lo_location_offset])
+                texts.append(html.escape(
+                    original_text[prev_ending_index + 1:lo_location_offset], quote=False))
                 prev_ending_index = hi_location_offset
                 texts.append(text)
 
-    texts.append(original_text[prev_ending_index + 1:])
+    texts.append(html.escape(original_text[prev_ending_index + 1:], quote=False))
     final_text = ''.join(texts)
     return f'<snippet>{final_text}</snippet>'
 

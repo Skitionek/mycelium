@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { select, Store } from '@ngrx/store';
 import { EMPTY, from } from 'rxjs';
@@ -37,7 +37,7 @@ export class AuthEffects {
     private readonly store$: Store<State>,
     private readonly authService: AuthenticationService,
     private readonly modalService: NgbModal,
-    private readonly snackbar: MatLegacySnackBar,
+    private readonly snackbar: MatSnackBar,
   ) {
   }
 
@@ -53,7 +53,7 @@ export class AuthEffects {
       if (!cookie || outOfDate) {
         this.authService.eraseCookie('terms_of_service');
 
-        const modalRef = this.modalService.open(TermsOfServiceDialogComponent);
+        const modalRef = this.modalService.open(TermsOfServiceDialogComponent, {scrollable: true});
         modalRef.result.then(() => {
           const timeStamp = TERMS_OF_SERVICE.updateTimestamp;
 

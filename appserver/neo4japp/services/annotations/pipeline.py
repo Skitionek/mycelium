@@ -51,24 +51,19 @@ class Pipeline:
                 (1) FILE_MIME_TYPE_PDF
                 (2) FILE_MIME_TYPE_ENRICHMENT_TABLE
         :param kwargs : dict
-            Currently accept three keyword args:
-                (1) file_id : int
-                (2) exclude_references : bool
-                (3) text : str
+            Currently accept two keyword args:
+                (1) pdf_bytes : bytes  — raw PDF content (required for PDFs)
+                (2) text : str         — plain text (required for enrichment tables)
         """
-        params = {}
-        if 'text' not in kwargs:
-            params['file_id'] = kwargs.get('file_id', None)
-            params['exclude_references'] = kwargs.get('exclude_references', True)
+        if content_type == FILE_MIME_TYPE_PDF:
+            pdf_bytes = kwargs.get('pdf_bytes')
+            if not pdf_bytes:
+                raise AnnotationError(
+                    'Unable to Annotate',
+                    'Cannot annotate the PDF file: no content provided.')
+            return parse_content(content_type, pdf_bytes=pdf_bytes)
         else:
-            params['text'] = kwargs.get('text', '')
-
-        if content_type == FILE_MIME_TYPE_PDF and not params['file_id']:
-            raise AnnotationError(
-                'Unable to Annotate',
-                'Cannot annotate the PDF file, the file id is missing or data is corrupted.')
-
-        return parse_content(content_type, **params)
+            return parse_content(content_type, text=kwargs.get('text', ''))
 
     def get_globals(
         self,

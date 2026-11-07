@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, firstValueFrom, forkJoin, from, merge, of } from 'rxjs';
@@ -17,7 +17,6 @@ import { openDownloadForBlob } from 'app/shared/utils/files';
 import { ResultMapping } from 'app/shared/schemas/common';
 import { Progress } from 'app/interfaces/common-dialog.interface';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
-import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 
 import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 import { ObjectDeleteDialogComponent } from '../components/dialog/object-delete-dialog.component';
@@ -47,7 +46,7 @@ export class FilesystemObjectActions {
 
   constructor(protected readonly annotationsService: AnnotationsService,
               protected readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly route: ActivatedRoute,

@@ -10,19 +10,19 @@ import {
   Output,
   ViewChild,
   ViewEncapsulation,
-  ComponentFactoryResolver,
   ApplicationRef,
   Injector,
+  ChangeDetectionStrategy,
 } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentPortal, DomPortalOutlet } from '@angular/cdk/portal';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { escape, isNil, uniqueId, defer, forEach } from 'lodash-es';
 import { Observable, Subject, Subscription } from 'rxjs';
+
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
-
 import { DatabaseLink, EntityType, ENTITY_TYPE_MAP } from 'app/shared/annotation-types';
 import { SEARCH_LINKS } from 'app/shared/links';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
@@ -30,7 +30,6 @@ import { toValidLink } from 'app/shared/utils/browser';
 import { openModal } from 'app/shared/utils/modals';
 import { IS_MAC } from 'app/shared/utils/platform';
 import { InternalSearchService } from 'app/shared/services/internal-search.service';
-
 
 import { AddedAnnotationExclusion, Annotation, Location, Meta, Rect, RemovedAnnotationExclusion, } from './annotation-type';
 import { AnnotationEditDialogComponent } from './components/annotation-edit-dialog.component';
@@ -44,11 +43,13 @@ import { convertToViewportRectangle } from './utils/viewport-utils';
 declare let bootstrap: any;
 
 @Component({
-  // tslint:disable-next-line:component-selector
+  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'lib-pdf-viewer-lib',
   templateUrl: './pdf-viewer-lib.component.html',
   styleUrls: ['./pdf-viewer-lib.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
@@ -107,7 +108,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     }
   }
 
-  // tslint:disable-next-line: variable-name
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private _showExcludedAnnotations: boolean;
   @Input()
   set showExcludedAnnotations(showExcludedAnnotations: boolean) {
@@ -121,7 +122,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   @Output() loadCompleted = new EventEmitter();
   @Output() annotationDragStart = new EventEmitter<AnnotationDragEvent>();
-  // tslint:disable
+  /* eslint-disable */
   @Output('custom-annotation-created') annotationCreated = new EventEmitter();
   @Output('custom-annotation-removed') annotationRemoved = new EventEmitter();
   @Output('annotation-exclusion-added') annotationExclusionAdded = new EventEmitter();
@@ -198,11 +199,10 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   constructor(
     protected readonly elementRef: ElementRef,
     protected readonly modalService: NgbModal,
-    private cfr: ComponentFactoryResolver,
     private appRef: ApplicationRef,
     private injector: Injector,
     protected readonly zone: NgZone,
-    protected readonly snackBar: MatLegacySnackBar,
+    protected readonly snackBar: MatSnackBar,
     protected readonly errorHandler: ErrorHandler,
     protected readonly internalSearch: InternalSearchService,
   ) {
@@ -372,6 +372,16 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
           trigger: 'click',
           placement: 'top',
           container: overlayContainer,
+          // Bootstrap sanitizes popover HTML against an allowlist with no
+          // <button>, inline handlers or data-* attributes, which stripped
+          // the action buttons and the collapse toggles out of this markup.
+          // prepareTooltipContent() escapes every value it interpolates.
+          allowList: {
+            ...bootstrap.Popover.Default.allowList,
+            div: ['data-bs-toggle', 'data-bs-target', 'style'],
+            span: ['style'],
+            button: ['type', 'onclick'],
+          },
         });
         this.annotationPopoverMap.set(overlayDiv, popover);
       }
@@ -432,7 +442,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     base.push(an.meta.idType && an.meta.idType !== '' ? `Data Source: ${escape(an.meta.idType)}` : 'Data Source: None');
 
     if (an.meta.isCustom) {
-      base.push('User generated annotation');
+      base.push(`User generated annotation`);
     }
 
     let htmlLinks = '<div>';
@@ -440,7 +450,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     // source links if any
     if (an.meta.idHyperlinks && an.meta.idHyperlinks.length > 0) {
       htmlLinks += `
-        <a>Source Links <i class="fas fa-external-link-alt ml-1 text-muted"></i></a>
+        <a>Source Links <i class="fas fa-external-link-alt ms-1 text-muted"></i></a>
         <div>
       `;
 
@@ -449,7 +459,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         htmlLinks += `<a target="_blank" href="${escape(toValidLink(url))}">${escape(label)}</a><br>`;
       }
 
-      htmlLinks += '</div></div>';
+      htmlLinks += `</div></div>`;
     }
 
     // search links
@@ -459,11 +469,11 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div
           class="tooltip-collapse-control collapsed"
           role="button"
-          data-toggle="collapse"
-          data-target="#${searchLinkCollapseTargetId}"
+          data-bs-toggle="collapse"
+          data-bs-target="#${searchLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchLinkCollapseTargetId}"
-        >Search links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        >Search links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div class="collapse" id="${searchLinkCollapseTargetId}">
     `;
     // links should be sorted in the order that they appear in SEARCH_LINKS
@@ -471,7 +481,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       const link = an.meta.links[domain.toLowerCase()] || url.replace(/%s/, encodeURIComponent(an.meta.allText));
       htmlLinks += `<a target="_blank" href="${escape(link)}">${escape(domain.replace('_', ' '))}</a><br>`;
     }
-    htmlLinks += '</div></div>';
+    htmlLinks += `</div></div>`;
 
     // search internal links
     const searchInternalLinkCollapseTargetId = uniqueId('pdf-tooltip-internal-collapse-target');
@@ -480,11 +490,11 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div
           class="tooltip-collapse-control collapsed"
           role="button"
-          data-toggle="collapse"
-          data-target="#${searchInternalLinkCollapseTargetId}"
+          data-bs-toggle="collapse"
+          data-bs-target="#${searchInternalLinkCollapseTargetId}"
           aria-expanded="false"
           aria-controls="${searchInternalLinkCollapseTargetId}"
-        >Search internal links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        >Search internal links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div class="collapse" id="${searchInternalLinkCollapseTargetId}">
     `;
     const visLink = this.internalSearch.getVisualizerLink(an.meta.allText);
@@ -493,7 +503,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     htmlLinks += `<a target="_blank" href="${contLink}">File Content</a><br>`;
     const mapLink = this.internalSearch.getFileContentLink(an.meta.allText, {types: ['map']});
     htmlLinks += `<a target="_blank" href="${mapLink}">Map Content</a><br>`;
-    htmlLinks += '</div></div>';
+    htmlLinks += `</div></div>`;
 
     base.push(htmlLinks);
     base = [base.join('<br>')];
@@ -503,7 +513,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
         <div class="mt-1">
           <button
             type="button"
-            class="btn btn-primary btn-block"
+            class="btn btn-primary w-100"
             onclick="
                 window.pdfViewerRef['${this.pdfViewerId}']
                   .removeCustomAnnotation(${escape(
@@ -527,7 +537,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       };
       base.push(`
         <div class="mt-1">
-          <button type="button" class="btn btn-primary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].openExclusionPanel(${escape(
+          <button type="button" class="btn btn-primary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].openExclusionPanel(${escape(
         JSON.stringify(annExclusion))})">
             <i class="fas fa-fw fa-minus-circle"></i>
             <span>Mark for Exclusion</span>
@@ -537,7 +547,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     }
     base.push(`
         <div class="mt-1">
-          <button type="button" class="btn btn-secondary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].highlightAllAnnotations(${escape(
+          <button type="button" class="btn btn-secondary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].highlightAllAnnotations(${escape(
       JSON.stringify(an.meta.id))}, false);window.pdfViewerRef['${this.pdfViewerId}'].hideAllAnnotationPopovers()">
             <i class="fas fa-fw fa-search"></i>
             <span>Find Occurrences</span>
@@ -557,7 +567,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
             ${an.meta.exclusionComment ? `<span style="line-height: 16px"><i>comment: </i>${escape(an.meta.exclusionComment)}</span>` : ''}
           </div>
           <div class="mt-1">
-            <button type="button" class="btn btn-primary btn-block" onclick="window.pdfViewerRef['${this.pdfViewerId}'].removeAnnotationExclusion(${escape(
+            <button type="button" class="btn btn-primary w-100" onclick="window.pdfViewerRef['${this.pdfViewerId}'].removeAnnotationExclusion(${escape(
         JSON.stringify(annExclusion))})">
               <i class="fas fa-fw fa-undo"></i>
               <span>Unmark Exclusion</span>
@@ -587,16 +597,16 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
       }
       this._focusedTextLayer = undefined;
     }
-  }
+  };
 
   private get focusedTextLayer() {
     return this._focusedTextLayer;
-  }
+  };
 
   @HostListener('window:mousedown', ['$event'])
   mouseDown(event: MouseEvent) {
-    const target = event.target as any;
-    const parent = this.getClosestTextLayer(target);
+    let target = event.target as any;
+    let parent = this.getClosestTextLayer(target);
     if (parent) {
       this.focusedTextLayer = parent;
       // coming from pdf-viewer
@@ -646,7 +656,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     this.selection = null;
     this.firstAnnotationRange = null;
     // taking parent as to not start with Text node which does not have 'closest' method
-    const pageNumber = this.getClosestPageNumber(event.target as Node);
+    let pageNumber = this.getClosestPageNumber(event.target as Node);
     // not selecting outside pdf viewer
     if (pageNumber > -1) {
       this.selecting = true;
@@ -700,7 +710,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
    */
   cloneRangeContents(range: Range) {
     const {startOffset, endOffset} = range;
-    const rangeDocumentFragment = range.cloneContents();
+    let rangeDocumentFragment = range.cloneContents();
     // if selection is within singular span and not empty
     if (!rangeDocumentFragment.children.length && !range.collapsed) {
       const clonedElement = range.commonAncestorContainer.parentElement.cloneNode(true) as HTMLElement;
@@ -760,7 +770,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
    * @param event - event to decorate
    */
   setDragImage(node, event) {
-    const draggedElementRef = IS_MAC ? this.selectionDragContainer :
+    let draggedElementRef = IS_MAC ? this.selectionDragContainer :
       this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
 
     draggedElementRef.classList.add('dragged');
@@ -793,7 +803,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   @HostListener('dragend', ['$event'])
   dragEnd(event: DragEvent) {
-    const page = this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
+    let page = this.getClosestTextLayer(this.firstAnnotationRange.commonAncestorContainer);
     page.classList.remove('dragged');
   }
 
@@ -1128,7 +1138,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
         this.addHighlightItem(firstPageNumber, firstAnnotation.rects[0]);
       } else {
-        this.snackBar.open('The annotation could not be found in the document.',
+        this.snackBar.open(`The annotation could not be found in the document.`,
           'Close', {duration: 5000});
       }
     }
@@ -1177,7 +1187,7 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
     const height = Math.abs(bounds[1] - bounds[3]);
     const overlayContainer = pdfPageView.div;
     const overlayDiv = document.createElement('div');
-    overlayDiv.setAttribute('style', 'border: 2px solid red; position:absolute;' +
+    overlayDiv.setAttribute('style', `border: 2px solid red; position:absolute;` +
       'left:' + (left - 4) + 'px;top:' + (top - 4) + 'px;width:' + (width + 8) + 'px;height:' + (height + 8) + 'px;');
     overlayContainer.appendChild(overlayDiv);
     overlayDiv.scrollIntoView({block: 'center'});
@@ -1189,10 +1199,9 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
 
   textLayerPortalOutlets: Map<number, DomPortalOutlet> = new Map();
 
-  createTextLayerPortalOutlet({pageNumber, textLayerDiv}: TextLayerBuilder) {
+  createTextLayerPortalOutlet({pageNumber, div}: TextLayerBuilder) {
     const portalOutlet = new DomPortalOutlet(
-      textLayerDiv,
-      this.cfr,
+      div,
       this.appRef,
       this.injector
     );
@@ -1238,8 +1247,8 @@ export class PdfViewerLibComponent implements OnInit, OnDestroy {
   @HostListener('keydown.control.c')
   @HostListener('keydown.meta.c')
   copySelectedText() {
-    const listener = (e: ClipboardEvent) => {
-      const clipboard = e.clipboardData || window['clipboardData'];
+    let listener = (e: ClipboardEvent) => {
+      let clipboard = e.clipboardData || window['clipboardData'];
       clipboard.setData('text', this.allText);
       e.preventDefault();
     };

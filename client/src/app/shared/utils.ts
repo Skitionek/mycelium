@@ -227,6 +227,8 @@ export function ignore404Errors<T>(): UnaryFunction<Observable<T>, Observable<T>
  * Matches filename/url with supported extensions and returns its information
  */
 export function getSupportedFileCodes(text: string): SupportedExtensionInfo {
+  // Extensions are often in capitals, as in REPORT.DOCX
+  text = text.toLowerCase();
   if (text.endsWith('.docx') || text.endsWith('.doc')) {
     return {
       unicode: Unicodes.Word,

@@ -3,7 +3,7 @@
  */
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -11,8 +11,8 @@ import { RouterModule } from '@angular/router';
 
 import { EffectsModule } from '@ngrx/effects';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { AngularSplitModule } from 'angular-split';
 
+import { AngularSplitModule } from 'angular-split';
 import { LinksPanelComponent } from 'app/drawing-tool/components/links-panel.component';
 
 import { AngularMaterialModule } from './angular-material.module';
@@ -144,7 +144,6 @@ const components = [
 @NgModule({
   imports: [
     CommonModule,
-    HttpClientModule,
     AngularMaterialModule,
     FormsModule,
     ReactiveFormsModule,
@@ -192,12 +191,16 @@ const components = [
       useClass: HighlightTagHandler,
       multi: true,
     },
+    // Replaces the deprecated HttpClientModule. withInterceptorsFromDi keeps the
+    // class-based interceptors registered through HTTP_INTERCEPTORS working, and
+    // withXhr keeps XMLHttpRequest as the backend (Angular 22 defaults to fetch,
+    // which has no upload progress).
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
   ],
   // exported modules are visible to modules that import this one
   exports: [
     // Modules
     CommonModule,
-    HttpClientModule,
     AngularMaterialModule,
     FormsModule,
     ReactiveFormsModule,

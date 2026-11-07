@@ -37,7 +37,7 @@ def test_can_authenticate_user(client, session, password, login_password):
     if password == login_password:
         assert response.status_code == 200
     else:
-        assert response.status_code == 404
+        assert response.status_code == 401
 
 
 def test_can_authenticate_with_auth_token(client, session):

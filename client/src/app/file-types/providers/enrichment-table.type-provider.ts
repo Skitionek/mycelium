@@ -1,4 +1,4 @@
-import { ComponentFactory, ComponentFactoryResolver, Injectable, Injector } from '@angular/core';
+import { createComponent, EnvironmentInjector, Injectable, Injector } from '@angular/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { finalize, map, mergeMap, take, tap } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export class EnrichmentTableTypeProvider extends AbstractObjectTypeProvider {
               protected readonly errorHandler: ErrorHandler,
               protected readonly objectCreationService: ObjectCreationService,
               protected readonly worksheetViewerService: EnrichmentTableService,
-              protected readonly componentFactoryResolver: ComponentFactoryResolver,
+              protected readonly environmentInjector: EnvironmentInjector,
               protected readonly injector: Injector,
               protected readonly worksheetService: EnrichmentTableService) {
     super(abstractObjectTypeProviderHelper);
@@ -59,9 +59,10 @@ export class EnrichmentTableTypeProvider extends AbstractObjectTypeProvider {
 
   createPreviewComponent(object: FilesystemObject, contentValue$: Observable<Blob>,
                          options?: PreviewOptions) {
-    const factory: ComponentFactory<EnrichmentTablePreviewComponent> =
-      this.componentFactoryResolver.resolveComponentFactory(EnrichmentTablePreviewComponent);
-    const componentRef = factory.create(this.injector);
+    const componentRef = createComponent(EnrichmentTablePreviewComponent, {
+      environmentInjector: this.environmentInjector,
+      elementInjector: this.injector,
+    });
     const instance: EnrichmentTablePreviewComponent = componentRef.instance;
     return contentValue$.pipe(
       mergeMap(blob => new EnrichmentDocument(this.worksheetService).loadResult(blob, object.hashId)),

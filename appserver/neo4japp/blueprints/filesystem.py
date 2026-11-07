@@ -63,7 +63,11 @@ from neo4japp.schemas.filesystem import (
 )
 from neo4japp.services.file_types.exports import ExportFormatError
 from neo4japp.services.file_types.providers import DirectoryTypeProvider
-from neo4japp.services.libreoffice import convert_to_pdf, mime_type_for_filename
+from neo4japp.services.libreoffice import (
+    ConversionFailedError,
+    convert_to_pdf,
+    mime_type_for_filename,
+)
 from neo4japp.utils.collections import window
 from neo4japp.utils.http import make_cacheable_file_response
 from neo4japp.utils.network import read_url
@@ -993,8 +997,10 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            file_ids = [file_id for (file_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(file_ids))
             total = result.total
 
         elif params['type'] == 'linked':
@@ -1012,8 +1018,10 @@ class FileSearchView(FilesystemBaseView):
                 per_page=pagination['limit'],
             )
 
-            # Now we get the full file information for this slice of the results
-            files = self.get_nondeleted_recycled_files(Files.id.in_(result.items))
+            # Now we get the full file information for this slice of the results;
+            # a single-column query pages through rows, and Postgres binds plain ids
+            map_ids = [map_id for (map_id,) in result.items]
+            files = self.get_nondeleted_recycled_files(Files.id.in_(map_ids))
             total = len(files)
 
         else:
@@ -1072,6 +1080,24 @@ class FileContentView(FilesystemBaseView):
         )
 
 
+def convert_document_to_pdf(content: bytes, mime_type: str, filename: str) -> bytes:
+    """Convert a document with LibreOffice, answering a failure as a client or server error."""
+    try:
+        return convert_to_pdf(content, mime_type).read()
+    except RuntimeError as e:
+        raise ServerException(
+            title='Conversion Unavailable',
+            message=str(e),
+            code=503,
+        )
+    except (ConversionFailedError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        raise ServerException(
+            title='Conversion Failed',
+            message=f"'{filename}' could not be converted to PDF.",
+            code=422,
+        )
+
+
 class FileContentPdfView(FilesystemBaseView):
     """Serve a file's content as PDF, converting on-the-fly via LibreOffice if needed."""
 
@@ -1109,8 +1135,7 @@ class FileContentPdfView(FilesystemBaseView):
                 code=415,
             )
 
-        pdf_buffer = convert_to_pdf(raw, file.mime_type)
-        pdf_bytes = pdf_buffer.read()
+        pdf_bytes = convert_document_to_pdf(raw, file.mime_type, file.filename)
         # Hash the actual PDF output for a reliable ETag that reflects conversion output.
         pdf_etag = hashlib.sha256(pdf_bytes).hexdigest()
 
@@ -1154,20 +1179,7 @@ class PdfConversionView(MethodView):
                 code=415,
             )
 
-        try:
-            pdf_bytes = convert_to_pdf(content, mime_type).read()
-        except RuntimeError as e:
-            raise ServerException(
-                title='Conversion Unavailable',
-                message=str(e),
-                code=503,
-            )
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            raise ServerException(
-                title='Conversion Failed',
-                message=f"'{filename}' could not be converted to PDF.",
-                code=422,
-            )
+        pdf_bytes = convert_document_to_pdf(content, mime_type, filename)
         return self._pdf_response(pdf_bytes, pdf_filename)
 
     @staticmethod

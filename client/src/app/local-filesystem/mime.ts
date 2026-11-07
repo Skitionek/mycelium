@@ -161,6 +161,19 @@ export function withTypeExtension(filename: string, mimeType: string): string {
   return filename + extension;
 }
 
+/**
+ * Give a file name the extension of its MIME type when it has none, so that a converter
+ * that goes by the name can tell the format of e.g. an upload named without one.
+ */
+export function withMimeTypeExtension(filename: string, mimeType: string): string {
+  if (getExtension(filename)) {
+    return filename;
+  }
+  const extension = Object.keys(EXTENSION_MIME_TYPES)
+    .find(candidate => EXTENSION_MIME_TYPES[candidate] === mimeType);
+  return extension ? filename + extension : filename;
+}
+
 export function isPdfConvertible(filename: string, mimeType: string): boolean {
   const officeExtensions = ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.odt', '.ods', '.odp', '.rtf'];
   return officeExtensions.includes(getExtension(filename))

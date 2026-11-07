@@ -1,10 +1,12 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { hexToRGBA } from '../utils';
 
 @Component({
   selector: 'app-result-control',
   templateUrl: './result-control.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ResultControlComponent {
 

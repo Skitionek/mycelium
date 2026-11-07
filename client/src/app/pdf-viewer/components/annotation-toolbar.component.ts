@@ -1,5 +1,15 @@
-import { Component, ElementRef, NgZone, Output, EventEmitter, Input, HostBinding, ViewEncapsulation } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import {
+  Component,
+  ElementRef,
+  NgZone,
+  Output,
+  EventEmitter,
+  Input,
+  HostBinding,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,14 +23,16 @@ import { Rect } from '../annotation-type';
   selector: 'app-annotation-toolbar',
   styleUrls: ['./annotation-toolbar.component.scss'],
   templateUrl: './annotation-toolbar.component.html',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class AnnotationToolbarComponent {
 
   constructor(protected readonly elementRef: ElementRef,
               protected readonly modalService: NgbModal,
               protected readonly zone: NgZone,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly errorHandler: ErrorHandler) {
   }
 
