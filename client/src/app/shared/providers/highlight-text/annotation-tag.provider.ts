@@ -82,7 +82,6 @@ export class AnnotationTagHandler extends TagHandler {
     const object: FilesystemObject | undefined = detail.object;
 
     if (element != null) {
-      let search;
       let text = element.textContent;
 
       const sources: Source[] = [];
@@ -93,7 +92,7 @@ export class AnnotationTagHandler extends TagHandler {
         sources.push(...object.getGraphEntitySources(meta));
       }
 
-      search = Object.keys(meta.links || []).map(k => {
+      const search = Object.keys(meta.links || []).map(k => {
         return {
           domain: k,
           url: meta.links[k],
@@ -214,7 +213,7 @@ export class AnnotationTagHandler extends TagHandler {
     }
 
     if (idLink !== null) {
-      // tslint:disable-next-line:max-line-length
+      // eslint-disable-next-line @stylistic/max-len
       base.push(annoId && annoId.indexOf('NULL') === -1 ? `Id: <a href=${escape(`${idLink.url}${annoId}`)} target="_blank">${escape(annoId)}</a>` : 'Id: None');
     } else {
       base.push(annoId && annoId.indexOf('NULL') === -1 ? `Id: ${escape(annoId)}` : 'Id: None');
@@ -232,7 +231,7 @@ export class AnnotationTagHandler extends TagHandler {
     // source links if any
     if (meta.idHyperlinks && meta.idHyperlinks.length > 0) {
       htmlLinks += `
-        <div>Source Links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Source Links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
       `;
 
@@ -250,7 +249,7 @@ export class AnnotationTagHandler extends TagHandler {
     const searchLinkCollapseTargetId = uniqueId('enrichment-tooltip-collapse-target');
     htmlLinks += `
       <div>
-        <div>Search links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Search links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
     `;
     // links should be sorted in the order that they appear in SEARCH_LINKS
@@ -266,7 +265,7 @@ export class AnnotationTagHandler extends TagHandler {
     const searchInternalLinkCollapseTargetId = uniqueId('enrichment-tooltip-internal-collapse-target');
     htmlLinks += `
       <div>
-        <div>Search internal links <i class="fas fa-external-link-alt ml-1 text-muted"></i></div>
+        <div>Search internal links <i class="fas fa-external-link-alt ms-1 text-muted"></i></div>
         <div>
     `;
     const visLink = this.internalSearch.getVisualizerLink(meta.allText);

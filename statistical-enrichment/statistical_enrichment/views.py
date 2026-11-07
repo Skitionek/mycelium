@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, Response
 from webargs.flaskparser import use_args
 
 from .schemas import EnrichmentSchema
@@ -14,11 +14,12 @@ def enrich_go(args):
     organism = args["organism"]
     analysis = args["analysis"]
 
-    return jsonify(
-        redis_cached(
-            f'enrich_go_{",".join(gene_names)}_{analysis}_{organism}',
-            lambda: get_enrichment_visualisation_service().enrich_go(
-                gene_names, analysis, organism
-            ),
-        )
+    # The result is already a JSON document, and comes back from the cache as
+    # bytes, so it is sent as is rather than encoded a second time.
+    result = redis_cached(
+        f'enrich_go_{",".join(gene_names)}_{analysis}_{organism}',
+        lambda: get_enrichment_visualisation_service().enrich_go(
+            gene_names, analysis, organism
+        ),
     )
+    return Response(result, mimetype="application/json")

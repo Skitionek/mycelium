@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { SdrfDocument } from '../models/sdrf-document';
 
@@ -8,6 +8,8 @@ import { SdrfDocument } from '../models/sdrf-document';
 @Component({
   selector: 'app-sdrf-preview',
   templateUrl: './sdrf-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SdrfPreviewComponent {
 

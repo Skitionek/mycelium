@@ -119,7 +119,9 @@ class URLFixerHandler(BaseHandler):
         port = parsed.port
 
         path = quote(path, '/%')
-        query = quote(query, '&%=')
+        # Every character RFC 3986 allows in a query is kept: '+' in
+        # particular is a space to most servers, and '%2B' a literal plus.
+        query = quote(query, "&%=+;,:@/?!$'()*")
         fragment = quote(fragment, '%')
 
         # Encode the netloc
@@ -130,7 +132,10 @@ class URLFixerHandler(BaseHandler):
                 new_netloc.write(':')
                 new_netloc.write(quote(password, '%'))
             new_netloc.write('@')
-        if hostname is not None:
+        if hostname is not None and ':' in hostname:
+            # An IPv6 literal, which urlsplit returns without its brackets
+            new_netloc.write(f'[{hostname}]')
+        elif hostname is not None:
             # Apply punycode
             new_netloc.write(hostname.encode('idna').decode('ascii'))
         if port is not None:

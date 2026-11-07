@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -26,6 +26,8 @@ import { FilesystemService } from 'app/file-browser/services/filesystem.service'
 @Component({
     selector: 'app-annotations-table',
     templateUrl: './annotations-table.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false,
 })
 export class AnnotationTableComponent implements OnInit, OnDestroy {
 

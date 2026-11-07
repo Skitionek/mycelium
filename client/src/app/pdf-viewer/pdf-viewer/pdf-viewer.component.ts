@@ -10,13 +10,15 @@ import {
   HostListener,
   OnDestroy,
   ViewChild,
-  NgZone
+  NgZone,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 import * as pdfjsLib from 'pdfjs-dist';
 import * as viewerx from 'pdfjs-dist/legacy/web/pdf_viewer';
 import { PDFDocumentProxy, PDFPageProxy, DocumentInitParameters, PDFDocumentLoadingTask } from 'pdfjs-dist/types/src/display/api';
 import { PageViewport } from 'pdfjs-dist/types/src/display/page_viewport';
+import { PDF_WORKER_PATH } from 'app/shared/constants';
 
 import { PDFProgressData, PDFViewerParams, PDFSource } from './interfaces';
 import { createEventBus } from '../utils/event-bus-utils';
@@ -49,7 +51,9 @@ Object.freeze(DEFAULT_DOCUMENT_INIT_PARAMETERS);
           <div class="pdfViewer"></div>
       </div>
   `,
-  styleUrls: ['./pdf-viewer.component.scss']
+  styleUrls: ['./pdf-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class PdfViewerComponent
   implements OnChanges, OnInit, OnDestroy {
@@ -162,9 +166,8 @@ export class PdfViewerComponent
     ) {
       pdfWorkerSrc = (window as any).pdfWorkerSrc;
     } else {
-      pdfWorkerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${
-        PDFJS.version
-      }/pdf.worker.min.js`;
+      // Served with the app: cdnjs has no pdf.worker.min.js for pdf.js 4 and later
+      pdfWorkerSrc = new URL(PDF_WORKER_PATH, document.baseURI).toString();
     }
 
     PDFJS.GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
@@ -217,19 +220,19 @@ export class PdfViewerComponent
   private isInitialized = false;
   private loadingTask: PDFDocumentLoadingTask;
 
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('after-load-complete') afterLoadComplete = new EventEmitter<PDFDocumentProxy>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('page-rendered') pageRendered = new EventEmitter<CustomEvent>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('text-layer-rendered') textLayerRendered = new EventEmitter<CustomEvent>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('matches-count-updated') matchesCountUpdated = new EventEmitter();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('find-control-state-updated') findControlStateUpdated = new EventEmitter();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('error') onError = new EventEmitter<any>();
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   @Output('on-progress') onProgress = new EventEmitter<PDFProgressData>();
   @Output() pageChange: EventEmitter<number> = new EventEmitter<number>(true);
   @Input()
@@ -359,6 +362,11 @@ export class PdfViewerComponent
 
   public updateSize() {
     const currentViewer = this.getCurrentViewer();
+    // pdf.js creates its pages some time after the document is attached and then fires
+    // pagesinit; scaling before that only logs an invalid pageNumber error
+    if (!currentViewer.pagesCount) {
+      return Promise.resolve();
+    }
     return this.internalPdf
       .getPage(currentViewer.currentPageNumber)
       .then((page: PDFPageProxy) => {
@@ -369,7 +377,6 @@ export class PdfViewerComponent
             rotation
           }).width * PdfViewerComponent.CSS_UNITS;
         let scale = this.internalZoom;
-        let stickToPage = true;
 
         // Scale the document when it shouldn't be in original size or doesn't fit into the viewport
         if (
@@ -381,10 +388,11 @@ export class PdfViewerComponent
             (page as any).getViewport({scale: 1, rotation})
               .width
           );
-          stickToPage = !this.internalStickToPage;
         }
 
-        currentViewer._setScale(scale, stickToPage);
+        // pdf.js 4 and later have no _setScale(scale, noScroll); the setter keeps the
+        // current page in view
+        currentViewer.currentScale = scale;
       });
   }
 
@@ -415,6 +423,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagechanging', e => {
@@ -496,6 +505,7 @@ export class PdfViewerComponent
 
     eventBus.on('pagesinit', e => {
       this.afterLoadComplete.emit(this.internalPdf);
+      this.updateSize();
     });
 
     eventBus.on('pagerendered', e => {

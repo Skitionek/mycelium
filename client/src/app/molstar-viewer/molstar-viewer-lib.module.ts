@@ -15,7 +15,7 @@ import { MolstarViewComponent } from './components/molstar-view.component';
     CommonModule,
     SharedModule,
     FileBrowserModule,
-    RouterModule.forRoot([]),
+    RouterModule,
   ],
   exports: [
     MolstarViewComponent,

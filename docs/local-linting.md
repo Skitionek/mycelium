@@ -53,5 +53,10 @@ npx prettier --check '**/*.{json,yml,yaml}'
 ```
 
 Note that `client/`'s TypeScript is **not** currently covered by either
-MegaLinter or the test workflow. See the open issue on replacing tslint with
-`angular-eslint`.
+MegaLinter or the test workflow. Lint it with ESLint (configured in
+`client/eslint.config.mjs`), which also runs on staged files in the pre-commit
+hook:
+
+```bash
+cd client && yarn lint
+```

@@ -1,4 +1,4 @@
-import { Component, Input, HostBinding } from '@angular/core';
+import { Component, Input, HostBinding, ChangeDetectionStrategy } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 
@@ -13,6 +13,8 @@ import { ErrorHandler } from '../services/error-handler.service';
   styleUrls: [
     './module-error.component.scss'
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ModuleErrorComponent {
   @HostBinding('class') @Input() class = 'position-absolute w-100 h-100 bg-white p-4';

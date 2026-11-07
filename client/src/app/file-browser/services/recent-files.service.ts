@@ -6,6 +6,7 @@ import { isEqual, remove } from 'lodash-es';
 
 import { BackgroundTask } from 'app/shared/rxjs/background-task';
 import { ErrorHandler } from 'app/shared/services/error-handler.service';
+import { LocalFolderError } from 'app/local-filesystem/local-folder-errors';
 
 import { FilesystemObject } from '../models/filesystem-object';
 import { FilesystemService } from './filesystem.service';
@@ -78,7 +79,7 @@ export class RecentFileHashesService implements OnDestroy {
       if (strValue) {
         const value = JSON.parse(strValue);
         if (Array.isArray(value)) {
-          return value.filter(v => typeof v === 'string' || v instanceof String);
+          return value.filter((v): v is string => typeof v === 'string' || v instanceof String);
         } else {
           this.errorHandler.logError(new Error('Recent files list has been corrupted - refreshing'));
         }
@@ -130,14 +131,18 @@ export class RecentFilesService extends RecentFileHashesService implements OnDes
       return zip(
         ...fileHashes.map(fileHash =>
           filesystemService.get(fileHash, false).pipe(
-            catchError(() => {
-              // if file does not exist, delete from list
-              this.deleteFromHashes(fileHash);
+            catchError(error => {
+              // if file does not exist, delete from list; files in a local folder that only
+              // needs reconnecting stay listed and show up again once it is reconnected
+              if (!(error instanceof LocalFolderError) || error.code === 'not-found') {
+                this.deleteFromHashes(fileHash);
+              }
               return of(undefined);
             }),
             tap(fileObj => {
-              const {hashId} = fileObj;
-              this.fileObjects.set(hashId, fileObj);
+              if (fileObj != null) {
+                this.fileObjects.set(fileObj.hashId, fileObj);
+              }
             })
           )
         )

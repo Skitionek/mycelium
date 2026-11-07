@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Subscription } from 'rxjs';
@@ -15,7 +15,9 @@ import { EnrichmentService } from '../../services/enrichment.service';
   selector: 'app-enrichment-visualisation-viewer',
   templateUrl: './enrichment-visualisation-viewer.component.html',
   styleUrls: ['./enrichment-visualisation-viewer.component.scss'],
-  providers: [EnrichmentVisualisationService, EnrichmentService]
+  providers: [EnrichmentVisualisationService, EnrichmentService],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class EnrichmentVisualisationViewerComponent implements OnInit, ModuleAwareComponent {
 

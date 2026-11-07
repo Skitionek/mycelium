@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -14,6 +14,8 @@ import { AppUser, UserUpdateRequest } from 'app/interfaces';
 @Component({
   selector: 'app-user-update-dialog',
   templateUrl: './user-update-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class UserUpdateDialogComponent extends CommonFormDialogComponent {
   @Input() isSelf: boolean;
@@ -33,8 +35,12 @@ export class UserUpdateDialogComponent extends CommonFormDialogComponent {
   }
 
   getValue(): UserUpdateRequest {
+    // The value has no roles when their control is disabled, as for one's own account
+    const {roles, ...value} = this.form.value;
     return {
-      ...this.form.value,
+      ...value,
+      // The form picks one role, the API takes a list of them
+      ...(roles != null ? {roles: [roles]} : {}),
       hashId: this.user.hashId,
     };
   }

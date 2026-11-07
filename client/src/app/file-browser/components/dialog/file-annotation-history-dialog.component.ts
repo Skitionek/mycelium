@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,6 +13,8 @@ import { FilesystemObject } from '../../models/filesystem-object';
 @Component({
   selector: 'app-object-annotation-history-dialog',
   templateUrl: './file-annotation-history-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class FileAnnotationHistoryDialogComponent extends CommonDialogComponent {
 

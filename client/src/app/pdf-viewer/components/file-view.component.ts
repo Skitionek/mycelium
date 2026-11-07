@@ -1,5 +1,5 @@
-import { Component, EventEmitter, OnDestroy, Output, ViewChild } from '@angular/core';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { Component, EventEmitter, OnDestroy, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -41,10 +41,10 @@ import {
 
 class DummyFile implements PdfFile {
   constructor(
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     public file_id: string,
     public filename: string = null,
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     public creation_date: string = null,
     public username: string = null) {
   }
@@ -59,6 +59,8 @@ class EntityTypeEntry {
   selector: 'app-pdf-viewer',
   templateUrl: './file-view.component.html',
   styleUrls: ['./file-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 
 export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
@@ -133,7 +135,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     protected readonly filesystemService: FilesystemService,
     protected readonly fileObjectActions: FilesystemObjectActions,
     protected readonly pdfAnnService: AnnotationsService,
-    protected readonly snackBar: MatLegacySnackBar,
+    protected readonly snackBar: MatSnackBar,
     protected readonly modalService: NgbModal,
     protected readonly route: ActivatedRoute,
     protected readonly errorHandler: ErrorHandler,
@@ -143,8 +145,8 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
     this.loadTask = new BackgroundTask(([hashId, loc]) => {
       return combineLatest(
         this.filesystemService.get(hashId),
-        // Use the /content/pdf endpoint so non-PDF files are converted server-side
-        // before the PDF viewer receives them.
+        // Non-PDF files are converted (in the browser where possible) before the PDF
+        // viewer receives them.
         this.filesystemService.getContentAsPdf(hashId).pipe(
           mapBlobToBuffer(),
         ),
@@ -441,7 +443,7 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
           // assumes first link will be main database source link
           // tslint ignore cause other option is destructuring and that
           // also gets name shadowing error
-          /* tslint:disable-next-line */
+          /* eslint-disable-next-line */
           url: hyperlink.length > 0 ? JSON.parse(hyperlink[0])['url'] : '',
         }],
         hyperlinks,
@@ -618,16 +620,14 @@ export class FileViewComponent implements OnDestroy, ModuleAwareComponent {
   }
 
   parseLocationFromUrl(fragment: string): Location | undefined {
-    let pageMatch;
     let coordMatch;
-    let jumpMatch;
     const params = new URLSearchParams(fragment);
-    pageMatch = params.get('page');
+    const pageMatch = params.get('page');
     const coords = params.get('coords');
     if (coords != null) {
       coordMatch = coords.split(/,/g);
     }
-    jumpMatch = params.get('jump');
+    const jumpMatch = params.get('jump');
     return {
       pageNumber: pageMatch != null ? parseInt(pageMatch, 10) : null,
       rect: coordMatch != null ? coordMatch.map(parseFloat) : null,

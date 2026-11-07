@@ -1,5 +1,6 @@
 import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -23,6 +24,7 @@ import { GlobalErrorHandler } from 'app/global-error-handler';
 import { EnrichmentTablesModule } from 'app/enrichment/enrichment-tables.module';
 import { EnrichmentVisualisationsModule } from 'app/enrichment/enrichment-visualisation.module';
 import { FileTypesModule } from 'app/file-types/file-types.module';
+import { LocalFilesystemModule } from 'app/local-filesystem/local-filesystem.module';
 
 @NgModule({
   declarations: [
@@ -33,12 +35,14 @@ import { FileTypesModule } from 'app/file-types/file-types.module';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AdminModule,
     AuthModule,
     SharedModule,
     AppRoutingModule,
     FileTypesModule,
     FileBrowserModule,
+    LocalFilesystemModule,
     UserModule,
     // ngrx
     RootStoreModule,
