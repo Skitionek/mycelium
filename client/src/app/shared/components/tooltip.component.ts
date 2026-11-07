@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, Input, OnDestroy, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { isNil } from 'lodash-es';
 import { VirtualElement, Instance, createPopper, Options } from '@popperjs/core';
@@ -11,6 +11,8 @@ import { uuidv4 } from '../utils';
   selector: 'app-tooltip',
   template: '<div id="tooltip">I am a Tooltip</div>',
   styles: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class TooltipComponent implements AfterViewInit, OnDestroy {
     @Input() tooltipOptions: Partial<Options>;

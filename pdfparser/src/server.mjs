@@ -23,7 +23,7 @@ const workerPath = require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs');
 pdfjsLib.GlobalWorkerOptions.workerSrc = pathToFileURL(workerPath).toString();
 
 const app = express();
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 const upload = multer({ storage: multer.memoryStorage() });
 

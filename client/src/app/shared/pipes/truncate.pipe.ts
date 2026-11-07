@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { isNil, isString } from 'lodash-es';
 
 @Pipe({
-  name: 'truncate'
+  name: 'truncate',
+  standalone: false
 })
 export class TruncatePipe implements PipeTransform {
   transform(value: string, limit = 20, ellipsis = '...'): string {

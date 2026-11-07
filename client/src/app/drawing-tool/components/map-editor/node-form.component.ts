@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild, HostListener, } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  HostListener,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { cloneDeep, isNil, startCase } from 'lodash-es';
 
@@ -18,6 +28,8 @@ import { InfoPanel } from '../../models/info-panel';
   selector: 'app-node-form',
   styleUrls: ['./node-form.component.scss'],
   templateUrl: './node-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class NodeFormComponent implements AfterViewInit {
   @ViewChild('displayName', {static: false}) displayNameRef: ElementRef;
