@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,6 +27,8 @@ import { SdrfDocument } from '../models/sdrf-document';
   selector: 'app-sdrf-view',
   templateUrl: './sdrf-view.component.html',
   styleUrls: ['./sdrf-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SdrfViewComponent implements OnInit, OnDestroy {
 

@@ -1,4 +1,4 @@
-import {ComponentFactory, ComponentFactoryResolver, Injectable, Injector} from '@angular/core';
+import {createComponent, EnvironmentInjector, Injectable, Injector} from '@angular/core';
 
 import {from, Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -31,7 +31,7 @@ export class MapTypeProvider extends AbstractObjectTypeProvider {
               protected readonly filesystemService: FilesystemService,
               protected readonly injector: Injector,
               protected readonly objectCreationService: ObjectCreationService,
-              protected readonly componentFactoryResolver: ComponentFactoryResolver,
+              protected readonly environmentInjector: EnvironmentInjector,
               protected readonly mapImageProviderService: MapImageProviderService) {
     super(abstractObjectTypeProviderHelper);
   }
@@ -66,9 +66,10 @@ export class MapTypeProvider extends AbstractObjectTypeProvider {
                          options?: PreviewOptions) {
     return contentValue$.pipe(
       map(contentValue => {
-        const factory: ComponentFactory<MapComponent<any>> =
-          this.componentFactoryResolver.resolveComponentFactory(MapComponent);
-        const componentRef = factory.create(this.injector);
+        const componentRef = createComponent<MapComponent<any>>(MapComponent, {
+          environmentInjector: this.environmentInjector,
+          elementInjector: this.injector,
+        });
         const instance: MapComponent = componentRef.instance;
         instance.highlightTerms = options ? options.highlightTerms : null;
         instance.map = object;

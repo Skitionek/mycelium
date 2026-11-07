@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
@@ -9,7 +9,7 @@ describe('BiocTableViewComponent', () => {
   let component: BiocTableViewComponent;
   let fixture: ComponentFixture<BiocTableViewComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ BiocTableViewComponent, AnnotatedTextComponent ],
       imports: [ NgbTooltip ],

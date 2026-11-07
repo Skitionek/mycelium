@@ -1,4 +1,4 @@
-import { Component, Input, isDevMode, } from '@angular/core';
+import { Component, Input, isDevMode, ChangeDetectionStrategy, } from '@angular/core';
 import { isDataSource } from '@angular/cdk/collections';
 
 import { Observable } from 'rxjs';
@@ -11,7 +11,9 @@ interface TreeNode {
 
 @Component({
   selector: 'app-object-explorer',
-  templateUrl: './object-explorer.component.html'
+  templateUrl: './object-explorer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class ObjectExplorerComponent {
   _dataSource;

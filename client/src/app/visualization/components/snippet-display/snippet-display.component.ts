@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -18,7 +18,9 @@ import { GenericDataProvider } from 'app/shared/providers/data-transfer-data/gen
 @Component({
     selector: 'app-snippet-display',
     templateUrl: './snippet-display.component.html',
-    styleUrls: ['./snippet-display.component.scss']
+    styleUrls: ['./snippet-display.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class SnippetDisplayComponent implements OnChanges, OnDestroy {
     @Output() requestNewPageEmitter: EventEmitter<

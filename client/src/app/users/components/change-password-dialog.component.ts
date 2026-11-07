@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ofType } from '@ngrx/effects';
@@ -15,7 +15,9 @@ import { UserEffects } from '../store/effects';
 
 @Component({
   selector: 'app-change-password-dialog',
-  templateUrl: './change-password-dialog.component.html'
+  templateUrl: './change-password-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class ChangePasswordDialogComponent extends CommonDialogComponent {
   user: PrivateAppUser;

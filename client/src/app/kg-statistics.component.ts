@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 
@@ -49,7 +49,9 @@ const DOMAIN_COLORS = [
 @Component({
   selector: 'app-kg-statistics',
   templateUrl: './kg-statistics.component.html',
-  styleUrls: ['./kg-statistics.component.scss']
+  styleUrls: ['./kg-statistics.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class KgStatisticsComponent {
   loadTask: BackgroundTask<void, StatisticsDataResponse>;

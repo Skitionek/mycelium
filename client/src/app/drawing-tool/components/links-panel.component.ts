@@ -1,4 +1,4 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectionStrategy } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { cloneDeep } from 'lodash-es';
@@ -30,6 +30,8 @@ import { LinkEditDialogComponent } from './map-editor/dialog/link-edit-dialog.co
     useExisting: LinksPanelComponent,
     multi: true,
   }],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LinksPanelComponent extends AbstractControlValueAccessor<(Source | Hyperlink)[]> {
 
