@@ -47,7 +47,7 @@ export class DelegateResourceManager<K, V> implements ResourceManager<K, V> {
     // TODO: Garbage collect!!
     // TODO: Garbage collect!!
     // TODO: Garbage collect!!
-    /*for (const id of removeIds) {
+    /* for (const id of removeIds) {
       this.resources.delete(id);
     }*/
   }

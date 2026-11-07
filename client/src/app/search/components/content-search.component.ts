@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -48,6 +48,8 @@ import {
   selector: 'app-content-search',
   templateUrl: './content-search.component.html',
   styleUrls: ['./content-search.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ContentSearchComponent extends PaginatedResultListComponent<ContentSearchParameters,
   RankedItem<FilesystemObject>> implements OnInit, OnDestroy {

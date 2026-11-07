@@ -1,7 +1,6 @@
 import os
 import codecs
 import re
-import string
 
 from datetime import timezone
 from enum import Enum
@@ -440,10 +439,9 @@ DETAIL_TEXT_LIMIT = 250
 
 # Start shared security constants
 MAX_ALLOWED_LOGIN_FAILURES = 5
-MIN_TEMP_PASS_LENGTH = 18
-MAX_TEMP_PASS_LENGTH = 24
-RESET_PASSWORD_SYMBOLS = '!@#$%&()-_=+[]{};:><?'
-RESET_PASSWORD_ALPHABET = RESET_PASSWORD_SYMBOLS + string.ascii_letters + string.digits
+MIN_PASSWORD_LENGTH = 8
+# Short-lived on purpose: the link is a bearer credential sitting in an inbox.
+PASSWORD_RESET_TOKEN_TTL_MINUTES = 30
 
 # Assets
 ASSETS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../assets')

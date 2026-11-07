@@ -36,7 +36,7 @@ name: Dependabot train
 # instruction. Those are listed in the log and skipped -- commenting at them
 # only collects refusals.
 #   * DIRTY -- bumps in one ecosystem edit the same lockfile
-#     (a yarn.lock, a requirements.txt, a uv.lock), so one landing can
+#     (a yarn.lock, a uv.lock), so one landing can
 #     conflict the rest. Dependabot re-resolves those, but only on its next
 #     scheduled run, which is weekly for most ecosystems here.
 #
@@ -119,7 +119,7 @@ jobs:
         id: app-token
         if: ${{ env.APP_ID != '' }}
         continue-on-error: true
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ env.APP_ID }}
           private-key: ${{ secrets.DEPENDABOT_TRAIN_APP_PRIVATE_KEY }}

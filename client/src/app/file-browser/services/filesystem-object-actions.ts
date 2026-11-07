@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatLegacySnackBar } from '@angular/material/legacy-snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, firstValueFrom, forkJoin, from, merge, of } from 'rxjs';
@@ -18,6 +18,7 @@ import { ResultMapping } from 'app/shared/schemas/common';
 import { Progress } from 'app/interfaces/common-dialog.interface';
 import { MessageType } from 'app/interfaces/message-dialog.interface';
 
+import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 import { ObjectDeleteDialogComponent } from '../components/dialog/object-delete-dialog.component';
 import { FilesystemObject } from '../models/filesystem-object';
 import { ObjectSelectionDialogComponent } from '../components/dialog/object-selection-dialog.component';
@@ -34,7 +35,6 @@ import { AnnotationsService } from './annotations.service';
 import { ObjectCreationService } from './object-creation.service';
 import { AnnotationGenerationResultData } from '../schema';
 import { ObjectReannotateResultsDialogComponent } from '../components/dialog/object-reannotate-results-dialog.component';
-import { isCodemirrorHandledMimeType, MimeTypes } from 'app/shared/constants';
 
 export interface OpenInOption {
   label: string;
@@ -46,7 +46,7 @@ export class FilesystemObjectActions {
 
   constructor(protected readonly annotationsService: AnnotationsService,
               protected readonly router: Router,
-              protected readonly snackBar: MatLegacySnackBar,
+              protected readonly snackBar: MatSnackBar,
               protected readonly modalService: NgbModal,
               protected readonly progressDialog: ProgressDialog,
               protected readonly route: ActivatedRoute,
@@ -268,6 +268,10 @@ export class FilesystemObjectActions {
 
     if (object.mimeType === MimeTypes.BioC) {
       addOption('BioC viewer', ['/projects', projectName, 'bioc', object.hashId]);
+    }
+
+    if (object.mimeType === MimeTypes.Sdrf) {
+      addOption('SDRF viewer', ['/projects', projectName, 'sdrf', object.hashId]);
     }
 
     if (object.isProteinStructure) {

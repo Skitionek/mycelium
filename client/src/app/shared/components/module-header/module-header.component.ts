@@ -1,11 +1,13 @@
-import { Component, Input, EventEmitter, Output, TemplateRef } from '@angular/core';
+import { Component, Input, EventEmitter, Output, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { FilesystemObject } from 'app/file-browser/models/filesystem-object';
 
 @Component({
   selector: 'app-module-header',
-  templateUrl: './module-header.component.html'
+  templateUrl: './module-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class ModuleHeaderComponent {
   @Input() object!: FilesystemObject;

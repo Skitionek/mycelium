@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -9,6 +9,8 @@ import { DirectoryObject } from 'app/interfaces/projects.interface';
 @Component({
   selector: 'app-deletion-result-dialog',
   templateUrl: './object-deletion-result-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class ObjectDeletionResultDialogComponent extends CommonDialogComponent {
   @Input() failed: { object: DirectoryObject, message: string }[];

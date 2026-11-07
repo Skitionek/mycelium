@@ -1,15 +1,18 @@
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { AfterViewInit, Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import * as d3 from 'd3';
 
 import { uuidv4 } from 'app/shared/utils';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- global from the Plotly script
 declare const Plotly: any;
 
 @Component({
   selector: 'app-plotly-sankey-diagram',
   templateUrl: './plotly-sankey-diagram.component.html',
-  styleUrls: ['./plotly-sankey-diagram.component.scss']
+  styleUrls: ['./plotly-sankey-diagram.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class PlotlySankeyDiagramComponent implements AfterViewInit {
   @Input() config: any;

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
+import { encode } from 'punycode';
 import { ApiService } from 'app/shared/services/api.service';
 import {
   PaginatedRequestOptions,
@@ -24,7 +25,6 @@ import {
   ProjectData,
   ProjectSearchRequest,
 } from '../schema';
-import { encode } from 'punycode';
 import { Collaborator } from '../models/collaborator';
 
 @Injectable()

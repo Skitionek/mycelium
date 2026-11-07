@@ -1,4 +1,4 @@
-import { Component, } from '@angular/core';
+import { Component, ChangeDetectionStrategy, } from '@angular/core';
 
 import { uuidv4 } from 'app/shared/utils';
 import { SankeyOptions, SankeyState } from 'app/shared-sankey/interfaces';
@@ -10,6 +10,8 @@ import { SankeyControllerService, customisedMultiValueAccessorId } from '../../s
   selector: 'app-sankey-advanced-panel',
   templateUrl: './advanced-panel.component.html',
   styleUrls: ['./advanced-panel.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class SankeyAdvancedPanelComponent {
   uuid: string;

@@ -22,18 +22,19 @@ Roadmap:
 | Feature / Improvement | [SBRG/lifelike](https://github.com/SBRG/lifelike) | Mycelium |
 |---|:---:|:---:|
 | **Dev environment** | Manual setup required | Zero-config via VS Code Dev Container / GitHub Codespaces |
-| **Angular version** | v9 | v14 |
+| **Angular version** | v9 | v22 |
 | **Tab/panel implementation** | Custom component | URL-encoded named router outlets (`route-with-dynamic-outlets`) |
 | **PDF viewer library** | pdfjs-dist 2.9.359 | pdfjs-dist 4.2.67 (CVE-2024-4367 fixed) |
 | **Office file support** | ❌ | ✅ Open and view Office files (`.docx`, `.xlsx`, `.pptx`, `.xls`, `.ppt`, `.odt`, etc.) |
 | **Protein structure viewer** | ❌ | ✅ Mol* viewer for `.pdb`, `.cif`, `.mmcif` |
 | **Code/text viewer** | ❌ | ✅ CodeMirror 6 read-only viewer with syntax highlighting |
 | **Folder-level annotation config** | ❌ | ✅ `.annotations` JSON files with inheritance/overrides |
+| **Local folders** | ❌ | ✅ Open folders from your computer via the File System Access API, indexed in the background with resumable on-disk shards ([docs](docs/local-folders.md)) |
 | **jQuery dependency** | ❌ (jquery, jquery-ui, qtip2) | ✅ Removed — replaced with native DOM APIs & Bootstrap 5 Popover |
 | **Python linting** | ❌ | ✅ ruff (E/F rules) across all Python services |
 | **Comprehensive linting** | ❌ | ✅ MegaLinter with SARIF upload & PR annotations |
 | **CI/CD pipelines** | ❌ | ✅ GitHub Actions: tests, Docker build/publish, CodeQL, Dependabot auto-merge |
-| **Automated UI tests** | ❌ | ✅ Angular unit specs for core UI components |
+| **Automated UI tests** | ❌ | ✅ Angular unit specs for core UI components and Playwright end-to-end tests against the full stack ([tests/e2e](tests/e2e)) |
 | **Database migrations** | 100+ incremental Alembic files | Single squashed baseline migration |
 | **d3 version** | v5 | v7 |
 | **Flask version** | 2.x | 3.x |
@@ -135,6 +136,14 @@ Mycelium currently provides the following built-in visualization types:
 - Enrichment tables
 - Sankey diagrams
 - Pathway Browser
+
+### Local folders
+
+Folders on your own computer can be connected next to projects, in Chromium-based
+browsers. Their files open in the same built-in viewers as uploaded files, without being
+uploaded, and are indexed in the background for search; PDFs and enrichment tables also
+get entity annotations. The index is saved in hidden `.mycelium` directories inside the
+folder, so it survives disconnecting and is picked up when the folder is connected again. See [Local folders](docs/local-folders.md).
 
 ### Other features
 

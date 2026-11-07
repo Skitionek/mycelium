@@ -68,7 +68,7 @@ jobs:
     permissions:
       contents: read
     container:
-      image: ghcr.io/Skitionek/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
+      image: ghcr.io/skitionek/mycelium-graphdb-migrator:${{ github.event.inputs.migrator_image_tag }}
       options: --user root
       env:
         NEO4J_HOST: ${{ github.event.inputs.neo4j_host }}
@@ -85,7 +85,7 @@ jobs:
       - name: Copy changelog files
         run: cp -rp graph-db/changelog/* /liquibase/changelog/
       - name: Release previous lock
-        if: ${{ github.event.inputs.release_lock }}
+        if: ${{ inputs.release_lock }}
         run: /docker-entrypoint.sh releaseLocks
       - name: Run Liquibase migrations
         run: /docker-entrypoint.sh update

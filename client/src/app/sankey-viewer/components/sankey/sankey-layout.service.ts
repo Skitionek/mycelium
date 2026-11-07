@@ -461,7 +461,7 @@ export class SankeyLayoutService extends AttributeAccessors {
     const {
       py, y1, y0
     } = this;
-    // tslint:disable-next-line:no-bitwise
+    // eslint-disable-next-line no-bitwise
     const i = nodes.length >> 1;
     const subject = nodes[i];
     this.resolveCollisionsBottomToTop(nodes, subject._y0 - py, i - 1, alpha);
@@ -479,7 +479,8 @@ export class SankeyLayoutService extends AttributeAccessors {
       const node = nodes[i];
       const dy = (y - node._y0) * alpha;
       if (dy > 1e-6) {
-        node._y0 += dy, node._y1 += dy;
+        node._y0 += dy;
+        node._y1 += dy;
       }
       y = node._y1 + py;
     }
@@ -494,7 +495,8 @@ export class SankeyLayoutService extends AttributeAccessors {
       const node = nodes[i];
       const dy = (node._y1 - y) * alpha;
       if (dy > 1e-6) {
-        node._y0 -= dy, node._y1 -= dy;
+        node._y0 -= dy;
+        node._y1 -= dy;
       }
       y = node._y0 - py;
     }
