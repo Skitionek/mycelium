@@ -18,6 +18,7 @@ import { ErrorHandler } from '../../services/error-handler.service';
     useExisting: UserSelectComponent,
     multi: true,
   }],
+  standalone: false,
 })
 export class UserSelectComponent implements ControlValueAccessor, OnInit, OnDestroy {
 

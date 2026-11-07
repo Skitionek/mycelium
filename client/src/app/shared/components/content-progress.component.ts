@@ -5,6 +5,7 @@ import { TaskStatus } from '../rxjs/background-task';
 @Component({
   selector: 'app-content-progress',
   templateUrl: './content-progress.component.html',
+  standalone: false,
 })
 export class ContentProgressComponent {
   @Input() status: TaskStatus;

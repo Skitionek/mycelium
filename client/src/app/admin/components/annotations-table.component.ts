@@ -26,6 +26,7 @@ import { FilesystemService } from 'app/file-browser/services/filesystem.service'
 @Component({
     selector: 'app-annotations-table',
     templateUrl: './annotations-table.component.html',
+    standalone: false,
 })
 export class AnnotationTableComponent implements OnInit, OnDestroy {
 

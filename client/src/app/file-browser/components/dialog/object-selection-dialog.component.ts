@@ -13,6 +13,7 @@ import { ObjectSelectService } from '../../services/object-select.service';
   selector: 'app-object-selection-dialog',
   templateUrl: './object-selection-dialog.component.html',
   providers: [ObjectSelectService],
+  standalone: false,
 })
 export class ObjectSelectionDialogComponent
   extends CommonDialogComponent<readonly FilesystemObject[]>

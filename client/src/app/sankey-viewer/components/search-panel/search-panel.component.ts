@@ -8,7 +8,8 @@ import { SankeySearchService } from '../../services/search.service';
   selector: 'app-sankey-search-panel',
   templateUrl: './search-panel.component.html',
   styleUrls: ['./search-panel.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class SankeySearchPanelComponent {
   constructor(

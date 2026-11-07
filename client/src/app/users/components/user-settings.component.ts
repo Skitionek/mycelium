@@ -10,6 +10,7 @@ import { AppUser } from 'app/interfaces';
 @Component({
   selector: 'app-user-settings',
   templateUrl: './user-settings.component.html',
+  standalone: false,
 })
 export class UserSettingsComponent {
   currentUsers$: Observable<AppUser>;

@@ -11,6 +11,7 @@ import { uuidv4 } from '../utils';
   selector: 'app-tooltip',
   template: '<div id="tooltip">I am a Tooltip</div>',
   styles: [],
+  standalone: false,
 })
 export class TooltipComponent implements AfterViewInit, OnDestroy {
     @Input() tooltipOptions: Partial<Options>;

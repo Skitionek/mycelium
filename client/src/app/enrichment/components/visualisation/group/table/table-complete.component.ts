@@ -12,7 +12,8 @@ import { EnrichWithGOTermsResult } from 'app/enrichment/services/enrichment-visu
   selector: 'app-table-complete',
   templateUrl: './table-complete.component.html',
   styleUrls: ['./table-complete.component.scss'],
-  providers: [DataService, DecimalPipe]
+  providers: [DataService, DecimalPipe],
+  standalone: false
 })
 export class TableCompleteComponent implements OnChanges {
   data$: Observable<EnrichWithGOTermsResult[]>;

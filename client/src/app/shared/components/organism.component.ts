@@ -23,6 +23,7 @@ import { OrganismAutocomplete } from 'app/interfaces';
       <strong>Synonym:</strong> {{ organism.synonym }}
     </ng-template>
   `,
+  standalone: false,
 })
 export class OrganismComponent {
 

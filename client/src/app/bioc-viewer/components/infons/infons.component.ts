@@ -5,6 +5,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-bioc-infons',
   templateUrl: './infons.component.html',
   styleUrls: ['./infons.component.scss'],
+  standalone: false,
 })
 export class InfonsComponent {
   @Input() data;

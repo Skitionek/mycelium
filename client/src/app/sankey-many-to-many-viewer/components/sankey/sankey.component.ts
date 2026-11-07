@@ -16,6 +16,7 @@ import { SankeyManyToManyLink, SankeyManyToManyNode } from '../interfaces';
   templateUrl: './sankey.component.svg',
   styleUrls: ['./sankey.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class SankeyManyToManyComponent extends SankeyComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() highlightCircular;

@@ -14,7 +14,8 @@ import { SynonymData } from '../shared';
 @Component({
   selector: 'app-synonym-search',
   templateUrl: './synonym-search.component.html',
-  styleUrls: ['./synonym-search.component.scss']
+  styleUrls: ['./synonym-search.component.scss'],
+  standalone: false
 })
 export class SynonymSearchComponent {
   id = uuidv4();

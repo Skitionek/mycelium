@@ -9,7 +9,8 @@ import { MessageDialog } from 'app/shared/services/message-dialog.service';
 
 @Component({
   selector: 'app-sankey-view-confirm',
-  templateUrl: './view-create.component.html'
+  templateUrl: './view-create.component.html',
+  standalone: false
 })
 export class SankeyViewCreateComponent extends CommonFormDialogComponent<ObjectEditDialogValue> {
   constructor(

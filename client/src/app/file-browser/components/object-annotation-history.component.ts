@@ -11,6 +11,7 @@ import { FilesystemObject } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-annotation-history',
   templateUrl: './object-annotation-history.component.html',
+  standalone: false,
 })
 export class ObjectAnnotationHistoryComponent {
 

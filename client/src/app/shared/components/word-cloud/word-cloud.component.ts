@@ -102,6 +102,7 @@ const createResizeObserver = (callback, container) => {
   templateUrl: './word-cloud.component.html',
   styleUrls: ['./word-cloud.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class WordCloudComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cloudWrapper', {static: false}) cloudWrapper!: ElementRef;

@@ -21,6 +21,7 @@ import { WordCloudAnnotationFilterEntityWithLayout } from '../interfaces';
   templateUrl: './word-cloud.component.html',
   styleUrls: ['./word-cloud.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class WordCloudComponent implements OnInit, OnDestroy {
   id = uniqueId('WordCloudComponent-');

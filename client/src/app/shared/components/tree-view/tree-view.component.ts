@@ -11,7 +11,8 @@ interface TreeNode {
   selector: 'app-tree-view',
   templateUrl: './tree-view.component.html',
   styleUrls: ['./tree-view.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class TreeViewComponent implements OnChanges {
   /**

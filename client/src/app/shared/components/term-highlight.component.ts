@@ -7,6 +7,7 @@ import { FindOptions } from 'app/shared/utils/find';
 @Component({
   selector: 'app-term-highlight',
   templateUrl: 'term-highlight.component.html',
+  standalone: false,
 })
 export class TermHighlightComponent implements OnChanges {
   @Input() text = '';

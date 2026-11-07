@@ -8,6 +8,7 @@ import { GraphEntity, GraphEntityType, UniversalGraphEdge, UniversalGraphNode } 
 @Component({
   selector: 'app-info-view-panel',
   templateUrl: './info-view-panel.component.html',
+  standalone: false,
 })
 export class InfoViewPanelComponent {
 

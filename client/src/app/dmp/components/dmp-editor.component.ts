@@ -18,6 +18,7 @@ import { DMPDocument } from '../models/dmp.interface';
   selector: 'app-dmp-editor',
   templateUrl: './dmp-editor.component.html',
   styleUrls: ['./dmp-editor.component.scss'],
+  standalone: false,
 })
 export class DMPEditorComponent implements OnInit {
   @Output() modulePropertiesChange = new EventEmitter<ModuleProperties>();

@@ -10,6 +10,7 @@ import { FilesystemService } from '../../services/filesystem.service';
 @Component({
   selector: 'app-browser-community-list',
   templateUrl: './browser-community-list.component.html',
+  standalone: false,
 })
 export class BrowserCommunityListComponent implements OnInit, OnDestroy {
 

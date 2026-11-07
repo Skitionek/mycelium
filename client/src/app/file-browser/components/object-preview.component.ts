@@ -22,6 +22,7 @@ import { FilesystemService } from '../services/filesystem.service';
 @Component({
   selector: 'app-object-preview',
   templateUrl: './object-preview.component.html',
+  standalone: false,
 })
 export class ObjectPreviewComponent implements OnChanges {
 
@@ -64,6 +65,7 @@ export class ObjectPreviewComponent implements OnChanges {
   template: `
     <ng-container #child></ng-container>
   `,
+  standalone: false,
 })
 export class ObjectPreviewOutletComponent implements AfterViewInit {
 

@@ -21,7 +21,8 @@ import { AppVersionDialogComponent } from 'app/app-version-dialog.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
+  standalone: false
 })
 export class AppComponent {
   readonly appUser$: Observable<AppUser>;

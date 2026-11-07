@@ -10,6 +10,7 @@ import { createNodeDragImage } from '../../utils/drag';
   selector: 'app-palette',
   templateUrl: './palette.component.html',
   styleUrls: ['./palette.component.scss'],
+  standalone: false,
 })
 export class PaletteComponent {
   nodeTemplates = annotationTypes;

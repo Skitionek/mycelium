@@ -17,6 +17,7 @@ import { MimeTypes } from 'app/shared/constants';
 @Component({
   selector: 'app-associated-maps',
   templateUrl: './associated-maps.component.html',
+  standalone: false,
 })
 export class AssociatedMapsComponent implements OnInit, OnDestroy {
   @Input() object: FilesystemObject;

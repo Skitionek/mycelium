@@ -44,6 +44,7 @@ import { MapImageProviderService } from '../services/map-image-provider.service'
   styleUrls: [
     './map.component.scss',
   ],
+  standalone: false,
 })
 export class MapComponent<ExtraResult = void> implements OnDestroy, AfterViewInit, OnChanges {
   @Input() highlightTerms: string[] | undefined;

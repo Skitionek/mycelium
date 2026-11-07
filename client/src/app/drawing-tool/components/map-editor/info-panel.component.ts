@@ -13,6 +13,7 @@ import { InfoPanel } from '../../models/info-panel';
 @Component({
   selector: 'app-info-panel',
   templateUrl: './info-panel.component.html',
+  standalone: false,
 })
 export class InfoPanelComponent {
   @Input() infoPanel: InfoPanel = new InfoPanel();

@@ -33,6 +33,7 @@ import { MouseNavigableDirective } from '../../directives/mouse-navigable.direct
     useExisting: SelectInputComponent,
     multi: true,
   }],
+  standalone: false,
 })
 export class SelectInputComponent<T extends { label?: string }>
   implements OnDestroy, OnChanges, AfterViewInit, AfterViewChecked, ControlValueAccessor {

@@ -18,7 +18,8 @@ import { GenericDataProvider } from 'app/shared/providers/data-transfer-data/gen
 @Component({
     selector: 'app-snippet-display',
     templateUrl: './snippet-display.component.html',
-    styleUrls: ['./snippet-display.component.scss']
+    styleUrls: ['./snippet-display.component.scss'],
+    standalone: false
 })
 export class SnippetDisplayComponent implements OnChanges, OnDestroy {
     @Output() requestNewPageEmitter: EventEmitter<

@@ -5,7 +5,8 @@ import { NewClusterSnippetsPageRequest, SidenavClusterEntity } from 'app/interfa
 @Component({
     selector: 'app-sidenav-cluster-view',
     templateUrl: './sidenav-cluster-view.component.html',
-    styleUrls: ['./sidenav-cluster-view.component.scss']
+    styleUrls: ['./sidenav-cluster-view.component.scss'],
+    standalone: false
 })
 export class SidenavClusterViewComponent {
     @Output() requestNewPageEmitter: EventEmitter<NewClusterSnippetsPageRequest>;

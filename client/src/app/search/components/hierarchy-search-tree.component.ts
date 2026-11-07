@@ -7,7 +7,8 @@ import { FlatNode } from 'app/shared/schemas/common';
 @Component({
   selector: 'app-hierarchy-search-tree',
   templateUrl: './hierarchy-search-tree.component.html',
-  styleUrls: ['./hierarchy-search-tree.component.scss']
+  styleUrls: ['./hierarchy-search-tree.component.scss'],
+  standalone: false
 })
 export class HierarchySearchTreeComponent extends ChecklistFlatTreeComponent<FilesystemObject> {
   @Output() folderSelectionChanged = new EventEmitter<string[]>();

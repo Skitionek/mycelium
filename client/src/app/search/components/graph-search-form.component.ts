@@ -11,6 +11,7 @@ import { GraphSearchParameters } from '../graph-search';
 @Component({
   selector: 'app-graph-search-form',
   templateUrl: './graph-search-form.component.html',
+  standalone: false,
 })
 export class GraphSearchFormComponent {
   @Output() search = new EventEmitter<GraphSearchParameters>();

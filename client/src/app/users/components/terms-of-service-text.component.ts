@@ -8,6 +8,7 @@ export const TERMS_OF_SERVICE = {
 @Component({
   selector: 'app-terms-of-service-text',
   templateUrl: './terms-of-service-text.component.html',
+  standalone: false,
 })
 export class TermsOfServiceTextComponent {
 }

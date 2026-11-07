@@ -23,6 +23,7 @@ import * as UserActions from '../store/actions';
   selector: 'app-user-security',
   templateUrl: './user-security.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 })
 export class UserSecurityComponent {
   @Input() user: AppUser;

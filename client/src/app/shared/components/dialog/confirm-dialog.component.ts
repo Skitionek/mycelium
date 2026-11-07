@@ -8,6 +8,7 @@ import { CommonDialogComponent } from './common-dialog.component';
 @Component({
   selector: 'app-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
+  standalone: false,
 })
 export class ConfirmDialogComponent extends CommonDialogComponent {
   @Input() message: string;

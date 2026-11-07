@@ -28,6 +28,7 @@ import { FilesystemObjectActions } from 'app/file-browser/services/filesystem-ob
   selector: 'app-bioc-viewer',
   templateUrl: './bioc-view.component.html',
   styleUrls: ['./bioc-view.component.scss'],
+  standalone: false,
 })
 export class BiocViewComponent implements OnDestroy, ModuleAwareComponent {
   @ViewChild('dropdown', { static: false, read: NgbDropdown }) dropdownComponent: NgbDropdown;

@@ -5,6 +5,7 @@ import { debounceTime } from 'rxjs/operators';
 
 @Directive({
   selector: '[appContainerBreakpoints]',
+  standalone: false,
 })
 export class ContainerBreakpointsDirective implements OnInit, OnDestroy {
   private _queryDelay = 50;

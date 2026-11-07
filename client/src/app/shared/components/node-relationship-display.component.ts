@@ -12,6 +12,7 @@ import { getDTCompatibleLabel } from '../utils/drawing-tool';
   selector: 'app-node-relationship',
   templateUrl: 'node-relationship-display.component.html',
   styleUrls: ['./node-relationship-display.component.scss'],
+  standalone: false,
 })
 export class NodeRelationshipComponent {
   @Input() leftNodeName: string;

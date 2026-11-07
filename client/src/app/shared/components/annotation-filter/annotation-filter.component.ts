@@ -18,6 +18,7 @@ import { SortingAlgorithm } from 'app/word-cloud/sorting/sorting-algorithms';
   selector: 'app-annotation-filter',
   templateUrl: './annotation-filter.component.html',
   styleUrls: ['./annotation-filter.component.scss'],
+  standalone: false,
 })
 export class AnnotationFilterComponent<T extends AnnotationFilterEntity> implements OnInit, OnDestroy {
   id = uniqueId('AnnotationFilterComponent-');

@@ -12,6 +12,7 @@ import {AnnotationGenerationResultData } from '../../schema';
 @Component({
   selector: 'app-object-reannotate-results-dialog',
   templateUrl: './object-reannotate-results-dialog.component.html',
+  standalone: false,
 })
 export class ObjectReannotateResultsDialogComponent extends ConfirmDialogComponent {
   @Input() objects: FilesystemObject[] = [];

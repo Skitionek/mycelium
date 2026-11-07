@@ -49,7 +49,8 @@ const DOMAIN_COLORS = [
 @Component({
   selector: 'app-kg-statistics',
   templateUrl: './kg-statistics.component.html',
-  styleUrls: ['./kg-statistics.component.scss']
+  styleUrls: ['./kg-statistics.component.scss'],
+  standalone: false
 })
 export class KgStatisticsComponent {
   loadTask: BackgroundTask<void, StatisticsDataResponse>;

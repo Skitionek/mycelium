@@ -25,6 +25,7 @@ import { getLanguageExtension } from '../codemirror-language';
   selector: 'app-codemirror-viewer',
   templateUrl: './codemirror-view.component.html',
   styleUrls: ['./codemirror-view.component.scss'],
+  standalone: false,
 })
 export class CodemirrorViewComponent implements OnDestroy, ModuleAwareComponent {
   // The container is rendered once the file has loaded

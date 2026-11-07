@@ -13,7 +13,8 @@ import {
 @Component({
   selector: 'app-organism-autocomplete',
   templateUrl: './organism-autocomplete.component.html',
-  styleUrls: ['./organism-autocomplete.component.scss']
+  styleUrls: ['./organism-autocomplete.component.scss'],
+  standalone: false
 })
 export class OrganismAutocompleteComponent implements OnInit {
   @Input() organismTaxId: string;

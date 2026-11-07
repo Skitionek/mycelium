@@ -7,7 +7,8 @@ import { SankeyManyToManyLink } from '../interfaces';
 @Component({
   selector: 'app-sankey-many-to-many-link-details',
   templateUrl: './link-details.component.html',
-  styleUrls: ['./link-details.component.scss']
+  styleUrls: ['./link-details.component.scss'],
+  standalone: false
 })
 export class SankeyManyToManyLinkDetailsComponent extends SankeyLinkDetailsComponent {
   @Input() entity: SankeyManyToManyLink;

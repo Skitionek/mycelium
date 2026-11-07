@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: [
     './loading-indicator.component.scss',
   ],
+  standalone: false,
 })
 export class LoadingIndicatorComponent {
 }

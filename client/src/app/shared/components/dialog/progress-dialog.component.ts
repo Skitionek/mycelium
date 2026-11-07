@@ -13,6 +13,7 @@ import { Progress } from 'app/interfaces/common-dialog.interface';
 @Component({
   selector: 'app-progress-dialog',
   templateUrl: './progress-dialog.component.html',
+  standalone: false,
 })
 export class ProgressDialogComponent implements OnInit, OnDestroy {
   @Input() title: string;

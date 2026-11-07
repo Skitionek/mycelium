@@ -26,6 +26,7 @@ interface StatusView {
 @Component({
   selector: 'app-local-folder-status',
   templateUrl: './local-folder-status.component.html',
+  standalone: false,
 })
 export class LocalFolderStatusComponent implements OnChanges, OnDestroy {
   @Input() object: FilesystemObject;

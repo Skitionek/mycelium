@@ -15,7 +15,8 @@ import { SearchType } from '../shared';
 @Component({
   selector: 'app-advanced-search-dialog',
   templateUrl: './advanced-search-dialog.component.html',
-  styleUrls: ['./advanced-search-dialog.component.scss']
+  styleUrls: ['./advanced-search-dialog.component.scss'],
+  standalone: false
 })
 export class AdvancedSearchDialogComponent implements OnInit {
   @Input() set params(params: ContentSearchOptions) {

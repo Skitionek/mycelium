@@ -31,7 +31,8 @@ import { SankeyLink, SankeyNode } from '../pure_interfaces';
 @Component({
   selector: 'app-sankey-view-dropdown',
   templateUrl: 'view-dropdown.component.html',
-  styleUrls: ['./view-dropdown.component.scss']
+  styleUrls: ['./view-dropdown.component.scss'],
+  standalone: false
 })
 export class SankeyViewDropdownComponent implements OnChanges {
 

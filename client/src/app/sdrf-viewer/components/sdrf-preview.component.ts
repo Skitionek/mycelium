@@ -8,6 +8,7 @@ import { SdrfDocument } from '../models/sdrf-document';
 @Component({
   selector: 'app-sdrf-preview',
   templateUrl: './sdrf-preview.component.html',
+  standalone: false,
 })
 export class SdrfPreviewComponent {
 

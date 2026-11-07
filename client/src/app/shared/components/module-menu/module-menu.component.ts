@@ -22,6 +22,7 @@ import { ModuleAwareComponent } from '../../modules';
 @Component({
   selector: 'app-module-menu',
   templateUrl: '../object-menu/object-menu.component.html',
+  standalone: false,
 })
 export class ModuleMenuComponent extends ObjectMenuComponent implements AfterViewInit, OnChanges {
   constructor(readonly router: Router,

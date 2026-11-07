@@ -16,6 +16,7 @@ import { getObjectLabel } from '../utils/objects';
 @Component({
   selector: 'app-object-viewer',
   templateUrl: 'object-viewer.component.html',
+  standalone: false,
 })
 export class ObjectViewerComponent implements OnDestroy {
 

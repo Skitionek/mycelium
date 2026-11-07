@@ -59,6 +59,7 @@ class EntityTypeEntry {
   selector: 'app-pdf-viewer',
   templateUrl: './file-view.component.html',
   styleUrls: ['./file-view.component.scss'],
+  standalone: false,
 })
 
 export class FileViewComponent implements OnDestroy, ModuleAwareComponent {

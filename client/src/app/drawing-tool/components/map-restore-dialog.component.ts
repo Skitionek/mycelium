@@ -12,6 +12,7 @@ import {
 @Component({
   selector: 'app-map-restore-dialog',
   templateUrl: './map-restore-dialog.component.html',
+  standalone: false,
 })
 export class MapRestoreDialogComponent extends CommonDialogComponent {
   @Input() map: KnowledgeMap;

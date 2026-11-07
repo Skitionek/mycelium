@@ -17,6 +17,7 @@ import { GraphSearchParameters } from '../graph-search';
 @Component({
   selector: 'app-graph-search',
   templateUrl: './graph-search.component.html',
+  standalone: false,
 })
 export class GraphSearchComponent implements OnInit, OnDestroy {
   @ViewChild('body', {static: false}) body: ElementRef;

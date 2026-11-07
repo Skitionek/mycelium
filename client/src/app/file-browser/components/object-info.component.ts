@@ -8,6 +8,7 @@ import { FilesystemObject } from '../models/filesystem-object';
 @Component({
   selector: 'app-object-info',
   templateUrl: './object-info.component.html',
+  standalone: false,
 })
 export class ObjectInfoComponent implements OnInit {
   @Input() defaultHighlightLimit = 5;

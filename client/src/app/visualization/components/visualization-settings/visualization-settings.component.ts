@@ -10,7 +10,8 @@ import { uuidv4 } from 'app/shared/utils';
 @Component({
   selector: 'app-visualization-settings',
   templateUrl: './visualization-settings.component.html',
-  styleUrls: ['./visualization-settings.component.scss']
+  styleUrls: ['./visualization-settings.component.scss'],
+  standalone: false
 })
 export class VisualizationSettingsComponent implements OnInit {
     @Input() legendLabels: string[];

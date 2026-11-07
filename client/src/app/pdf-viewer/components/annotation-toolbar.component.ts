@@ -13,7 +13,8 @@ import { Rect } from '../annotation-type';
   selector: 'app-annotation-toolbar',
   styleUrls: ['./annotation-toolbar.component.scss'],
   templateUrl: './annotation-toolbar.component.html',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
 export class AnnotationToolbarComponent {
 

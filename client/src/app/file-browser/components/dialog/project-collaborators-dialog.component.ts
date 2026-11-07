@@ -24,6 +24,7 @@ import { MultiCollaboratorUpdateRequest } from '../../schema';
 @Component({
   selector: 'app-project-collaborators-dialog',
   templateUrl: './project-collaborators-dialog.component.html',
+  standalone: false,
 })
 export class ProjectCollaboratorsDialogComponent extends CommonFormDialogComponent<any> {
   id = uniqueId('ProjectCollaboratorsDialogComponent-');

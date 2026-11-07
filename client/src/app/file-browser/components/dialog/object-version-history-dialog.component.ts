@@ -12,6 +12,7 @@ import { ObjectVersion } from '../../models/object-version';
 @Component({
   selector: 'app-object-version-history-dialog',
   templateUrl: './object-version-history-dialog.component.html',
+  standalone: false,
 })
 export class ObjectVersionHistoryDialogComponent extends CommonFormDialogComponent {
   @Input() object: FilesystemObject;
