@@ -9,294 +9,297 @@
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: actions
-    groups:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "daily"
+  commit-message:
+    prefix: actions
+  groups:
       # All three codeql-action entrypoints are pinned to one SHA in codeql.yml.
-      codeql-action:
-        patterns:
-          - github/codeql-action/*
+    codeql-action:
+      patterns:
+      - github/codeql-action/*
       # login/metadata/build-push are released together and share the buildx
       # action protocol; mixing majors breaks the build-and-push jobs.
-      docker-actions:
-        patterns:
-          - docker/*
+    docker-actions:
+      patterns:
+      - docker/*
 
   # Maintain dependencies for Python. The `uv` ecosystem bumps pyproject.toml
   # and re-locks uv.lock, which is what CI and the Docker images install from.
-  - package-ecosystem: uv
-    directory: /appserver
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: uv
-    groups:
+- package-ecosystem: uv
+  directory: /appserver
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: uv
+  groups:
       # Flask core + its WSGI/templating stack: werkzeug, jinja2, itsdangerous,
       # click and blinker are version-pinned by each Flask release.
-      flask:
-        patterns:
-          - flask
-          - flask-caching
-          - flask-cors
-          - flask-httpauth
-          - werkzeug
-          - jinja2
-          - itsdangerous
-          - click
-          - blinker
+    flask:
+      patterns:
+      - flask
+      - flask-caching
+      - flask-cors
+      - flask-httpauth
+      - werkzeug
+      - jinja2
+      - itsdangerous
+      - click
+      - blinker
       # SQLAlchemy 2.x drives the pinned flask-sqlalchemy / alembic /
       # flask-migrate / marshmallow-sqlalchemy / sqlalchemy-searchable versions.
-      sqlalchemy:
-        patterns:
-          - sqlalchemy
-          - sqlalchemy-*
-          - flask-sqlalchemy
-          - alembic
-          - flask-migrate
-          - marshmallow-sqlalchemy
+    sqlalchemy:
+      patterns:
+      - sqlalchemy
+      - sqlalchemy-*
+      - flask-sqlalchemy
+      - alembic
+      - flask-migrate
+      - marshmallow-sqlalchemy
       # marshmallow 4 was a breaking release; webargs, flask-marshmallow,
       # marshmallow-dataclass and typeguard all track its major.
       # marshmallow-sqlalchemy is coupled to both majors; it matches the
       # `sqlalchemy` group above, and first match wins, so it lands there.
-      marshmallow:
-        patterns:
-          - marshmallow
-          - marshmallow-*
-          - flask-marshmallow
-          - webargs
-          - typeguard
-          - typing-inspect
+    marshmallow:
+      patterns:
+      - marshmallow
+      - marshmallow-*
+      - flask-marshmallow
+      - webargs
+      - typeguard
+      - typing-inspect
       # google-cloud-storage pulls api-core/auth/protobuf; protobuf majors are
       # not cross-compatible with generated proto-plus/googleapis stubs.
-      google-cloud:
-        patterns:
-          - google-*
-          - googleapis-common-protos
-          - proto-plus
-          - protobuf
-      azure:
-        patterns:
-          - azure-*
+    google-cloud:
+      patterns:
+      - google-*
+      - googleapis-common-protos
+      - proto-plus
+      - protobuf
+    azure:
+      patterns:
+      - azure-*
       # numpy ABI: pandas/scipy/scikit wheels are built against a numpy major.
-      scientific:
-        patterns:
-          - numpy
-          - scipy
-          - pandas
+    scientific:
+      patterns:
+      - numpy
+      - scipy
+      - pandas
       # Stubs must match the runtime package they describe, and mypy must be
       # able to parse them.
-      typing-stubs:
-        patterns:
-          - types-*
-          - mypy
-          - mypy-extensions
+    typing-stubs:
+      patterns:
+      - types-*
+      - mypy
+      - mypy-extensions
       # NOTE: neo4j and redis are also declared in /statistical-enrichment and
       # /cache-invalidator. Dependabot cannot group across ecosystem entries,
       # so those PRs must be merged together (all services talk to one
       # Neo4j/Redis deployment).
 
-  - package-ecosystem: uv
-    directory: /statistical-enrichment
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: uv
-    groups:
-      flask:
-        patterns:
-          - flask
-          - flask-caching
-          - flask-marshmallow
-          - webargs
-          - elastic-apm
-      scientific:
-        patterns:
-          - numpy
-          - scipy
-          - pandas
-          - statsmodels
+- package-ecosystem: uv
+  directory: /statistical-enrichment
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: uv
+  groups:
+    flask:
+      patterns:
+      - flask
+      - flask-caching
+      - flask-marshmallow
+      - webargs
+      - elastic-apm
+    scientific:
+      patterns:
+      - numpy
+      - scipy
+      - pandas
+      - statsmodels
       # Keep in sync with the same-named deps in /appserver and
       # /cache-invalidator; see the note there.
-      datastores:
-        patterns:
-          - neo4j
-          - redis
+    datastores:
+      patterns:
+      - neo4j
+      - redis
 
-  - package-ecosystem: uv
-    directory: /cache-invalidator
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: uv
-    groups:
+- package-ecosystem: uv
+  directory: /cache-invalidator
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: uv
+  groups:
       # Keep in sync with the same-named deps in /appserver and
       # /statistical-enrichment; see the note there.
-      datastores:
-        patterns:
-          - neo4j
-          - redis
+    datastores:
+      patterns:
+      - neo4j
+      - redis
 
   # Maintain dependencies for Node.js
-  - package-ecosystem: npm
-    directory: /client
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: npm
-    groups:
+- package-ecosystem: npm
+  directory: /client
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: npm
+  groups:
       # The whole Angular toolchain ships as one release train: framework,
       # CLI, devkit builders and the custom-webpack wrapper must match, and
       # each Angular major supports exactly one TypeScript and zone.js range.
-      angular:
-        patterns:
-          - "@angular/*"
-          - "@angular-devkit/*"
-          - "@angular-builders/*"
-          - typescript
-          - zone.js
+    angular:
+      patterns:
+      - "@angular/*"
+      - "@angular-devkit/*"
+      - "@angular-builders/*"
+      - typescript
+      - zone.js
       # NgRx majors track the Angular major.
-      ngrx:
-        patterns:
-          - "@ngrx/*"
-          - ngrx-store-localstorage
+    ngrx:
+      patterns:
+      - "@ngrx/*"
+      - ngrx-store-localstorage
       # @codemirror/* packages share a single @codemirror/state instance at
       # runtime; mismatched versions throw. Also pinned in `resolutions`.
-      codemirror:
-        patterns:
-          - "@codemirror/*"
-          - codemirror
+    codemirror:
+      patterns:
+      - "@codemirror/*"
+      - codemirror
       # vis-network embeds vis-data/vis-util types and expects matching majors.
-      vis:
-        patterns:
-          - vis-*
+    vis:
+      patterns:
+      - vis-*
       # d3 is a bundle of d3-* submodules plus its DefinitelyTyped stubs
       # (@types/d3-array is additionally pinned in `resolutions`).
-      d3:
-        patterns:
-          - d3
-          - d3-*
-          - d3.layout.cloud
-          - "@types/d3*"
+    d3:
+      patterns:
+      - d3
+      - d3-*
+      - d3.layout.cloud
+      - "@types/d3*"
       # ng2-charts wraps a specific chart.js major, as does the datalabels plugin.
-      charts:
-        patterns:
-          - chart.js
-          - chartjs-*
-          - ng2-charts
+    charts:
+      patterns:
+      - chart.js
+      - chartjs-*
+      - ng2-charts
       # ng-bootstrap targets one Bootstrap major and needs popper.
-      bootstrap:
-        patterns:
-          - bootstrap
-          - "@ng-bootstrap/*"
-          - "@popperjs/core"
+    bootstrap:
+      patterns:
+      - bootstrap
+      - "@ng-bootstrap/*"
+      - "@popperjs/core"
       # Karma/Jasmine runner, reporters and stubs are only compatible in sets.
-      test-runner:
-        patterns:
-          - karma
-          - karma-*
-          - jasmine-*
-          - "@types/jasmine*"
-          - ng-mocks
-          - ng-bullet
+    test-runner:
+      patterns:
+      - karma
+      - karma-*
+      - jasmine-*
+      - "@types/jasmine*"
+      - ng-mocks
+      - ng-bullet
       # babel-loader majors require a matching @babel/core major.
-      babel:
-        patterns:
-          - "@babel/*"
-          - babel-loader
-      jszip:
-        patterns:
-          - jszip
-          - jszip-utils
-      hammerjs:
-        patterns:
-          - hammerjs
-          - "@egjs/hammerjs"
+    babel:
+      patterns:
+      - "@babel/*"
+      - babel-loader
+    jszip:
+      patterns:
+      - jszip
+      - jszip-utils
+    hammerjs:
+      patterns:
+      - hammerjs
+      - "@egjs/hammerjs"
       # Storybook ships core, framework and addons as one lockstep release;
       # @storybook/angular also pins the Angular range it supports, so this
       # group must not be bumped past what the `angular` group allows.
-      storybook:
-        patterns:
-          - storybook
-          - "@storybook/*"
+    storybook:
+      patterns:
+      - storybook
+      - "@storybook/*"
       # The image-snapshot stack. playwright is pinned to the exact version of
       # the mcr.microsoft.com/playwright image used by the client-storybook job
       # in tests.yml, because snapshots are only byte-reproducible against one
       # browser build. Bumping any of these means updating that image tag and
       # regenerating every PNG in client/__image_snapshots__/.
-      visual-snapshots:
-        patterns:
-          - playwright
-          - jest-image-snapshot
-          - "@types/jest-image-snapshot"
+    visual-snapshots:
+      patterns:
+      - playwright
+      - jest-image-snapshot
+      - "@types/jest-image-snapshot"
       # Fonts are bundled from npm, not a CDN, and Storybook also vendors Font
       # Awesome Free in place of the app's Pro kit, so snapshots render offline
       # and identically everywhere. Any bump changes glyph shapes and therefore
       # invalidates every committed image snapshot, so they move together and
       # the bump PR must include regenerated PNGs.
-      webfonts:
-        patterns:
-          - "@fontsource/*"
-          - "@fortawesome/*"
+    webfonts:
+      patterns:
+      - "@fontsource/*"
+      - "@fortawesome/*"
       # Pinned to 1.58.5, the build the old plotly-latest.min.js CDN URL froze
       # at. v2 dropped APIs and changed defaults, so a major bump needs the
       # sankey views checked by hand.
-      plotly:
-        patterns:
-          - plotly.js*
-    ignore:
+    plotly:
+      patterns:
+      - plotly.js*
+  ignore:
       # Angular is upgraded by hand, one major at a time (currently Angular 22).
       # The rest of the `angular` group is ignored too, otherwise the
       # CLI/devkit/TypeScript halves would still be bumped on their own and
       # break the build against Angular 22.
-      - dependency-name: '@angular/*'
-      - dependency-name: '@angular-devkit/*'
-      - dependency-name: '@angular-builders/*'
-      - dependency-name: 'typescript'
-      - dependency-name: 'zone.js'
+  - dependency-name: '@angular/*'
+  - dependency-name: '@angular-devkit/*'
+  - dependency-name: '@angular-builders/*'
+  - dependency-name: 'typescript'
+  - dependency-name: 'zone.js'
       # jasmine-core 7.x makes properties zone.js patches (e.g. `describe`)
       # read-only, breaking zone-testing's monkeypatch. zone.js is pinned to
       # the 0.15.x line (Angular 22 also accepts 0.16.x) above, so jasmine-core must stay
       # on 6.x until an Angular upgrade unblocks a compatible zone.js.
-      - dependency-name: 'jasmine-core'
-        versions: ['>=7.0.0']
+  - dependency-name: 'jasmine-core'
+    versions: ['>=7.0.0']
       # ng-bootstrap majors track the Angular major; 21.x is the last that
       # supports Angular 22 (22.x needs Angular 23). Cap at one major at a time
       # until the next Angular upgrade unblocks it. (PR #585 jumped 15 → 21.)
-      - dependency-name: '@ng-bootstrap/ng-bootstrap'
-        versions: ['>=22']
+  - dependency-name: '@ng-bootstrap/ng-bootstrap'
+    versions: ['>=22']
       # ngrx majors also track the Angular major; 22.x is the last that
       # supports Angular 22. Cap at one major at a time. (PR #569 jumped 16 → 22.)
-      - dependency-name: '@ngrx/*'
-        versions: ['>=23']
-      - dependency-name: ngrx-store-localstorage
-        versions: ['>=23']
+  - dependency-name: '@ngrx/*'
+    versions: ['>=23']
+  - dependency-name: ngrx-store-localstorage
+    versions: ['>=23']
+  - dependency-name: angular-split
+    versions:
+    - '>=19'
 
   # End-to-end suite (tests/e2e). Independent of the client's pinned
   # `playwright`: the e2e job installs whichever browser build its
   # @playwright/test version asks for.
-  - package-ecosystem: npm
-    directory: /tests/e2e
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: npm
+- package-ecosystem: npm
+  directory: /tests/e2e
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: npm
 
   # Maintain dependencies for Java
-  - package-ecosystem: maven
-    directory: /graph-db
-    schedule:
-      interval: weekly
-    commit-message:
-      prefix: maven
-    groups:
+- package-ecosystem: maven
+  directory: /graph-db
+  schedule:
+    interval: weekly
+  commit-message:
+    prefix: maven
+  groups:
       # slf4j-api and its log4j12 binding must be the same version.
-      slf4j:
-        patterns:
-          - org.slf4j:*
-      log4j:
-        patterns:
-          - org.apache.logging.log4j:*
+    slf4j:
+      patterns:
+      - org.slf4j:*
+    log4j:
+      patterns:
+      - org.apache.logging.log4j:*
