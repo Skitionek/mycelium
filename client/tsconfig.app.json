@@ -13,5 +13,8 @@
     // Story-only helpers; they import @storybook/angular, which is not an app dependency.
     "src/app/shared/storybook/**",
     "src/**/*.worker.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "strictTemplates": false
+  }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -15,7 +15,9 @@ import { AccountService } from 'app/users/services/account.service';
 
 @Component({
   selector: 'app-missing-roles-dialog',
-  templateUrl: './missing-roles-dialog.component.html'
+  templateUrl: './missing-roles-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false
 })
 export class MissingRolesDialogComponent extends CommonFormDialogComponent {
 

@@ -1,11 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 
 import { NewClusterSnippetsPageRequest, SidenavClusterEntity } from 'app/interfaces';
 
 @Component({
     selector: 'app-sidenav-cluster-view',
     templateUrl: './sidenav-cluster-view.component.html',
-    styleUrls: ['./sidenav-cluster-view.component.scss']
+    styleUrls: ['./sidenav-cluster-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    standalone: false
 })
 export class SidenavClusterViewComponent {
     @Output() requestNewPageEmitter: EventEmitter<NewClusterSnippetsPageRequest>;

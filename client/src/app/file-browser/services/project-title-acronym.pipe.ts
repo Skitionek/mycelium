@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { isNil } from 'lodash-es';
 
 @Pipe({
-  name: 'projectTitleAcronym'
+  name: 'projectTitleAcronym',
+  standalone: false
 })
 export class ProjectTitleAcronymPipe implements PipeTransform {
 
