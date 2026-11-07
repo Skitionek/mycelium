@@ -1,4 +1,15 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild,
+  ViewEncapsulation,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 
 import { uniqueId } from 'lodash-es';
 import { combineLatest, Subscription } from 'rxjs';
@@ -21,6 +32,8 @@ import { WordCloudAnnotationFilterEntityWithLayout } from '../interfaces';
   templateUrl: './word-cloud.component.html',
   styleUrls: ['./word-cloud.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class WordCloudComponent implements OnInit, OnDestroy {
   id = uniqueId('WordCloudComponent-');

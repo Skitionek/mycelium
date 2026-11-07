@@ -25,6 +25,7 @@ import { AccountService } from '../services/account.service';
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: false,
 
 })
 export class UserProfileComponent implements OnInit  {

@@ -1,5 +1,5 @@
 import { Platform } from '@angular/cdk/platform';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -23,6 +23,8 @@ import { ResetPasswordDialogComponent } from './reset-password-dialog.component'
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
+  standalone: false,
 })
 export class LoginComponent {
   readonly form = new FormGroup({
