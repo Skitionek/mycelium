@@ -64,7 +64,7 @@
     "chartjs-plugin-datalabels": "^2.0.0",
     "codemirror": "6.0.2",
     "color": "^5.0.3",
-    "d3": "^7.9.0",
+    "d3": "^7.9.2",
     "d3-sankey": "^0.12.3",
     "d3-sankey-circular": "^0.34.0",
     "d3.layout.cloud": "^1.2.0",
